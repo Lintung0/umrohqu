@@ -21,6 +21,8 @@ const PUBLIC_ROUTES = [
   "/api/dashboard/action-center",
 ]
 
+const SKIP_SUBDOMAIN_HOSTS = ["www", "api", "localhost", "127.0.0.1"]
+
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.some((route) => {
     if (route === "/") return pathname === "/"
@@ -28,7 +30,55 @@ function isPublicRoute(pathname: string): boolean {
   })
 }
 
+function getSubdomain(hostname: string): string | null {
+  const parts = hostname.split(".")
+  if (parts.length < 3) return null
+  const sub = parts[0]
+  if (SKIP_SUBDOMAIN_HOSTS.includes(sub)) return null
+  return sub
+}
+
 export async function middleware(request: NextRequest) {
+  const { hostname, protocol } = request.nextUrl
+  const { pathname } = request.nextUrl
+
+  const subdomain = getSubdomain(hostname)
+
+  if (subdomain) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return request.cookies.getAll() },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          },
+        },
+      }
+    )
+
+    const { data: tenant } = await supabase
+      .from("tenants")
+      .select("id, slug, name, logo_url, brand_color, custom_domain, description")
+      .eq("slug", subdomain)
+      .eq("status", "verified")
+      .single()
+
+    if (!tenant) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/404"
+      return NextResponse.rewrite(url)
+    }
+
+    const response = NextResponse.rewrite(
+      new URL(`/travel-site/${tenant.id}${pathname === "/" ? "" : pathname}`, request.url)
+    )
+    response.headers.set("x-tenant-id", tenant.id)
+    response.headers.set("x-tenant-data", JSON.stringify(tenant))
+    return response
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -56,13 +106,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { pathname } = request.nextUrl
-
   if (isPublicRoute(pathname)) {
-    if (
-      user &&
-      (pathname === "/login" || pathname === "/register")
-    ) {
+    if (user && (pathname === "/login" || pathname === "/register")) {
       const redirectUrl = request.nextUrl.clone()
       redirectUrl.pathname = "/dashboard"
       return NextResponse.redirect(redirectUrl)

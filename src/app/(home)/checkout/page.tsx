@@ -203,6 +203,28 @@ function CheckoutContent() {
 
     await supabase.from("booking_participants").insert(participants)
 
+    // Auto-generate service fee invoice
+    const { data: feeConfig } = await supabase
+      .from("fee_config")
+      .select("*")
+      .limit(1)
+      .single()
+
+    if (feeConfig) {
+      const serviceFee = Math.max(
+        subtotal * ((feeConfig.service_fee_percent || 3) / 100),
+        feeConfig.service_fee_flat || 300000
+      )
+      await supabase.from("invoices").insert({
+        booking_id: booking.id,
+        tenant_id: pkg.tenant_id,
+        type: "service_fee",
+        amount: serviceFee,
+        description: `Biaya layanan booking #${booking.id.slice(0, 8).toUpperCase()}`,
+        status: "pending",
+      })
+    }
+
     setBookingId(booking.id)
     setIsSubmitting(false)
     setIsSuccess(true)
