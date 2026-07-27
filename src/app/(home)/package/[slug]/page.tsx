@@ -114,7 +114,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ slug: 
     setTogglingWishlist(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      window.location.href = "/auth/login"
+      window.location.href = "/login"
       return
     }
 

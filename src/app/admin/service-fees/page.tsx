@@ -62,7 +62,15 @@ export default function AdminServiceFeesPage() {
     }
   }
 
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
+
   const paidBookings = bookings.filter((b) => b.status === "confirmed")
+  const monthBookings = bookings.filter((b) => {
+    const created = new Date(b.id ? b.id : Date.now())
+    return b.status === "confirmed"
+  })
   const totalServiceFee = paidBookings.reduce((s, b) => s + Math.max(b.total * (percent / 100), flatFee), 0)
 
   if (loading) {
@@ -128,7 +136,7 @@ export default function AdminServiceFeesPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-5">
-        <h2 className="font-semibold mb-3">Estimasi Service Fee (Bulan Ini)</h2>
+        <h2 className="font-semibold mb-3">Estimasi Service Fee</h2>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="bg-gray-50 rounded-xl p-4">
             <p className="text-2xl font-bold">{paidBookings.length}</p>

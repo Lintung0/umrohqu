@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Building2, Palette, DollarSign, Target, Tag, BarChart3, LifeBuoy, ClipboardCheck, Headphones, FileText, CreditCard, Wallet, Receipt, TrendingUp, LogOut, ChevronDown, Shield } from "lucide-react"
+import { LayoutDashboard, Building2, Palette, DollarSign, Target, Tag, BarChart3, LifeBuoy, ClipboardCheck, Headphones, FileText, CreditCard, Wallet, Receipt, TrendingUp, LogOut, Shield, Menu, X } from "lucide-react"
 import { type AdminRole } from "@/lib/types"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -41,11 +41,12 @@ const ROLE_COLORS: Record<AdminRole, string> = {
 
 interface AdminSidebarProps {
   currentRole: AdminRole
-  onRoleChange: (role: AdminRole) => void
 }
 
-export default function AdminSidebar({ currentRole, onRoleChange }: AdminSidebarProps) {
+export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [mobileOpen, setMobileOpen] = useState(false)
   const visibleNav = ADMIN_NAV.filter((item) => item.roles.includes(currentRole))
 
   const ROLE_USERS: Record<AdminRole, { name: string; email: string }> = {
@@ -56,8 +57,14 @@ export default function AdminSidebar({ currentRole, onRoleChange }: AdminSidebar
 
   const currentUser = ROLE_USERS[currentRole]
 
-  return (
-    <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-white border-r border-border min-h-screen">
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/")
+  }
+
+  const sidebarContent = (
+    <>
       {/* Logo */}
       <div className="p-5 border-b border-border">
         <Link href="/admin" className="flex items-center gap-2">
@@ -71,21 +78,9 @@ export default function AdminSidebar({ currentRole, onRoleChange }: AdminSidebar
         </Link>
       </div>
 
-      {/* Role Switcher */}
+      {/* Role Badge */}
       <div className="p-3 border-b border-border">
-        <div className="relative">
-          <select
-            value={currentRole}
-            onChange={(e) => onRoleChange(e.target.value as AdminRole)}
-            className="w-full appearance-none bg-gray-50 border border-border rounded-xl px-3 py-2 pr-8 text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-          >
-            {(Object.keys(ROLE_LABELS) as AdminRole[]).map((role) => (
-              <option key={role} value={role}>{ROLE_LABELS[role]} — {ROLE_USERS[role].name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-        </div>
-        <div className="mt-2 flex items-center gap-2 px-1">
+        <div className="flex items-center gap-2 px-1">
           <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
             <span className="text-[10px] font-bold text-emerald-700">{currentUser.name.charAt(0)}</span>
           </div>
@@ -106,6 +101,7 @@ export default function AdminSidebar({ currentRole, onRoleChange }: AdminSidebar
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors ${
                 isActive ? "bg-emerald-50 text-emerald-700 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
@@ -119,28 +115,45 @@ export default function AdminSidebar({ currentRole, onRoleChange }: AdminSidebar
 
       {/* Logout */}
       <div className="p-3 border-t border-border">
-        <AdminLogout />
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Keluar
+        </button>
       </div>
-    </aside>
+    </>
   )
-}
-
-function AdminLogout() {
-  const router = useRouter()
-  const supabase = createClient()
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
-  }
 
   return (
-    <button
-      onClick={handleLogout}
-      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-    >
-      <LogOut className="w-4 h-4" />
-      Keluar
-    </button>
+    <>
+      {/* Mobile header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-border px-4 py-3 flex items-center justify-between">
+        <Link href="/admin" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">U</span>
+          </div>
+          <p className="font-bold text-sm">UmrohQ Admin</p>
+        </Link>
+        <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-xl hover:bg-muted">
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-30 bg-black/50" onClick={() => setMobileOpen(false)}>
+          <aside className="w-64 h-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-white border-r border-border min-h-screen sticky top-0">
+        {sidebarContent}
+      </aside>
+    </>
   )
 }

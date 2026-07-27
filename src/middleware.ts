@@ -17,8 +17,6 @@ const PUBLIC_ROUTES = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
-  "/api/dashboard/stats",
-  "/api/dashboard/action-center",
 ]
 
 const SKIP_SUBDOMAIN_HOSTS = ["www", "api", "localhost", "127.0.0.1"]

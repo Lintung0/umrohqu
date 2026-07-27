@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client"
 import type { Tenant } from "@/lib/types"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 
-const TESTIMONIALS = [
+const FALLBACK_TESTIMONIALS = [
   {
     id: "t-1",
     name: "Hj. Siti Rahayu",
@@ -41,41 +41,46 @@ const TESTIMONIALS = [
   },
 ]
 
-const WHY_US = [
-  {
-    icon: Shield,
-    title: "Terpercaya & Berizin",
-    desc: "Seluruh travel partner terverifikasi Kementerian Agama dan memiliki izin resmi PPIU.",
-    bg: "bg-emerald-50",
-  },
-  {
-    icon: Award,
-    title: "100+ Travel Partner",
-    desc: "Pilih dari ratusan biro perjalanan umroh & haji terbaik di seluruh Indonesia.",
-    bg: "bg-amber-50",
-  },
-  {
-    icon: Headphones,
-    title: "Dukungan 24/7",
-    desc: "Tim kami siap membantu Anda sebelum, selama, dan setelah perjalanan ibadah.",
-    bg: "bg-blue-50",
-  },
-  {
-    icon: Users,
-    title: "100.000+ Jamaah",
-    desc: "Telah dipercaya lebih dari 100 ribu jamaah untuk merencanakan perjalanan suci mereka.",
-    bg: "bg-purple-50",
-  },
-]
-
-const STATS = [
-  { value: "100+", label: "Travel Partner" },
-  { value: "500+", label: "Paket Tersedia" },
-  { value: "100rb+", label: "Jamaah Berangkat" },
-  { value: "4.9\u2605", label: "Rating Rata-rata" },
-]
+interface HomeStats {
+  travelCount: number
+  packageCount: number
+  bookingCount: number
+  avgRating: number
+}
 
 export function StatsSection() {
+  const [stats, setStats] = useState<HomeStats>({ travelCount: 0, packageCount: 0, bookingCount: 0, avgRating: 0 })
+
+  useEffect(() => {
+    const supabase = createClient()
+    async function load() {
+      const [tenantsRes, packagesRes, bookingsRes, reviewsRes] = await Promise.all([
+        supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified"),
+        supabase.from("packages").select("id", { count: "exact", head: true }).eq("status", "published"),
+        supabase.from("bookings").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
+        supabase.from("reviews").select("rating"),
+      ])
+
+      const allRatings = reviewsRes.data || []
+      const avg = allRatings.length > 0 ? allRatings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / allRatings.length : 4.9
+
+      setStats({
+        travelCount: tenantsRes.count || 0,
+        packageCount: packagesRes.count || 0,
+        bookingCount: bookingsRes.count || 0,
+        avgRating: Math.round(avg * 10) / 10,
+      })
+    }
+    load()
+  }, [])
+
+  const displayStats = [
+    { value: stats.travelCount > 0 ? `${stats.travelCount}+` : "0", label: "Travel Partner" },
+    { value: stats.packageCount > 0 ? `${stats.packageCount}+` : "0", label: "Paket Tersedia" },
+    { value: stats.bookingCount > 0 ? `${stats.bookingCount}+` : "0", label: "Booking Berhasil" },
+    { value: stats.avgRating > 0 ? `${stats.avgRating}★` : "4.9★", label: "Rating Rata-rata" },
+  ]
+
   return (
     <section className="relative overflow-hidden py-14 px-6">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary" />
@@ -85,7 +90,7 @@ export function StatsSection() {
       <div className="absolute top-0 left-1/4 w-64 h-64 bg-emerald-glow/15 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-gold/10 rounded-full blur-3xl" />
       <div className="relative mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-        {STATS.map((s) => (
+        {displayStats.map((s) => (
           <div key={s.label} className="space-y-2">
             <div className="text-3xl md:text-4xl font-bold text-white tracking-tight">{s.value}</div>
             <div className="text-sm text-white/60 font-medium">{s.label}</div>
@@ -97,6 +102,42 @@ export function StatsSection() {
 }
 
 export function WhyUsSection() {
+  const [travelCount, setTravelCount] = useState(0)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified").then(({ count }) => {
+      setTravelCount(count || 0)
+    })
+  }, [])
+
+  const WHY_US = [
+    {
+      icon: Shield,
+      title: "Terpercaya & Berizin",
+      desc: "Seluruh travel partner terverifikasi Kementerian Agama dan memiliki izin resmi PPIU.",
+      bg: "bg-emerald-50",
+    },
+    {
+      icon: Award,
+      title: `${travelCount > 0 ? travelCount : "100+"} Travel Partner`,
+      desc: "Pilih dari berbagai biro perjalanan umroh & haji terbaik di seluruh Indonesia.",
+      bg: "bg-amber-50",
+    },
+    {
+      icon: Headphones,
+      title: "Dukungan 24/7",
+      desc: "Tim kami siap membantu Anda sebelum, selama, dan setelah perjalanan ibadah.",
+      bg: "bg-blue-50",
+    },
+    {
+      icon: Users,
+      title: "Pembayaran Aman",
+      desc: "Sistem pembayaran terintegrasi dengan virtual account dan e-wallet terpercaya.",
+      bg: "bg-purple-50",
+    },
+  ]
+
   return (
     <section className="relative py-20 px-6 md:px-12 overflow-hidden">
       <div className="absolute top-0 right-0 text-primary/5">
@@ -145,6 +186,7 @@ export function TravelAgenciesSection() {
       .from("tenants")
       .select("*")
       .eq("status", "verified")
+      .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(4)
       .then(({ data }) => {
@@ -245,6 +287,32 @@ export function TravelAgenciesSection() {
 }
 
 export function TestimonialSection() {
+  const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from("reviews")
+      .select("id, rating, review, created_at, customer:users(full_name), tenant:tenants(name)")
+      .eq("status", "published")
+      .order("created_at", { ascending: false })
+      .limit(3)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const mapped = data.map((r: any) => ({
+            id: r.id,
+            name: r.customer?.full_name || "Pengguna",
+            city: "Indonesia",
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(r.customer?.full_name || "U")}&background=E8F5EE&color=2A7D4F&size=80&bold=true`,
+            rating: r.rating,
+            package: r.tenant?.name || "Umroh",
+            comment: r.review || "Paket bagus, pelayanan memuaskan!",
+          }))
+          setTestimonials(mapped)
+        }
+      })
+  }, [])
+
   return (
     <section className="relative py-20 px-6 md:px-12 overflow-hidden">
       <div className="absolute bottom-0 left-0 text-primary/5">
@@ -263,7 +331,7 @@ export function TestimonialSection() {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t) => (
+          {testimonials.map((t) => (
             <div
               key={t.id}
               className="group relative flex flex-col gap-4 p-6 rounded-2xl border border-border/60 bg-white hover:shadow-xl hover:shadow-gold/5 hover:border-gold/20 transition-all duration-300 hover:-translate-y-1"
@@ -318,7 +386,7 @@ export function CTASection() {
         </h2>
         <p className="mt-4 text-white/60 text-sm md:text-base leading-relaxed">
           Daftar sekarang dan temukan paket umroh terbaik sesuai kebutuhan Anda.
-          Lebih dari 500 paket dari 100+ travel terpercaya menanti Anda.
+          Berbagai paket dari travel terpercaya menanti Anda.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
           <Link

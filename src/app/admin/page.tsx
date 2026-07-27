@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { User } from "@supabase/supabase-js"
 import { Building2, BookOpen, DollarSign, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
@@ -15,18 +14,23 @@ export default function AdminOverviewPage() {
 
   useEffect(() => {
     async function load() {
-      const [travelRes, bookingRes] = await Promise.all([
+      const [travelRes, bookingRes, allBookingsRes] = await Promise.all([
         supabase.from("tenants").select("id, status", { count: "exact" }).is("deleted_at", null),
         supabase.from("bookings").select("id, status, total, pilgrim_count, package:packages(name), customer:users(full_name), created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
+        supabase.from("bookings").select("id, total, status").is("deleted_at", null),
       ])
 
       const tenants = travelRes.data || []
       const bookings = bookingRes.data || []
-      const totalRevenue = bookings.filter((b: any) => b.status === "confirmed" || b.status === "completed").reduce((s: number, b: any) => s + (b.total || 0), 0)
+      const allBookings = allBookingsRes.data || []
+
+      const totalRevenue = allBookings
+        .filter((b: any) => b.status === "confirmed" || b.status === "completed")
+        .reduce((s: number, b: any) => s + (b.total || 0), 0)
 
       setStats({
         travelCount: travelRes.count || 0,
-        bookingCount: bookings.length,
+        bookingCount: allBookings.length,
         totalRevenue,
         pendingTravel: tenants.filter((t) => t.status === "pending").length,
       })

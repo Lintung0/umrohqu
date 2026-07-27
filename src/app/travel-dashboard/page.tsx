@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { Package, BookOpen, Users, DollarSign, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Package, BookOpen, Users, DollarSign, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 
@@ -32,19 +32,25 @@ export default function TravelDashboardOverview() {
       if (!profile?.tenant_id) { setLoading(false); return }
       setTenantId(profile.tenant_id)
 
-      const [packagesRes, bookingsRes] = await Promise.all([
+      const [packagesRes, bookingsRes, allBookingsRes] = await Promise.all([
         supabase.from("packages").select("id", { count: "exact", head: true }).eq("tenant_id", profile.tenant_id).is("deleted_at", null),
         supabase.from("bookings").select("id, status, pilgrim_count, price, fee, total, package:packages(name), customer:users(full_name), created_at").eq("tenant_id", profile.tenant_id).is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
+        supabase.from("bookings").select("id, status, pilgrim_count, price, total").eq("tenant_id", profile.tenant_id).is("deleted_at", null),
       ])
 
       const bookings = bookingsRes.data || []
-      const totalRevenue = bookings.filter((b: any) => b.status === "confirmed" || b.status === "completed").reduce((sum: number, b: any) => sum + (b.price || 0), 0)
-      const totalPilgrims = bookings.filter((b: any) => b.status !== "cancelled").reduce((sum: number, b: any) => sum + (b.pilgrim_count || 0), 0)
-      const pendingBookings = bookings.filter((b: any) => b.status === "pending_payment").length
+      const allBookings = allBookingsRes.data || []
+
+      const totalRevenue = allBookings
+        .filter((b: any) => b.status === "confirmed" || b.status === "completed")
+        .reduce((sum: number, b: any) => sum + (b.total || 0), 0)
+      const totalPilgrims = allBookings
+        .filter((b: any) => b.status !== "cancelled")
+        .reduce((sum: number, b: any) => sum + (b.pilgrim_count || 0), 0)
 
       setStats({
         packageCount: packagesRes.count || 0,
-        bookingCount: bookings.length,
+        bookingCount: allBookings.length,
         totalRevenue,
         totalPilgrims,
         recentBookings: bookings,

@@ -10,43 +10,92 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
+const ROLE_DASHBOARD_MAP: Record<string, string> = {
+  super_admin: "/admin",
+  marketplace_admin: "/admin",
+  marketplace_billing: "/admin",
+  marketplace_support: "/admin",
+  travel_admin: "/travel-dashboard",
+  travel_staff: "/travel-dashboard",
+  customer: "/dashboard",
+}
+
+const ROLE_DASHBOARD_LABELS: Record<string, string> = {
+  super_admin: "Admin Dashboard",
+  marketplace_admin: "Admin Dashboard",
+  marketplace_billing: "Billing Dashboard",
+  marketplace_support: "Support Dashboard",
+  travel_admin: "Travel Dashboard",
+  travel_staff: "Travel Dashboard",
+  customer: "Dashboard Saya",
+}
+
 const Navbar = () => {
   const [user, setUser] = useState<User | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [scrolled, setScrolled] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
+    const supabase = createClient()
+    let mounted = true
+
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
+      if (!mounted) return
       setUser(user)
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .single()
+        if (mounted) setUserRole(profile?.role || null)
+      }
       setLoading(false)
     }
     getUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", session.user.id)
+          .single()
+        setUserRole(profile?.role || null)
+      } else {
+        setUserRole(null)
+      }
     })
 
     const handleScroll = () => setScrolled(window.scrollY > 10)
     window.addEventListener("scroll", handleScroll, { passive: true })
 
     return () => {
+      mounted = false
       subscription.unsubscribe()
       window.removeEventListener("scroll", handleScroll)
     }
   }, [])
 
   const handleLogout = async () => {
+    const supabase = createClient()
     await supabase.auth.signOut()
     setUser(null)
+    setUserRole(null)
     setMenuOpen(false)
     setMobileOpen(false)
     router.push("/")
   }
+
+  const dashboardPath = userRole ? (ROLE_DASHBOARD_MAP[userRole] || "/dashboard") : "/dashboard"
+  const dashboardLabel = userRole ? (ROLE_DASHBOARD_LABELS[userRole] || "Dashboard") : "Dashboard"
 
   return (
     <header
@@ -117,12 +166,12 @@ const Navbar = () => {
                         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                       </div>
                       <Link
-                        href="/dashboard"
+                        href={dashboardPath}
                         onClick={() => setMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-primary/10 transition-colors"
                       >
                         <LayoutDashboard className="w-4 h-4 text-primary" />
-                        Dashboard
+                        {dashboardLabel}
                       </Link>
                       <button
                         onClick={handleLogout}
@@ -184,8 +233,8 @@ const Navbar = () => {
                 <div className="w-full h-10 bg-muted rounded-xl animate-pulse" />
               ) : user ? (
                 <>
-                  <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
-                    <LayoutDashboard className="w-4 h-4 text-primary" /> Dashboard
+                  <Link href={dashboardPath} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
+                    <LayoutDashboard className="w-4 h-4 text-primary" /> {dashboardLabel}
                   </Link>
                   <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
                     <LogOut className="w-4 h-4" /> Keluar
