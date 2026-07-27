@@ -1,5 +1,6 @@
 import HeroSection from "@/components/ui/home/hero-section"
 import PackageSection from "@/components/ui/home/package-section"
+import { IslamicWidgets } from "@/components/ui/islamic-widgets"
 import {
   StatsSection,
   WhyUsSection,
@@ -13,6 +14,7 @@ export default function Home() {
     <main className="flex-1">
       <HeroSection />
       <StatsSection />
+      <IslamicWidgets />
       <PackageSection />
       <WhyUsSection />
       <TravelAgenciesSection />

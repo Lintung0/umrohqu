@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Receipt, Info, Save, Loader2 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner"
 
 interface FeeConfigRow {
   service_fee_percent: number
@@ -20,6 +21,7 @@ export default function AdminServiceFeesPage() {
   const [percent, setPercent] = useState(2)
   const [flatFee, setFlatFee] = useState(250000)
   const [bookings, setBookings] = useState<BookingRow[]>([])
+  const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -45,6 +47,20 @@ export default function AdminServiceFeesPage() {
     }
     fetch()
   }, [])
+
+  async function handleSave() {
+    setSaving(true)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from("fee_config")
+      .upsert({ id: 1, service_fee_percent: percent, service_fee_flat: flatFee }, { onConflict: "id" })
+    setSaving(false)
+    if (error) {
+      toast.error("Gagal menyimpan: " + error.message)
+    } else {
+      toast.success("Konfigurasi fee berhasil disimpan")
+    }
+  }
 
   const paidBookings = bookings.filter((b) => b.status === "confirmed")
   const totalServiceFee = paidBookings.reduce((s, b) => s + Math.max(b.total * (percent / 100), flatFee), 0)
@@ -106,8 +122,8 @@ export default function AdminServiceFeesPage() {
           <span>Fee = max({percent}% dari total, {formatRupiah(flatFee)}). Jika hasil persen lebih kecil dari flat fee, maka flat fee yang dikenakan.</span>
         </div>
 
-        <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">
-          <Save className="w-4 h-4" /> Simpan
+        <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Simpan
         </button>
       </div>
 

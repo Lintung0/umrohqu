@@ -52,12 +52,6 @@ interface PromoResult {
   type?: "percent" | "fixed"
 }
 
-const VALID_PROMOS: Record<string, { discount: number; type: "percent" | "fixed" }> = {
-  RAMADHAN50: { discount: 50, type: "percent" },
-  PAKET5: { discount: 1500000, type: "fixed" },
-  NEWUSER20: { discount: 20, type: "percent" },
-}
-
 const PAYMENT_METHODS = [
   { id: "va_bca", label: "Virtual Account BCA" },
   { id: "va_mandiri", label: "Virtual Account Mandiri" },
@@ -94,6 +88,7 @@ function CheckoutContent() {
   const [promoResult, setPromoResult] = useState<PromoResult | null>(null)
   const [step, setStep] = useState<"data" | "payment">("data")
   const [paymentMethod, setPaymentMethod] = useState("va_bca")
+  const [promoLoading, setPromoLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
@@ -135,11 +130,25 @@ function CheckoutContent() {
     setPilgrims((prev) => prev.map((p, i) => (i === index ? { ...p, [field]: value } : p)))
   }
 
-  function applyPromo() {
+  async function applyPromo() {
     const code = promoCode.trim().toUpperCase()
-    const promo = VALID_PROMOS[code]
-    if (promo) {
-      setPromoResult({ valid: true, discount: promo.discount, message: `Promo "${code}" berhasil diterapkan!`, type: promo.type })
+    if (!code) return
+    setPromoLoading(true)
+    const { data } = await supabase
+      .from("promotions")
+      .select("discount_value, discount_type, is_active, valid_from, valid_until")
+      .eq("code", code)
+      .single()
+    setPromoLoading(false)
+    if (data && data.is_active) {
+      const now = new Date().toISOString()
+      if (data.valid_from && now < data.valid_from) {
+        setPromoResult({ valid: false, discount: 0, message: "Promo belum berlaku" })
+      } else if (data.valid_until && now > data.valid_until) {
+        setPromoResult({ valid: false, discount: 0, message: "Promo sudah kedaluwarsa" })
+      } else {
+        setPromoResult({ valid: true, discount: data.discount_value, message: `Promo "${code}" berhasil diterapkan!`, type: data.discount_type })
+      }
     } else {
       setPromoResult({ valid: false, discount: 0, message: "Kode promo tidak valid" })
     }
@@ -435,7 +444,9 @@ function CheckoutContent() {
               <div className="space-y-2">
                 <div className="flex gap-2">
                   <input type="text" value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="Kode promo" className="flex-1 px-3 py-2 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                  <button onClick={applyPromo} className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-medium hover:bg-emerald-100 transition-colors">Pakai</button>
+                  <button onClick={applyPromo} disabled={promoLoading} className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-medium hover:bg-emerald-100 transition-colors disabled:opacity-50">
+                    {promoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Pakai"}
+                  </button>
                 </div>
                 {promoResult && <p className={`text-xs ${promoResult.valid ? "text-emerald-600" : "text-red-500"}`}>{promoResult.message}</p>}
               </div>

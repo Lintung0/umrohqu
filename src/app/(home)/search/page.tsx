@@ -21,6 +21,7 @@ import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import type { Package, Tenant } from "@/lib/types"
 import SharedPackageCard from "@/components/shared/package-card"
+import { rankTravels, RankingFactors, DEFAULT_RANKING_CONFIG } from "@/lib/business-logic/bidding"
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -37,6 +38,7 @@ function SearchContent() {
 
   const [packages, setPackages] = useState<Package[]>([])
   const [tenants, setTenants] = useState<Map<string, Tenant>>(new Map())
+  const [rankingScores, setRankingScores] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -61,6 +63,31 @@ function SearchContent() {
         const tenantMap = new Map<string, Tenant>()
         tnts.forEach((t) => tenantMap.set(t.id, t as Tenant))
         setTenants(tenantMap)
+
+        const { data: bids } = await supabase
+          .from("bids")
+          .select("travel_id, bid_value, is_active, impressions, clicks")
+          .eq("is_active", true)
+
+        if (bids && bids.length > 0) {
+          const entries = bids.map((b: any) => ({
+            travelId: b.travel_id,
+            factors: {
+              bidScore: b.bid_value || 0,
+              rating: 0,
+              reviewCount: 0,
+              totalBookings: 0,
+              conversionRate: b.impressions > 0 ? (b.clicks / b.impressions) * 100 : 0,
+              isVerified: tenantMap.get(b.travel_id)?.is_verified ?? false,
+              hasPromo: false,
+              sponsored: false,
+            } as RankingFactors,
+          }))
+          const ranked = rankTravels(entries, DEFAULT_RANKING_CONFIG)
+          const scoreMap = new Map<string, number>()
+          ranked.forEach((r) => scoreMap.set(r.travelId, r.score))
+          setRankingScores(scoreMap)
+        }
       }
 
       setLoading(false)
@@ -107,7 +134,9 @@ function SearchContent() {
       if (sortBy === "price-asc") return a.price - b.price
       if (sortBy === "price-desc") return b.price - a.price
       if (sortBy === "duration") return (a.duration_days ?? 0) - (b.duration_days ?? 0)
-      return 0
+      const scoreA = rankingScores.get(a.tenant_id) ?? 0
+      const scoreB = rankingScores.get(b.tenant_id) ?? 0
+      return scoreB - scoreA
     })
 
   const handleSearch = () => {

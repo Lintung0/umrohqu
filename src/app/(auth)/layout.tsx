@@ -1,7 +1,9 @@
-export default function AuthLayout({
+import { AuthLayout } from "@/components/auth/auth-layout"
+
+export default function AuthLayoutRoute({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return <AuthLayout>{children}</AuthLayout>
 }
