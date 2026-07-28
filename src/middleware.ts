@@ -6,6 +6,7 @@ const PUBLIC_ROUTES = [
   "/search",
   "/package",
   "/travel",
+  "/compare",
   "/promotions",
   "/articles",
   "/about",
@@ -17,6 +18,7 @@ const PUBLIC_ROUTES = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  "/api/auth",
 ]
 
 const SKIP_SUBDOMAIN_HOSTS = ["www", "api", "localhost", "127.0.0.1"]
@@ -129,7 +131,7 @@ export async function middleware(request: NextRequest) {
   const role = profile?.role as string | undefined
 
   if (pathname.startsWith("/admin")) {
-    if (!role || !["super_admin", "marketplace_admin", "marketplace_billing", "marketplace_support"].includes(role)) {
+    if (!role || !["super_admin", "marketplace_admin", "marketplace_finance", "marketplace_operational"].includes(role)) {
       const redirectUrl = request.nextUrl.clone()
       redirectUrl.pathname = "/dashboard"
       return NextResponse.redirect(redirectUrl)

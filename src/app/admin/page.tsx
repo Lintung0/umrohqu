@@ -2,39 +2,91 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Building2, BookOpen, DollarSign, AlertTriangle } from "lucide-react"
+import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
+
+const MOCK_CHART = [
+  { month: "Feb", gmv: 3200000000 },
+  { month: "Mar", gmv: 4100000000 },
+  { month: "Apr", gmv: 3600000000 },
+  { month: "Mei", gmv: 5800000000 },
+  { month: "Jun", gmv: 7200000000 },
+  { month: "Jul", gmv: 9400000000 },
+]
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: "#C9A24B",
+  verified: "#0E5C4E",
+  rejected: "#e53e3e",
+  open: "#3b82f6",
+  in_progress: "#C9A24B",
+  resolved: "#0E5C4E",
+}
+
+function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
+  const max = Math.max(...data.map((d) => d.gmv))
+  const w = 300
+  const h = 80
+  const points = data.map((d, i) => {
+    const x = (i / (data.length - 1)) * w
+    const y = h - (d.gmv / max) * (h - 10)
+    return `${x},${y}`
+  })
+  const area = `0,${h} ${points.join(" ")} ${w},${h}`
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-20">
+      <defs>
+        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#0E5C4E" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#0E5C4E" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={area} fill="url(#chartGrad)" />
+      <polyline points={points.join(" ")} fill="none" stroke="#0E5C4E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {data.map((d, i) => {
+        const x = (i / (data.length - 1)) * w
+        const y = h - (d.gmv / max) * (h - 10)
+        return <circle key={i} cx={x} cy={y} r="3" fill="#0E5C4E" />
+      })}
+    </svg>
+  )
+}
 
 export default function AdminOverviewPage() {
   const supabase = createClient()
   const [stats, setStats] = useState({ travelCount: 0, bookingCount: 0, totalRevenue: 0, pendingTravel: 0 })
   const [recentBookings, setRecentBookings] = useState<any[]>([])
+  const [pendingTravels, setPendingTravels] = useState<any[]>([])
+  const [recentTickets, setRecentTickets] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
-      const [travelRes, bookingRes, allBookingsRes] = await Promise.all([
-        supabase.from("tenants").select("id, status", { count: "exact" }).is("deleted_at", null),
-        supabase.from("bookings").select("id, status, total, pilgrim_count, package:packages(name), customer:users(full_name), created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
+      const [travelRes, bookingRes, allBookingsRes, pendingTravelRes, ticketsRes] = await Promise.all([
+        supabase.from("tenants").select("id, status").is("deleted_at", null),
+        supabase.from("bookings").select("id, status, total, pilgrim_count, package:packages(name), customer:users(full_name), created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(5),
         supabase.from("bookings").select("id, total, status").is("deleted_at", null),
+        supabase.from("tenants").select("id, name, city, status, created_at").eq("status", "pending").is("deleted_at", null).order("created_at", { ascending: false }).limit(4),
+        supabase.from("support_tickets").select("id, subject, status, priority, created_at, user:users(full_name)").order("created_at", { ascending: false }).limit(4),
       ])
 
       const tenants = travelRes.data || []
-      const bookings = bookingRes.data || []
       const allBookings = allBookingsRes.data || []
-
       const totalRevenue = allBookings
         .filter((b: any) => b.status === "confirmed" || b.status === "completed")
         .reduce((s: number, b: any) => s + (b.total || 0), 0)
 
       setStats({
-        travelCount: travelRes.count || 0,
+        travelCount: travelRes.data?.length || 0,
         bookingCount: allBookings.length,
         totalRevenue,
         pendingTravel: tenants.filter((t) => t.status === "pending").length,
       })
-      setRecentBookings(bookings)
+      setRecentBookings(bookingRes.data || [])
+      setPendingTravels(pendingTravelRes.data || [])
+      setRecentTickets(ticketsRes.data || [])
       setLoading(false)
     }
     load()
@@ -45,7 +97,7 @@ export default function AdminOverviewPage() {
       <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <div className="h-8 w-56 bg-muted rounded animate-pulse" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1,2,3,4].map((i) => <div key={i} className="h-24 bg-muted rounded-2xl animate-pulse" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-28 bg-muted rounded-2xl animate-pulse" />)}
         </div>
       </div>
     )
@@ -53,43 +105,110 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Overview seluruh sistem UmrohQ</p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Ringkasan Sistem</h1>
+          <p className="text-muted-foreground text-sm mt-1">UmrohQ Platform · {new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
+        </div>
+        <Link href="/admin/travels" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">
+          Kelola Travel <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
 
+      {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: Building2, label: "Total Travel", value: stats.travelCount, color: "bg-emerald-100 text-emerald-600" },
-          { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, color: "bg-blue-100 text-blue-600" },
-          { icon: DollarSign, label: "Revenue Platform", value: formatRupiah(stats.totalRevenue), color: "bg-purple-100 text-purple-600" },
-          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, color: "bg-yellow-100 text-yellow-600" },
+          { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, color: "bg-emerald-50 text-primary", trend: "+12" },
+          { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, sub: "Sepanjang platform", color: "bg-blue-50 text-blue-600", trend: "+8%" },
+          { icon: TrendingUp, label: "Revenue Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", color: "bg-amber-50 text-amber-600", trend: "+31%" },
+          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu review", color: "bg-red-50 text-red-500", trend: null },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl border border-border p-5">
-            <div className="flex items-center gap-3">
+          <div key={s.label} className="bg-white rounded-2xl border border-border p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between mb-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.color}`}>
                 <s.icon className="w-5 h-5" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{s.value}</p>
-                <p className="text-sm text-muted-foreground">{s.label}</p>
-              </div>
+              {s.trend && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-primary flex items-center gap-0.5">
+                  <TrendingUp className="w-3 h-3" /> {s.trend}
+                </span>
+              )}
             </div>
+            <p className="text-2xl font-bold">{s.value}</p>
+            <p className="text-sm font-medium mt-0.5">{s.label}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{s.sub}</p>
           </div>
         ))}
       </div>
 
+      {/* GMV Chart + Pending Travels */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* GMV Trend */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-border p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-semibold">Tren GMV Platform</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">6 bulan terakhir</p>
+            </div>
+            <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-full bg-primary/10">
+              Rp {(MOCK_CHART[MOCK_CHART.length - 1].gmv / 1_000_000_000).toFixed(1)}M
+            </span>
+          </div>
+          <MiniChart data={MOCK_CHART} />
+          <div className="flex justify-between mt-2">
+            {MOCK_CHART.map((d) => (
+              <span key={d.month} className="text-xs text-muted-foreground">{d.month}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Pending Travel Verifications */}
+        <div className="bg-white rounded-2xl border border-border p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-sm">Verifikasi Travel</h2>
+            <Link href="/admin/verification" className="text-xs text-primary hover:underline">Lihat Semua</Link>
+          </div>
+          {pendingTravels.length === 0 ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              <CheckCircle className="w-8 h-8 mx-auto mb-2 text-primary/30" />
+              Semua travel sudah diverifikasi
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pendingTravels.map((t) => (
+                <div key={t.id} className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100">
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-sm font-bold text-amber-700 shrink-0">
+                    {t.name.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.city || "Indonesia"}</p>
+                  </div>
+                  <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent Bookings + Support Tickets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Bookings */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-border">
           <div className="flex items-center justify-between p-5 border-b border-border">
             <h2 className="font-semibold">Booking Terbaru</h2>
-            <Link href="/admin/invoices" className="text-sm text-emerald-600 hover:underline">Lihat Semua</Link>
+            <Link href="/admin/invoices" className="text-sm text-primary hover:underline">Lihat Semua</Link>
           </div>
           <div className="divide-y divide-border">
             {recentBookings.length === 0 ? (
               <p className="p-8 text-center text-muted-foreground text-sm">Belum ada booking</p>
-            ) : recentBookings.slice(0, 5).map((b: any) => (
+            ) : recentBookings.map((b: any) => (
               <div key={b.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                  {(b.customer?.full_name || "P").charAt(0)}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{b.customer?.full_name || "Pelanggan"}</p>
                   <p className="text-xs text-muted-foreground">{b.package?.name || "Paket"} · {b.pilgrim_count} jamaah</p>
@@ -103,29 +222,43 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <Link href="/admin/travels" className="block bg-white border border-border rounded-2xl p-5 hover:bg-gray-50 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold">Akun Travel</p>
-                <p className="text-sm text-muted-foreground">{stats.travelCount} terdaftar</p>
+        {/* Support Tickets */}
+        <div className="bg-white rounded-2xl border border-border">
+          <div className="flex items-center justify-between p-5 border-b border-border">
+            <h2 className="font-semibold text-sm">Tiket Terbaru</h2>
+            <Link href="/admin/tickets" className="text-xs text-primary hover:underline">Lihat Semua</Link>
+          </div>
+          <div className="divide-y divide-border">
+            {recentTickets.length === 0 ? (
+              <p className="p-6 text-center text-muted-foreground text-sm">Tidak ada tiket aktif</p>
+            ) : recentTickets.map((t: any) => (
+              <div key={t.id} className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-medium line-clamp-1">{t.subject}</p>
+                  <span className="text-xs px-2 py-0.5 rounded-full shrink-0"
+                    style={{ background: `${STATUS_COLORS[t.status] || "#888"}15`, color: STATUS_COLORS[t.status] || "#888" }}>
+                    {t.status === "open" ? "Baru" : t.status === "in_progress" ? "Diproses" : "Selesai"}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{t.user?.full_name || "Pengguna"}</p>
               </div>
-              {stats.pendingTravel > 0 && (
-                <span className="bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full text-xs font-medium">{stats.pendingTravel} pending</span>
-              )}
-            </div>
-          </Link>
-
-          <Link href="/admin/billing-promos" className="block bg-white border border-border rounded-2xl p-5 hover:bg-gray-50 transition-colors">
-            <p className="font-semibold">Promo</p>
-            <p className="text-sm text-muted-foreground mt-0.5">Kelola promo platform</p>
-          </Link>
-
-          <Link href="/admin/service-fees" className="block bg-emerald-600 text-white rounded-2xl p-5 hover:bg-emerald-700 transition-colors">
-            <p className="font-semibold">Fee & Revenue</p>
-            <p className="text-emerald-100 text-sm mt-0.5">Pengaturan biaya layanan</p>
-          </Link>
+            ))}
+          </div>
         </div>
+      </div>
+
+      {/* Quick Links */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Verifikasi Travel", href: "/admin/verification", color: "bg-emerald-600 text-white" },
+          { label: "Promo Platform", href: "/admin/billing-promos", color: "bg-amber-500 text-white" },
+          { label: "Konfigurasi Fee", href: "/admin/service-fees", color: "bg-blue-600 text-white" },
+          { label: "Laporan Keuangan", href: "/admin/billing-reports", color: "bg-purple-600 text-white" },
+        ].map((l) => (
+          <Link key={l.href} href={l.href} className={`rounded-2xl p-4 text-sm font-semibold hover:opacity-90 transition-opacity ${l.color}`}>
+            {l.label}
+          </Link>
+        ))}
       </div>
     </div>
   )

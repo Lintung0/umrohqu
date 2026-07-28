@@ -65,7 +65,7 @@ export default function TravelBookingsPage() {
   const filtered = bookings.filter((b) => {
     const q = searchQuery.toLowerCase()
     const matchSearch = !q || b.customer?.full_name?.toLowerCase().includes(q) || b.id.includes(q) || b.package?.name?.toLowerCase().includes(q)
-    const matchStatus = statusFilter === "all" || b.status === statusFilter
+    const matchStatus = statusFilter === "all" || statusFilter === "semua" || b.status === statusFilter
     return matchSearch && matchStatus
   })
 

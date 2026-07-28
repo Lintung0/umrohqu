@@ -23,8 +23,8 @@ create extension if not exists "pgcrypto";
 create type user_role as enum (
   'super_admin',
   'marketplace_admin',
-  'marketplace_billing',
-  'marketplace_support',
+  'marketplace_finance',
+  'marketplace_operational',
   'travel_admin',
   'travel_staff',
   'customer'
@@ -342,7 +342,7 @@ returns boolean
 language sql stable
 as $$
   select coalesce(auth_role(), '') in
-    ('super_admin', 'marketplace_admin', 'marketplace_billing', 'marketplace_support');
+    ('super_admin', 'marketplace_admin', 'marketplace_finance', 'marketplace_operational');
 $$;
 
 create or replace function is_super_admin()

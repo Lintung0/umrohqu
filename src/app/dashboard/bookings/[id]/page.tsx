@@ -3,8 +3,9 @@
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle } from "lucide-react"
+import { ArrowLeft, Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, Wallet, Sparkles } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
+import { toast } from "sonner"
 import Link from "next/link"
 
 interface BookingDetail {
@@ -17,6 +18,11 @@ interface BookingDetail {
   booking_channel: string
   notes: string | null
   created_at: string
+  payment_type: string | null
+  dp_percentage: number | null
+  dp_amount: number | null
+  remaining_amount: number | null
+  remaining_due_date: string | null
   package: { name: string; slug: string; image_url: string | null; departure_city: string | null; duration_days: number | null; airline: string | null; hotel_makkah: string | null; hotel_makkah_stars: number | null; hotel_madinah: string | null; hotel_madinah_stars: number | null } | null
   participants: { id: string; full_name: string; nik: string | null; passport_no: string | null; gender: string | null; phone: string | null; relation: string }[]
 }
@@ -185,8 +191,31 @@ export default function BookingDetailPage() {
               <span className="text-muted-foreground">Biaya Layanan</span>
               <span>{formatRupiah(booking.fee)}</span>
             </div>
+            {booking.payment_type === "dp" && (
+              <>
+                <div className="border-t border-border pt-2 flex justify-between text-emerald-600">
+                  <span className="font-medium flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    DP {booking.dp_percentage}%
+                  </span>
+                  <span className="font-bold">{formatRupiah(booking.dp_amount || 0)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Sisa cicilan</span>
+                  <span className="font-medium">{formatRupiah(booking.remaining_amount || 0)}</span>
+                </div>
+                {booking.remaining_due_date && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Jatuh tempo sisa</span>
+                    <span className="font-medium">
+                      {new Date(booking.remaining_due_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
             <div className="border-t border-border pt-2 flex justify-between font-semibold">
-              <span>Total</span>
+              <span>Total dibayar</span>
               <span className="text-emerald-600">{formatRupiah(booking.total)}</span>
             </div>
           </div>
@@ -227,14 +256,155 @@ export default function BookingDetailPage() {
         )}
       </div>
 
-      {booking.status === "pending_payment" && (
+      {booking.status === "pending_payment" && booking.payment_type !== "dp" && (
         <div className="bg-white rounded-2xl border border-border p-6">
-          <h2 className="font-semibold mb-3">Aksi</h2>
-          <button className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors">
-            Bayar Sekarang
+          <h2 className="font-semibold mb-3">Pembayaran</h2>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
+            <p className="text-sm text-emerald-700">Silakan lakukan pembayaran sebelum jatuh tempo. Setelah pembayaran dikonfirmasi, status booking akan berubah menjadi "Dikonfirmasi".</p>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-4 mb-4">
+            <p className="text-xs text-muted-foreground mb-1">Kode Booking</p>
+            <div className="flex items-center gap-2">
+              <p className="font-mono font-bold text-lg">{booking.id.slice(0, 8).toUpperCase()}</p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(booking.id.slice(0, 8).toUpperCase())
+                  toast.success("Kode booking disalin")
+                }}
+                className="p-1 hover:bg-gray-200 rounded transition-colors"
+              >
+                <Copy className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Gunakan kode booking ini saat melakukan transfer bank atau pembayaran.</p>
+          </div>
+          <button
+            onClick={() => toast.success("Simulasi pembayaran berhasil! Status booking akan diperbarui.")}
+            className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center gap-2"
+          >
+            <CreditCard className="w-4 h-4" />
+            Simulasi Bayar Sekarang
           </button>
         </div>
       )}
+
+      {/* DP: Pay Remaining */}
+      {booking.payment_type === "dp" && (booking.remaining_amount || 0) > 0 && booking.status !== "confirmed" && (
+        <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            Pelunasan Sisa DP
+          </h2>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <p className="text-sm text-amber-700">
+              Booking DP Anda masih memiliki sisa cicilan sebesar <strong>{formatRupiah(booking.remaining_amount || 0)}</strong>.
+              {booking.remaining_due_date && (
+                <> Jatuh tempo: {new Date(booking.remaining_due_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</>
+              )}
+            </p>
+          </div>
+          <PayRemainingSection bookingId={booking.id} remainingAmount={booking.remaining_amount || 0} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string; remainingAmount: number }) {
+  const supabase = createClient()
+  const [walletBalance, setWalletBalance] = useState<number | null>(null)
+  const [useWallet, setUseWallet] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: wallet } = await supabase
+          .from("wallets")
+          .select("balance")
+          .eq("user_id", user.id)
+          .single()
+        setWalletBalance(wallet?.balance || 0)
+      }
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const walletSufficient = walletBalance !== null && walletBalance >= remainingAmount
+
+  const handlePay = async () => {
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/booking/pay-remaining", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, useWallet }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        if (data.xendit?.invoice_url) {
+          window.location.href = data.xendit.invoice_url
+        } else {
+          toast.success("Pembayaran sisa berhasil!")
+          setTimeout(() => window.location.reload(), 1000)
+        }
+      } else {
+        toast.error(data.error || "Pembayaran gagal")
+      }
+    } catch {
+      toast.error("Terjadi kesalahan jaringan")
+    }
+    setSubmitting(false)
+  }
+
+  if (loading) {
+    return <div className="h-12 bg-muted rounded-xl animate-pulse" />
+  }
+
+  return (
+    <div className="space-y-3">
+      {walletBalance !== null && (
+        <button
+          onClick={() => setUseWallet(true)}
+          className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
+        >
+          <Wallet className={`w-5 h-5 ${useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
+          <div className="flex-1">
+            <p className="text-sm font-semibold">Dompet UmrohQ</p>
+            <p className={`text-xs ${walletSufficient ? "text-emerald-600" : "text-red-500"}`}>
+              Saldo: {walletBalance !== null ? formatRupiah(walletBalance) : "-"}
+              {!walletSufficient && ` (${formatRupiah(remainingAmount - (walletBalance || 0))} kurang)`}
+            </p>
+          </div>
+          <CheckCircle className={`w-4 h-4 ${useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
+        </button>
+      )}
+      <button
+        onClick={() => setUseWallet(false)}
+        className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${!useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
+      >
+        <CreditCard className={`w-5 h-5 ${!useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
+        <div className="flex-1">
+          <p className="text-sm font-semibold">Transfer Bank / QRIS</p>
+          <p className="text-xs text-muted-foreground">Bayar via transfer bank atau QRIS</p>
+        </div>
+        <CheckCircle className={`w-4 h-4 ${!useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
+      </button>
+
+      <button
+        onClick={handlePay}
+        disabled={submitting || (useWallet && !walletSufficient)}
+        className="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+      >
+        {submitting ? (
+          <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+        ) : (
+          <>Bayar Sisa {formatRupiah(remainingAmount)}</>
+        )}
+      </button>
     </div>
   )
 }

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Headphones, Clock, CheckCircle, AlertTriangle, MessageSquare, Loader2 } from "lucide-react"
+import { Search, Headphones, Clock, CheckCircle, AlertTriangle, MessageSquare, Loader2, X, Send } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner"
 
 interface TicketRow {
   id: string
@@ -13,6 +14,7 @@ interface TicketRow {
   priority: string
   status: string
   created_at: string
+  response?: string | null
   tenants?: { name: string } | null
 }
 
@@ -42,12 +44,15 @@ export default function AdminTicketsPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [replyTicket, setReplyTicket] = useState<TicketRow | null>(null)
+  const [replyMessage, setReplyMessage] = useState("")
+  const [updatingStatus, setUpdatingStatus] = useState(false)
 
-  useEffect(() => {
+  const fetchTickets = () => {
     const supabase = createClient()
     supabase
       .from("support_tickets")
-      .select("id, tenant_id, subject, description, category, priority, status, created_at, tenants(name)")
+      .select("id, tenant_id, subject, description, category, priority, status, created_at, response, tenants(name)")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         const rows = (data || []).map((d: any) => ({
@@ -57,7 +62,47 @@ export default function AdminTicketsPage() {
         setTickets(rows as TicketRow[])
         setLoading(false)
       })
+  }
+
+  useEffect(() => {
+    fetchTickets()
   }, [])
+
+  const handleStatusUpdate = async (ticketId: string, newStatus: string) => {
+    if (newStatus !== "open" && !replyMessage.trim()) {
+      toast.error("Masukkan pesan balasan terlebih dahulu")
+      return
+    }
+
+    setUpdatingStatus(true)
+    const supabase = createClient()
+
+    const update: Record<string, any> = { status: newStatus }
+
+    if (replyMessage.trim()) {
+      const existingResponse = tickets.find((t) => t.id === ticketId)?.response
+      const timestamp = new Date().toLocaleString("id-ID")
+      const newEntry = `[${timestamp}] ${replyMessage.trim()}`
+      update.response = existingResponse ? `${existingResponse}\n\n${newEntry}` : newEntry
+    }
+
+    const { error } = await supabase
+      .from("support_tickets")
+      .update(update)
+      .eq("id", ticketId)
+
+    setUpdatingStatus(false)
+
+    if (error) {
+      toast.error("Gagal memperbarui tiket")
+      return
+    }
+
+    toast.success(`Tiket berhasil diubah ke "${STATUS_MAP[newStatus]?.label || newStatus}"`)
+    setReplyTicket(null)
+    setReplyMessage("")
+    fetchTickets()
+  }
 
   const filtered = tickets.filter((t) => {
     const tenantName = (t.tenants as any)?.name || ""
@@ -162,7 +207,13 @@ export default function AdminTicketsPage() {
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(ticket.created_at).toLocaleDateString("id-ID")}</span>
                   </div>
                 </div>
-                <button className="px-4 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors shrink-0 flex items-center gap-1.5">
+                <button
+                  onClick={() => {
+                    setReplyTicket(ticket)
+                    setReplyMessage("")
+                  }}
+                  className="px-4 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors shrink-0 flex items-center gap-1.5"
+                >
                   <MessageSquare className="w-4 h-4" /> Balas
                 </button>
               </div>
@@ -170,6 +221,73 @@ export default function AdminTicketsPage() {
           )
         })}
       </div>
+
+      {replyTicket && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h2 className="font-bold text-lg">Balas Tiket</h2>
+              <button
+                onClick={() => {
+                  setReplyTicket(null)
+                  setReplyMessage("")
+                }}
+                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Subjek</p>
+                <p className="font-semibold text-sm">{replyTicket.subject}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Deskripsi</p>
+                <p className="text-sm text-muted-foreground">{replyTicket.description || "-"}</p>
+              </div>
+              {replyTicket.response && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Respon Sebelumnya</p>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-gray-50 rounded-xl p-3">{replyTicket.response}</p>
+                </div>
+              )}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Pesan Balasan</label>
+                <textarea
+                  value={replyMessage}
+                  onChange={(e) => setReplyMessage(e.target.value)}
+                  placeholder="Tulis balasan..."
+                  rows={4}
+                  className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-border space-y-3">
+              <p className="text-xs text-muted-foreground">Ubah Status</p>
+              <div className="flex gap-2 flex-wrap">
+                {(["in_progress", "resolved", "closed"] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => handleStatusUpdate(replyTicket.id, s)}
+                    disabled={updatingStatus}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 ${
+                      replyTicket.status === s
+                        ? "bg-emerald-600 text-white"
+                        : "bg-white border border-border hover:bg-gray-50"
+                    }`}
+                  >
+                    {updatingStatus && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    {STATUS_MAP[s]?.label || s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

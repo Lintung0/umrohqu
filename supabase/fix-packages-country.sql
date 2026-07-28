@@ -1,0 +1,9 @@
+UPDATE public.packages SET
+  country = 'Indonesia',
+  country_code = 'id'
+WHERE country IS NULL AND tenant_id IN (
+  'b0000000-0000-0000-0000-000000000001',
+  'b0000000-0000-0000-0000-000000000002',
+  'b0000000-0000-0000-0000-000000000003',
+  'b0000000-0000-0000-0000-000000000004'
+);

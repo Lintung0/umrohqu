@@ -1,4 +1,4 @@
-export type AdminRole = "marketplace_admin" | "marketplace_support" | "marketplace_billing"
+export type AdminRole = "marketplace_admin" | "marketplace_operational" | "marketplace_finance"
 
 // ─── Database Row Types ────────────────────────────────────────────────────────
 // These mirror the Supabase schema exactly (snake_case column names)
@@ -82,6 +82,9 @@ export interface Package {
   excludes: string[] | null
   terms: string[] | null
   cancellation_policy: string | null
+  country: string | null
+  country_code: string | null
+  city: string | null
 }
 
 export interface Booking {
@@ -89,14 +92,20 @@ export interface Booking {
   tenant_id: string | null
   customer_id: string
   package_id: string
-  channel: string
+  booking_channel: string
   status: string
-  payment_status: string
   pilgrim_count: number
-  price_per_person: number
-  service_fee: number
-  total_price: number
+  price: number
+  fee: number
+  total: number
   notes: string | null
+  payment_status: string
+  payment_method: string | null
+  payment_type: string | null
+  dp_percentage: number | null
+  dp_amount: number | null
+  remaining_amount: number | null
+  remaining_due_date: string | null
   created_at: string
   updated_at: string
   deleted_at: string | null

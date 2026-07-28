@@ -169,16 +169,16 @@ VALUES
   ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'admin@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Utama","role":"marketplace_admin"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
--- Admin Billing
+-- Admin Finance
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 VALUES
-  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'billing@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Billing","role":"marketplace_billing"}', now(), now())
+  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'billing@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Finance","role":"marketplace_finance"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
--- Admin Support
+-- Admin Operational
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 VALUES
-  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'support@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Support","role":"marketplace_support"}', now(), now())
+  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'support@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Operational","role":"marketplace_operational"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Travel Admin (Al-Haramain)
@@ -211,8 +211,8 @@ ON CONFLICT (id) DO NOTHING;
 -- We update role + tenant_id for travel admins.
 -- =========================================================
 UPDATE public.users SET role = 'marketplace_admin', full_name = 'Admin Utama' WHERE id = '10000000-0000-0000-0000-000000000001';
-UPDATE public.users SET role = 'marketplace_billing', full_name = 'Admin Billing' WHERE id = '10000000-0000-0000-0000-000000000002';
-UPDATE public.users SET role = 'marketplace_support', full_name = 'Admin Support' WHERE id = '10000000-0000-0000-0000-000000000003';
+UPDATE public.users SET role = 'marketplace_finance', full_name = 'Admin Finance' WHERE id = '10000000-0000-0000-0000-000000000002';
+UPDATE public.users SET role = 'marketplace_operational', full_name = 'Admin Operational' WHERE id = '10000000-0000-0000-0000-000000000003';
 UPDATE public.users SET role = 'travel_admin', tenant_id = 'b0000000-0000-0000-0000-000000000001', full_name = 'Admin Al-Haramain' WHERE id = '20000000-0000-0000-0000-000000000001';
 UPDATE public.users SET role = 'travel_admin', tenant_id = 'b0000000-0000-0000-0000-000000000002', full_name = 'Admin Baitullah' WHERE id = '20000000-0000-0000-0000-000000000002';
 UPDATE public.users SET role = 'customer', full_name = 'Ahmad Fauzi', phone = '081298765432' WHERE id = '30000000-0000-0000-0000-000000000001';

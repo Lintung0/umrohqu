@@ -8,35 +8,35 @@ import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 
 const ADMIN_NAV = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["marketplace_admin", "marketplace_support", "marketplace_billing"] as AdminRole[] },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["marketplace_admin", "marketplace_operational", "marketplace_finance"] as AdminRole[] },
   { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["marketplace_admin"] },
   { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["marketplace_admin"] },
   { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["marketplace_admin"] },
   { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["marketplace_admin"] },
   { href: "/admin/promos", label: "Promo & Diskon", icon: Tag, roles: ["marketplace_admin"] },
   { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["marketplace_admin"] },
-  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["marketplace_support"] },
-  { href: "/admin/verification", label: "Verifikasi Travel", icon: Shield, roles: ["marketplace_support"] },
-  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["marketplace_support"] },
-  { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["marketplace_support"] },
-  { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["marketplace_billing"] },
-  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["marketplace_billing"] },
-  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["marketplace_billing"] },
-  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["marketplace_billing"] },
-  { href: "/admin/billing-promos", label: "Promo & Diskon", icon: Tag, roles: ["marketplace_billing"] },
-  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["marketplace_billing"] },
+  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["marketplace_operational"] },
+  { href: "/admin/verification", label: "Verifikasi Travel", icon: Shield, roles: ["marketplace_operational"] },
+  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["marketplace_operational"] },
+  { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["marketplace_operational"] },
+  { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["marketplace_finance"] },
+  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["marketplace_finance"] },
+  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["marketplace_finance"] },
+  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["marketplace_finance"] },
+  { href: "/admin/billing-promos", label: "Promo & Diskon", icon: Tag, roles: ["marketplace_finance"] },
+  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["marketplace_finance"] },
 ]
 
 const ROLE_LABELS: Record<AdminRole, string> = {
   marketplace_admin: "Admin",
-  marketplace_support: "Support",
-  marketplace_billing: "Billing",
+  marketplace_operational: "Operational",
+  marketplace_finance: "Finance",
 }
 
 const ROLE_COLORS: Record<AdminRole, string> = {
   marketplace_admin: "bg-emerald-100 text-emerald-700",
-  marketplace_support: "bg-blue-100 text-blue-700",
-  marketplace_billing: "bg-amber-100 text-amber-700",
+  marketplace_operational: "bg-blue-100 text-blue-700",
+  marketplace_finance: "bg-amber-100 text-amber-700",
 }
 
 interface AdminSidebarProps {
@@ -51,8 +51,8 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
 
   const ROLE_USERS: Record<AdminRole, { name: string; email: string }> = {
     marketplace_admin: { name: "Super Admin", email: "admin@umrohq.com" },
-    marketplace_support: { name: "Support Agent", email: "support@umrohq.com" },
-    marketplace_billing: { name: "Billing Staff", email: "billing@umrohq.com" },
+    marketplace_operational: { name: "Operational Staff", email: "operational@umrohq.com" },
+    marketplace_finance: { name: "Finance Staff", email: "finance@umrohq.com" },
   }
 
   const currentUser = ROLE_USERS[currentRole]

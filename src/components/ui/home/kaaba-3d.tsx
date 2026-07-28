@@ -7,10 +7,12 @@ import * as THREE from "three"
 
 function KaabaBody() {
   const meshRef = useRef<THREE.Mesh>(null)
+  const timeRef = useRef(0)
 
-  useFrame((state) => {
+  useFrame((_state, delta) => {
+    timeRef.current += delta
     if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.15
+      meshRef.current.rotation.y = timeRef.current * 0.15
     }
   })
 
@@ -119,11 +121,13 @@ function Particles() {
   }, [])
 
   const pointsRef = useRef<THREE.Points>(null)
+  const ptTimeRef = useRef(0)
 
-  useFrame((state) => {
+  useFrame((_state, delta) => {
+    ptTimeRef.current += delta
     if (pointsRef.current) {
-      pointsRef.current.rotation.y = state.clock.elapsedTime * 0.03
-      pointsRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.02) * 0.1
+      pointsRef.current.rotation.y = ptTimeRef.current * 0.03
+      pointsRef.current.rotation.x = Math.sin(ptTimeRef.current * 0.02) * 0.1
     }
   })
 
@@ -148,10 +152,12 @@ function Particles() {
 
 function GlowRing() {
   const ringRef = useRef<THREE.Mesh>(null)
+  const ringTimeRef = useRef(0)
 
-  useFrame((state) => {
+  useFrame((_state, delta) => {
+    ringTimeRef.current += delta
     if (ringRef.current) {
-      ringRef.current.rotation.z = state.clock.elapsedTime * 0.1
+      ringRef.current.rotation.z = ringTimeRef.current * 0.1
     }
   })
 

@@ -1,15 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { User, Mail, AlertCircle } from "lucide-react"
-import { AuthLayout } from "@/components/auth/auth-layout"
 import { Logo } from "@/components/auth/logo"
 import { PhoneInput } from "@/components/auth/phone-input"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
-import { GoogleButton } from "@/components/auth/google-button"
 import { Divider } from "@/components/auth/divider"
 import { createClient } from "@/lib/supabase/client"
 import { z } from "zod"
@@ -25,10 +22,7 @@ const registerSchema = z
       .string()
       .min(1, "Nomor telepon wajib diisi.")
       .min(9, "Nomor telepon tidak valid."),
-    email: z
-      .string()
-      .min(1, "Alamat email wajib diisi.")
-      .email("Format email tidak valid."),
+    email: z.string().email("Email tidak valid").optional().or(z.literal("")),
     password: z
       .string()
       .min(1, "Kata sandi wajib diisi.")
@@ -49,7 +43,6 @@ type RegisterErrors = {
 }
 
 export default function RegisterPage() {
-  const router = useRouter()
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", confirm: "" })
   const [errors, setErrors] = useState<RegisterErrors>({})
   const [loading, setLoading] = useState(false)
@@ -57,7 +50,7 @@ export default function RegisterPage() {
 
   const supabase = createClient()
 
-  const set = (k: keyof typeof form) => (v: string) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: v }))
 
   const validate = () => {
     const result = registerSchema.safeParse(form)
@@ -81,50 +74,46 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: {
-          data: {
-            full_name: form.name.trim(),
-            phone: form.phone,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          phone: form.phone,
+          email: form.email.trim(),
+          password: form.password,
+        }),
       })
 
-      if (error) {
-        if (error.message.includes("already")) {
-          setAuthError("Email atau nomor telepon sudah terdaftar.")
-        } else {
-          setAuthError(error.message)
-        }
+      const data = await res.json()
+
+      if (!res.ok) {
+        setAuthError(data.error || "Terjadi kesalahan saat pendaftaran.")
         return
       }
-      router.push("/verify-email?email=" + encodeURIComponent(form.email))
-    } catch (err: any) {
-      setAuthError(err.message || "Terjadi kesalahan saat pendaftaran.")
+
+      // Auto-login
+      const authEmail = data.email
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: authEmail,
+        password: form.password,
+      })
+
+      if (signInError) {
+        setAuthError("Akun berhasil dibuat, namun gagal masuk otomatis. Silakan login.")
+        return
+      }
+
+      window.location.href = "/"
+    } catch {
+      setAuthError("Terjadi kesalahan jaringan.")
     } finally {
       setLoading(false)
     }
   }
 
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-      if (error) setAuthError(error.message)
-    } catch (err: any) {
-      setAuthError(err.message || "Terjadi kesalahan saat pendaftaran dengan Google.")
-    }
-  }
-
   return (
-    <AuthLayout>
+    <>
       <div className="mb-7">
         <Logo />
       </div>
@@ -154,21 +143,21 @@ export default function RegisterPage() {
           onChange={set("name")}
           placeholder="Masukkan nama lengkap Anda"
           error={errors.name}
-          prefix={<User size={18} />}
           autoComplete="name"
         />
+
         <PhoneInput value={form.phone} onChange={set("phone")} error={errors.phone} />
+
         <InputField
-          label="Alamat Email"
-          type="email"
+          label="Email (opsional)"
           value={form.email}
           onChange={set("email")}
           placeholder="contoh@email.com"
           error={errors.email}
-          prefix={<Mail size={18} />}
           autoComplete="email"
-          inputMode="email"
+          icon={Mail}
         />
+
         <PasswordInput
           label="Kata Sandi"
           value={form.password}
@@ -186,48 +175,50 @@ export default function RegisterPage() {
 
         <div className="mt-0.5">
           <PrimaryButton type="submit" loading={loading}>
-            {loading ? "Membuat Akun..." : "Buat Akun"}
+            {loading ? "Mendaftarkan..." : "Buat Akun"}
           </PrimaryButton>
         </div>
 
         <Divider label="atau" />
 
-        <GoogleButton onClick={handleGoogleLogin} />
+        <p className="m-0 text-center text-[14px] text-auth-muted-foreground">
+          Dengan mendaftar, Anda menyetujui{" "}
+          <Link href="/terms" className="font-semibold text-auth-primary no-underline">
+            Syarat & Ketentuan
+          </Link>{" "}
+          dan{" "}
+          <Link href="/privacy" className="font-semibold text-auth-primary no-underline">
+            Kebijakan Privasi
+          </Link>
+        </p>
       </form>
 
       <p className="mb-0 mt-6 text-center text-[15px] text-auth-muted-foreground">
         Sudah punya akun?{" "}
-        <Link
-          href="/login"
-          className="text-[15px] font-bold text-auth-primary no-underline"
-        >
+        <Link href="/login" className="text-[15px] font-bold text-auth-primary no-underline">
           Masuk
         </Link>
       </p>
-    </AuthLayout>
+    </>
   )
 }
 
 function InputField({
   label,
-  type = "text",
   value,
   onChange,
   placeholder,
   error,
-  prefix,
   autoComplete,
-  inputMode,
+  icon: Icon = User,
 }: {
   label: string
-  type?: string
   value: string
   onChange: (v: string) => void
   placeholder?: string
   error?: string
-  prefix?: React.ReactNode
   autoComplete?: string
-  inputMode?: "text" | "tel" | "email" | "numeric"
+  icon?: React.ComponentType<{ size: number }>
 }) {
   const [focused, setFocused] = useState(false)
 
@@ -241,29 +232,26 @@ function InputField({
         style={{
           borderColor: error ? "#DC2626" : focused ? "#2A7D4F" : "#DDE8E2",
           background: error ? "#FEF2F2" : "#FAFFFE",
-          boxShadow: focused && !error
-            ? "0 0 0 3px rgba(42,125,79,0.13)"
-            : error && focused
-              ? "0 0 0 3px rgba(220,38,38,0.09)"
-              : "none",
+          boxShadow:
+            focused && !error
+              ? "0 0 0 3px rgba(42,125,79,0.13)"
+              : error && focused
+                ? "0 0 0 3px rgba(220,38,38,0.09)"
+                : "none",
         }}
       >
-        {prefix && (
-          <div className="flex shrink-0 items-center pl-3.5" style={{ color: focused ? "#2A7D4F" : "#5C7268" }}>
-            {prefix}
-          </div>
-        )}
+        <div className="flex items-center pl-3.5" style={{ color: focused ? "#2A7D4F" : "#5C7268" }}>
+          <Icon size={18} />
+        </div>
         <input
-          type={type}
+          type={Icon === User ? "text" : "email"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          inputMode={inputMode}
           className="flex-1 border-none bg-transparent px-3 py-3.5 text-[16px] text-auth-foreground outline-none placeholder:text-auth-muted-foreground/60"
-          style={{ paddingLeft: prefix ? "12px" : "16px" }}
         />
       </div>
       {error && (

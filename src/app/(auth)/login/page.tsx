@@ -1,32 +1,24 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { AuthLayout } from "@/components/auth/auth-layout"
 import { Logo } from "@/components/auth/logo"
 import { PhoneInput } from "@/components/auth/phone-input"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
-import { GoogleButton } from "@/components/auth/google-button"
 import { Divider } from "@/components/auth/divider"
 import { createClient } from "@/lib/supabase/client"
 import { z } from "zod"
 
 const loginSchema = z.object({
-  phone: z
-    .string()
-    .min(1, "Nomor telepon wajib diisi.")
-    .min(9, "Nomor telepon tidak valid."),
-  password: z
-    .string()
-    .min(1, "Kata sandi wajib diisi.")
-    .min(6, "Kata sandi minimal 6 karakter."),
+  phone: z.string().min(1, "Nomor telepon wajib diisi.").min(9, "Nomor telepon tidak valid."),
+  password: z.string().min(1, "Kata sandi wajib diisi.").min(6, "Kata sandi minimal 6 karakter."),
 })
 
 type LoginErrors = { phone?: string; password?: string }
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
@@ -35,15 +27,20 @@ export default function LoginPage() {
   const [authError, setAuthError] = useState("")
 
   const supabase = createClient()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get("error") === "auth_callback_error") {
+      setAuthError("Gagal masuk dengan Google. Silakan coba lagi.")
+    }
+  }, [searchParams])
 
   const validate = () => {
     const result = loginSchema.safeParse({ phone, password })
     if (!result.success) {
       const fieldErrors: LoginErrors = {}
       result.error.issues.forEach((err) => {
-        if (err.path[0]) {
-          fieldErrors[err.path[0] as keyof LoginErrors] = err.message
-        }
+        if (err.path[0]) fieldErrors[err.path[0] as keyof LoginErrors] = err.message
       })
       setErrors(fieldErrors)
       return false
@@ -59,39 +56,26 @@ export default function LoginPage() {
 
     try {
       const email = `${phone}@phone.umrohq.id`
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) {
-        setAuthError(error.message)
+        if (error.message === "Invalid login credentials") {
+          setAuthError("Nomor telepon atau kata sandi salah.")
+        } else {
+          setAuthError(error.message)
+        }
         return
       }
-      router.push("/dashboard")
-    } catch (err: any) {
-      setAuthError(err.message || "Terjadi kesalahan saat masuk.")
+      router.push("/")
+    } catch {
+      setAuthError("Terjadi kesalahan saat masuk.")
     } finally {
       setLoading(false)
     }
   }
 
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-      if (error) setAuthError(error.message)
-    } catch (err: any) {
-      setAuthError(err.message || "Terjadi kesalahan saat masuk dengan Google.")
-    }
-  }
-
   return (
-    <AuthLayout>
+    <>
       <div className="mb-8">
         <Logo />
       </div>
@@ -107,16 +91,11 @@ export default function LoginPage() {
 
       {authError && (
         <div className="mb-4 rounded-[14px] border border-auth-error/30 bg-auth-error-light p-3 text-[14px] text-auth-error">
-          {authError === "Invalid login credentials"
-            ? "Nomor telepon atau kata sandi salah."
-            : authError}
+          {authError}
         </div>
       )}
 
-      <form
-        onSubmit={(e) => { e.preventDefault(); handleLogin() }}
-        className="flex flex-col gap-[18px]"
-      >
+      <form onSubmit={(e) => { e.preventDefault(); handleLogin() }} className="flex flex-col gap-[18px]">
         <PhoneInput value={phone} onChange={setPhone} error={errors.phone} />
         <PasswordInput
           label="Kata Sandi"
@@ -127,10 +106,7 @@ export default function LoginPage() {
         />
 
         <div className="-mt-1.5 text-right">
-          <Link
-            href="/forgot-password"
-            className="text-[14.5px] font-semibold text-auth-primary no-underline"
-          >
+          <Link href="/forgot-password" className="text-[14.5px] font-semibold text-auth-primary no-underline">
             Lupa Kata Sandi?
           </Link>
         </div>
@@ -140,19 +116,22 @@ export default function LoginPage() {
         </PrimaryButton>
 
         <Divider label="atau" />
-
-        <GoogleButton onClick={handleGoogleLogin} />
       </form>
 
       <p className="mb-0 mt-7 text-center text-[15px] text-auth-muted-foreground">
         Belum punya akun?{" "}
-        <Link
-          href="/register"
-          className="text-[15px] font-bold text-auth-primary no-underline"
-        >
+        <Link href="/register" className="text-[15px] font-bold text-auth-primary no-underline">
           Daftar Sekarang
         </Link>
       </p>
-    </AuthLayout>
+    </>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

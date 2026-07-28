@@ -1,16 +1,21 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { X, Plus, Check, Minus, GitCompare } from "lucide-react"
+import { X, Plus, Check, Minus, GitCompare, Award, Leaf, Sparkles, TrendingDown, Star, Shield, BadgeCheck, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import type { Package, Tenant } from "@/lib/types"
 
 const MAX_COMPARE = 3
+
+const AIRLINE_QUALITY: Record<string, number> = {
+  "Garuda Indonesia": 5, "Saudi Airlines": 4, "Turkish Airlines": 4,
+  "Royal Jordanian": 4, "Batik Air": 3, "Lion Air": 2, "Citilink": 1,
+}
 
 const ROW_LABELS = [
   { key: "price", label: "Harga" },
@@ -27,11 +32,49 @@ const ROW_LABELS = [
   { key: "facilities", label: "Fasilitas" },
 ]
 
-function renderValue(key: string, pkg: Package) {
+function calcScore(pkg: Package) {
+  const pricePerDay = pkg.price / (pkg.duration_days || 1)
+  const makkahStars = pkg.hotel_makkah_stars || 0
+  const madinahStars = pkg.hotel_madinah_stars || 0
+  const avgHotel = (makkahStars + madinahStars) / 2
+  const facilitiesCount = (pkg.facilities || []).length
+  const airlineScore = AIRLINE_QUALITY[pkg.airline || ""] || 2
+  const valueScore = ((avgHotel * 15) + (facilitiesCount * 8) + (airlineScore * 6)) / Math.max(pricePerDay / 1000000, 1)
+  return { pricePerDay, avgHotel, facilitiesCount, valueScore }
+}
+
+function SmartBadges({ scores, index }: { scores: ReturnType<typeof calcScore>[]; index: number }) {
+  const bestValue = scores.indexOf(scores.reduce((a, b) => a.valueScore > b.valueScore ? a : b))
+  const cheapest = scores.indexOf(scores.reduce((a, b) => a.pricePerDay < b.pricePerDay ? a : b))
+  const bestHotel = scores.indexOf(scores.reduce((a, b) => a.avgHotel > b.avgHotel ? a : b))
+
+  return (
+    <div className="flex flex-wrap gap-1 mt-1.5">
+      {index === bestValue && (
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-1.5 py-0.5 rounded-full">
+          <Award className="w-2.5 h-2.5" /> Best Value
+        </span>
+      )}
+      {index === cheapest && (
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full">
+          <TrendingDown className="w-2.5 h-2.5" /> Termurah
+        </span>
+      )}
+      {index === bestHotel && scores.length > 1 && (
+        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full">
+          <Star className="w-2.5 h-2.5" /> Hotel Terbaik
+        </span>
+      )}
+    </div>
+  )
+}
+
+function renderValue(key: string, pkg: Package, highlight?: "best" | "worst") {
+  const hlClass = highlight === "best" ? "ring-2 ring-emerald-400/40 bg-emerald-50/50 rounded-lg p-1.5 -m-1.5" : ""
   switch (key) {
     case "price":
       return (
-        <div>
+        <div className={hlClass}>
           {pkg.original_price && (
             <p className="text-xs text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>
           )}
@@ -40,16 +83,16 @@ function renderValue(key: string, pkg: Package) {
         </div>
       )
     case "hotel_makkah_stars":
-      return <span>{"★".repeat(pkg.hotel_makkah_stars || 0)}</span>
+      return <span className={hlClass}>{"★".repeat(pkg.hotel_makkah_stars || 0)}</span>
     case "hotel_madinah_stars":
-      return <span>{"★".repeat(pkg.hotel_madinah_stars || 0)}</span>
+      return <span className={hlClass}>{"★".repeat(pkg.hotel_madinah_stars || 0)}</span>
     case "duration":
-      return <span>{pkg.duration_days} Hari</span>
+      return <span className={hlClass}>{pkg.duration_days} Hari</span>
     case "type":
-      return <span className="capitalize font-medium">{pkg.type}</span>
+      return <span className={`capitalize font-medium ${hlClass}`}>{pkg.type}</span>
     case "facilities":
       return (
-        <ul className="space-y-1">
+        <ul className={`space-y-1 ${hlClass}`}>
           {(pkg.facilities || []).map((f) => (
             <li key={f} className="flex items-center gap-1.5 text-xs">
               <Check className="w-3 h-3 text-primary shrink-0" />{f}
@@ -59,8 +102,37 @@ function renderValue(key: string, pkg: Package) {
       )
     default:
       const value = pkg[key as keyof Package]
-      return <span>{String(value ?? "-")}</span>
+      return <span className={hlClass}>{String(value ?? "-")}</span>
   }
+}
+
+function compareRows(pkgs: Package[], key: string, scores: ReturnType<typeof calcScore>[]): ("best" | "worst" | undefined)[][] {
+  return pkgs.map((pkg, i) => {
+    const others = pkgs.filter((_, j) => j !== i)
+    return others.map((other) => {
+      if (key === "price") {
+        if (pkg.price < other.price) return "best"
+        if (pkg.price > other.price) return "worst"
+      }
+      if (key === "duration") {
+        if ((pkg.duration_days || 0) > (other.duration_days || 0)) return "best"
+        if ((pkg.duration_days || 0) < (other.duration_days || 0)) return "worst"
+      }
+      if (key === "hotel_makkah_stars" || key === "hotel_madinah_stars") {
+        const a = pkg[key === "hotel_makkah_stars" ? "hotel_makkah_stars" : "hotel_madinah_stars"] || 0
+        const b = other[key === "hotel_makkah_stars" ? "hotel_makkah_stars" : "hotel_madinah_stars"] || 0
+        if (a > b) return "best"
+        if (a < b) return "worst"
+      }
+      if (key === "facilities") {
+        const a = (pkg.facilities || []).length
+        const b = (other.facilities || []).length
+        if (a > b) return "best"
+        if (a < b) return "worst"
+      }
+      return undefined
+    })
+  })
 }
 
 function CompareContent() {
@@ -79,14 +151,12 @@ function CompareContent() {
         .select("*")
         .eq("status", "published")
         .is("deleted_at", null)
-
       setAllPackages((pkgs as Package[]) || [])
 
       const { data: tnts } = await supabase
         .from("tenants")
         .select("*")
         .is("deleted_at", null)
-
       if (tnts) {
         const m = new Map<string, Tenant>()
         tnts.forEach((t) => m.set(t.id, t as Tenant))
@@ -104,6 +174,58 @@ function CompareContent() {
       if (init) setSelected([init])
     }
   }, [initialPkgId, allPackages])
+
+  const scores = useMemo(() => selected.map(calcScore), [selected])
+
+  const rowHighlights = useMemo(() => {
+    const highlights: Record<string, ("best" | "worst" | undefined)[][]> = {}
+    ROW_LABELS.forEach((row) => {
+      const arr = compareRows(selected, row.key, scores)
+      if (arr.length === selected.length && arr.every((r) => r.length === selected.length - 1)) {
+        const result: ("best" | "worst" | undefined)[] = []
+        for (let i = 0; i < selected.length; i++) {
+          const allBest = arr[i].every((h) => h === "best")
+          const allWorst = arr[i].every((h) => h === "worst")
+          result.push(allBest ? "best" : allWorst ? "worst" : undefined)
+        }
+        highlights[row.key] = [result]
+      }
+    })
+    return highlights
+  }, [selected, scores])
+
+  const insightLines = useMemo(() => {
+    if (selected.length < 2) return []
+    const lines: string[] = []
+    const pricePerDay = selected.map((p, i) => ({ i, v: scores[i].pricePerDay })).sort((a, b) => a.v - b.v)
+    const cheapestPerDay = pricePerDay[0]
+    const mostExpensivePerDay = pricePerDay[pricePerDay.length - 1]
+    const diff = mostExpensivePerDay.v - cheapestPerDay.v
+
+    if (diff > 0) {
+      const cheapestName = selected[cheapestPerDay.i].name
+      const expensiveName = selected[mostExpensivePerDay.i].name
+      lines.push(`💰 ${cheapestName} lebih hemat Rp ${formatRupiah(Math.round(diff))} per hari dibanding ${expensiveName}.`)
+    }
+
+    const bestValue = scores.indexOf(scores.reduce((a, b) => a.valueScore > b.valueScore ? a : b))
+    const worstValue = scores.indexOf(scores.reduce((a, b) => a.valueScore < b.valueScore ? a : b))
+    if (bestValue !== worstValue) {
+      const reasons: string[] = []
+      if (scores[bestValue].avgHotel > scores[worstValue].avgHotel) reasons.push("hotel bintang lebih tinggi")
+      if (scores[bestValue].facilitiesCount > scores[worstValue].facilitiesCount) reasons.push("fasilitas lebih lengkap")
+      if (reasons.length > 0) {
+        lines.push(`🏆 ${selected[bestValue].name} memiliki nilai terbaik karena ${reasons.join(" dan ")}.`)
+      }
+    }
+
+    const hotelDiffs = selected.map((p, i) => ({ i, stars: scores[i].avgHotel })).sort((a, b) => b.stars - a.stars)
+    if (hotelDiffs[0].stars > hotelDiffs[hotelDiffs.length - 1].stars && selected.length >= 2) {
+      lines.push(`⭐ ${selected[hotelDiffs[0].i].name} menawarkan akomodasi bintang ${hotelDiffs[0].stars}, lebih tinggi dari lainnya.`)
+    }
+
+    return lines
+  }, [selected, scores])
 
   const [showPicker, setShowPicker] = useState(false)
   const [search, setSearch] = useState("")
@@ -155,12 +277,32 @@ function CompareContent() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 overflow-x-auto">
         <div className="min-w-[640px]">
+          {/* Smart Insights */}
+          {insightLines.length > 0 && (
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-2xl p-4 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+                <span className="text-sm font-semibold text-emerald-800">Smart Comparison</span>
+              </div>
+              <ul className="space-y-1.5">
+                {insightLines.map((line, i) => (
+                  <li key={i} className="text-xs leading-relaxed text-emerald-700">{line}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Cards */}
           <div className={`grid gap-4 mb-6`} style={{ gridTemplateColumns: `200px repeat(${MAX_COMPARE}, 1fr)` }}>
             <div />
-            {selected.map((pkg) => {
+            {selected.map((pkg, i) => {
               const travel = tenantsMap.get(pkg.tenant_id)
               return (
-                <div key={pkg.id} className="bg-white border border-primary/30 rounded-2xl overflow-hidden">
+                <div key={pkg.id} className={`bg-white border-2 rounded-2xl overflow-hidden ${
+                  scores[i].valueScore === Math.max(...scores.map(s => s.valueScore)) && selected.length > 1
+                    ? "border-emerald-400 shadow-md shadow-emerald-100"
+                    : "border-primary/30"
+                }`}>
                   <div className="relative h-28">
                     <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=800&q=80"} alt={pkg.name} fill className="object-cover" />
                     <button
@@ -169,6 +311,11 @@ function CompareContent() {
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
+                    {scores[i].valueScore === Math.max(...scores.map(s => s.valueScore)) && selected.length > 1 && (
+                      <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                        <Award className="w-3 h-3" /> Pilihan Terbaik
+                      </div>
+                    )}
                   </div>
                   <div className="p-3">
                     {travel && (
@@ -184,6 +331,10 @@ function CompareContent() {
                       </div>
                     )}
                     <p className="text-xs font-semibold leading-snug line-clamp-2">{pkg.name}</p>
+                    <div className="text-[10px] text-muted-foreground mt-1">
+                      Rp {Math.round(scores[i].pricePerDay / 1000)}rb / hari
+                    </div>
+                    <SmartBadges scores={scores} index={i} />
                   </div>
                 </div>
               )
@@ -200,6 +351,7 @@ function CompareContent() {
             ))}
           </div>
 
+          {/* Comparison Rows */}
           {selected.length > 0 && ROW_LABELS.map((row, idx) => (
             <div
               key={row.key}
@@ -207,11 +359,14 @@ function CompareContent() {
               style={{ gridTemplateColumns: `200px repeat(${MAX_COMPARE}, 1fr)` }}
             >
               <div className="text-xs font-semibold text-muted-foreground flex items-center">{row.label}</div>
-              {selected.map((pkg) => (
-                <div key={pkg.id} className="text-sm">
-                  {renderValue(row.key, pkg)}
-                </div>
-              ))}
+              {selected.map((pkg, i) => {
+                const hl = rowHighlights[row.key]?.[0]?.[i]
+                return (
+                  <div key={pkg.id} className="text-sm">
+                    {renderValue(row.key, pkg, hl)}
+                  </div>
+                )
+              })}
               {Array.from({ length: emptySlots }).map((_, i) => (
                 <div key={i} className="flex items-center justify-center">
                   <Minus className="w-4 h-4 text-border" />
@@ -220,6 +375,7 @@ function CompareContent() {
             </div>
           ))}
 
+          {/* CTA Buttons */}
           {selected.length > 0 && (
             <div
               className="grid gap-4 mt-4 pt-4 border-t border-border"

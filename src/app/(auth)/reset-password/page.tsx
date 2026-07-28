@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Lock } from "lucide-react"
-import { AuthLayout } from "@/components/auth/auth-layout"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { createClient } from "@/lib/supabase/client"
@@ -82,7 +81,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <AuthLayout>
+    <>
       <div className="mb-5 flex size-14 items-center justify-center rounded-[16px] bg-auth-primary-light">
         <Lock size={26} className="text-auth-primary" />
       </div>
@@ -116,6 +115,6 @@ export default function ResetPasswordPage() {
           </div>
         </form>
       )}
-    </AuthLayout>
+    </>
   )
 }

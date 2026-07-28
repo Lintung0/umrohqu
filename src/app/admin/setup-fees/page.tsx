@@ -1,9 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Wallet, Save, Loader2 } from "lucide-react"
+import { Wallet, Save, Loader2, ExternalLink } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner"
+import Link from "next/link"
 
 interface TenantRow {
   id: string
@@ -46,6 +48,20 @@ export default function AdminSetupFeesPage() {
     fetch()
   }, [])
 
+  async function handleSave() {
+    setSaving(true)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from("fee_config")
+      .upsert({ id: "default", setup_fee: setupFee }, { onConflict: "id" })
+    if (error) {
+      toast.error("Gagal menyimpan setup fee")
+    } else {
+      toast.success("Setup fee berhasil diperbarui")
+    }
+    setSaving(false)
+  }
+
   if (loading) {
     return (
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
@@ -86,8 +102,13 @@ export default function AdminSetupFeesPage() {
               onChange={(e) => setSetupFee(Number(e.target.value))}
               className="flex-1 px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
-            <button className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">
-              <Save className="w-4 h-4" />
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Simpan
             </button>
           </div>
         </div>
@@ -122,7 +143,12 @@ export default function AdminSetupFeesPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <button className="text-sm text-emerald-600 hover:underline">Lihat Invoice</button>
+                    <Link
+                      href={`/admin/invoices?tenant=${tenant.id}`}
+                      className="text-sm text-emerald-600 hover:underline inline-flex items-center gap-1"
+                    >
+                      Lihat Invoice <ExternalLink className="w-3 h-3" />
+                    </Link>
                   </td>
                 </tr>
               ))}

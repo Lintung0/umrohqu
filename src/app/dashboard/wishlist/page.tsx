@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { Heart, Clock, MapPin, Trash2 } from "lucide-react"
+import { Heart, Clock, Trash2 } from "lucide-react"
 import { formatRupiah } from "@/lib/constants"
 import Link from "next/link"
 import Image from "next/image"
+import { toast } from "sonner"
 
 interface WishlistItem {
   id: string
@@ -17,9 +18,8 @@ interface WishlistItem {
     image_url: string | null
     price: number
     duration_days: number | null
-    travel_id: string
+    tenant_id: string
   } | null
-  travel: { id: string; name: string; verified: boolean } | null
 }
 
 export default function WishlistPage() {
@@ -46,8 +46,14 @@ export default function WishlistPage() {
   }, [])
 
   async function removeWishlist(wishlistId: string) {
-    await supabase.from("wishlists").delete().eq("id", wishlistId)
-    setItems((prev) => prev.filter((i) => i.id !== wishlistId))
+    if (!window.confirm("Hapus paket dari wishlist?")) return
+    const { error } = await supabase.from("wishlists").delete().eq("id", wishlistId)
+    if (error) {
+      toast.error("Gagal menghapus dari wishlist")
+    } else {
+      setItems((prev) => prev.filter((i) => i.id !== wishlistId))
+      toast.success("Berhasil dihapus dari wishlist")
+    }
   }
 
   if (loading) {
@@ -80,7 +86,6 @@ export default function WishlistPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {items.map((item) => {
             const pkg = item.package
-            const travel = item.travel
             return (
               <div
                 key={item.id}
@@ -100,11 +105,8 @@ export default function WishlistPage() {
                   )}
                 </Link>
                 <div className="p-4">
-                  {travel && (
-                    <p className="text-xs text-muted-foreground">{travel.name}</p>
-                  )}
                   <Link href={`/package/${pkg?.slug || ""}`}>
-                    <h3 className="font-semibold mt-1 hover:text-emerald-600 transition-colors">{pkg?.name}</h3>
+                    <h3 className="font-semibold hover:text-emerald-600 transition-colors">{pkg?.name}</h3>
                   </Link>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
                     {pkg?.duration_days && (

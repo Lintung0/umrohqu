@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, Phone } from "lucide-react"
-import { AuthLayout } from "@/components/auth/auth-layout"
 import { PhoneInput } from "@/components/auth/phone-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { createClient } from "@/lib/supabase/client"
@@ -57,7 +56,7 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <AuthLayout>
+    <>
       <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-auth-primary/20 bg-auth-primary-light px-3.5 py-1.5">
         <CheckCircle2 size={15} className="text-auth-primary" />
         <span className="text-[13.5px] font-semibold text-auth-primary">
@@ -91,6 +90,6 @@ export default function CompleteProfilePage() {
           {loading ? "Menyimpan..." : "Lanjutkan"}
         </PrimaryButton>
       </form>
-    </AuthLayout>
+    </>
   )
 }

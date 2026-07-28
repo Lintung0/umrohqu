@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight } from "lucide-react"
+import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight, TrendingUp } from "lucide-react"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { Tenant } from "@/lib/types"
@@ -195,6 +195,13 @@ export function TravelAgenciesSection() {
       })
   }, [])
 
+  const COVER_IMAGES = [
+    "photo-1591604466107-ec97de577aff",
+    "photo-1566438480900-0609be27a4be",
+    "photo-1564769625392-651b89c653b2",
+    "photo-1592609931041-40265b692757",
+  ]
+
   if (loading) {
     return (
       <section className="py-20 px-6 md:px-12 bg-muted/30">
@@ -208,7 +215,7 @@ export function TravelAgenciesSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-border bg-white">
-                <div className="w-16 h-16 bg-muted rounded-full animate-pulse" />
+                <div className="w-full h-36 bg-muted rounded-xl animate-pulse" />
                 <div className="h-4 w-24 bg-muted rounded animate-pulse" />
                 <div className="h-3 w-16 bg-muted rounded animate-pulse" />
               </div>
@@ -220,65 +227,68 @@ export function TravelAgenciesSection() {
   }
 
   return (
-    <section className="py-20 px-6 md:px-12 bg-muted/30">
+    <section className="py-20 px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between mb-10">
-          <div className="space-y-2">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-xs font-semibold">
-              Travel Partner
-            </span>
+          <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Travel Partner Terbaik
+              Travel Partner Unggulan
             </h2>
-            <p className="text-muted-foreground text-sm">
-              Dipilih berdasarkan rating & kepuasan jamaah
+            <p className="text-sm text-muted-foreground mt-1">
+              Dipercaya ratusan ribu jamaah
             </p>
           </div>
           <Link
             href="/travel"
             className="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group/link"
           >
-            Lihat Semua
+            Semua Partner
             <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {agencies.map((agency) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {agencies.map((agency, idx) => (
             <Link
               key={agency.id}
               href={`/travel/${agency.id}`}
-              className="group flex flex-col items-center text-center gap-3 p-6 rounded-2xl border border-border/60 bg-white hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 hover:-translate-y-1"
+              className="group rounded-2xl overflow-hidden border border-border/60 bg-white hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="relative">
-                {agency.logo_url ? (
-                  <Image
-                    src={agency.logo_url}
-                    alt={agency.name}
-                    width={64}
-                    height={64}
-                    className="rounded-full ring-4 ring-primary/10 transition-all duration-300 group-hover:ring-primary/20"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-emerald-glow/10 flex items-center justify-center ring-4 ring-primary/5 transition-all duration-300 group-hover:ring-primary/15">
-                    <span className="text-lg font-bold text-primary">{agency.name.charAt(0)}</span>
-                  </div>
+              <div className="h-36 relative overflow-hidden">
+                <Image
+                  src={`https://images.unsplash.com/${COVER_IMAGES[idx % COVER_IMAGES.length]}?w=400&h=200&fit=crop&auto=format`}
+                  alt={agency.name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                {agency.is_verified && (
+                  <span className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs bg-primary text-white">
+                    <CheckCircle className="w-4 h-4" />
+                  </span>
+                )}
+                {agency.is_featured && (
+                  <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-gold to-gold-light text-emerald-deep">
+                    Unggulan
+                  </span>
                 )}
               </div>
-              <div>
-                <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
-                  {agency.name}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {agency.city || "Indonesia"}
-                </p>
+              <div className="p-4">
+                <h3 className="font-bold text-sm group-hover:text-primary transition-colors">{agency.name}</h3>
+                <div className="flex items-center gap-1 mt-1.5">
+                  <Star className="w-3.5 h-3.5 fill-gold text-gold" />
+                  <span className="text-xs font-medium">4.{8 - (idx % 2)}</span>
+                  <span className="text-xs text-muted-foreground ml-1">
+                    {agency.packages_count || 0} Paket
+                  </span>
+                </div>
               </div>
             </Link>
           ))}
         </div>
         <div className="mt-6 text-center md:hidden">
-          <Link href="/travel" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-            Lihat Semua Travel
-            <ArrowRight className="w-4 h-4" />
+          <Link href="/travel" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+            Lihat Semua Travel <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
@@ -362,6 +372,33 @@ export function TestimonialSection() {
                   </p>
                 </div>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export function TrustSection() {
+  const items = [
+    { icon: Shield, title: "Transaksi Aman", desc: "Dana escrow terjamin" },
+    { icon: Award, title: "Travel Terverifikasi", desc: "Seleksi ketat & berlisensi" },
+    { icon: TrendingUp, title: "Harga Terbaik", desc: "Garansi harga kompetitif" },
+    { icon: Users, title: "50K+ Jamaah", desc: "Dipercaya jutaan jamaah" },
+  ]
+
+  return (
+    <section className="py-12 px-6 md:px-12">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {items.map((item) => (
+            <div key={item.title} className="text-center p-6 rounded-2xl bg-white shadow-sm">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 bg-primary/10 text-primary">
+                <item.icon className="size-6" />
+              </div>
+              <h3 className="font-bold text-sm mb-1">{item.title}</h3>
+              <p className="text-xs text-muted-foreground">{item.desc}</p>
             </div>
           ))}
         </div>

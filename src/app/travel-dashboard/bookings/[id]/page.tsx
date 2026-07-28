@@ -9,12 +9,13 @@ import {
   CheckCircle, Clock, XCircle, Loader2, Phone, Mail, FileText,
 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 import type { Booking, Package } from "@/lib/types"
 
 interface Participant {
   full_name: string
   nik: string
-  passport_number: string
+  passport_no: string
   gender: string
   phone: string
 }
@@ -67,8 +68,13 @@ export default function TravelBookingDetailPage() {
 
   const updateStatus = async (newStatus: string) => {
     setUpdating(true)
-    await supabase.from("bookings").update({ status: newStatus }).eq("id", id)
-    setBooking((prev) => prev ? { ...prev, status: newStatus } : prev)
+    const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", id)
+    if (error) {
+      toast.error("Gagal mengubah status booking")
+    } else {
+      setBooking((prev) => prev ? { ...prev, status: newStatus } : prev)
+      toast.success("Status booking diperbarui")
+    }
     setUpdating(false)
   }
 
@@ -191,7 +197,7 @@ export default function TravelBookingDetailPage() {
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground uppercase">Paspor</p>
-                        <p className="font-medium font-mono text-xs">{p.passport_number || "-"}</p>
+                        <p className="font-medium font-mono text-xs">{p.passport_no || "-"}</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground uppercase">Gender</p>

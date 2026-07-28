@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils"
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
   super_admin: "/admin",
   marketplace_admin: "/admin",
-  marketplace_billing: "/admin",
-  marketplace_support: "/admin",
+  marketplace_finance: "/admin",
+  marketplace_operational: "/admin",
   travel_admin: "/travel-dashboard",
   travel_staff: "/travel-dashboard",
   customer: "/dashboard",
@@ -23,8 +23,8 @@ const ROLE_DASHBOARD_MAP: Record<string, string> = {
 const ROLE_DASHBOARD_LABELS: Record<string, string> = {
   super_admin: "Admin Dashboard",
   marketplace_admin: "Admin Dashboard",
-  marketplace_billing: "Billing Dashboard",
-  marketplace_support: "Support Dashboard",
+  marketplace_finance: "Finance Dashboard",
+  marketplace_operational: "Operational Dashboard",
   travel_admin: "Travel Dashboard",
   travel_staff: "Travel Dashboard",
   customer: "Dashboard Saya",

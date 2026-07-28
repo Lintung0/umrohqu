@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Target, Eye, MousePointerClick, TrendingUp, Edit, Trash2, Loader2 } from "lucide-react"
+import { Target, Eye, MousePointerClick, TrendingUp, Edit, Trash2, Loader2, X } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner"
 
 interface BiddingRow {
   id: string
@@ -31,23 +32,75 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 export default function AdminBiddingPage() {
   const [biddings, setBiddings] = useState<BiddingRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [editingBid, setEditingBid] = useState<BiddingRow | null>(null)
+  const [form, setForm] = useState({ bid_value: 0, start_date: "", end_date: "", status: "active" })
+  const [saving, setSaving] = useState(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
+    fetchBiddings()
+  }, [])
+
+  async function fetchBiddings() {
     const supabase = createClient()
-    supabase
+    const { data } = await supabase
       .from("biddings")
       .select("id, tenant_id, package_id, bid_value, position, impressions, clicks, status, start_date, end_date, created_at, tenants(name), packages(name)")
       .order("position", { ascending: true })
-      .then(({ data }) => {
-        const rows = (data || []).map((d: any) => ({
-          ...d,
-          tenants: Array.isArray(d.tenants) ? d.tenants[0] : d.tenants,
-          packages: Array.isArray(d.packages) ? d.packages[0] : d.packages,
-        }))
-        setBiddings(rows as BiddingRow[])
-        setLoading(false)
-      })
-  }, [])
+    const rows = (data || []).map((d: any) => ({
+      ...d,
+      tenants: Array.isArray(d.tenants) ? d.tenants[0] : d.tenants,
+      packages: Array.isArray(d.packages) ? d.packages[0] : d.packages,
+    }))
+    setBiddings(rows as BiddingRow[])
+    setLoading(false)
+  }
+
+  function openEdit(bid: BiddingRow) {
+    setEditingBid(bid)
+    setForm({
+      bid_value: bid.bid_value,
+      start_date: bid.start_date || "",
+      end_date: bid.end_date || "",
+      status: bid.status,
+    })
+  }
+
+  async function handleSave() {
+    if (!editingBid) return
+    setSaving(true)
+    const supabase = createClient()
+    const { error } = await supabase.from("biddings").update({
+      bid_value: form.bid_value,
+      start_date: form.start_date || null,
+      end_date: form.end_date || null,
+      status: form.status,
+    }).eq("id", editingBid.id)
+    if (error) {
+      toast.error("Gagal memperbarui bidding")
+    } else {
+      toast.success("Bidding berhasil diperbarui")
+      setEditingBid(null)
+      fetchBiddings()
+    }
+    setSaving(false)
+  }
+
+  async function handleDelete() {
+    if (!deleteId) return
+    setDeleting(true)
+    const supabase = createClient()
+    const { error } = await supabase.from("biddings").delete().eq("id", deleteId)
+    if (error) {
+      toast.error("Gagal menghapus bidding")
+    } else {
+      toast.success("Bidding berhasil dihapus")
+      setDeleteId(null)
+      fetchBiddings()
+    }
+    setDeleting(false)
+  }
 
   const totalBudget = biddings.reduce((s, b) => s + b.bid_value, 0)
   const activeBids = biddings.filter((b) => b.status === "active").length
@@ -146,8 +199,8 @@ export default function AdminBiddingPage() {
                     <td className="px-4 py-3 text-xs text-muted-foreground">{bid.start_date || "-"} — {bid.end_date || "-"}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button className="p-1.5 text-muted-foreground hover:bg-gray-100 rounded-lg"><Edit className="w-4 h-4" /></button>
-                        <button className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => openEdit(bid)} className="p-1.5 text-muted-foreground hover:bg-gray-100 rounded-lg"><Edit className="w-4 h-4" /></button>
+                        <button onClick={() => setDeleteId(bid.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -157,6 +210,69 @@ export default function AdminBiddingPage() {
           </table>
         </div>
       </div>
+
+      {editingBid && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setEditingBid(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Edit Bidding</h2>
+              <button onClick={() => setEditingBid(null)} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">Bid Value per Hari (Rp)</label>
+                <input type="number" value={form.bid_value} onChange={(e) => setForm({ ...form, bid_value: Number(e.target.value) })} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" min={0} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Tanggal Mulai</label>
+                  <input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Tanggal Selesai</label>
+                  <input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                  {Object.entries(STATUS_MAP).map(([k, v]) => (
+                    <option key={k} value={k}>{v.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button onClick={() => setEditingBid(null)} className="px-4 py-2.5 border border-border rounded-xl text-sm font-medium hover:bg-gray-50">Batal</button>
+              <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2">
+                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteId && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setDeleteId(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center"><Trash2 className="w-5 h-5 text-red-600" /></div>
+              <div>
+                <h3 className="font-semibold">Hapus Bidding</h3>
+                <p className="text-sm text-muted-foreground">Apakah Anda yakin ingin menghapus bidding ini?</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setDeleteId(null)} className="px-4 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50">Batal</button>
+              <button onClick={handleDelete} disabled={deleting} className="px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50 flex items-center gap-2">
+                {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

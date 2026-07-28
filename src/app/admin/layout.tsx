@@ -5,7 +5,7 @@ import AdminSidebar from "@/components/dashboard/AdminSidebar"
 import { createClient } from "@/lib/supabase/client"
 import type { AdminRole } from "@/lib/types"
 
-const ADMIN_ROLES: AdminRole[] = ["marketplace_admin", "marketplace_billing", "marketplace_support"]
+const ADMIN_ROLES: AdminRole[] = ["marketplace_admin", "marketplace_finance", "marketplace_operational"]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<AdminRole | null>(null)

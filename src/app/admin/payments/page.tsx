@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { CreditCard, Download, Clock, Loader2 } from "lucide-react"
+import { CreditCard, Download, Clock, Loader2, X } from "lucide-react"
 import Image from "next/image"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner"
 
 interface TenantRow {
   id: string
@@ -27,31 +28,74 @@ export default function AdminPaymentsPage() {
   const [tenants, setTenants] = useState<TenantRow[]>([])
   const [payouts, setPayouts] = useState<PayoutRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [processingPayout, setProcessingPayout] = useState<string | null>(null)
+  const [confirmPayout, setConfirmPayout] = useState<TenantRow | null>(null)
+  const [processing, setProcessing] = useState(false)
 
   useEffect(() => {
-    const supabase = createClient()
-    const fetch = async () => {
-      const { data: tnts } = await supabase
-        .from("tenants")
-        .select("id, name, logo_url, status, total_revenue")
-        .is("deleted_at", null)
-
-      setTenants((tnts as TenantRow[]) || [])
-
-      const { data: p } = await supabase
-        .from("payouts")
-        .select("id, tenant_id, amount, status, created_at, tenants(name, logo_url)")
-        .order("created_at", { ascending: false })
-
-      const payoutRows = (p || []).map((d: any) => ({
-        ...d,
-        tenants: Array.isArray(d.tenants) ? d.tenants[0] : d.tenants,
-      }))
-      setPayouts(payoutRows as PayoutRow[])
-      setLoading(false)
-    }
-    fetch()
+    fetchData()
   }, [])
+
+  async function fetchData() {
+    const supabase = createClient()
+    const { data: tnts } = await supabase
+      .from("tenants")
+      .select("id, name, logo_url, status, total_revenue")
+      .is("deleted_at", null)
+
+    setTenants((tnts as TenantRow[]) || [])
+
+    const { data: p } = await supabase
+      .from("payouts")
+      .select("id, tenant_id, amount, status, created_at, tenants(name, logo_url)")
+      .order("created_at", { ascending: false })
+
+    const payoutRows = (p || []).map((d: any) => ({
+      ...d,
+      tenants: Array.isArray(d.tenants) ? d.tenants[0] : d.tenants,
+    }))
+    setPayouts(payoutRows as PayoutRow[])
+    setLoading(false)
+  }
+
+  async function handleProcessPayout() {
+    if (!confirmPayout) return
+    setProcessing(true)
+    const supabase = createClient()
+    const payoutAmount = confirmPayout.total_revenue || 0
+    const { error } = await supabase.from("payouts").insert({
+      tenant_id: confirmPayout.id,
+      amount: payoutAmount,
+      status: "pending",
+    })
+    if (error) {
+      toast.error("Gagal memproses payout")
+    } else {
+      toast.success(`Payout sebesar ${formatRupiah(payoutAmount)} berhasil diproses untuk ${confirmPayout.name}`)
+      setConfirmPayout(null)
+      fetchData()
+    }
+    setProcessing(false)
+  }
+
+  function handleExport() {
+    const headers = ["Travel", "Revenue", "Status", "Tanggal"]
+    const rows = payouts.map((p) => [
+      (p.tenants as any)?.name || "-",
+      p.amount,
+      p.status,
+      new Date(p.created_at).toLocaleDateString("id-ID"),
+    ])
+    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n")
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `payout-history-${new Date().toISOString().split("T")[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("Export berhasil")
+  }
 
   const verifiedTravels = tenants.filter((t) => t.status === "verified")
 
@@ -78,7 +122,10 @@ export default function AdminPaymentsPage() {
           <h1 className="text-2xl font-bold">Pembayaran Travel</h1>
           <p className="text-muted-foreground mt-1">Kelola pembayaran dan payout ke travel</p>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">
+        <button
+          onClick={() => verifiedTravels.length > 0 ? setConfirmPayout(verifiedTravels[0]) : toast.info("Tidak ada travel aktif")}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
+        >
           <CreditCard className="w-4 h-4" />
           Proses Payout
         </button>
@@ -102,7 +149,7 @@ export default function AdminPaymentsPage() {
       <div className="bg-white rounded-2xl border border-border">
         <div className="p-5 border-b border-border flex items-center justify-between">
           <h2 className="font-semibold">Riwayat Payout</h2>
-          <button className="text-sm text-emerald-600 hover:underline flex items-center gap-1"><Download className="w-4 h-4" /> Export</button>
+          <button onClick={handleExport} className="text-sm text-emerald-600 hover:underline flex items-center gap-1"><Download className="w-4 h-4" /> Export</button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -118,7 +165,11 @@ export default function AdminPaymentsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {payouts.map((payout) => {
+              {payouts.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground text-sm">Belum ada riwayat payout</td>
+                </tr>
+              ) : payouts.map((payout) => {
                 const tenantName = (payout.tenants as any)?.name || "-"
                 const tenantLogo = (payout.tenants as any)?.logo_url
                 const serviceFee = Math.round(payout.amount * 0.003)
@@ -157,6 +208,42 @@ export default function AdminPaymentsPage() {
           </table>
         </div>
       </div>
+
+      {confirmPayout && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setConfirmPayout(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Proses Payout</h2>
+              <button onClick={() => setConfirmPayout(null)} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Travel</span>
+                <span className="font-medium">{confirmPayout.name}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Revenue</span>
+                <span className="font-semibold">{formatRupiah(confirmPayout.total_revenue || 0)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Service Fee (0.3%)</span>
+                <span className="text-red-500">-{formatRupiah(Math.round((confirmPayout.total_revenue || 0) * 0.003))}</span>
+              </div>
+              <div className="border-t border-border pt-2 flex justify-between font-bold">
+                <span>Net Payout</span>
+                <span className="text-emerald-600">{formatRupiah((confirmPayout.total_revenue || 0) - Math.round((confirmPayout.total_revenue || 0) * 0.003))}</span>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setConfirmPayout(null)} className="px-4 py-2.5 border border-border rounded-xl text-sm font-medium hover:bg-gray-50">Batal</button>
+              <button onClick={handleProcessPayout} disabled={processing} className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2">
+                {processing && <Loader2 className="w-4 h-4 animate-spin" />}
+                Konfirmasi Payout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

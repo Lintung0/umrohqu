@@ -10,12 +10,20 @@ const Logo = ({ type = "full" }: { type?: "full" | "icon" }) => {
         alt="Logo"
         src="/logo-icon.png"
         className="shrink-0"
+        style={{ width: "52px", height: "auto" }}
       />
     );
   }
   return (
     <Link href="/" className="block">
-      <Image width={160} height={160} alt="Logo" src="/logo.png" />
+      <Image
+        width={160}
+        height={160}
+        alt="Logo"
+        src="/logo.png"
+        loading="eager"
+        style={{ width: "160px", height: "auto" }}
+      />
     </Link>
   );
 };

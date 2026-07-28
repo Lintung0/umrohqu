@@ -2,61 +2,105 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Lock, Mail, CheckCircle2, AlertCircle } from "lucide-react"
-import { AuthLayout } from "@/components/auth/auth-layout"
+import { ArrowLeft, Lock, CheckCircle2, AlertCircle, Smartphone, KeyRound } from "lucide-react"
+import { PhoneInput } from "@/components/auth/phone-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
-import { createClient } from "@/lib/supabase/client"
 import { z } from "zod"
 
-const forgotPasswordSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Alamat email wajib diisi.")
-    .email("Format email tidak valid."),
-})
+const STEP_PHONE = "phone"
+const STEP_OTP = "otp"
+const STEP_DONE = "done"
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("")
+  const [step, setStep] = useState(STEP_PHONE)
+  const [phone, setPhone] = useState("")
+  const [code, setCode] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirm, setConfirm] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
 
-  const supabase = createClient()
-
-  const validate = () => {
-    const result = forgotPasswordSchema.safeParse({ email })
-    if (!result.success) {
-      setError(result.error.issues[0].message)
+  const validatePhone = () => {
+    if (!phone.trim() || phone.length < 9) {
+      setError("Nomor telepon tidak valid.")
       return false
     }
     setError("")
     return true
   }
 
-  const handleSend = async () => {
-    if (!validate()) return
+  const validateOtp = () => {
+    if (code.length !== 6) {
+      setError("Kode OTP harus 6 digit.")
+      return false
+    }
+    setError("")
+    return true
+  }
+
+  const validatePassword = () => {
+    if (password.length < 8) {
+      setError("Kata sandi minimal 8 karakter.")
+      return false
+    }
+    if (password !== confirm) {
+      setError("Kata sandi tidak cocok.")
+      return false
+    }
+    setError("")
+    return true
+  }
+
+  const handleSendOtp = async () => {
+    if (!validatePhone()) return
     setError("")
     setLoading(true)
 
     try {
-      const { error: sendError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
       })
-
-      if (sendError) {
-        setError(sendError.message)
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Gagal mengirim OTP.")
         return
       }
-      setSent(true)
-    } catch (err: any) {
-      setError(err.message || "Terjadi kesalahan saat mengirim tautan reset.")
+      setStep(STEP_OTP)
+    } catch {
+      setError("Terjadi kesalahan jaringan.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!validateOtp() || !validatePassword()) return
+    setError("")
+    setLoading(true)
+
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code, password }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Gagal mengubah kata sandi.")
+        return
+      }
+      setStep(STEP_DONE)
+    } catch {
+      setError("Terjadi kesalahan jaringan.")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <AuthLayout>
+    <>
       <div className="mb-6">
         <Link
           href="/login"
@@ -69,87 +113,119 @@ export default function ForgotPasswordPage() {
 
       <div className="mb-9">
         <div className="mb-5 flex size-14 items-center justify-center rounded-[16px] bg-auth-primary-light">
-          <Lock size={26} className="text-auth-primary" />
+          {step === STEP_PHONE && <Lock size={26} className="text-auth-primary" />}
+          {step === STEP_OTP && <Smartphone size={26} className="text-auth-primary" />}
+          {step === STEP_DONE && <CheckCircle2 size={26} className="text-auth-primary" />}
         </div>
         <h1 className="m-0 text-[26px] font-bold leading-tight tracking-tight text-auth-foreground">
-          Lupa Kata Sandi?
+          {step === STEP_PHONE && "Lupa Kata Sandi?"}
+          {step === STEP_OTP && "Verifikasi OTP"}
+          {step === STEP_DONE && "Berhasil!"}
         </h1>
         <p className="m-0 mt-2.5 text-[16px] leading-relaxed text-auth-muted-foreground">
-          {sent
-            ? "Tautan pengaturan ulang kata sandi telah dikirim. Silakan periksa kotak masuk email Anda."
-            : "Masukkan alamat email yang terdaftar, dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda."}
+          {step === STEP_PHONE && "Masukkan nomor telepon yang terdaftar. Kami akan kirim kode OTP via WhatsApp."}
+          {step === STEP_OTP && "Masukkan kode OTP 6 digit yang dikirim ke WhatsApp Anda, lalu buat kata sandi baru."}
+          {step === STEP_DONE && "Kata sandi Anda telah berhasil diubah. Silakan masuk dengan kata sandi baru."}
         </p>
       </div>
 
-      {sent ? (
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 rounded-[14px] border border-auth-primary/20 bg-auth-primary-light p-4">
-            <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-auth-primary" />
-            <div>
-              <p className="m-0 text-[15px] font-semibold text-auth-secondary-foreground">
-                Email Terkirim
-              </p>
-              <p className="m-0 mt-1 text-[14px] leading-relaxed text-auth-muted-foreground">
-                Tautan dikirim ke{" "}
-                <strong className="text-auth-secondary-foreground">{email}</strong>
-              </p>
-            </div>
-          </div>
-          <Link href="/login">
-            <PrimaryButton>
-              Kembali ke Halaman Masuk
-            </PrimaryButton>
-          </Link>
-          <button
-            type="button"
-            onClick={() => { setSent(false); setEmail(""); setError("") }}
-            className="w-full cursor-pointer border-none bg-transparent text-center text-[14.5px] font-medium text-auth-muted-foreground"
-          >
-            Kirim ulang email
-          </button>
+      {error && (
+        <div className="mb-4 flex items-center gap-1.5 rounded-[14px] border border-auth-error/30 bg-auth-error-light p-3 text-[13.5px] font-medium text-auth-error">
+          <AlertCircle size={14} />
+          {error}
         </div>
-      ) : (
-        <form
-          onSubmit={(e) => { e.preventDefault(); handleSend() }}
-          className="flex flex-col gap-5"
-        >
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
-              Alamat Email
-            </label>
-            <div
-              className="flex min-h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] transition-[border-color,box-shadow] duration-150"
-              style={{
-                borderColor: error ? "#DC2626" : "#DDE8E2",
-                background: error ? "#FEF2F2" : "#FAFFFE",
-              }}
-            >
-              <div className="flex items-center pl-3.5 text-auth-muted-foreground">
-                <Mail size={18} />
-              </div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="contoh@email.com"
-                autoComplete="email"
-                inputMode="email"
-                className="flex-1 border-none bg-transparent px-3 py-3.5 text-[16px] text-auth-foreground outline-none placeholder:text-auth-muted-foreground/60"
-              />
-            </div>
-            {error && (
-              <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-auth-error">
-                <AlertCircle size={14} />
-                {error}
-              </div>
-            )}
-          </div>
+      )}
 
+      {step === STEP_PHONE && (
+        <form onSubmit={(e) => { e.preventDefault(); handleSendOtp() }} className="flex flex-col gap-5">
+          <PhoneInput value={phone} onChange={setPhone} error={error} />
           <PrimaryButton type="submit" loading={loading}>
-            {loading ? "Mengirim..." : "Kirim Tautan Reset"}
+            {loading ? "Mengirim..." : "Kirim OTP via WhatsApp"}
           </PrimaryButton>
         </form>
       )}
-    </AuthLayout>
+
+      {step === STEP_OTP && (
+        <form onSubmit={(e) => { e.preventDefault(); handleResetPassword() }} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
+              Kode OTP
+            </label>
+            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-[#DDE8E2] bg-[#FAFFFE]">
+              <div className="flex items-center pl-3.5 text-[#5C7268]">
+                <KeyRound size={18} />
+              </div>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                placeholder="000000"
+                className="flex-1 border-none bg-transparent px-3 py-3.5 text-[18px] text-auth-foreground outline-none placeholder:text-auth-muted-foreground/60 tracking-[0.3em]"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
+              Kata Sandi Baru
+            </label>
+            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-[#DDE8E2] bg-[#FAFFFE]">
+              <div className="flex items-center pl-3.5 text-[#5C7268]">
+                <Lock size={18} />
+              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minimal 8 karakter"
+                autoComplete="new-password"
+                className="flex-1 border-none bg-transparent px-3 py-3.5 text-[16px] text-auth-foreground outline-none placeholder:text-auth-muted-foreground/60"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
+              Konfirmasi Kata Sandi Baru
+            </label>
+            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-[#DDE8E2] bg-[#FAFFFE]">
+              <div className="flex items-center pl-3.5 text-[#5C7268]">
+                <Lock size={18} />
+              </div>
+              <input
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="Masukkan ulang kata sandi baru"
+                autoComplete="new-password"
+                className="flex-1 border-none bg-transparent px-3 py-3.5 text-[16px] text-auth-foreground outline-none placeholder:text-auth-muted-foreground/60"
+              />
+            </div>
+          </div>
+
+          <div className="mt-0.5">
+            <PrimaryButton type="submit" loading={loading}>
+              {loading ? "Menyimpan..." : "Simpan Kata Sandi Baru"}
+            </PrimaryButton>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => { setStep(STEP_PHONE); setCode(""); setPassword(""); setConfirm(""); setError("") }}
+            className="w-full cursor-pointer border-none bg-transparent text-center text-[14.5px] font-medium text-auth-muted-foreground"
+          >
+            Kirim ulang OTP
+          </button>
+        </form>
+      )}
+
+      {step === STEP_DONE && (
+        <Link href="/login">
+          <PrimaryButton>Kembali ke Halaman Masuk</PrimaryButton>
+        </Link>
+      )}
+    </>
   )
 }
