@@ -33,6 +33,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Cek apakah email sudah ada di auth.users
+    const { data: users } = await adminClient.auth.admin.listUsers()
+    const existingUser = users.users.find((u) => u.email === email.toLowerCase())
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "Email sudah terdaftar." },
+        { status: 409 },
+      )
+    }
+
     const { data, error } = await adminAuth.admin.createUser({
       email: email.toLowerCase(),
       password,
@@ -43,15 +53,9 @@ export async function POST(request: NextRequest) {
     })
 
     if (error || !data?.user?.id) {
-      if (error?.message?.toLowerCase().includes("already")) {
-        return NextResponse.json(
-          { error: "Email sudah terdaftar." },
-          { status: 409 },
-        )
-      }
       console.error("Admin createUser error:", error)
       return NextResponse.json(
-        { error: "Terjadi kesalahan saat pendaftaran." },
+        { error: error?.message || "Terjadi kesalahan saat pendaftaran." },
         { status: 500 },
       )
     }
