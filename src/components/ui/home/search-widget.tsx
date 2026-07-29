@@ -15,10 +15,14 @@ import {
 import { MapPin, Search, Calendar } from "lucide-react";
 
 const COUNTRIES = [
-  { value: "id", label: "\ud83c\uddee\ud83c\uddf9 Indonesia" },
-  { value: "my", label: "\ud83c\uddf2\ud83c\uddfe Malaysia" },
-  { value: "sg", label: "\ud83c\uddf8\ud83c\uddec Singapura" },
-  { value: "ae", label: "\ud83c\udde6\ud83c\uddea UAE" },
+  { value: "Indonesia", label: "\ud83c\uddee\ud83c\uddf9 Indonesia" },
+  { value: "Malaysia", label: "\ud83c\uddf2\ud83c\uddfe Malaysia" },
+  { value: "Singapura", label: "\ud83c\uddf8\ud83c\uddec Singapura" },
+  { value: "UAE", label: "\ud83c\udde6\ud83c\uddea UAE" },
+  { value: "Pakistan", label: "\ud83c\uddf5\ud83c\uddf0 Pakistan" },
+  { value: "Bangladesh", label: "\ud83c\udde7\ud83c\udde9 Bangladesh" },
+  { value: "United Kingdom", label: "\ud83c\uddec\ud83c\udde7 United Kingdom" },
+  { value: "India", label: "\ud83c\uddee\ud83c\uddf3 India" },
 ]
 
 export default function SearchWidget() {
@@ -41,7 +45,7 @@ export default function SearchWidget() {
   return (
     <div className="w-full max-w-5xl mx-auto">
       <div className="rounded-2xl border border-white/15 bg-white/[0.07] backdrop-blur-xl shadow-xl">
-        <form ref={formRef} onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 p-3 sm:p-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 sm:gap-3 p-3 sm:p-4">
           {/* Country */}
           <div className="space-y-1">
             <Label className="flex items-center gap-1.5 text-xs font-semibold text-white/50">
