@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server"
 import { generateOtp } from "@/lib/services/otp-store"
 import { sendOtpWhatsApp } from "@/lib/services/whatsapp"
 import { z } from "zod"
+import { normalizePhone } from "@/lib/utils/phone"
 
 const schema = z.object({
   phone: z.string().min(9, "Nomor telepon tidak valid").max(15),
@@ -17,16 +18,17 @@ export async function POST(request: NextRequest) {
     }
 
     const { phone } = parsed.data
+    const normalizedPhone = normalizePhone(phone)
 
     const adminClient = createAdminClient()
-    const { data: existing } = await adminClient.from("users").select("id, full_name").eq("phone", phone).maybeSingle()
+    const { data: existing } = await adminClient.from("users").select("id, full_name").eq("phone", normalizedPhone).maybeSingle()
     if (!existing) {
       return NextResponse.json({ error: "Nomor telepon tidak terdaftar." }, { status: 404 })
     }
 
-    const code = await generateOtp(phone)
+    const code = await generateOtp(normalizedPhone)
 
-    await sendOtpWhatsApp({ phone, code, name: existing.full_name || undefined })
+    await sendOtpWhatsApp({ phone: normalizedPhone, code, name: existing.full_name || undefined })
 
     return NextResponse.json({ success: true, message: "Kode OTP telah dikirim via WhatsApp." })
   } catch (err) {

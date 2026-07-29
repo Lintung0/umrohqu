@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { verifyOtp } from "@/lib/services/otp-store"
 import { z } from "zod"
+import { normalizePhone } from "@/lib/utils/phone"
 
 const schema = z.object({
   phone: z.string().min(9).max(15),
@@ -18,15 +19,16 @@ export async function POST(request: NextRequest) {
     }
 
     const { phone, code, password } = parsed.data
+    const normalizedPhone = normalizePhone(phone)
 
-    const otpResult = await verifyOtp(phone, code)
+    const otpResult = await verifyOtp(normalizedPhone, code)
     if (!otpResult.valid) {
       return NextResponse.json({ error: otpResult.reason || "Kode OTP tidak valid." }, { status: 400 })
     }
 
     const adminClient = createAdminClient()
 
-    const { data: users } = await adminClient.from("users").select("id").eq("phone", phone).maybeSingle()
+    const { data: users } = await adminClient.from("users").select("id").eq("phone", normalizedPhone).maybeSingle()
     if (!users) {
       return NextResponse.json({ error: "Akun tidak ditemukan." }, { status: 404 })
     }

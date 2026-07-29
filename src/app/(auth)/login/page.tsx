@@ -55,7 +55,9 @@ function LoginForm() {
     setLoading(true)
 
     try {
-      const email = `${phone}@phone.umrohq.id`
+      const { normalizePhone } = await import("@/lib/utils/phone")
+      const normalizedPhone = normalizePhone(phone)
+      const email = `${normalizedPhone}@phone.umrohq.id`
       const { error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) {

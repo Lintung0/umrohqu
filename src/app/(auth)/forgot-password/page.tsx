@@ -5,7 +5,7 @@ import Link from "next/link"
 import { ArrowLeft, Lock, CheckCircle2, AlertCircle, Smartphone, KeyRound } from "lucide-react"
 import { PhoneInput } from "@/components/auth/phone-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
-import { z } from "zod"
+import { normalizePhone } from "@/lib/utils/phone"
 
 const STEP_PHONE = "phone"
 const STEP_OTP = "otp"
@@ -57,10 +57,11 @@ export default function ForgotPasswordPage() {
     setLoading(true)
 
     try {
+      const normalizedPhone = normalizePhone(phone)
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: normalizedPhone }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -81,10 +82,11 @@ export default function ForgotPasswordPage() {
     setLoading(true)
 
     try {
+      const normalizedPhone = normalizePhone(phone)
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, code, password }),
+        body: JSON.stringify({ phone: normalizedPhone, code, password }),
       })
       const data = await res.json()
       if (!res.ok) {

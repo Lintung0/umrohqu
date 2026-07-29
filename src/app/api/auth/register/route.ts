@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { z } from "zod"
+import { normalizePhone } from "@/lib/utils/phone"
 
 const registerSchema = z.object({
   name: z.string().min(3, "Nama minimal 3 karakter"),
@@ -19,7 +20,8 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, phone, email, password } = parsed.data
-    const authEmail = email && email.includes("@") ? email : `${phone}@phone.umrohq.id`
+    const normalizedPhone = normalizePhone(phone)
+    const authEmail = email && email.includes("@") ? email : `${normalizedPhone}@phone.umrohq.id`
 
     const adminClient = createAdminClient()
     const adminAuth = adminClient.auth as unknown as {
@@ -42,7 +44,7 @@ export async function POST(request: NextRequest) {
       email_confirm: true,
       user_metadata: {
         full_name: name,
-        phone,
+        phone: normalizedPhone,
       },
     })
 
@@ -68,7 +70,7 @@ export async function POST(request: NextRequest) {
           id: data.user.id,
           email: authEmail,
           full_name: name,
-          phone,
+          phone: normalizedPhone,
           role: "customer",
         },
         { onConflict: "id", ignoreDuplicates: true },
