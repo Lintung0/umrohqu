@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { z } from "zod"
-import { normalizePhone } from "@/lib/utils/phone"
 
 const registerSchema = z.object({
   name: z.string().min(3, "Nama minimal 3 karakter"),
-  phone: z.string().min(9, "Nomor telepon tidak valid").max(15),
-  email: z.string().email("Email tidak valid").optional().or(z.literal("")),
+  email: z.string().email("Email tidak valid"),
   password: z.string().min(8, "Kata sandi minimal 8 karakter"),
 })
 
@@ -19,10 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: msg }, { status: 400 })
     }
 
-    const { name, phone, email, password } = parsed.data
-    const normalizedPhone = normalizePhone(phone)
-    const authEmail = email && email.includes("@") ? email : `${normalizedPhone}@phone.umrohq.id`
-
+    const { name, email, password } = parsed.data
     const adminClient = createAdminClient()
     const adminAuth = adminClient.auth as unknown as {
       admin: {
@@ -39,19 +34,18 @@ export async function POST(request: NextRequest) {
     }
 
     const { data, error } = await adminAuth.admin.createUser({
-      email: authEmail,
+      email: email.toLowerCase(),
       password,
       email_confirm: true,
       user_metadata: {
         full_name: name,
-        phone: normalizedPhone,
       },
     })
 
     if (error || !data?.user?.id) {
       if (error?.message?.toLowerCase().includes("already")) {
         return NextResponse.json(
-          { error: "Nomor telepon sudah terdaftar." },
+          { error: "Email sudah terdaftar." },
           { status: 409 },
         )
       }
@@ -62,15 +56,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Also ensure public.users row exists (fallback if trigger fails)
+    // Ensure public.users row exists (trigger handles this, but fallback)
     const { error: insertError } = await adminClient
       .from("users")
       .upsert(
         {
           id: data.user.id,
-          email: authEmail,
+          email: email.toLowerCase(),
           full_name: name,
-          phone: normalizedPhone,
           role: "customer",
         },
         { onConflict: "id", ignoreDuplicates: true },
@@ -83,7 +76,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       userId: data.user.id,
-      email: authEmail,
+      email,
     })
   } catch (err) {
     console.error("Register API error:", err)

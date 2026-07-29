@@ -4,23 +4,23 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Logo } from "@/components/auth/logo"
-import { PhoneInput } from "@/components/auth/phone-input"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { Divider } from "@/components/auth/divider"
 import { createClient } from "@/lib/supabase/client"
 import { z } from "zod"
+import { Mail, Lock, AlertCircle } from "lucide-react"
 
 const loginSchema = z.object({
-  phone: z.string().min(1, "Nomor telepon wajib diisi.").min(9, "Nomor telepon tidak valid."),
+  email: z.string().min(1, "Email wajib diisi.").email("Format email tidak valid."),
   password: z.string().min(1, "Kata sandi wajib diisi.").min(6, "Kata sandi minimal 6 karakter."),
 })
 
-type LoginErrors = { phone?: string; password?: string }
+type LoginErrors = { email?: string; password?: string }
 
 function LoginForm() {
   const router = useRouter()
-  const [phone, setPhone] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [errors, setErrors] = useState<LoginErrors>({})
   const [loading, setLoading] = useState(false)
@@ -36,7 +36,7 @@ function LoginForm() {
   }, [searchParams])
 
   const validate = () => {
-    const result = loginSchema.safeParse({ phone, password })
+    const result = loginSchema.safeParse({ email, password })
     if (!result.success) {
       const fieldErrors: LoginErrors = {}
       result.error.issues.forEach((err) => {
@@ -55,14 +55,14 @@ function LoginForm() {
     setLoading(true)
 
     try {
-      const { normalizePhone } = await import("@/lib/utils/phone")
-      const normalizedPhone = normalizePhone(phone)
-      const email = `${normalizedPhone}@phone.umrohq.id`
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      })
 
       if (error) {
         if (error.message === "Invalid login credentials") {
-          setAuthError("Nomor telepon atau kata sandi salah.")
+          setAuthError("Email atau kata sandi salah.")
         } else {
           setAuthError(error.message)
         }
@@ -98,7 +98,16 @@ function LoginForm() {
       )}
 
       <form onSubmit={(e) => { e.preventDefault(); handleLogin() }} className="flex flex-col gap-[18px]">
-        <PhoneInput value={phone} onChange={setPhone} error={errors.phone} />
+        <InputField
+          label="Email"
+          value={email}
+          onChange={setEmail}
+          placeholder="contoh@email.com"
+          error={errors.email}
+          autoComplete="email"
+          icon={Mail}
+        />
+
         <PasswordInput
           label="Kata Sandi"
           value={password}
@@ -127,6 +136,67 @@ function LoginForm() {
         </Link>
       </p>
     </>
+  )
+}
+
+function InputField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  error,
+  autoComplete,
+  icon: Icon = Mail,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  error?: string
+  autoComplete?: string
+  icon?: React.ComponentType<{ size: number }>
+}) {
+  const [focused, setFocused] = useState(false)
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
+        {label}
+      </label>
+      <div
+        className="flex min-h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] transition-[border-color,box-shadow] duration-150"
+        style={{
+          borderColor: error ? "#DC2626" : focused ? "#2A7D4F" : "#DDE8E2",
+          background: error ? "#FEF2F2" : "#FAFFFE",
+          boxShadow:
+            focused && !error
+              ? "0 0 0 3px rgba(42,125,79,0.13)"
+              : error && focused
+              ? "0 0 0 3px rgba(220,38,38,0.09)"
+              : "none",
+        }}
+      >
+        <div className="flex items-center pl-3.5" style={{ color: focused ? "#2A7D4F" : "#5C7268" }}>
+          <Icon size={18} />
+        </div>
+        <input
+          type="email"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          className="flex-1 border-none bg-transparent px-3 py-3.5 text-[16px] text-auth-foreground outline-none placeholder:text-auth-muted-foreground/60"
+        />
+      </div>
+      {error && (
+        <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-auth-error">
+          <AlertCircle size={14} />
+          {error}
+        </div>
+      )}
+    </div>
   )
 }
 

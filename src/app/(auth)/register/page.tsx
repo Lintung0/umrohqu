@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { User, Mail, AlertCircle } from "lucide-react"
+import { Mail, AlertCircle } from "lucide-react"
 import { Logo } from "@/components/auth/logo"
-import { PhoneInput } from "@/components/auth/phone-input"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { Divider } from "@/components/auth/divider"
@@ -18,11 +17,7 @@ const registerSchema = z
       .trim()
       .min(1, "Nama lengkap wajib diisi.")
       .min(3, "Nama minimal 3 karakter."),
-    phone: z
-      .string()
-      .min(1, "Nomor telepon wajib diisi.")
-      .min(9, "Nomor telepon tidak valid."),
-    email: z.string().email("Email tidak valid").optional().or(z.literal("")),
+    email: z.string().email("Email tidak valid"),
     password: z
       .string()
       .min(1, "Kata sandi wajib diisi.")
@@ -36,14 +31,13 @@ const registerSchema = z
 
 type RegisterErrors = {
   name?: string
-  phone?: string
   email?: string
   password?: string
   confirm?: string
 }
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", confirm: "" })
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" })
   const [errors, setErrors] = useState<RegisterErrors>({})
   const [loading, setLoading] = useState(false)
   const [authError, setAuthError] = useState("")
@@ -79,8 +73,7 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name.trim(),
-          phone: form.phone,
-          email: form.email.trim(),
+          email: form.email.trim().toLowerCase(),
           password: form.password,
         }),
       })
@@ -93,9 +86,8 @@ export default function RegisterPage() {
       }
 
       // Auto-login
-      const authEmail = data.email
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: authEmail,
+        email: form.email.trim().toLowerCase(),
         password: form.password,
       })
 
@@ -146,10 +138,8 @@ export default function RegisterPage() {
           autoComplete="name"
         />
 
-        <PhoneInput value={form.phone} onChange={set("phone")} error={errors.phone} />
-
         <InputField
-          label="Email (opsional)"
+          label="Email"
           value={form.email}
           onChange={set("email")}
           placeholder="contoh@email.com"
@@ -210,7 +200,7 @@ function InputField({
   placeholder,
   error,
   autoComplete,
-  icon: Icon = User,
+  icon: Icon = Mail,
 }: {
   label: string
   value: string
@@ -236,15 +226,15 @@ function InputField({
             focused && !error
               ? "0 0 0 3px rgba(42,125,79,0.13)"
               : error && focused
-                ? "0 0 0 3px rgba(220,38,38,0.09)"
-                : "none",
+              ? "0 0 0 3px rgba(220,38,38,0.09)"
+              : "none",
         }}
       >
         <div className="flex items-center pl-3.5" style={{ color: focused ? "#2A7D4F" : "#5C7268" }}>
           <Icon size={18} />
         </div>
         <input
-          type={Icon === User ? "text" : "email"}
+          type="email"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
