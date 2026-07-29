@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient, createAdminClient } from "@/lib/supabase/server"
+import { createServerClient } from "@supabase/ssr"
+import { createAdminClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -8,7 +9,26 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     try {
-      const supabase = await createClient()
+      const pendingCookies: { name: string; value: string; options?: Record<string, unknown> }[] = []
+
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll()
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach((cookie) => {
+                request.cookies.set(cookie.name, cookie.value)
+                pendingCookies.push(cookie)
+              })
+            },
+          },
+        },
+      )
+
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
       if (!error && data.user) {
@@ -26,7 +46,12 @@ export async function GET(request: NextRequest) {
           console.error("Callback upsert error:", upsertError)
         }
 
-        return NextResponse.redirect(`${origin}${next}`)
+        const redirectResponse = NextResponse.redirect(`${origin}${next}`)
+        pendingCookies.forEach(({ name, value, options }) => {
+          redirectResponse.cookies.set(name, value, options)
+        })
+
+        return redirectResponse
       }
 
       if (error) {
@@ -35,13 +60,6 @@ export async function GET(request: NextRequest) {
     } catch (err) {
       console.error("Auth callback exception:", err)
     }
-  }
-
-  const redirected = searchParams.get("redirected")
-  if (!redirected) {
-    const url = new URL(request.url)
-    url.searchParams.set("redirected", "1")
-    return NextResponse.redirect(`${origin}/login?error=auth_callback_error`)
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth_callback_error`)
