@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { COST_RANGES, PACKAGE_TYPES, AIRLINES, HOTEL_STARS } from "@/lib/constants"
+import { COST_RANGES, PACKAGE_TYPES, AIRLINES, HOTEL_STARS, COUNTRIES, COUNTRY_CODE_MAP } from "@/lib/constants"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import type { Package, Tenant } from "@/lib/types"
@@ -165,11 +165,7 @@ function SearchContent() {
 
   const hasActiveFilters = departure || country || month || cost || type !== "semua" || airline !== "semua" || hotelStars !== "semua"
 
-  const COUNTRY_CODES: Record<string, string> = {
-    Indonesia: "id", Malaysia: "my", Singapura: "sg", UAE: "ae",
-    Pakistan: "pk", Bangladesh: "bd", "United Kingdom": "gb", India: "in",
-  }
-  const countryCode = country ? COUNTRY_CODES[country] : undefined
+  const countryCode = country ? COUNTRY_CODE_MAP[country] : undefined
 
   if (loading) {
     return (
@@ -421,16 +417,11 @@ function FilterPanel({
           <SelectTrigger className="h-9 w-full text-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-h-60">
             <SelectItem value="semua">Semua Negara</SelectItem>
-            <SelectItem value="Indonesia">Indonesia</SelectItem>
-            <SelectItem value="Malaysia">Malaysia</SelectItem>
-            <SelectItem value="Singapura">Singapura</SelectItem>
-            <SelectItem value="UAE">UAE</SelectItem>
-            <SelectItem value="Pakistan">Pakistan</SelectItem>
-            <SelectItem value="Bangladesh">Bangladesh</SelectItem>
-            <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-            <SelectItem value="India">India</SelectItem>
+            {COUNTRIES.map((c) => (
+              <SelectItem key={c.code} value={c.name}>{c.emoji} {c.name}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

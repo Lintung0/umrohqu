@@ -13,17 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MapPin, Search, Calendar } from "lucide-react";
-
-const COUNTRIES = [
-  { value: "Indonesia", label: "\ud83c\uddee\ud83c\uddf9 Indonesia" },
-  { value: "Malaysia", label: "\ud83c\uddf2\ud83c\uddfe Malaysia" },
-  { value: "Singapura", label: "\ud83c\uddf8\ud83c\uddec Singapura" },
-  { value: "UAE", label: "\ud83c\udde6\ud83c\uddea UAE" },
-  { value: "Pakistan", label: "\ud83c\uddf5\ud83c\uddf0 Pakistan" },
-  { value: "Bangladesh", label: "\ud83c\udde7\ud83c\udde9 Bangladesh" },
-  { value: "United Kingdom", label: "\ud83c\uddec\ud83c\udde7 United Kingdom" },
-  { value: "India", label: "\ud83c\uddee\ud83c\uddf3 India" },
-]
+import { COUNTRIES } from "@/lib/constants";
 
 export default function SearchWidget() {
   const router = useRouter();
@@ -59,7 +49,7 @@ export default function SearchWidget() {
               <SelectContent>
                 <SelectItem value="all">Semua Negara</SelectItem>
                 {COUNTRIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                  <SelectItem key={c.code} value={c.name}>{c.emoji} {c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
