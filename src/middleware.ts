@@ -19,6 +19,7 @@ const PUBLIC_ROUTES = [
   "/reset-password",
   "/verify-email",
   "/api/auth",
+  "/auth/callback",
 ]
 
 const SKIP_SUBDOMAIN_HOSTS = ["www", "api", "localhost", "127.0.0.1"]

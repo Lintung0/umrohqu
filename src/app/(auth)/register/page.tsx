@@ -68,34 +68,25 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim().toLowerCase(),
-          password: form.password,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setAuthError(data.error || "Terjadi kesalahan saat pendaftaran.")
-        return
-      }
-
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email: form.email.trim().toLowerCase(),
         password: form.password,
+        options: {
+          data: { full_name: form.name.trim() },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
 
-      if (signInError) {
-        setAuthError("Akun berhasil dibuat, namun gagal masuk otomatis. Silakan login.")
+      if (error) {
+        if (error.message.toLowerCase().includes("already")) {
+          setAuthError("Email sudah terdaftar. Silakan login.")
+        } else {
+          setAuthError(error.message)
+        }
         return
       }
 
-      window.location.href = "/"
+      window.location.href = `/verify-email?email=${encodeURIComponent(form.email.trim().toLowerCase())}`
     } catch {
       setAuthError("Terjadi kesalahan jaringan.")
     } finally {
