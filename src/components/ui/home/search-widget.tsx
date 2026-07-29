@@ -43,7 +43,7 @@ export default function SearchWidget() {
               Negara Keberangkatan
             </Label>
             <Select name="country">
-              <SelectTrigger className="h-11 text-sm bg-white/10 border-white/10 text-white focus:border-gold/40 focus:ring-gold/10 rounded-xl">
+              <SelectTrigger className="w-full h-11 text-sm bg-white/10 border-white/10 text-white focus:border-gold/40 focus:ring-gold/10 rounded-xl">
                 <SelectValue placeholder="Pilih negara..." />
               </SelectTrigger>
               <SelectContent>

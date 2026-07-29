@@ -1,5 +1,4 @@
 import HeroSection from "@/components/ui/home/hero-section"
-import CountrySelector from "@/components/ui/home/country-selector"
 import PackageSection from "@/components/ui/home/package-section"
 import { IslamicWidgets } from "@/components/ui/islamic-widgets"
 import {
@@ -15,7 +14,6 @@ export default function Home() {
   return (
     <main className="flex-1">
       <HeroSection />
-      <CountrySelector />
       <IslamicWidgets />
       <TravelAgenciesSection />
       <PackageSection />
