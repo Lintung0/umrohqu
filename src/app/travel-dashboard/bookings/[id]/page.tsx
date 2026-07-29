@@ -123,7 +123,7 @@ export default function TravelBookingDetailPage() {
             {status.label}
           </div>
           <span className="text-sm text-muted-foreground">
-            via {booking.channel === "portal" ? "Portal Utama" : booking.channel === "subdomain" ? "Subdomain" : "Custom Domain"}
+            via {booking.booking_channel === "marketplace" ? "Portal Utama" : booking.booking_channel === "tenant_subdomain" ? "Subdomain" : "Custom Domain"}
           </span>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -239,16 +239,16 @@ export default function TravelBookingDetailPage() {
             <h2 className="font-semibold mb-4">Ringkasan Pembayaran</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Harga per orang × {booking.pilgrim_count} jamaah</span>
-                <span>{formatRupiah(booking.price_per_person * booking.pilgrim_count)}</span>
+                <span className="text-muted-foreground">Harga paket ({booking.pilgrim_count} jamaah)</span>
+                <span>{formatRupiah(booking.price)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Service fee</span>
-                <span>{formatRupiah(booking.service_fee)}</span>
+                <span>{formatRupiah(booking.fee)}</span>
               </div>
               <div className="border-t pt-2 mt-2 flex justify-between font-bold text-base">
                 <span>Total</span>
-                <span className="text-primary">{formatRupiah(booking.total_price)}</span>
+                <span className="text-primary">{formatRupiah(booking.total)}</span>
               </div>
             </div>
           </div>
