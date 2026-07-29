@@ -16,12 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { COST_RANGES, PACKAGE_TYPES, AIRLINES, HOTEL_STARS, COUNTRIES, COUNTRY_CODE_MAP } from "@/lib/constants"
+import { COST_RANGES, PACKAGE_TYPES, AIRLINES, HOTEL_STARS, COUNTRY_CODE_MAP } from "@/lib/constants"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import type { Package, Tenant } from "@/lib/types"
 import SharedPackageCard from "@/components/shared/package-card"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
+import CountrySelect from "@/components/shared/country-select"
 import { rankTravels, RankingFactors, DEFAULT_RANKING_CONFIG } from "@/lib/business-logic/bidding"
 
 function SearchContent() {
@@ -413,17 +414,7 @@ function FilterPanel({
 
       <div className="space-y-1.5">
         <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Negara</Label>
-        <Select value={country || "semua"} onValueChange={(v) => setCountry(v === "semua" ? "" : (v ?? ""))}>
-          <SelectTrigger className="h-9 w-full text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="max-h-60">
-            <SelectItem value="semua">Semua Negara</SelectItem>
-            {COUNTRIES.map((c) => (
-              <SelectItem key={c.code} value={c.name}>{c.emoji} {c.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <CountrySelect value={country} onChange={setCountry} />
       </div>
 
       <div className="space-y-1.5">
