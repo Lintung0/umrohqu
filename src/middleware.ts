@@ -32,6 +32,18 @@ function isPublicRoute(pathname: string): boolean {
 
 function getSubdomain(hostname: string): string | null {
   const parts = hostname.split(".")
+  
+  // Handle Vercel deployments (e.g., umrohqu.vercel.app or tenant.umrohqu.vercel.app)
+  if (hostname.endsWith(".vercel.app")) {
+    if (parts.length === 3) return null // main vercel domain, e.g. umrohqu.vercel.app
+    if (parts.length === 4) {
+      const sub = parts[0]
+      if (SKIP_SUBDOMAIN_HOSTS.includes(sub)) return null
+      return sub
+    }
+  }
+
+  // Standard domain logic (e.g., umrohqu.com or tenant.umrohqu.com)
   if (parts.length < 3) return null
   const sub = parts[0]
   if (SKIP_SUBDOMAIN_HOSTS.includes(sub)) return null
