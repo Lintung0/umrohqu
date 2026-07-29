@@ -55,6 +55,18 @@ function LoginForm() {
     setLoading(true)
 
     try {
+      const checkRes = await fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      })
+
+      if (!checkRes.ok) {
+        const checkData = await checkRes.json()
+        setAuthError(checkData.error || "Akun belum terdaftar. Silakan daftar terlebih dahulu.")
+        return
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
@@ -62,7 +74,7 @@ function LoginForm() {
 
       if (error) {
         if (error.message === "Invalid login credentials") {
-          setAuthError("Email atau kata sandi salah.")
+          setAuthError("Kata sandi salah.")
         } else {
           setAuthError(error.message)
         }
