@@ -18,75 +18,48 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, email, password } = parsed.data
+    const lowerEmail = email.toLowerCase()
     const adminClient = createAdminClient()
-    const adminAuth = adminClient.auth as unknown as {
-      admin: {
-        createUser: (opts: {
-          email: string
-          password: string
-          email_confirm: boolean
-          user_metadata: Record<string, string>
-        }) => Promise<{
-          data: { user: { id: string } } | null
-          error: { message: string } | null
-        }>
-      }
-    }
 
     // Cek apakah email sudah ada di auth.users
-    const { data: users } = await adminClient.auth.admin.listUsers()
-    const existingUser = users.users.find((u) => u.email === email.toLowerCase())
+    const { data: users, error: listError } = await adminClient.auth.admin.listUsers()
+    if (listError) {
+      console.error("listUsers error:", listError)
+      return NextResponse.json({ error: "Gagal memeriksa email: " + listError.message }, { status: 500 })
+    }
+    const existingUser = users.users.find((u) => u.email === lowerEmail)
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Email sudah terdaftar." },
-        { status: 409 },
-      )
+      return NextResponse.json({ error: "Email sudah terdaftar." }, { status: 409 })
     }
 
-    const { data, error } = await adminAuth.admin.createUser({
-      email: email.toLowerCase(),
+    const { data, error } = await adminClient.auth.admin.createUser({
+      email: lowerEmail,
       password,
       email_confirm: true,
-      user_metadata: {
-        full_name: name,
-      },
+      user_metadata: { full_name: name },
     })
 
     if (error || !data?.user?.id) {
       console.error("Admin createUser error:", error)
-      return NextResponse.json(
-        { error: error?.message || "Terjadi kesalahan saat pendaftaran." },
-        { status: 500 },
-      )
+      return NextResponse.json({ error: error?.message || "Terjadi kesalahan saat pendaftaran." }, { status: 500 })
     }
 
-    // Ensure public.users row exists (trigger handles this, but fallback)
-    const { error: insertError } = await adminClient
-      .from("users")
-      .upsert(
-        {
-          id: data.user.id,
-          email: email.toLowerCase(),
-          full_name: name,
-          role: "customer",
-        },
-        { onConflict: "id", ignoreDuplicates: true },
-      )
+    // Ensure public.users row exists
+    const { error: insertError } = await adminClient.from("users").upsert({
+      id: data.user.id,
+      email: lowerEmail,
+      full_name: name,
+      role: "customer",
+    }, { onConflict: "id", ignoreDuplicates: true })
 
     if (insertError) {
       console.error("Users upsert error:", insertError)
     }
 
-    return NextResponse.json({
-      success: true,
-      userId: data.user.id,
-      email,
-    })
+    return NextResponse.json({ success: true, userId: data.user.id, email: lowerEmail })
   } catch (err) {
     console.error("Register API error:", err)
-    return NextResponse.json(
-      { error: "Terjadi kesalahan server." },
-      { status: 500 },
-    )
+    const message = err instanceof Error ? err.message : "Terjadi kesalahan server."
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
