@@ -55,19 +55,6 @@ function LoginForm() {
     setLoading(true)
 
     try {
-      // Cek apakah user ada di database dulu
-      const { data: userExists } = await supabase
-        .from("users")
-        .select("id")
-        .eq("email", email.trim().toLowerCase())
-        .maybeSingle()
-
-      if (!userExists) {
-        setAuthError("Akun belum terdaftar. Silakan daftar terlebih dahulu.")
-        setLoading(false)
-        return
-      }
-
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
@@ -75,7 +62,7 @@ function LoginForm() {
 
       if (error) {
         if (error.message === "Invalid login credentials") {
-          setAuthError("Kata sandi salah.")
+          setAuthError("Email atau kata sandi salah.")
         } else {
           setAuthError(error.message)
         }
