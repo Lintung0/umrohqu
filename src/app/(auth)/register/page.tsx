@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Mail, AlertCircle } from "lucide-react"
+import { User, Mail, AlertCircle } from "lucide-react"
 import { Logo } from "@/components/auth/logo"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
@@ -136,6 +136,7 @@ export default function RegisterPage() {
           placeholder="Masukkan nama lengkap Anda"
           error={errors.name}
           autoComplete="name"
+          icon={User}
         />
 
         <InputField
@@ -201,6 +202,7 @@ function InputField({
   error,
   autoComplete,
   icon: Icon = Mail,
+  type = "text",
 }: {
   label: string
   value: string
@@ -209,6 +211,7 @@ function InputField({
   error?: string
   autoComplete?: string
   icon?: React.ComponentType<{ size: number }>
+  type?: string
 }) {
   const [focused, setFocused] = useState(false)
 
@@ -234,7 +237,7 @@ function InputField({
           <Icon size={18} />
         </div>
         <input
-          type="email"
+          type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
