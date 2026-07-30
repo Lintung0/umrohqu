@@ -19,6 +19,8 @@ const PUBLIC_ROUTES = [
   "/reset-password",
   "/verify-email",
   "/api/auth",
+  "/api/xendit",
+  "/api/wallet",
   "/auth/callback",
 ]
 
