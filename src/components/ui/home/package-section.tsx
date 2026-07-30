@@ -36,6 +36,25 @@ export default function PackageSection() {
     );
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animate-slide-up");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const animatedElements = document.querySelectorAll(".card-animate");
+    animatedElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [packages]);
+
   if (loading) {
     return (
       <section className="py-20 px-6 md:px-12">
@@ -46,8 +65,8 @@ export default function PackageSection() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white border border-border rounded-xl overflow-hidden">
-                <div className="h-44 bg-muted animate-pulse" />
+              <div key={i} className="rounded-2xl overflow-hidden bg-white border animate-shimmer-skeleton">
+                <div className="h-44" />
                 <div className="p-4 space-y-3">
                   <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
                   <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
@@ -94,7 +113,7 @@ export default function PackageSection() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {packages.map((pkg) => {
+          {packages.map((pkg, index) => {
             const seatsLeft = pkg.available ?? pkg.quota;
             const fillPercentage = ((pkg.quota - seatsLeft) / pkg.quota) * 100;
             const isCompared = compared.includes(pkg.id);
@@ -102,10 +121,11 @@ export default function PackageSection() {
             return (
               <div
                 key={pkg.id}
-                className="rounded-2xl overflow-hidden bg-white border transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                className="rounded-2xl overflow-hidden bg-white border card-hover card-animate"
                 style={{
                   borderColor: isCompared ? "rgb(201,162,75)" : "rgba(0,0,0,0.07)",
                   borderWidth: isCompared ? "2px" : "1px",
+                  animationDelay: `${index * 50}ms`,
                 }}
               >
                 {/* Image header */}

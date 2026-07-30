@@ -160,10 +160,11 @@ export function WhyUsSection() {
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {WHY_US.map((item) => (
+          {WHY_US.map((item, index) => (
             <div
               key={item.title}
-              className="group relative flex flex-col items-start gap-4 p-6 rounded-2xl border border-border/60 bg-white hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 hover:-translate-y-1"
+              className="group relative flex flex-col items-start gap-4 p-6 rounded-2xl border border-border/60 bg-white card-hover card-animate"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className={`p-3 rounded-xl ${item.bg} transition-transform duration-300 group-hover:scale-110`}>
                 <item.icon className="size-6 text-primary" />
