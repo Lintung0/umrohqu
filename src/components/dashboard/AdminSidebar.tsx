@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client"
 const ADMIN_NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["marketplace_admin", "marketplace_operational", "marketplace_finance"] as AdminRole[] },
   { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["marketplace_admin"] },
+  { href: "/admin/users", label: "Pengguna", icon: Shield, roles: ["marketplace_admin"] },
   { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["marketplace_admin"] },
   { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["marketplace_admin"] },
   { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["marketplace_admin"] },

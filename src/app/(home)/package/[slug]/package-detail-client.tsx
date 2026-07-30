@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/constants"
+import ImageGallery from "@/components/shared/image-gallery"
 
 interface PackageDetail {
   id: string
@@ -48,9 +49,10 @@ const TAB_ITEMS = [
 interface Props {
   pkg: PackageDetail
   reviews: ReviewRow[]
+  images?: string[]
 }
 
-export default function PackageDetailClient({ pkg, reviews: initialReviews }: Props) {
+export default function PackageDetailClient({ pkg, reviews: initialReviews, images: initialImages }: Props) {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistId, setWishlistId] = useState<string | null>(null)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
@@ -112,28 +114,32 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews }: Pr
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            {/* Hero Image */}
-            <div className="relative h-72 md:h-96 rounded-2xl overflow-hidden">
-              {pkg.image_url ? (
-                <Image src={pkg.image_url} alt={pkg.name} fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full bg-muted" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white">
-                <h1 className="text-2xl font-bold leading-tight">{pkg.name}</h1>
-                <div className="flex items-center gap-3 mt-1 text-sm text-white/80">
-                  {pkg.duration_days && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{pkg.duration_days} Hari</span>}
-                  {pkg.departure_date && <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{new Date(pkg.departure_date).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}</span>}
-                  {avgRating > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      {avgRating.toFixed(1)} ({initialReviews.length} ulasan)
-                    </span>
-                  )}
+            {/* Gallery / Hero Image */}
+            {initialImages && initialImages.length > 1 ? (
+              <ImageGallery images={initialImages} title={pkg.name} />
+            ) : (
+              <div className="relative h-72 md:h-96 rounded-2xl overflow-hidden">
+                {pkg.image_url ? (
+                  <Image src={pkg.image_url} alt={pkg.name} fill className="object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-muted" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h1 className="text-2xl font-bold leading-tight">{pkg.name}</h1>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-white/80">
+                    {pkg.duration_days && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{pkg.duration_days} Hari</span>}
+                    {pkg.departure_date && <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{new Date(pkg.departure_date).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}</span>}
+                    {avgRating > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        {avgRating.toFixed(1)} ({initialReviews.length} ulasan)
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Travel Info */}
             {pkg.travel && (

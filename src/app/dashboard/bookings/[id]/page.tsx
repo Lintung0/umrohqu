@@ -24,6 +24,10 @@ interface BookingDetail {
   dp_amount: number | null
   remaining_amount: number | null
   remaining_due_date: string | null
+  platform_fee?: number
+  service_fee?: number
+  tax_amount?: number
+  fee_channel?: string
   package: { name: string; slug: string; image_url: string | null; departure_city: string | null; duration_days: number | null; airline: string | null; hotel_makkah: string | null; hotel_makkah_stars: number | null; hotel_madinah: string | null; hotel_madinah_stars: number | null } | null
   participants: { id: string; full_name: string; nik: string | null; passport_no: string | null; gender: string | null; phone: string | null; relation: string }[]
 }
@@ -207,10 +211,27 @@ export default function BookingDetailPage() {
               <span className="text-muted-foreground">{t("booking.package")} ({booking.pilgrim_count})</span>
               <span>{formatRupiah(booking.price)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t("travel_dashboard.fee")}</span>
-              <span>{formatRupiah(booking.fee)}</span>
-            </div>
+            {booking.platform_fee ? (
+              <>
+                <div className="flex justify-between pl-3">
+                  <span className="text-muted-foreground text-xs">Biaya layanan platform</span>
+                  <span className="text-xs">{formatRupiah(booking.platform_fee)}</span>
+                </div>
+                <div className="flex justify-between pl-3">
+                  <span className="text-muted-foreground text-xs">Service fee</span>
+                  <span className="text-xs">{formatRupiah(booking.service_fee || 0)}</span>
+                </div>
+                <div className="flex justify-between pl-3">
+                  <span className="text-muted-foreground text-xs">PPN 11%</span>
+                  <span className="text-xs">{formatRupiah(booking.tax_amount || 0)}</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{t("travel_dashboard.fee")}</span>
+                <span>{formatRupiah(booking.fee)}</span>
+              </div>
+            )}
             {booking.payment_type === "dp" && (
               <>
                 <div className="border-t border-border pt-2 flex justify-between text-emerald-600">

@@ -8,6 +8,11 @@ const schema = z.object({
   paymentType: z.enum(["full", "dp"]),
   dpPercentage: z.number().min(10).max(90).optional(),
   useWallet: z.boolean().default(false),
+  platformFee: z.number().default(0),
+  serviceFee: z.number().default(0),
+  taxAmount: z.number().default(0),
+  feeChannel: z.string().default("portal"),
+  notes: z.string().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -24,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Data tidak valid" }, { status: 400 })
     }
 
-    const { packageId, pilgrimCount, paymentType, dpPercentage, useWallet } = parsed.data
+    const { packageId, pilgrimCount, paymentType, dpPercentage, useWallet, platformFee, serviceFee, taxAmount, feeChannel, notes } = parsed.data
     const admin = createAdminClient()
 
     // 1. Get package
@@ -41,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     const totalPrice = Number(pkg.price) * pilgrimCount
-    const fee = 0
+    const totalFee = platformFee + serviceFee + taxAmount
     let dpAmount: number
     let remainingAmount: number
     let remainingDueDate: string | null = null
@@ -51,10 +56,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Persentase DP wajib diisi" }, { status: 400 })
       }
       dpAmount = Math.round(totalPrice * dpPercentage / 100)
-      remainingAmount = totalPrice - dpAmount + fee
+      remainingAmount = totalPrice - dpAmount + totalFee
       remainingDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     } else {
-      dpAmount = totalPrice + fee
+      dpAmount = totalPrice + totalFee
       remainingAmount = 0
     }
 
@@ -120,7 +125,7 @@ export async function POST(request: NextRequest) {
         status: bookingStatus,
         pilgrim_count: pilgrimCount,
         price: totalPrice,
-        fee,
+        fee: totalFee,
         total: payNow,
         payment_status: paymentStatus,
         payment_type: paymentType,
@@ -128,6 +133,11 @@ export async function POST(request: NextRequest) {
         dp_amount: paymentType === "dp" ? dpAmount : 0,
         remaining_amount: remainingAmount,
         remaining_due_date: remainingDueDate,
+        platform_fee: platformFee,
+        service_fee: serviceFee,
+        tax_amount: taxAmount,
+        fee_channel: feeChannel,
+        notes: notes || null,
       })
       .select("id")
       .single()

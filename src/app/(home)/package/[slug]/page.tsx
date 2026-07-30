@@ -15,6 +15,12 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     .eq("status", "published")
     .single()
 
+  const { data: pkgImages } = await supabase
+    .from("package_images")
+    .select("url")
+    .eq("package_id", pkg?.id)
+    .order("sort_order", { ascending: true })
+
   if (!pkg) {
     console.error("[PACKAGE DETAIL] Not found for slug:", slug)
     notFound()
@@ -28,10 +34,16 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     .order("created_at", { ascending: false })
     .limit(20)
 
+  const images = [
+    pkg.image_url,
+    ...(pkgImages || []).map((i: any) => i.url),
+  ].filter(Boolean) as string[]
+
   return (
     <PackageDetailClient
       pkg={pkg}
       reviews={(reviews as any) || []}
+      images={images}
     />
   )
 }
