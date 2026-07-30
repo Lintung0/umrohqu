@@ -38,20 +38,40 @@ export default function BookingDetailPage() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
+  const [pollingStatus, setPollingStatus] = useState<string | null>(null)
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let interval: NodeJS.Timeout
+
     async function load() {
       const { data } = await supabase
         .from("bookings")
         .select("*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
         .eq("id", params.id)
         .single()
-      setBooking(data as any)
+      const b = data as any
+      setBooking(b)
       setLoading(false)
+
+      if (b && b.status === "pending_payment" && b.xendit_invoice_id) {
+        interval = setInterval(async () => {
+          const { data: fresh } = await supabase
+            .from("bookings")
+            .select("status")
+            .eq("id", params.id)
+            .single()
+          if (fresh && fresh.status !== "pending_payment") {
+            setBooking((prev) => prev ? { ...prev, status: fresh.status } : prev)
+            setPollingStatus(fresh.status)
+            clearInterval(interval)
+          }
+        }, 5000)
+      }
     }
     load()
+    return () => clearInterval(interval)
   }, [params.id])
 
   if (loading) {

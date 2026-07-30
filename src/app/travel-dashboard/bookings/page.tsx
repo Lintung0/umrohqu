@@ -95,6 +95,7 @@ export default function TravelBookingsPage() {
         {[
           { label: "Total", value: bookings.length, color: "text-foreground" },
           { label: "Menunggu", value: bookings.filter((b) => b.status === "pending_payment").length, color: "text-yellow-600" },
+          { label: "Diproses", value: bookings.filter((b) => b.status === "processing").length, color: "text-purple-600" },
           { label: "Dikonfirmasi", value: bookings.filter((b) => b.status === "confirmed").length, color: "text-green-600" },
           { label: "Revenue", value: formatRupiah(totalRevenue), color: "text-emerald-600" },
         ].map((s) => (

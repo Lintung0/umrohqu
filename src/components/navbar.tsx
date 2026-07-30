@@ -140,11 +140,12 @@ const Navbar = () => {
             </Link>
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-1">
+            <LanguageSwitcher />
             {loading ? (
-              <div className="w-20 h-9 bg-muted rounded-xl animate-pulse" />
+              <div className="w-20 h-9 bg-muted rounded-xl animate-pulse ml-2" />
             ) : user ? (
-              <div className="relative">
+              <div className="relative ml-2">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
@@ -187,7 +188,6 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center gap-1">
-                <LanguageSwitcher />
                 <Link
                   href="/login"
                   className="px-5 py-2 text-sm font-semibold rounded-xl border border-primary/20 text-primary hover:bg-primary/10 transition-all duration-200"
