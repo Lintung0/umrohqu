@@ -21,6 +21,7 @@ const PUBLIC_ROUTES = [
   "/api/auth",
   "/api/xendit",
   "/api/wallet",
+  "/api/tenant/setup-fee-callback",
   "/auth/callback",
 ]
 
