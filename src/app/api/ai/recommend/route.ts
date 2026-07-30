@@ -145,24 +145,35 @@ function generateFallbackResponse(packages: any[], message: string, history: any
 }
 
 export async function POST(req: Request) {
+  let body: { packages: any[]; message: string; history?: any[] }
+
   try {
-    const { packages, message, history } = await req.json()
+    body = await req.json()
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "Format request tidak valid" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    )
+  }
 
-    if (!packages || packages.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Belum ada paket yang dipilih" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      )
-    }
+  const { packages, message, history } = body
 
-    if (!genAI) {
-      const fallback = generateFallbackResponse(packages, message, history || [])
-      return new Response(
-        JSON.stringify({ fallback: true, content: fallback }),
-        { headers: { "Content-Type": "application/json" } }
-      )
-    }
+  if (!packages || packages.length === 0) {
+    return new Response(
+      JSON.stringify({ error: "Belum ada paket yang dipilih" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    )
+  }
 
+  if (!genAI) {
+    const fallback = generateFallbackResponse(packages, message, history || [])
+    return new Response(
+      JSON.stringify({ fallback: true, content: fallback }),
+      { headers: { "Content-Type": "application/json" } }
+    )
+  }
+
+  try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
     const systemInstruction = `Kamu adalah asisten AI untuk platform UmrahQu — marketplace paket umrah.
@@ -233,23 +244,9 @@ Selamat membantu! 🕋`
   } catch (error: any) {
     console.error("AI recommend error:", error)
 
-    // If Gemini quota exceeded, still try to return a fallback
-    try {
-      const cloned = await req.clone().json()
-      if (cloned.packages && cloned.packages.length > 0) {
-        const fallback = generateFallbackResponse(cloned.packages, cloned.message || "", cloned.history || [])
-        return new Response(
-          JSON.stringify({ fallback: true, content: fallback }),
-          { headers: { "Content-Type": "application/json" } }
-        )
-      }
-    } catch {}
-
+    const fallback = generateFallbackResponse(packages, message, history || [])
     return new Response(
-      JSON.stringify({
-        fallback: true,
-        content: "Maaf, layanan AI sedang sibuk. Coba tanya lagi nanti atau gunakan fitur Smart Comparison yang sudah tersedia di halaman ini."
-      }),
+      JSON.stringify({ fallback: true, content: fallback }),
       { headers: { "Content-Type": "application/json" } }
     )
   }
