@@ -150,6 +150,12 @@ function LoginForm() {
           {t.auth.register_link}
         </Link>
       </p>
+      <p className="mt-2 text-center text-[13px] text-auth-muted-foreground">
+        Punya travel?{" "}
+        <Link href="/register/travel" className="font-bold text-auth-primary no-underline">
+          Daftar sebagai Travel
+        </Link>
+      </p>
     </>
   )
 }
