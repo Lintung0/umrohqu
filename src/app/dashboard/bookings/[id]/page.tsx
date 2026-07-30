@@ -257,35 +257,7 @@ export default function BookingDetailPage() {
       </div>
 
       {booking.status === "pending_payment" && booking.payment_type !== "dp" && (
-        <div className="bg-white rounded-2xl border border-border p-6">
-          <h2 className="font-semibold mb-3">Pembayaran</h2>
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
-            <p className="text-sm text-emerald-700">Silakan lakukan pembayaran sebelum jatuh tempo. Setelah pembayaran dikonfirmasi, status booking akan berubah menjadi "Dikonfirmasi".</p>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-4 mb-4">
-            <p className="text-xs text-muted-foreground mb-1">Kode Booking</p>
-            <div className="flex items-center gap-2">
-              <p className="font-mono font-bold text-lg">{booking.id.slice(0, 8).toUpperCase()}</p>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(booking.id.slice(0, 8).toUpperCase())
-                  toast.success("Kode booking disalin")
-                }}
-                className="p-1 hover:bg-gray-200 rounded transition-colors"
-              >
-                <Copy className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Gunakan kode booking ini saat melakukan transfer bank atau pembayaran.</p>
-          </div>
-          <button
-            onClick={() => toast.success("Simulasi pembayaran berhasil! Status booking akan diperbarui.")}
-            className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center gap-2"
-          >
-            <CreditCard className="w-4 h-4" />
-            Simulasi Bayar Sekarang
-          </button>
-        </div>
+        <PayNowSection bookingId={booking.id} total={booking.total} />
       )}
 
       {/* DP: Pay Remaining */}
@@ -306,6 +278,65 @@ export default function BookingDetailPage() {
           <PayRemainingSection bookingId={booking.id} remainingAmount={booking.remaining_amount || 0} />
         </div>
       )}
+    </div>
+  )
+}
+
+function PayNowSection({ bookingId, total }: { bookingId: string; total: number }) {
+  const [submitting, setSubmitting] = useState(false)
+
+  const handlePay = async () => {
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/booking/pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId }),
+      })
+      const data = await res.json()
+      if (res.ok && data.xendit?.invoice_url) {
+        window.location.href = data.xendit.invoice_url
+      } else {
+        toast.error(data.error || "Gagal memproses pembayaran")
+      }
+    } catch {
+      toast.error("Terjadi kesalahan jaringan")
+    }
+    setSubmitting(false)
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-border p-6">
+      <h2 className="font-semibold mb-3">Pembayaran</h2>
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
+        <p className="text-sm text-emerald-700">Silakan lakukan pembayaran sebesar <strong>{formatRupiah(total)}</strong> sebelum jatuh tempo.</p>
+      </div>
+      <div className="bg-gray-50 rounded-xl p-4 mb-4">
+        <p className="text-xs text-muted-foreground mb-1">Kode Booking</p>
+        <div className="flex items-center gap-2">
+          <p className="font-mono font-bold text-lg">{bookingId.slice(0, 8).toUpperCase()}</p>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(bookingId.slice(0, 8).toUpperCase())
+              toast.success("Kode booking disalin")
+            }}
+            className="p-1 hover:bg-gray-200 rounded transition-colors"
+          >
+            <Copy className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+      <button
+        onClick={handlePay}
+        disabled={submitting}
+        className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+      >
+        {submitting ? (
+          <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+        ) : (
+          <><CreditCard className="w-4 h-4" /> Bayar Sekarang {formatRupiah(total)}</>
+        )}
+      </button>
     </div>
   )
 }
