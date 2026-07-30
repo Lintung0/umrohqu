@@ -7,6 +7,7 @@ import Image from "next/image"
 import { X, Plus, Check, Minus, GitCompare, Award, Leaf, Sparkles, TrendingDown, Star, Shield, BadgeCheck, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
+import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
 import type { Package, Tenant } from "@/lib/types"
 
@@ -449,6 +450,8 @@ function CompareContent() {
           </div>
         </div>
       )}
+
+      <AiChatPanel packages={selected} />
     </main>
   )
 }
