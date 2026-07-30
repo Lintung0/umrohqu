@@ -12,10 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/lib/i18n";
 import { MapPin, Search, Calendar } from "lucide-react";
 import { COUNTRIES } from "@/lib/constants";
 
 export default function SearchWidget() {
+  const { t } = useTranslation();
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -38,10 +40,10 @@ export default function SearchWidget() {
         <form ref={formRef} onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 sm:gap-3 p-3 sm:p-4">
           {/* Country */}
           <div className="space-y-1">
-            <Label className="flex items-center gap-1.5 text-xs font-semibold text-white/50">
-              <MapPin className="w-3 h-3" />
-              Negara Keberangkatan
-            </Label>
+              <Label className="flex items-center gap-1.5 text-xs font-semibold text-white/50">
+                <MapPin className="w-3 h-3" />
+                {t.hero.departure_city}
+              </Label>
             <Select name="country">
               <SelectTrigger className="w-full h-11 text-sm bg-white/10 border-white/10 text-white focus:border-gold/40 focus:ring-gold/10 rounded-xl">
                 <SelectValue placeholder="Pilih negara..." />
@@ -57,10 +59,10 @@ export default function SearchWidget() {
 
           {/* Date */}
           <div className="space-y-1">
-            <Label className="flex items-center gap-1.5 text-xs font-semibold text-white/50">
-              <Calendar className="w-3 h-3" />
-              Tanggal Keberangkatan
-            </Label>
+              <Label className="flex items-center gap-1.5 text-xs font-semibold text-white/50">
+                <Calendar className="w-3 h-3" />
+                {t.hero.month}
+              </Label>
             <Input
               type="date"
               name="date"
@@ -76,7 +78,7 @@ export default function SearchWidget() {
               className="w-full h-11 font-semibold rounded-xl bg-gradient-to-r from-gold to-gold-light text-emerald-deep shadow-lg shadow-gold/20 hover:shadow-xl hover:shadow-gold/30 transition-all duration-300 hover:-translate-y-0.5"
             >
               <Search className="w-4 h-4 mr-1.5" />
-              Cari Paket
+              {t.hero.search}
             </Button>
           </div>
         </form>

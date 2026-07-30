@@ -8,17 +8,20 @@ import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { Divider } from "@/components/auth/divider"
 import { createClient } from "@/lib/supabase/client"
+import { useTranslation } from "@/lib/i18n"
 import { z } from "zod"
 import { Mail, Lock, AlertCircle } from "lucide-react"
-
-const loginSchema = z.object({
-  email: z.string().min(1, "Email wajib diisi.").email("Format email tidak valid."),
-  password: z.string().min(1, "Kata sandi wajib diisi.").min(6, "Kata sandi minimal 6 karakter."),
-})
 
 type LoginErrors = { email?: string; password?: string }
 
 function LoginForm() {
+  const { t } = useTranslation()
+
+  const loginSchema = z.object({
+    email: z.string().min(1, t.auth.email_required).email(t.auth.email_invalid),
+    password: z.string().min(1, t.auth.password_required).min(6, t.auth.password_min.replace("{{min}}", "6")),
+  })
+
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -31,9 +34,9 @@ function LoginForm() {
 
   useEffect(() => {
     if (searchParams.get("error") === "auth_callback_error") {
-      setAuthError("Gagal masuk dengan Google. Silakan coba lagi.")
+      setAuthError(t.auth.auth_error_google)
     }
-  }, [searchParams])
+  }, [searchParams, t.auth.auth_error_google])
 
   const validate = () => {
     const result = loginSchema.safeParse({ email, password })
@@ -63,7 +66,7 @@ function LoginForm() {
 
       if (!checkRes.ok) {
         const checkData = await checkRes.json()
-        setAuthError(checkData.error || "Akun belum terdaftar.")
+        setAuthError(checkData.error || t.auth.email_required)
         return
       }
 
@@ -74,7 +77,7 @@ function LoginForm() {
 
       if (error) {
         if (error.message === "Invalid login credentials") {
-          setAuthError("Kata sandi salah.")
+          setAuthError(t.auth.password_required)
         } else {
           setAuthError(error.message)
         }
@@ -82,7 +85,7 @@ function LoginForm() {
       }
       router.push("/")
     } catch {
-      setAuthError("Terjadi kesalahan saat masuk.")
+      setAuthError(t.auth.password_required)
     } finally {
       setLoading(false)
     }
@@ -96,10 +99,10 @@ function LoginForm() {
 
       <div className="mb-8">
         <h1 className="m-0 text-[26px] font-bold leading-tight tracking-tight text-auth-foreground">
-          Selamat Datang
+          {t.auth.login_title}
         </h1>
         <p className="m-0 mt-2 text-[16px] leading-relaxed text-auth-muted-foreground">
-          Masuk untuk melanjutkan perjalanan ibadah Anda
+          {t.auth.login_subtitle}
         </p>
       </div>
 
@@ -111,17 +114,17 @@ function LoginForm() {
 
       <form onSubmit={(e) => { e.preventDefault(); handleLogin() }} className="flex flex-col gap-[18px]">
         <InputField
-          label="Email"
+          label={t.auth.email}
           value={email}
           onChange={setEmail}
-          placeholder="contoh@email.com"
+          placeholder={t.auth.email_placeholder}
           error={errors.email}
           autoComplete="email"
           icon={Mail}
         />
 
         <PasswordInput
-          label="Kata Sandi"
+          label={t.auth.password}
           value={password}
           onChange={setPassword}
           error={errors.password}
@@ -130,21 +133,21 @@ function LoginForm() {
 
         <div className="-mt-1.5 text-right">
           <Link href="/forgot-password" className="text-[14.5px] font-semibold text-auth-primary no-underline">
-            Lupa Kata Sandi?
+            {t.auth.forgot_password}
           </Link>
         </div>
 
         <PrimaryButton type="submit" loading={loading}>
-          {loading ? "Masuk..." : "Masuk"}
+          {loading ? t.auth.logging_in : t.nav.login}
         </PrimaryButton>
 
-        <Divider label="atau" />
+        <Divider label={t.common.or} />
       </form>
 
       <p className="mb-0 mt-7 text-center text-[15px] text-auth-muted-foreground">
-        Belum punya akun?{" "}
+        {t.auth.no_account}{" "}
         <Link href="/register" className="text-[15px] font-bold text-auth-primary no-underline">
-          Daftar Sekarang
+          {t.auth.register_link}
         </Link>
       </p>
     </>

@@ -1,7 +1,10 @@
+"use client"
+
 import Logo from "./logo"
 import Link from "next/link"
 import Image from "next/image"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
+import { useTranslation } from "@/lib/i18n"
 
 interface FooterItem {
   href: string
@@ -15,40 +18,41 @@ interface FooterSection {
   items: FooterItem[]
 }
 
-const footerLinks: FooterSection[] = [
-  {
-    title: "Tentang Kami",
-    colSpan: "md:col-span-3",
-    items: [
-      { href: "/about", label: "Tentang UmrohQ" },
-      { href: "/faq", label: "FAQ" },
-      { href: "/articles", label: "Blog" },
-      { href: "/terms", label: "Syarat & Ketentuan" },
-      { href: "/privacy", label: "Kebijakan Privasi" },
-    ],
-  },
-  {
-    title: "Produk",
-    colSpan: "md:col-span-2",
-    items: [
-      { href: "/search", label: "Paket Umroh" },
-      { href: "/promotions", label: "Promo" },
-      { href: "/travel", label: "Travel" },
-      { href: "/compare", label: "Bandingkan" },
-    ],
-  },
-  {
-    title: "Ikuti Kami",
-    colSpan: "md:col-span-3",
-    items: [
-      { href: "https://facebook.com", label: "Facebook", icon: "/icons/facebook.svg" },
-      { href: "https://instagram.com", label: "Instagram", icon: "/icons/instagram.svg" },
-      { href: "https://twitter.com", label: "Twitter", icon: "/icons/twitter.svg" },
-    ],
-  },
-]
-
 const Footer = () => {
+  const { t } = useTranslation()
+
+  const footerLinks: FooterSection[] = [
+    {
+      title: t.footer.about,
+      colSpan: "md:col-span-3",
+      items: [
+        { href: "/about", label: t.footer.about },
+        { href: "/faq", label: t.footer.faq },
+        { href: "/articles", label: t.footer.blog },
+        { href: "/terms", label: t.footer.terms },
+        { href: "/privacy", label: t.footer.privacy },
+      ],
+    },
+    {
+      title: "Produk",
+      colSpan: "md:col-span-2",
+      items: [
+        { href: "/search", label: t.footer.packages },
+        { href: "/promotions", label: t.nav.promo },
+        { href: "/travel", label: "Travel" },
+        { href: "/compare", label: "Bandingkan" },
+      ],
+    },
+    {
+      title: t.footer.follow_us,
+      colSpan: "md:col-span-3",
+      items: [
+        { href: "https://facebook.com", label: "Facebook", icon: "/icons/facebook.svg" },
+        { href: "https://instagram.com", label: "Instagram", icon: "/icons/instagram.svg" },
+        { href: "https://twitter.com", label: "Twitter", icon: "/icons/twitter.svg" },
+      ],
+    },
+  ]
   return (
     <footer className="relative mt-auto overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary" />

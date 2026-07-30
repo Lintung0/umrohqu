@@ -5,8 +5,10 @@ import { Suspense, useEffect, useState } from "react"
 import Link from "next/link"
 import { Mail } from "lucide-react"
 import { PrimaryButton } from "@/components/auth/primary-button"
+import { useTranslation } from "@/lib/i18n"
 
 function VerifyEmailContent() {
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   const router = useRouter()
   const email = searchParams.get("email")
@@ -34,25 +36,26 @@ function VerifyEmailContent() {
       </div>
 
       <h1 className="m-0 text-[26px] font-bold leading-tight tracking-tight text-auth-foreground">
-        Cek Email Anda
+        {t.auth.verify_email_title}
       </h1>
       <p className="mx-auto mb-2 mt-3 max-w-[340px] text-[16px] leading-relaxed text-auth-muted-foreground">
         {email ? (
-          <>Kami telah mengirim tautan verifikasi ke <strong>{email}</strong></>
+          <>{t.auth.verify_email_desc} <strong>{email}</strong></>
         ) : (
-          "Kami telah mengirim tautan verifikasi ke email Anda."
+          t.auth.verify_email_desc
         )}
       </p>
+
       <p className="mx-auto mb-8 max-w-[340px] text-[14px] leading-relaxed text-auth-muted-foreground">
-        Klik tautan tersebut untuk mengaktifkan akun Anda. Setelah itu Anda bisa login.
+        {t.auth.verify_error}
       </p>
 
       <p className="mb-4 text-[14px] text-auth-muted-foreground">
-        Dialihkan ke halaman login dalam {countdown} detik...
+        {t.auth.verify_email_countdown} {countdown} {t.auth.seconds}...
       </p>
 
       <Link href="/login" className="w-full">
-        <PrimaryButton>Ke Halaman Login</PrimaryButton>
+        <PrimaryButton>{t.nav.login}</PrimaryButton>
       </Link>
     </div>
   )

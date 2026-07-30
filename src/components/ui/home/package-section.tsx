@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "@/lib/i18n";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Hotel, Plane, Clock, MapPin, Star } from "lucide-react";
@@ -8,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Package } from "@/lib/types";
 
 export default function PackageSection() {
+  const { t } = useTranslation();
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [compared, setCompared] = useState<string[]>([]);
@@ -64,7 +66,7 @@ export default function PackageSection() {
         <div className="flex items-center justify-between mb-10">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Paket Umrah Pilihan
+              {t.package.title}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               Harga terbaik, fasilitas premium
@@ -74,7 +76,7 @@ export default function PackageSection() {
             href="/search"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
           >
-            Lihat Semua
+            {t.common.view_all}
           </Link>
         </div>
 
@@ -86,7 +88,7 @@ export default function PackageSection() {
               Bandingkan
             </Link>
             <button onClick={() => setCompared([])} className="text-xs opacity-60 hover:opacity-100">
-              Hapus
+              {t.common.delete}
             </button>
           </div>
         )}
@@ -162,7 +164,7 @@ export default function PackageSection() {
                   {/* Price + actions */}
                   <div className="flex items-center justify-between pt-3 border-t border-border/60">
                     <div>
-                      <p className="text-xs text-muted-foreground">Mulai dari</p>
+                      <p className="text-xs text-muted-foreground">{t.package.price_from}</p>
                       <p className="font-bold text-base text-primary">
                         Rp {(pkg.price / 1_000_000).toFixed(0)}jt
                       </p>

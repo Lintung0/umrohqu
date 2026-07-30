@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "@/components/shared/language-switcher"
 import { LayoutDashboard, LogOut, ChevronDown, Search, Menu, X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
@@ -21,16 +22,6 @@ const ROLE_DASHBOARD_MAP: Record<string, string> = {
   customer: "/dashboard",
 }
 
-const ROLE_DASHBOARD_LABELS: Record<string, string> = {
-  super_admin: "Admin Dashboard",
-  marketplace_admin: "Admin Dashboard",
-  marketplace_finance: "Finance Dashboard",
-  marketplace_operational: "Operational Dashboard",
-  travel_admin: "Travel Dashboard",
-  travel_staff: "Travel Dashboard",
-  customer: "Dashboard Saya",
-}
-
 const Navbar = () => {
   const [user, setUser] = useState<User | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
@@ -39,6 +30,17 @@ const Navbar = () => {
   const [loading, setLoading] = useState(true)
   const [scrolled, setScrolled] = useState(false)
   const router = useRouter()
+  const { t } = useTranslation()
+
+  const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
+    super_admin: "admin_dashboard",
+    marketplace_admin: "admin_dashboard",
+    marketplace_finance: "finance_dashboard",
+    marketplace_operational: "operational_dashboard",
+    travel_admin: "travel_dashboard",
+    travel_staff: "travel_staff_dashboard",
+    customer: "dashboard_saya",
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -96,7 +98,9 @@ const Navbar = () => {
   }
 
   const dashboardPath = userRole ? (ROLE_DASHBOARD_MAP[userRole] || "/dashboard") : "/dashboard"
-  const dashboardLabel = userRole ? (ROLE_DASHBOARD_LABELS[userRole] || "Dashboard") : "Dashboard"
+  const dashboardLabel = userRole
+    ? (t.nav as Record<string, string>)[ROLE_DASHBOARD_LABEL_KEYS[userRole]] || t.nav.dashboard
+    : t.nav.dashboard
 
   return (
     <header
@@ -118,25 +122,25 @@ const Navbar = () => {
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
             >
               <Search className="w-4 h-4" />
-              Cari Paket
+              {t.nav.search_packages}
             </Link>
             <Link
               href="/articles"
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
             >
-              Blog
+              {t.nav.blog}
             </Link>
             <Link
               href="/promotions"
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary text-gold-dark font-semibold"
             >
-              Promo
+              {t.nav.promo}
             </Link>
             <Link
               href="/faq"
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
             >
-              FAQ
+              {t.nav.faq}
             </Link>
           </nav>
 
@@ -152,7 +156,7 @@ const Navbar = () => {
                 >
                   <Image
                     src={user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.user_metadata?.full_name || user.email || "U")}&background=0D7C5F&color=fff&size=80&bold=true`}
-                    alt="Avatar"
+                    alt={t.nav.dashboard}
                     width={30}
                     height={30}
                     className="rounded-full ring-2 ring-primary/20"
@@ -180,7 +184,7 @@ const Navbar = () => {
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
-                        Keluar
+                        {t.nav.logout}
                       </button>
                     </div>
                   </>
@@ -192,13 +196,13 @@ const Navbar = () => {
                   href="/login"
                   className="px-5 py-2 text-sm font-semibold rounded-xl border border-primary/20 text-primary hover:bg-primary/10 transition-all duration-200"
                 >
-                  Masuk
+                  {t.nav.login}
                 </Link>
                 <Link
                   href="/register"
                   className="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary to-emerald-glow text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200"
                 >
-                  Daftar
+                  {t.nav.register}
                 </Link>
               </div>
             )}
@@ -219,16 +223,16 @@ const Navbar = () => {
         <div className="md:hidden glass-strong border-t border-border/50 animate-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-4 space-y-1">
             <Link href="/search" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
-              <Search className="w-4 h-4 text-primary" /> Cari Paket
+              <Search className="w-4 h-4 text-primary" /> {t.nav.search_packages}
             </Link>
             <Link href="/articles" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
-              Blog
+              {t.nav.blog}
             </Link>
             <Link href="/promotions" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gold-dark hover:bg-gold/10 transition-colors">
-              Promo
+              {t.nav.promo}
             </Link>
             <Link href="/faq" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
-              FAQ
+              {t.nav.faq}
             </Link>
             <div className="flex items-center px-4 py-2">
               <LanguageSwitcher />
@@ -242,16 +246,16 @@ const Navbar = () => {
                     <LayoutDashboard className="w-4 h-4 text-primary" /> {dashboardLabel}
                   </Link>
                   <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
-                    <LogOut className="w-4 h-4" /> Keluar
+                    <LogOut className="w-4 h-4" /> {t.nav.logout}
                   </button>
                 </>
               ) : (
                 <div className="flex gap-2">
                   <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1 py-2.5 text-center text-sm font-semibold rounded-xl border border-primary/20 text-primary hover:bg-primary/10 transition-colors">
-                    Masuk
+                    {t.nav.login}
                   </Link>
                   <Link href="/register" onClick={() => setMobileOpen(false)} className="flex-1 py-2.5 text-center text-sm font-semibold rounded-xl bg-gradient-to-r from-primary to-emerald-glow text-white shadow-md transition-colors">
-                    Daftar
+                    {t.nav.register}
                   </Link>
                 </div>
               )}

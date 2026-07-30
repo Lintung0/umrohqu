@@ -6,6 +6,7 @@ import { User } from "@supabase/supabase-js"
 import { Search, Eye, Check, X, Download, Users } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel, BOOKING_STATUSES } from "@/lib/constants"
 import { toast } from "sonner"
+import { useTranslation } from "@/lib/i18n"
 
 interface BookingRow {
   id: string
@@ -21,6 +22,7 @@ interface BookingRow {
 }
 
 export default function TravelBookingsPage() {
+  const { t } = useTranslation()
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
@@ -55,10 +57,10 @@ export default function TravelBookingsPage() {
   async function updateBookingStatus(bookingId: string, newStatus: string) {
     const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", bookingId)
     if (error) {
-      toast.error("Gagal mengubah status")
+      toast.error(t("travel_dashboard.status_update_failed"))
     } else {
       setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: newStatus } : b))
-      toast.success("Status booking diperbarui")
+      toast.success(t("travel_dashboard.status_updated"))
     }
   }
 
@@ -86,18 +88,18 @@ export default function TravelBookingsPage() {
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Pesanan</h1>
-          <p className="text-muted-foreground mt-1">Kelola semua pesanan masuk dari jamaah</p>
+          <h1 className="text-2xl font-bold">{t("travel_dashboard.title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("travel_dashboard.manage_bookings")}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total", value: bookings.length, color: "text-foreground" },
-          { label: "Menunggu", value: bookings.filter((b) => b.status === "pending_payment").length, color: "text-yellow-600" },
-          { label: "Diproses", value: bookings.filter((b) => b.status === "processing").length, color: "text-purple-600" },
-          { label: "Dikonfirmasi", value: bookings.filter((b) => b.status === "confirmed").length, color: "text-green-600" },
-          { label: "Revenue", value: formatRupiah(totalRevenue), color: "text-emerald-600" },
+          { label: t("travel_dashboard.total"), value: bookings.length, color: "text-foreground" },
+          { label: t("travel_dashboard.pending"), value: bookings.filter((b) => b.status === "pending_payment").length, color: "text-yellow-600" },
+          { label: t("travel_dashboard.processing"), value: bookings.filter((b) => b.status === "processing").length, color: "text-purple-600" },
+          { label: t("travel_dashboard.confirmed"), value: bookings.filter((b) => b.status === "confirmed").length, color: "text-green-600" },
+          { label: t("travel_dashboard.revenue"), value: formatRupiah(totalRevenue), color: "text-emerald-600" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4 text-center">
             <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
@@ -111,7 +113,7 @@ export default function TravelBookingsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Cari nama, paket, atau ID..."
+            placeholder={t("travel_dashboard.search_placeholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
@@ -137,25 +139,25 @@ export default function TravelBookingsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-gray-50/50">
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Pelanggan</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Paket</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Jumlah</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Total</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fee</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Channel</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Aksi</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.customer")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.package")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.amount")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("booking.total")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.fee")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("booking.status")}</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.channel")}</th>
+                <th className="text-right px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.action")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">Tidak ada pesanan</td>
+                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">{t("travel_dashboard.no_bookings")}</td>
                 </tr>
               ) : filtered.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-medium">{booking.customer?.full_name || "Pelanggan"}</p>
+                    <p className="font-medium">{booking.customer?.full_name || t("travel_dashboard.customer")}</p>
                     <p className="text-xs text-muted-foreground">{booking.customer?.email}</p>
                   </td>
                   <td className="px-4 py-3 max-w-[180px] truncate text-muted-foreground">{booking.package?.name}</td>
@@ -180,16 +182,16 @@ export default function TravelBookingsPage() {
                             <button
                               onClick={() => updateBookingStatus(booking.id, "confirmed")}
                               className="px-2 py-1 text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
-                              title="Konfirmasi pembayaran"
+                              title={t("travel_dashboard.confirm_title")}
                             >
                               <Check className="w-3.5 h-3.5 inline mr-1" />
-                              Konfirmasi
+                              {t("travel_dashboard.confirm_btn")}
                             </button>
                           ) : (
                             <button
                               onClick={() => updateBookingStatus(booking.id, "confirmed")}
                               className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                              title="Konfirmasi"
+                              title={t("travel_dashboard.confirm_title")}
                             >
                               <Check className="w-4 h-4" />
                             </button>
@@ -197,7 +199,7 @@ export default function TravelBookingsPage() {
                           <button
                             onClick={() => updateBookingStatus(booking.id, "cancelled")}
                             className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Tolak"
+                            title={t("travel_dashboard.reject_title")}
                           >
                             <X className="w-4 h-4" />
                           </button>

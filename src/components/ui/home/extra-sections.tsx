@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslation } from "@/lib/i18n"
 import Image from "next/image"
 import Link from "next/link"
 import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight, TrendingUp } from "lucide-react"
@@ -49,6 +50,7 @@ interface HomeStats {
 }
 
 export function StatsSection() {
+  const { t } = useTranslation()
   const [stats, setStats] = useState<HomeStats>({ travelCount: 0, packageCount: 0, bookingCount: 0, avgRating: 0 })
 
   useEffect(() => {
@@ -75,10 +77,10 @@ export function StatsSection() {
   }, [])
 
   const displayStats = [
-    { value: stats.travelCount > 0 ? `${stats.travelCount}+` : "0", label: "Travel Partner" },
-    { value: stats.packageCount > 0 ? `${stats.packageCount}+` : "0", label: "Paket Tersedia" },
-    { value: stats.bookingCount > 0 ? `${stats.bookingCount}+` : "0", label: "Booking Berhasil" },
-    { value: stats.avgRating > 0 ? `${stats.avgRating}★` : "4.9★", label: "Rating Rata-rata" },
+    { value: stats.travelCount > 0 ? `${stats.travelCount}+` : "0", label: t.landing.stats_travels },
+    { value: stats.packageCount > 0 ? `${stats.packageCount}+` : "0", label: t.landing.stats_packages },
+    { value: stats.bookingCount > 0 ? `${stats.bookingCount}+` : "0", label: t.landing.stats_customers },
+    { value: stats.avgRating > 0 ? `${stats.avgRating}★` : "4.9★", label: t.landing.stats_cities },
   ]
 
   return (
@@ -89,19 +91,27 @@ export function StatsSection() {
       </div>
       <div className="absolute top-0 left-1/4 w-64 h-64 bg-emerald-glow/15 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-gold/10 rounded-full blur-3xl" />
-      <div className="relative mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-        {displayStats.map((s) => (
+      <div className="relative mx-auto max-w-7xl">
+        <div className="text-center mb-10 space-y-2">
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+            {t.landing.stats_title}
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {displayStats.map((s) => (
           <div key={s.label} className="space-y-2">
             <div className="text-3xl md:text-4xl font-bold text-white tracking-tight">{s.value}</div>
             <div className="text-sm text-white/60 font-medium">{s.label}</div>
           </div>
         ))}
+        </div>
       </div>
     </section>
   )
 }
 
 export function WhyUsSection() {
+  const { t } = useTranslation()
   const [travelCount, setTravelCount] = useState(0)
 
   useEffect(() => {
@@ -113,28 +123,22 @@ export function WhyUsSection() {
 
   const WHY_US = [
     {
-      icon: Shield,
-      title: "Terpercaya & Berizin",
-      desc: "Seluruh travel partner terverifikasi Kementerian Agama dan memiliki izin resmi PPIU.",
-      bg: "bg-emerald-50",
-    },
-    {
       icon: Award,
-      title: `${travelCount > 0 ? travelCount : "100+"} Travel Partner`,
-      desc: "Pilih dari berbagai biro perjalanan umroh & haji terbaik di seluruh Indonesia.",
+      title: t.landing.why_us_compare_title,
+      desc: t.landing.why_us_compare_desc,
       bg: "bg-amber-50",
     },
     {
-      icon: Headphones,
-      title: "Dukungan 24/7",
-      desc: "Tim kami siap membantu Anda sebelum, selama, dan setelah perjalanan ibadah.",
-      bg: "bg-blue-50",
+      icon: Shield,
+      title: t.landing.why_us_trusted_title,
+      desc: t.landing.why_us_trusted_desc,
+      bg: "bg-emerald-50",
     },
     {
-      icon: Users,
-      title: "Pembayaran Aman",
-      desc: "Sistem pembayaran terintegrasi dengan virtual account dan e-wallet terpercaya.",
-      bg: "bg-purple-50",
+      icon: Headphones,
+      title: t.landing.why_us_easy_title,
+      desc: t.landing.why_us_easy_desc,
+      bg: "bg-blue-50",
     },
   ]
 
@@ -149,13 +153,13 @@ export function WhyUsSection() {
             Keunggulan Kami
           </span>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Kenapa Pilih <span className="text-gradient-primary">UmrohQ</span>?
+            {t.landing.why_us_title}
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base">
-            Platform marketplace umroh & haji pertama di Indonesia yang menghubungkan jamaah dengan travel terpercaya.
+            {t.landing.why_us_desc}
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {WHY_US.map((item) => (
             <div
               key={item.title}
@@ -177,6 +181,7 @@ export function WhyUsSection() {
 }
 
 export function TravelAgenciesSection() {
+  const { t } = useTranslation()
   const [agencies, setAgencies] = useState<Tenant[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -232,17 +237,17 @@ export function TravelAgenciesSection() {
         <div className="flex items-end justify-between mb-10">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Travel Partner Unggulan
+              {t.landing.travel_section_title}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Dipercaya ratusan ribu jamaah
+              {t.landing.travel_section_desc}
             </p>
           </div>
           <Link
             href="/travel"
             className="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group/link"
           >
-            Semua Partner
+            {t.common.view_all}
             <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         </div>
@@ -279,7 +284,7 @@ export function TravelAgenciesSection() {
                   <Star className="w-3.5 h-3.5 fill-gold text-gold" />
                   <span className="text-xs font-medium">4.{8 - (idx % 2)}</span>
                   <span className="text-xs text-muted-foreground ml-1">
-                    {agency.packages_count || 0} Paket
+                    {agency.packages_count || 0} {t.package.title}
                   </span>
                 </div>
               </div>
@@ -288,7 +293,7 @@ export function TravelAgenciesSection() {
         </div>
         <div className="mt-6 text-center md:hidden">
           <Link href="/travel" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-            Lihat Semua Travel <ArrowRight className="w-4 h-4" />
+            {t.common.view_all} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
@@ -297,6 +302,7 @@ export function TravelAgenciesSection() {
 }
 
 export function TestimonialSection() {
+  const { t } = useTranslation()
   const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS)
 
   useEffect(() => {
@@ -334,41 +340,41 @@ export function TestimonialSection() {
             Testimoni
           </span>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Kata <span className="text-gradient-gold">Mereka</span>
+            {t.landing.testimonial_title}
           </h2>
           <p className="text-muted-foreground text-sm">
-            Pengalaman nyata jamaah yang telah berangkat bersama kami
+            {t.landing.testimonial_desc}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.map((t) => (
+          {testimonials.map((item) => (
             <div
-              key={t.id}
+              key={item.id}
               className="group relative flex flex-col gap-4 p-6 rounded-2xl border border-border/60 bg-white hover:shadow-xl hover:shadow-gold/5 hover:border-gold/20 transition-all duration-300 hover:-translate-y-1"
             >
               <div className="absolute -top-3 -left-1 text-5xl text-gold/15 font-serif leading-none select-none">
                 &ldquo;
               </div>
               <div className="flex gap-0.5">
-                {Array.from({ length: t.rating }).map((_, i) => (
+                {Array.from({ length: item.rating }).map((_, i) => (
                   <Star key={i} className="size-4 fill-gold text-gold" />
                 ))}
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed flex-1 relative z-10">
-                &ldquo;{t.comment}&rdquo;
+                &ldquo;{item.comment}&rdquo;
               </p>
               <div className="flex items-center gap-3 pt-3 border-t border-border/50">
                 <Image
-                  src={t.avatar}
-                  alt={t.name}
+                  src={item.avatar}
+                  alt={item.name}
                   width={40}
                   height={40}
                   className="rounded-full ring-2 ring-gold/20"
                 />
                 <div>
-                  <p className="text-sm font-semibold">{t.name}</p>
+                  <p className="text-sm font-semibold">{item.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {t.city} &middot; {t.package}
+                    {item.city} &middot; {item.package}
                   </p>
                 </div>
               </div>
@@ -381,6 +387,7 @@ export function TestimonialSection() {
 }
 
 export function TrustSection() {
+  const { t } = useTranslation()
   const items = [
     { icon: Shield, title: "Transaksi Aman", desc: "Dana escrow terjamin" },
     { icon: Award, title: "Travel Terverifikasi", desc: "Seleksi ketat & berlisensi" },
@@ -391,6 +398,10 @@ export function TrustSection() {
   return (
     <section className="py-12 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-10 space-y-2">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t.landing.trust_title}</h2>
+          <p className="text-muted-foreground text-sm">{t.landing.trust_desc}</p>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {items.map((item) => (
             <div key={item.title} className="text-center p-6 rounded-2xl bg-white shadow-sm">
@@ -408,6 +419,7 @@ export function TrustSection() {
 }
 
 export function CTASection() {
+  const { t } = useTranslation()
   return (
     <section className="relative overflow-hidden py-20 px-6 md:px-12">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary" />
@@ -418,26 +430,24 @@ export function CTASection() {
       <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gold/10 rounded-full blur-3xl" />
       <div className="relative max-w-3xl mx-auto text-center text-white">
         <h2 className="text-2xl md:text-3xl font-bold leading-tight">
-          Siap Memulai Perjalanan{" "}
-          <span className="text-gradient-gold">Ibadah</span> Anda?
+          {t.landing.cta_title}
         </h2>
         <p className="mt-4 text-white/60 text-sm md:text-base leading-relaxed">
-          Daftar sekarang dan temukan paket umroh terbaik sesuai kebutuhan Anda.
-          Berbagai paket dari travel terpercaya menanti Anda.
+          {t.landing.cta_desc}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
           <Link
             href="/register"
             className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-gold to-gold-light text-emerald-deep font-bold rounded-xl shadow-lg shadow-gold/20 hover:shadow-xl hover:shadow-gold/30 transition-all duration-300 hover:-translate-y-0.5"
           >
-            Daftar Gratis
+            {t.landing.cta_button}
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/search"
             className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border-2 border-white/20 text-white font-bold rounded-xl hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
           >
-            Cari Paket
+            {t.hero.search}
           </Link>
         </div>
         <div className="flex items-center justify-center gap-6 mt-10 text-sm text-white/50">

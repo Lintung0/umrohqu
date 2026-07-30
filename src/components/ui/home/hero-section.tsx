@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslation } from "@/lib/i18n"
 import SearchWidget from "./search-widget"
 import { IslamicCorner } from "@/components/ui/islamic-pattern"
 import dynamic from "next/dynamic"
@@ -7,6 +8,7 @@ import dynamic from "next/dynamic"
 const Kaaba3D = dynamic(() => import("./kaaba-3d"), { ssr: false })
 
 export default function HeroSection() {
+  const { t } = useTranslation()
   return (
     <section className="relative min-h-[92vh] flex flex-col justify-center overflow-hidden">
       {/* Background layers */}
@@ -41,15 +43,12 @@ export default function HeroSection() {
 
             {/* Heading */}
             <h1 className="animate-fade-in-up-delay-1 text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight">
-              Temukan Paket{" "}
-              <span className="text-gradient-gold">Umrah Sempurna</span>{" "}
-              untuk Perjalanan Anda
+              {t.hero.title}
             </h1>
 
             {/* Subtitle */}
             <p className="animate-fade-in-up-delay-2 text-lg sm:text-xl text-white/70 max-w-xl leading-relaxed">
-              Penerbangan, hotel, visa & dukungan ahli semuanya dalam satu tempat.
-              Waktu terbaik menanti Anda.
+              {t.hero.subtitle}
             </p>
 
             {/* Trust badges */}
@@ -61,9 +60,9 @@ export default function HeroSection() {
                 <span>4.9/5 Rating</span>
               </div>
               <div className="w-px h-4 bg-white/20" />
-              <div className="text-white/50 text-sm">10,000+ Jemaah Puas</div>
+              <div className="text-white/50 text-sm">{t.hero.customers}</div>
               <div className="w-px h-4 bg-white/20" />
-              <div className="text-white/50 text-sm">Biro Perjalanan Tersertifikasi</div>
+              <div className="text-white/50 text-sm">{t.hero.travel_partners}</div>
             </div>
           </div>
 

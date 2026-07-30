@@ -7,6 +7,7 @@ import { ArrowLeft, Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText,
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import Link from "next/link"
+import { useTranslation } from "@/lib/i18n"
 
 interface BookingDetail {
   id: string
@@ -27,17 +28,18 @@ interface BookingDetail {
   participants: { id: string; full_name: string; nik: string | null; passport_no: string | null; gender: string | null; phone: string | null; relation: string }[]
 }
 
-const TIMELINE_STEPS = [
-  { key: "pending_payment", label: "Dibuat", icon: Clock },
-  { key: "processing", label: "Diproses", icon: Loader2 },
-  { key: "confirmed", label: "Dikonfirmasi", icon: CheckCircle },
-  { key: "completed", label: "Selesai", icon: CheckCircle },
-]
-
 export default function BookingDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { t } = useTranslation()
   const supabase = createClient()
+
+  const TIMELINE_STEPS = [
+    { key: "pending_payment", label: t("booking.booking_created"), icon: Clock },
+    { key: "processing", label: t("booking.status_processing"), icon: Loader2 },
+    { key: "confirmed", label: t("booking.status_confirmed"), icon: CheckCircle },
+    { key: "completed", label: t("booking.status_completed"), icon: CheckCircle },
+  ]
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -88,9 +90,9 @@ export default function BookingDetailPage() {
     return (
       <div className="p-6 lg:p-8 max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl border border-border p-12 text-center">
-          <p className="text-muted-foreground">Booking tidak ditemukan</p>
+          <p className="text-muted-foreground">{t("booking.not_found")}</p>
           <Link href="/dashboard/bookings" className="text-emerald-600 hover:underline text-sm mt-2 inline-block">
-            Kembali ke daftar booking
+            {t("booking.back_to_list")}
           </Link>
         </div>
       </div>
@@ -104,16 +106,16 @@ export default function BookingDetailPage() {
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="w-4 h-4" />
-        Kembali
+        {t("booking.back")}
       </button>
 
       {/* Header */}
       <div className="bg-white rounded-2xl border border-border p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">Kode Booking</p>
+            <p className="text-sm text-muted-foreground">{t("booking.booking_id")}</p>
             <h1 className="text-xl font-bold font-mono">{booking.id.slice(0, 8).toUpperCase()}</h1>
-            <p className="text-muted-foreground mt-1">{pkg?.name || "Paket Umroh"}</p>
+            <p className="text-muted-foreground mt-1">{pkg?.name || t("booking.package")}</p>
           </div>
           <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(booking.status, "booking")}`}>
             {getStatusLabel(booking.status, "booking")}
@@ -123,7 +125,7 @@ export default function BookingDetailPage() {
 
       {/* Timeline */}
       <div className="bg-white rounded-2xl border border-border p-6">
-        <h2 className="font-semibold mb-4">Status Booking</h2>
+        <h2 className="font-semibold mb-4">{t("booking.status")}</h2>
         <div className="flex items-center gap-0">
           {TIMELINE_STEPS.map((step, i) => {
             const isActive = currentStepIndex >= i
@@ -148,7 +150,7 @@ export default function BookingDetailPage() {
         {booking.status === "cancelled" && (
           <div className="mt-4 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-xl">
             <XCircle className="w-4 h-4" />
-            Booking ini telah dibatalkan
+            {t("booking.status_cancelled")}
           </div>
         )}
       </div>
@@ -158,7 +160,7 @@ export default function BookingDetailPage() {
         <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">
             <FileText className="w-4 h-4" />
-            Detail Paket
+            {t("booking.package")}
           </h2>
           <div className="space-y-3 text-sm">
             {pkg?.departure_city && (
@@ -170,7 +172,7 @@ export default function BookingDetailPage() {
             {pkg?.duration_days && (
               <div className="flex items-center gap-3">
                 <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{pkg.duration_days} hari</span>
+                <span>{pkg.duration_days} {t("package.day")}</span>
               </div>
             )}
             {pkg?.airline && (
@@ -198,15 +200,15 @@ export default function BookingDetailPage() {
         <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
-            Informasi Pembayaran
+            {t("booking.payment_info")}
           </h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Harga Paket ({booking.pilgrim_count} jamaah)</span>
+              <span className="text-muted-foreground">{t("booking.package")} ({booking.pilgrim_count})</span>
               <span>{formatRupiah(booking.price)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Biaya Layanan</span>
+              <span className="text-muted-foreground">{t("travel_dashboard.fee")}</span>
               <span>{formatRupiah(booking.fee)}</span>
             </div>
             {booking.payment_type === "dp" && (
@@ -224,7 +226,7 @@ export default function BookingDetailPage() {
                 </div>
                 {booking.remaining_due_date && (
                   <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Jatuh tempo sisa</span>
+                    <span className="text-muted-foreground">{t("booking.due_date")}</span>
                     <span className="font-medium">
                       {new Date(booking.remaining_due_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
                     </span>
@@ -233,7 +235,7 @@ export default function BookingDetailPage() {
               </>
             )}
             <div className="border-t border-border pt-2 flex justify-between font-semibold">
-              <span>Total dibayar</span>
+              <span>{t("booking.total")}</span>
               <span className="text-emerald-600">{formatRupiah(booking.total)}</span>
             </div>
           </div>
@@ -244,7 +246,7 @@ export default function BookingDetailPage() {
           <div className="bg-white rounded-2xl border border-border p-6 lg:col-span-2 space-y-4">
             <h2 className="font-semibold flex items-center gap-2">
               <Users className="w-4 h-4" />
-              Data Jamaah ({booking.participants.length})
+              {t("booking.participants")} ({booking.participants.length})
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -282,11 +284,11 @@ export default function BookingDetailPage() {
         <div className="bg-white rounded-2xl border border-border p-6">
           <h2 className="font-semibold mb-3 flex items-center gap-2">
             <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
-            Pembayaran Diterima
+            {t("booking.payment_received_title")}
           </h2>
           <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
             <p className="text-sm text-purple-700">
-              Pembayaran Anda telah kami terima. Saat ini sedang dalam proses konfirmasi oleh travel partner. Kami akan memberi tahu Anda begitu status berubah.
+              {t("booking.processing_message")}
             </p>
           </div>
         </div>
@@ -297,13 +299,13 @@ export default function BookingDetailPage() {
         <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            Pelunasan Sisa DP
+            {t("booking.pay_remaining")}
           </h2>
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <p className="text-sm text-amber-700">
-              Booking DP Anda masih memiliki sisa cicilan sebesar <strong>{formatRupiah(booking.remaining_amount || 0)}</strong>.
+              {t("booking.remaining_dp_info", { amount: formatRupiah(booking.remaining_amount || 0) })}
               {booking.remaining_due_date && (
-                <> Jatuh tempo: {new Date(booking.remaining_due_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</>
+                <> {t("booking.due_date")}: {new Date(booking.remaining_due_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</>
               )}
             </p>
           </div>
@@ -315,6 +317,7 @@ export default function BookingDetailPage() {
 }
 
 function PayNowSection({ bookingId, total }: { bookingId: string; total: number }) {
+  const { t } = useTranslation()
   const [submitting, setSubmitting] = useState(false)
 
   const handlePay = async () => {
@@ -339,12 +342,12 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
 
   return (
     <div className="bg-white rounded-2xl border border-border p-6">
-      <h2 className="font-semibold mb-3">Pembayaran</h2>
+      <h2 className="font-semibold mb-3">{t("booking.payment_info")}</h2>
       <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
-        <p className="text-sm text-emerald-700">Silakan lakukan pembayaran sebesar <strong>{formatRupiah(total)}</strong> sebelum jatuh tempo.</p>
+        <p className="text-sm text-emerald-700">{t("booking.pay_now")} <strong>{formatRupiah(total)}</strong></p>
       </div>
       <div className="bg-gray-50 rounded-xl p-4 mb-4">
-        <p className="text-xs text-muted-foreground mb-1">Kode Booking</p>
+        <p className="text-xs text-muted-foreground mb-1">{t("booking.booking_id")}</p>
         <div className="flex items-center gap-2">
           <p className="font-mono font-bold text-lg">{bookingId.slice(0, 8).toUpperCase()}</p>
           <button
@@ -364,9 +367,9 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
         className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center gap-2 disabled:opacity-50"
       >
         {submitting ? (
-          <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+          <><Loader2 className="w-4 h-4 animate-spin" /> {t("common.loading")}</>
         ) : (
-          <><CreditCard className="w-4 h-4" /> Bayar Sekarang {formatRupiah(total)}</>
+          <><CreditCard className="w-4 h-4" /> {t("booking.pay_now")} {formatRupiah(total)}</>
         )}
       </button>
     </div>
@@ -374,6 +377,7 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
 }
 
 function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string; remainingAmount: number }) {
+  const { t } = useTranslation()
   const supabase = createClient()
   const [walletBalance, setWalletBalance] = useState<number | null>(null)
   const [useWallet, setUseWallet] = useState(true)
@@ -463,9 +467,9 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
         className="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
       >
         {submitting ? (
-          <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+          <><Loader2 className="w-4 h-4 animate-spin" /> {t("common.loading")}</>
         ) : (
-          <>Bayar Sisa {formatRupiah(remainingAmount)}</>
+          <>{t("booking.pay_remaining")} {formatRupiah(remainingAmount)}</>
         )}
       </button>
     </div>

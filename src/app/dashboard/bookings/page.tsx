@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BookOpen, Filter } from "lucide-react"
+import { useTranslation } from "@/lib/i18n"
 import { BOOKING_STATUSES, formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 
 interface BookingRow {
@@ -21,6 +22,7 @@ interface BookingRow {
 }
 
 export default function BookingsPage() {
+  const { t } = useTranslation()
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
@@ -61,8 +63,8 @@ export default function BookingsPage() {
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Booking Saya</h1>
-        <p className="text-muted-foreground mt-1">Kelola semua pemesanan umroh Anda</p>
+        <h1 className="text-2xl font-bold">{t("booking.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("booking.detail_title")}</p>
       </div>
 
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -85,8 +87,8 @@ export default function BookingsPage() {
       {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-border p-12 text-center">
           <BookOpen className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-muted-foreground">Tidak ada booking ditemukan</p>
-          <Link href="/search" className="text-sm text-primary hover:underline mt-2 inline-block">Cari Paket</Link>
+          <p className="text-muted-foreground">{t("booking.no_bookings")}</p>
+          <Link href="/search" className="text-sm text-primary hover:underline mt-2 inline-block">{t("package.search_title")}</Link>
         </div>
       ) : (
         <div className="space-y-3">
@@ -109,13 +111,13 @@ export default function BookingsPage() {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium truncate">{booking.package?.name || "Paket Umroh"}</p>
+                  <p className="font-medium truncate">{booking.package?.name || t("booking.package")}</p>
                   <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status, "booking")}`}>
                     {getStatusLabel(booking.status, "booking")}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {booking.pilgrim_count} jamaah · {booking.booking_channel === "marketplace" ? "Portal Utama" : "Website Travel"}
+                  {booking.pilgrim_count} {t("booking.participants")} · {booking.booking_channel === "marketplace" ? t("travel_dashboard.all_bookings") : t("travel_dashboard.title")}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
@@ -123,7 +125,7 @@ export default function BookingsPage() {
               </div>
               <div className="text-right shrink-0">
                 <p className="text-lg font-bold">{formatRupiah(booking.total)}</p>
-                <p className="text-xs text-muted-foreground">+ {formatRupiah(booking.fee)} fee</p>
+                <p className="text-xs text-muted-foreground">+ {formatRupiah(booking.fee)} {t("travel_dashboard.fee")}</p>
               </div>
             </Link>
           ))}

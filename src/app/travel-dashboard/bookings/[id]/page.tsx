@@ -11,6 +11,7 @@ import {
 import Link from "next/link"
 import { toast } from "sonner"
 import type { Booking, Package } from "@/lib/types"
+import { useTranslation } from "@/lib/i18n"
 
 interface Participant {
   full_name: string
@@ -26,20 +27,21 @@ interface BookingDetail extends Booking {
   booking_participants?: Participant[]
 }
 
-const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-  pending: { label: "Menunggu", color: "text-amber-600", bg: "bg-amber-50 border-amber-200", icon: <Clock className="w-4 h-4" /> },
-  confirmed: { label: "Dikonfirmasi", color: "text-blue-600", bg: "bg-blue-50 border-blue-200", icon: <CheckCircle className="w-4 h-4" /> },
-  processing: { label: "Diproses", color: "text-purple-600", bg: "bg-purple-50 border-purple-200", icon: <Loader2 className="w-4 h-4 animate-spin" /> },
-  completed: { label: "Selesai", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200", icon: <CheckCircle className="w-4 h-4" /> },
-  cancelled: { label: "Dibatalkan", color: "text-red-600", bg: "bg-red-50 border-red-200", icon: <XCircle className="w-4 h-4" /> },
-  refunded: { label: "Dikembalikan", color: "text-gray-600", bg: "bg-gray-50 border-gray-200", icon: <XCircle className="w-4 h-4" /> },
-}
-
 export default function TravelBookingDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { t } = useTranslation()
   const id = params.id as string
   const supabase = createClient()
+
+  const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
+    pending: { label: t("booking.status_pending"), color: "text-amber-600", bg: "bg-amber-50 border-amber-200", icon: <Clock className="w-4 h-4" /> },
+    confirmed: { label: t("booking.status_confirmed"), color: "text-blue-600", bg: "bg-blue-50 border-blue-200", icon: <CheckCircle className="w-4 h-4" /> },
+    processing: { label: t("booking.status_processing"), color: "text-purple-600", bg: "bg-purple-50 border-purple-200", icon: <Loader2 className="w-4 h-4 animate-spin" /> },
+    completed: { label: t("booking.status_completed"), color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200", icon: <CheckCircle className="w-4 h-4" /> },
+    cancelled: { label: t("booking.status_cancelled"), color: "text-red-600", bg: "bg-red-50 border-red-200", icon: <XCircle className="w-4 h-4" /> },
+    refunded: { label: t("booking.status_cancelled"), color: "text-gray-600", bg: "bg-gray-50 border-gray-200", icon: <XCircle className="w-4 h-4" /> },
+  }
 
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -70,10 +72,10 @@ export default function TravelBookingDetailPage() {
     setUpdating(true)
     const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", id)
     if (error) {
-      toast.error("Gagal mengubah status booking")
+      toast.error(t("travel_dashboard.status_update_failed"))
     } else {
       setBooking((prev) => prev ? { ...prev, status: newStatus } : prev)
-      toast.success("Status booking diperbarui")
+      toast.success(t("travel_dashboard.status_updated"))
     }
     setUpdating(false)
   }
@@ -90,9 +92,9 @@ export default function TravelBookingDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <FileText className="w-12 h-12 text-muted-foreground/40" />
-        <p className="text-muted-foreground">Booking tidak ditemukan</p>
+        <p className="text-muted-foreground">{t("booking.not_found")}</p>
         <Link href="/travel-dashboard/bookings" className="text-sm text-primary font-semibold">
-          Kembali ke daftar booking
+          {t("booking.back_to_list")}
         </Link>
       </div>
     )
@@ -110,7 +112,7 @@ export default function TravelBookingDetailPage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">Detail Booking</h1>
+          <h1 className="text-2xl font-bold">{t("travel_dashboard.booking_detail")}</h1>
           <p className="text-sm text-muted-foreground">#{booking.id.slice(0, 8).toUpperCase()}</p>
         </div>
       </div>
@@ -123,7 +125,7 @@ export default function TravelBookingDetailPage() {
             {status.label}
           </div>
           <span className="text-sm text-muted-foreground">
-            via {booking.booking_channel === "marketplace" ? "Portal Utama" : booking.booking_channel === "tenant_subdomain" ? "Subdomain" : "Custom Domain"}
+            {t("travel_dashboard.channel")}: {booking.booking_channel === "marketplace" ? "Portal" : booking.booking_channel === "tenant_subdomain" ? "Subdomain" : "Custom Domain"}
           </span>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -150,7 +152,7 @@ export default function TravelBookingDetailPage() {
           {/* Package info */}
           {booking.packages && (
             <div className="bg-white rounded-2xl border border-border p-6">
-              <h2 className="font-semibold mb-4">Paket</h2>
+              <h2 className="font-semibold mb-4">{t("travel_dashboard.package")}</h2>
               <div className="flex gap-4">
                 {booking.packages.image_url && (
                   <img
@@ -162,13 +164,13 @@ export default function TravelBookingDetailPage() {
                 <div className="space-y-1">
                   <p className="font-semibold">{booking.packages.name}</p>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {booking.packages.duration_days} hari</span>
+                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {booking.packages.duration_days} {t("package.day")}</span>
                     <span className="flex items-center gap-1"><Plane className="w-3.5 h-3.5" /> {booking.packages.airline}</span>
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                     <Hotel className="w-3.5 h-3.5" /> {booking.packages.hotel_makkah}
                   </p>
-                  <p className="font-bold text-primary">{formatRupiah(booking.packages.price)} /org</p>
+                  <p className="font-bold text-primary">{formatRupiah(booking.packages.price)} / {t("booking.participants")}</p>
                 </div>
               </div>
             </div>
@@ -177,7 +179,7 @@ export default function TravelBookingDetailPage() {
           {/* Participants */}
           <div className="bg-white rounded-2xl border border-border p-6">
             <h2 className="font-semibold mb-4">
-              Data Jamaah ({booking.booking_participants?.length || 0} orang)
+              {t("booking.participants")} ({booking.booking_participants?.length || 0})
             </h2>
             {booking.booking_participants && booking.booking_participants.length > 0 ? (
               <div className="space-y-3">
@@ -188,7 +190,7 @@ export default function TravelBookingDetailPage() {
                     </div>
                     <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
                       <div>
-                        <p className="text-[10px] text-muted-foreground uppercase">Nama</p>
+                        <p className="text-[10px] text-muted-foreground uppercase">{t("auth.full_name")}</p>
                         <p className="font-medium">{p.full_name}</p>
                       </div>
                       <div>
@@ -208,7 +210,7 @@ export default function TravelBookingDetailPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Belum ada data jamaah</p>
+              <p className="text-sm text-muted-foreground">{t("booking.no_bookings")}</p>
             )}
           </div>
         </div>
@@ -217,7 +219,7 @@ export default function TravelBookingDetailPage() {
         <div className="space-y-6">
           {/* Customer info */}
           <div className="bg-white rounded-2xl border border-border p-6">
-            <h2 className="font-semibold mb-4">Pelanggan</h2>
+            <h2 className="font-semibold mb-4">{t("travel_dashboard.customer")}</h2>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm">
                 <User className="w-4 h-4 text-primary" />
@@ -236,18 +238,18 @@ export default function TravelBookingDetailPage() {
 
           {/* Payment summary */}
           <div className="bg-white rounded-2xl border border-border p-6">
-            <h2 className="font-semibold mb-4">Ringkasan Pembayaran</h2>
+            <h2 className="font-semibold mb-4">{t("booking.payment_info")}</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Harga paket ({booking.pilgrim_count} jamaah)</span>
+                <span className="text-muted-foreground">{t("booking.package")} ({booking.pilgrim_count})</span>
                 <span>{formatRupiah(booking.price)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Service fee</span>
+                <span className="text-muted-foreground">{t("travel_dashboard.fee")}</span>
                 <span>{formatRupiah(booking.fee)}</span>
               </div>
               <div className="border-t pt-2 mt-2 flex justify-between font-bold text-base">
-                <span>Total</span>
+                <span>{t("booking.total")}</span>
                 <span className="text-primary">{formatRupiah(booking.total)}</span>
               </div>
             </div>
