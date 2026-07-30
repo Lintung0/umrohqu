@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Logo from "./logo"
+import { LanguageSwitcher } from "@/components/shared/language-switcher"
 import { LayoutDashboard, LogOut, ChevronDown, Search, Menu, X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -185,7 +186,8 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <LanguageSwitcher />
                 <Link
                   href="/login"
                   className="px-5 py-2 text-sm font-semibold rounded-xl border border-primary/20 text-primary hover:bg-primary/10 transition-all duration-200"
@@ -228,6 +230,9 @@ const Navbar = () => {
             <Link href="/faq" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
               FAQ
             </Link>
+            <div className="flex items-center px-4 py-2">
+              <LanguageSwitcher />
+            </div>
             <div className="pt-2 border-t border-border/50 mt-2">
               {loading ? (
                 <div className="w-full h-10 bg-muted rounded-xl animate-pulse" />

@@ -63,7 +63,7 @@ function LoginForm() {
 
       if (!checkRes.ok) {
         const checkData = await checkRes.json()
-        setAuthError(checkData.error || "Akun belum terdaftar. Silakan daftar terlebih dahulu.")
+        setAuthError(checkData.error || "Akun belum terdaftar.")
         return
       }
 
