@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react"
 import Link from "next/link"
+import { ImageUpload } from "@/components/shared/image-upload"
 
 const packageSchema = z.object({
   name: z.string().min(1, "Nama paket wajib diisi"),
@@ -846,27 +847,9 @@ export default function EditPackagePage() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              URL Gambar
+              URL Gambar atau Upload
             </label>
-            <input
-              type="text"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://contoh.com/gambar-paket.jpg"
-              className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground"
-            />
-            {imageUrl && (
-              <div className="mt-3 relative w-full h-40 rounded-xl overflow-hidden border border-border">
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    ;(e.target as HTMLImageElement).style.display = "none"
-                  }}
-                />
-              </div>
-            )}
+            <ImageUpload value={imageUrl} onChange={setImageUrl} />
             {fieldError("image_url")}
           </div>
         </div>
