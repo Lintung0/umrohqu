@@ -80,6 +80,19 @@ export default function AiChatPanel({ packages }: AiChatPanelProps) {
       return
     }
 
+    const contentType = res.headers.get("Content-Type") || ""
+
+    if (contentType.includes("application/json")) {
+      const data = await res.json()
+      if (data.fallback) {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.content }])
+      } else {
+        setError(data.error || "Gagal memproses permintaan")
+      }
+      setLoading(false)
+      return
+    }
+
     const reader = res.body?.getReader()
     if (!reader) {
       setError("Tidak bisa membaca respons")
@@ -213,7 +226,7 @@ export default function AiChatPanel({ packages }: AiChatPanelProps) {
                 </Button>
               </div>
               <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-                AI menggunakan Google Gemini. Jawaban tidak selalu akurat.
+                Menggunakan Google Gemini (gratis). Jika AI sibuk, jawaban otomatis dari sistem analitik.
               </p>
             </div>
           </div>
