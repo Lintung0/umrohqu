@@ -38,13 +38,10 @@ export default function BookingDetailPage() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
-  const [pollingStatus, setPollingStatus] = useState<string | null>(null)
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
-
     async function load() {
       const { data } = await supabase
         .from("bookings")
@@ -56,22 +53,22 @@ export default function BookingDetailPage() {
       setLoading(false)
 
       if (b && b.status === "pending_payment" && b.xendit_invoice_id) {
-        interval = setInterval(async () => {
-          const { data: fresh } = await supabase
-            .from("bookings")
-            .select("status")
-            .eq("id", params.id)
-            .single()
-          if (fresh && fresh.status !== "pending_payment") {
-            setBooking((prev) => prev ? { ...prev, status: fresh.status } : prev)
-            setPollingStatus(fresh.status)
-            clearInterval(interval)
+        try {
+          const res = await fetch("/api/booking/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bookingId: params.id }),
+          })
+          const result = await res.json()
+          if (result.status && result.status !== "pending_payment") {
+            setBooking((prev) => prev ? { ...prev, status: result.status } : prev)
           }
-        }, 5000)
+        } catch (e) {
+          console.error("Verify payment error:", e)
+        }
       }
     }
     load()
-    return () => clearInterval(interval)
   }, [params.id])
 
   if (loading) {
