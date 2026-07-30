@@ -29,6 +29,7 @@ interface BookingDetail {
 
 const TIMELINE_STEPS = [
   { key: "pending_payment", label: "Dibuat", icon: Clock },
+  { key: "processing", label: "Diproses", icon: Loader2 },
   { key: "confirmed", label: "Dikonfirmasi", icon: CheckCircle },
   { key: "completed", label: "Selesai", icon: CheckCircle },
 ]
@@ -260,8 +261,22 @@ export default function BookingDetailPage() {
         <PayNowSection bookingId={booking.id} total={booking.total} />
       )}
 
+      {booking.status === "processing" && (
+        <div className="bg-white rounded-2xl border border-border p-6">
+          <h2 className="font-semibold mb-3 flex items-center gap-2">
+            <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
+            Pembayaran Diterima
+          </h2>
+          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
+            <p className="text-sm text-purple-700">
+              Pembayaran Anda telah kami terima. Saat ini sedang dalam proses konfirmasi oleh travel partner. Kami akan memberi tahu Anda begitu status berubah.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* DP: Pay Remaining */}
-      {booking.payment_type === "dp" && (booking.remaining_amount || 0) > 0 && booking.status !== "confirmed" && (
+      {booking.payment_type === "dp" && (booking.remaining_amount || 0) > 0 && booking.status === "pending_payment" && (
         <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />

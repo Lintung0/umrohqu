@@ -173,15 +173,26 @@ export default function TravelBookingsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      {booking.status === "pending_payment" && (
+                      {(booking.status === "pending_payment" || booking.status === "processing") && (
                         <>
-                          <button
-                            onClick={() => updateBookingStatus(booking.id, "confirmed")}
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                            title="Konfirmasi"
-                          >
-                            <Check className="w-4 h-4" />
-                          </button>
+                          {booking.status === "processing" ? (
+                            <button
+                              onClick={() => updateBookingStatus(booking.id, "confirmed")}
+                              className="px-2 py-1 text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
+                              title="Konfirmasi pembayaran"
+                            >
+                              <Check className="w-3.5 h-3.5 inline mr-1" />
+                              Konfirmasi
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => updateBookingStatus(booking.id, "confirmed")}
+                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                              title="Konfirmasi"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => updateBookingStatus(booking.id, "cancelled")}
                             className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"

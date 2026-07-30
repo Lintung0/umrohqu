@@ -40,6 +40,7 @@ export const HOTEL_STARS = [
 export const BOOKING_STATUSES = [
   { value: "semua", label: "Semua", color: "bg-gray-100 text-gray-700" },
   { value: "pending_payment", label: "Menunggu", color: "bg-yellow-100 text-yellow-700" },
+  { value: "processing", label: "Diproses", color: "bg-purple-100 text-purple-700" },
   { value: "confirmed", label: "Dikonfirmasi", color: "bg-green-100 text-green-700" },
   { value: "completed", label: "Selesai", color: "bg-blue-100 text-blue-700" },
   { value: "cancelled", label: "Dibatalkan", color: "bg-red-100 text-red-700" },

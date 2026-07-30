@@ -36,27 +36,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    if (isRemaining) {
-      await admin
-        .from("bookings")
-        .update({
-          status: "confirmed",
-          payment_status: "paid",
-          remaining_amount: 0,
-          total: Number(booking.total) + Number(booking.remaining_amount),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", bookingId)
-    } else {
-      await admin
-        .from("bookings")
-        .update({
-          status: "confirmed",
-          payment_status: "paid",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", bookingId)
+    const newStatus = isRemaining ? "confirmed" : "processing"
+    const updateData: Record<string, any> = {
+      status: newStatus,
+      payment_status: "paid",
+      updated_at: new Date().toISOString(),
     }
+    if (isRemaining) {
+      updateData.remaining_amount = 0
+      updateData.total = Number(booking.total) + Number(booking.remaining_amount)
+    }
+
+    await admin.from("bookings").update(updateData).eq("id", bookingId)
 
     return NextResponse.json({ success: true })
   } catch (err) {
