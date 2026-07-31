@@ -140,12 +140,12 @@ export default function PackageSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   {pkg.is_promo && (
                     <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-green-500 text-white">
-                      Promo
+                      {t.card.promo}
                     </span>
                   )}
                   {pkg.type === "premium" && (
                     <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-gold to-gold-light text-emerald-deep">
-                      Premium
+                      {t.card.premium}
                     </span>
                   )}
                   <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
@@ -167,7 +167,7 @@ export default function PackageSection() {
                   </h3>
 
                   <div className="flex gap-4 mb-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Clock size={12} /> {pkg.duration_days} Hari</span>
+                    <span className="flex items-center gap-1"><Clock size={12} /> {pkg.duration_days} {t.package.day}</span>
                     <span className="flex items-center gap-1"><Calendar size={12} /> {pkg.departure_month || "TBA"}</span>
                   </div>
 
@@ -176,7 +176,7 @@ export default function PackageSection() {
                     <div className="flex-1 h-4 bg-zinc-100 rounded-full overflow-hidden relative flex items-center">
                       <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{ width: `${100 - fillPercentage}%` }} />
                       <span className="absolute right-2 z-10 text-[9px] font-bold text-zinc-600">
-                        Sisa Seat {seatsLeft}
+                        {t.card.seats_left} {seatsLeft}
                       </span>
                     </div>
                   </div>
@@ -199,13 +199,13 @@ export default function PackageSection() {
                           border: isCompared ? "1px solid rgba(201,162,75,0.4)" : "none",
                         }}
                       >
-                        {isCompared ? "\u2713 Dibandingkan" : "Bandingkan"}
+                        {isCompared ? `✓ ${t.card.compared}` : t.card.compare}
                       </button>
                       <Link
                         href={`/package/${pkg.slug}`}
                         className="px-4 py-2 rounded-xl text-xs font-semibold bg-primary text-white hover:bg-primary/90 transition-colors"
                       >
-                        Detail
+                        {t.card.detail}
                       </Link>
                     </div>
                   </div>

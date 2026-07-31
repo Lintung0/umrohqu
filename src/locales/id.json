@@ -176,6 +176,33 @@
     "results": "hasil",
     "rating": "Rating"
   },
+  "card": {
+    "compare": "Bandingkan",
+    "compared": "Dibandingkan",
+    "detail": "Detail",
+    "seats_left": "Sisa Seat",
+    "promo": "Promo",
+    "premium": "Premium",
+    "price_per_person": "Harga per orang"
+  },
+  "detail": {
+    "overview": "Overview",
+    "facilities": "Fasilitas",
+    "reviews": "Ulasan",
+    "included": "Sudah Termasuk",
+    "excluded": "Tidak Termasuk",
+    "no_facilities": "Info fasilitas belum tersedia.",
+    "no_reviews": "Belum ada ulasan untuk paket ini.",
+    "save": "Simpan",
+    "saved": "Tersimpan",
+    "per_person": "per orang",
+    "excl_service_fee": "belum termasuk service fee",
+    "remaining_seats": "Sisa Kursi",
+    "departure_from": "Dari",
+    "payment_secure": "Pembayaran 100% aman",
+    "verified_travel": "Travel terverifikasi Kemenag",
+    "visa_insured": "Visa & asuransi terjamin"
+  },
   "dashboard": {
     "welcome": "Selamat Datang",
     "my_bookings": "Pemesanan Saya",

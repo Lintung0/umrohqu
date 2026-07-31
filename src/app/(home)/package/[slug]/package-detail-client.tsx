@@ -8,9 +8,10 @@ import {
   Star, MapPin, Clock, Users, Plane, Hotel, Shield, CheckCircle,
   XCircle, BadgeCheck, Zap, Calendar, BookmarkPlus, BookmarkCheck, GitCompare, Loader2,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/constants"
 import ImageGallery from "@/components/shared/image-gallery"
+import { useTranslation } from "@/lib/i18n"
+import { Button } from "@/components/ui/button"
 
 interface PackageDetail {
   id: string
@@ -53,6 +54,13 @@ interface Props {
 }
 
 export default function PackageDetailClient({ pkg, reviews: initialReviews, images: initialImages }: Props) {
+  const { t } = useTranslation()
+  const TAB_ITEMS = [
+    { id: "overview", label: t.detail.overview },
+    { id: "facilities", label: t.package.facilities },
+    { id: "reviews", label: t.detail.reviews },
+  ]
+
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistId, setWishlistId] = useState<string | null>(null)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
@@ -189,35 +197,35 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                       {pkg.airline && (
                         <div className="bg-muted/40 rounded-xl p-3">
                           <Plane className="w-4 h-4 text-primary mb-1.5" />
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Maskapai</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t.package.airline}</p>
                           <p className="text-xs font-semibold mt-0.5">{pkg.airline}</p>
                         </div>
                       )}
                       {pkg.duration_days && (
                         <div className="bg-muted/40 rounded-xl p-3">
                           <Clock className="w-4 h-4 text-primary mb-1.5" />
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Durasi</p>
-                          <p className="text-xs font-semibold mt-0.5">{pkg.duration_days} Hari</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t.package.duration}</p>
+                          <p className="text-xs font-semibold mt-0.5">{pkg.duration_days} {t.package.day}</p>
                         </div>
                       )}
                       {hotelInfo.makkah && (
                         <div className="bg-muted/40 rounded-xl p-3">
                           <Hotel className="w-4 h-4 text-primary mb-1.5" />
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Hotel Makkah</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t.package.hotel_makkah}</p>
                           <p className="text-xs font-semibold mt-0.5 leading-snug">{hotelInfo.makkah}</p>
                         </div>
                       )}
                       {hotelInfo.madinah && (
                         <div className="bg-muted/40 rounded-xl p-3">
                           <Hotel className="w-4 h-4 text-primary mb-1.5" />
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Hotel Madinah</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t.package.hotel_madinah}</p>
                           <p className="text-xs font-semibold mt-0.5 leading-snug">{hotelInfo.madinah}</p>
                         </div>
                       )}
                     </div>
                     {pkg.departure_city && (
                       <div>
-                        <h3 className="font-semibold text-sm mb-2">Kota Keberangkatan</h3>
+                        <h3 className="font-semibold text-sm mb-2">{t.package.departure_city}</h3>
                         <span className="flex items-center gap-1.5 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full font-medium w-fit">
                           <MapPin className="w-3 h-3" />{pkg.departure_city}
                         </span>
@@ -231,7 +239,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                     {facilitiesList.length > 0 && (
                       <div>
                         <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-primary" /> Sudah Termasuk
+                          <CheckCircle className="w-4 h-4 text-primary" /> {t.detail.included}
                         </h3>
                         <ul className="space-y-2">
                           {facilitiesList.map((item: string) => (
@@ -246,7 +254,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                     {excludesList.length > 0 && (
                       <div>
                         <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                          <XCircle className="w-4 h-4 text-red-500" /> Tidak Termasuk
+                          <XCircle className="w-4 h-4 text-red-500" /> {t.detail.excluded}
                         </h3>
                         <ul className="space-y-2">
                           {excludesList.map((item: string) => (
@@ -259,7 +267,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                       </div>
                     )}
                     {facilitiesList.length === 0 && excludesList.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-8 sm:col-span-2">Info fasilitas belum tersedia.</p>
+                      <p className="text-sm text-muted-foreground text-center py-8 sm:col-span-2">{t.detail.no_facilities}</p>
                     )}
                   </div>
                 )}
@@ -304,7 +312,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                         ))}
                       </>
                     ) : (
-                      <p className="text-sm text-muted-foreground text-center py-8">Belum ada ulasan untuk paket ini.</p>
+                      <p className="text-sm text-muted-foreground text-center py-8">{t.detail.no_reviews}</p>
                     )}
                   </div>
                 )}
@@ -319,14 +327,14 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                 <div className="flex items-end gap-2">
                   <p className="text-3xl font-bold text-primary">{formatRupiah(pkg.price)}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">per orang · belum termasuk service fee</p>
+                <p className="text-xs text-muted-foreground">{t.detail.per_person} · {t.detail.excl_service_fee}</p>
               </div>
 
               {pkg.quota > 0 && (
                 <div className="bg-muted/40 rounded-xl p-3">
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <Users className="w-4 h-4" /> Sisa Kursi
+                      <Users className="w-4 h-4" /> {t.detail.remaining_seats}
                     </span>
                     <span className="font-bold">{pkg.quota}</span>
                   </div>
@@ -337,19 +345,19 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                 {pkg.duration_days && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-xs">Durasi: <span className="font-medium text-foreground">{pkg.duration_days} Hari</span></span>
+                    <span className="text-xs">{t.package.duration}: <span className="font-medium text-foreground">{pkg.duration_days} {t.package.day}</span></span>
                   </div>
                 )}
                 {pkg.airline && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Plane className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-xs">Maskapai: <span className="font-medium text-foreground">{pkg.airline}</span></span>
+                    <span className="text-xs">{t.package.airline}: <span className="font-medium text-foreground">{pkg.airline}</span></span>
                   </div>
                 )}
                 {pkg.departure_city && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-xs">Dari: <span className="font-medium text-foreground">{pkg.departure_city}</span></span>
+                    <span className="text-xs">{t.detail.departure_from}: <span className="font-medium text-foreground">{pkg.departure_city}</span></span>
                   </div>
                 )}
               </div>
@@ -357,7 +365,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
               <div className="space-y-2 pt-1">
                 <Link href={`/checkout?package=${pkg.id}`}>
                   <Button className="w-full h-11 font-semibold">
-                    Pesan Sekarang
+                    {t.package.book_now}
                   </Button>
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
@@ -375,11 +383,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                     ) : (
                       <BookmarkPlus className="w-3.5 h-3.5" />
                     )}
-                    {isWishlisted ? "Tersimpan" : "Simpan"}
+                    {isWishlisted ? t.detail.saved : t.detail.save}
                   </Button>
                   <Link href={`/compare?pkg=${pkg.id}`}>
                     <Button variant="outline" size="sm" className="w-full text-xs gap-1.5">
-                      <GitCompare className="w-3.5 h-3.5" /> Bandingkan
+                      <GitCompare className="w-3.5 h-3.5" /> {t.card.compare}
                     </Button>
                   </Link>
                 </div>
@@ -387,9 +395,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
 
               <div className="border-t border-border pt-3 space-y-2">
                 {[
-                  { icon: Shield, text: "Pembayaran 100% aman" },
-                  { icon: BadgeCheck, text: "Travel terverifikasi Kemenag" },
-                  { icon: CheckCircle, text: "Visa & asuransi terjamin" },
+                  { icon: Shield, text: t.detail.payment_secure },
+                  { icon: BadgeCheck, text: t.detail.verified_travel },
+                  { icon: CheckCircle, text: t.detail.visa_insured },
                 ].map((item) => (
                   <div key={item.text} className="flex items-center gap-2 text-xs text-muted-foreground">
                     <item.icon className="w-3.5 h-3.5 text-primary shrink-0" />
