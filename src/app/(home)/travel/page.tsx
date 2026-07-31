@@ -64,14 +64,54 @@ export default function TravelListPage() {
     )
   }
 
+  // Client-side search
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredTravels = travels.filter((travel) => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
+    return (
+      travel.name.toLowerCase().includes(query) ||
+      travel.slug.toLowerCase().includes(query) ||
+      travel.city?.toLowerCase().includes(query) ||
+      travel.description?.toLowerCase().includes(query)
+    )
+  })
+
   return (
     <main className="min-h-screen bg-zinc-50/50">
       <div className="bg-white border-b border-border px-6 py-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl font-bold">Travel Partner UmrohQ</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {travels.length} travel terpercaya · Semua terverifikasi Kementerian Agama
+            {filteredTravels.length} travel terpercaya • Semua terverifikasi Kementerian Agama
           </p>
+          
+          {/* Search Input */}
+          <div className="mt-4">
+            <div className="relative max-w-md">
+              <input
+                type="text"
+                placeholder="Cari travel partner..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            {searchQuery && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Menampilkan {filteredTravels.length} dari {travels.length} travel
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

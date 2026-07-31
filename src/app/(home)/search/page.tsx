@@ -43,6 +43,7 @@ function SearchContent() {
   const [tenants, setTenants] = useState<Map<string, Tenant>>(new Map())
   const [rankingScores, setRankingScores] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(true)
+  const searchQueryParam = searchParams.get("search")
 
   useEffect(() => {
     const supabase = createClient()
@@ -53,6 +54,11 @@ function SearchContent() {
         .select("*")
         .eq("status", "published")
         .is("deleted_at", null)
+
+      // Apply search filter if present
+      if (searchQueryParam) {
+        query = query.or(`name.ilike.%${searchQueryParam}%,description.ilike.%${searchQueryParam}%,departure_city.ilike.%${searchQueryParam}%`)
+      }
 
       const { data: pkgs } = await query
       setPackages((pkgs as Package[]) || [])
@@ -97,7 +103,32 @@ function SearchContent() {
     }
 
     fetchData()
-  }, [])
+  }, [searchQueryParam])
+
+  // Sync search query from URL
+  useEffect(() => {
+    const paramQuery = searchParams.get("search")
+    if (paramQuery !== searchQuery) {
+      setSearchQuery(paramQuery || "")
+    }
+  }, [searchParams.get("search")])
+
+  // Client-side search
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredWithSearch = filtered.filter((pkg) => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
+    const tenant = tenants.get(pkg.tenant_id)
+    
+    return (
+      pkg.name.toLowerCase().includes(query) ||
+      tenant?.name.toLowerCase().includes(query) ||
+      pkg.departure_city?.toLowerCase().includes(query) ||
+      pkg.slug.toLowerCase().includes(query) ||
+      pkg.description?.toLowerCase().includes(query)
+    )
+  })
 
   const filtered = packages
     .filter((pkg) => {
@@ -109,6 +140,11 @@ function SearchContent() {
         const dep = departure.toLowerCase()
         const cities = (pkg.departure_cities || [pkg.departure_city]).map((c) => c?.toLowerCase() || "")
         if (!cities.some((c) => c.includes(dep))) return false
+        
+        // Search in package name and travel name
+        if (!pkg.name.toLowerCase().includes(dep) && !pkg.tenant_name?.toLowerCase().includes(dep)) {
+          return false
+        }
       }
       if (month && month !== "") {
         if (!pkg.departure_month?.toLowerCase().includes(month.toLowerCase())) return false
@@ -149,10 +185,23 @@ function SearchContent() {
   const handleSearch = () => {
     const params = new URLSearchParams()
     if (departure) params.set("departure", departure)
+    if (country) params.set("country", country)
     if (month) params.set("month", month)
     if (cost && cost !== "Semua Biaya") params.set("cost", cost)
+    if (type && type !== "semua") params.set("type", type)
+    if (airline && airline !== "semua") params.set("airline", airline)
+    if (hotelStars && hotelStars !== "semua") params.set("hotelStars", hotelStars)
+    if (searchQuery) params.set("search", searchQuery)
     router.push(`/search?${params.toString()}`)
   }
+
+  // Sync search query from URL
+  useEffect(() => {
+    const searchQueryParam = searchParams.get("search")
+    if (searchQueryParam && searchQueryParam !== searchQuery) {
+      setSearchQuery(searchQueryParam)
+    }
+  }, [searchParams.get("search"), searchQuery])
 
   const clearFilters = () => {
     setDeparture("")
@@ -201,7 +250,8 @@ function SearchContent() {
         <div className="max-w-7xl mx-auto">
           <h1 className="text-xl font-bold">Hasil Pencarian Paket Umroh</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {filtered.length} paket ditemukan
+            {filteredWithSearch.length} paket ditemukan dari total {filtered.length} paket
+            {searchQuery && `· Pencarian kata kunci "${searchQuery}"`}
             {departure && ` · Keberangkatan dari ${departure}`}
             {month && ` · ${month}`}
             {cost && cost !== "Semua Biaya" && ` · ${cost}`}
@@ -255,6 +305,34 @@ function SearchContent() {
                     <SelectItem value="duration">Durasi Terpendek</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            {/* Global Search Widget */}
+            <div className="mb-6">
+              <div className="relative max-w-2xl mx-auto">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari nama paket atau travel..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:text-foreground transition-colors"
+                  >
+                    <svg className="w-5 h-5 text-muted-foreground hover:text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -312,6 +390,17 @@ function SearchContent() {
                   </button>
                 )
               })}
+            )}
+
+            {/* Results count with search */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-muted-foreground">
+                {filteredWithSearch.length} paket ditemukan dari total {filtered.length} paket
+                {searchQuery && `· Pencarian kata kunci "${searchQuery}"`}
+                {departure && `· Keberangkatan dari ${departure}`}
+                {month && `· ${month}`}
+                {cost && cost !== "Semua Biaya" && `· ${cost}`}
+              </p>
             </div>
 
             {hasActiveFilters && (
