@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle, Loader2, ExternalLink } from "lucide-react"
+import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle, Loader2, ExternalLink, ArrowDownToLine } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 
 interface Transaction {
@@ -48,8 +48,14 @@ export default function TravelWalletPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [showTopup, setShowTopup] = useState(false)
+  const [showWithdraw, setShowWithdraw] = useState(false)
   const [topupAmount, setTopupAmount] = useState(500000)
+  const [withdrawAmount, setWithdrawAmount] = useState(1000000)
+  const [bankName, setBankName] = useState("BCA")
+  const [accountNumber, setAccountNumber] = useState("")
+  const [accountName, setAccountName] = useState("")
   const [topupLoading, setTopupLoading] = useState(false)
+  const [withdrawLoading, setWithdrawLoading] = useState(false)
   const [topupUrl, setTopupUrl] = useState("")
 
   const fetchData = async () => {
@@ -90,6 +96,31 @@ export default function TravelWalletPage() {
     }
   }
 
+  const handleWithdraw = async () => {
+    if (withdrawAmount > balance) {
+      alert("Saldo tidak mencukupi")
+      return
+    }
+    setWithdrawLoading(true)
+    try {
+      const res = await fetch("/api/wallet/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: withdrawAmount, bankName, accountNumber, accountName }),
+      })
+      if (res.ok) {
+        alert("Permintaan penarikan dana berhasil diajukan dan sedang diproses.")
+        setShowWithdraw(false)
+        fetchData()
+      } else {
+        const d = await res.json()
+        alert(d.error || "Gagal mengajukan penarikan")
+      }
+    } finally {
+      setWithdrawLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-6 lg:p-8 max-w-4xl mx-auto">
@@ -105,13 +136,22 @@ export default function TravelWalletPage() {
           <h1 className="text-2xl font-bold">Dompet Travel</h1>
           <p className="text-muted-foreground mt-1">Kelola saldo dan lihat histori transaksi</p>
         </div>
-        <button
-          onClick={() => setShowTopup(!showTopup)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          Topup Saldo
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setShowWithdraw(!showWithdraw); setShowTopup(false) }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 border border-border bg-white text-foreground rounded-xl text-sm font-semibold shadow-sm hover:bg-gray-50 transition-all"
+          >
+            <ArrowDownToLine className="w-4 h-4" />
+            Tarik Saldo
+          </button>
+          <button
+            onClick={() => { setShowTopup(!showTopup); setShowWithdraw(false) }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Topup Saldo
+          </button>
+        </div>
       </div>
 
       {/* Saldo Card */}
@@ -123,7 +163,71 @@ export default function TravelWalletPage() {
         <p className="text-4xl font-bold">{formatRupiah(balance)}</p>
       </div>
 
-      {/* Topup Form */}
+      {/* Withdraw Form */}
+      {showWithdraw && (
+        <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+          <h3 className="font-semibold">Tarik Saldo (Pencairan Dana)</h3>
+          <p className="text-sm text-muted-foreground">
+            Dana akan ditransfer ke rekening bank terdaftar dalam 1-2 hari kerja.
+          </p>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Jumlah Penarikan (Rp)</label>
+            <input
+              type="number"
+              value={withdrawAmount}
+              onChange={(e) => setWithdrawAmount(Number(e.target.value))}
+              max={balance}
+              min={50000}
+              className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Bank</label>
+              <select
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              >
+                <option value="BCA">BCA</option>
+                <option value="Mandiri">Mandiri</option>
+                <option value="BNI">BNI</option>
+                <option value="BRI">BRI</option>
+                <option value="BSI">BSI</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">No. Rekening</label>
+              <input
+                type="text"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
+                placeholder="1234567890"
+                className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Nama Pemilik Rekening</label>
+              <input
+                type="text"
+                value={accountName}
+                onChange={(e) => setAccountName(e.target.value)}
+                placeholder="PT Travel Umroh"
+                className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={handleWithdraw}
+              disabled={withdrawLoading || withdrawAmount <= 0 || withdrawAmount > balance || !accountNumber || !accountName}
+              className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold disabled:opacity-50"
+            >
+              {withdrawLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ajukan Penarikan"}
+            </button>
+          </div>
+        </div>
+      )}
       {showTopup && (
         <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
           <h3 className="font-semibold">Topup Saldo</h3>
