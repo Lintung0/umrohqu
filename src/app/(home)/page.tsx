@@ -6,7 +6,6 @@ import {
   WhyUsSection,
   TravelAgenciesSection,
   TestimonialSection,
-  CTASection,
   TrustSection,
 } from "@/components/ui/home/extra-sections"
 
@@ -41,7 +40,7 @@ export default function Home() {
       <TravelAgenciesSection />
       <TrustSection />
       <TestimonialSection />
-      <CTASection />
     </main>
   )
 }
+
