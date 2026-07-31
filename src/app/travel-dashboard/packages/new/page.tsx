@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { ImageUpload } from "@/components/shared/image-upload"
+import { getTravelTenantId } from "@/lib/get-travel-tenant"
 
 const packageSchema = z.object({
   name: z.string().min(1, "Nama paket wajib diisi"),
@@ -202,13 +203,9 @@ export default function NewPackagePage() {
         setLoading(false)
         return
       }
-      const { data: profile } = await supabase
-        .from("users")
-        .select("tenant_id")
-        .eq("id", user.id)
-        .single()
-      if (profile?.tenant_id) {
-        setTenantId(profile.tenant_id)
+      const tId = await getTravelTenantId(supabase, user.id)
+      if (tId) {
+        setTenantId(tId)
       }
       setLoading(false)
     }

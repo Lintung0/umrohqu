@@ -6,6 +6,7 @@ import { User } from "@supabase/supabase-js"
 import { Package, BookOpen, Users, DollarSign, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
+import { getTravelTenantId } from "@/lib/get-travel-tenant"
 
 interface TravelStats {
   packageCount: number
@@ -28,14 +29,14 @@ export default function TravelDashboardOverview() {
       setUser(user)
       if (!user) { setLoading(false); return }
 
-      const { data: profile } = await supabase.from("users").select("tenant_id").eq("id", user.id).single()
-      if (!profile?.tenant_id) { setLoading(false); return }
-      setTenantId(profile.tenant_id)
+      const tId = await getTravelTenantId(supabase, user.id)
+      if (!tId) { setLoading(false); return }
+      setTenantId(tId)
 
       const [packagesRes, bookingsRes, allBookingsRes] = await Promise.all([
-        supabase.from("packages").select("id", { count: "exact", head: true }).eq("tenant_id", profile.tenant_id).is("deleted_at", null),
-        supabase.from("bookings").select("id, status, pilgrim_count, price, fee, total, package:packages(name), customer:users(full_name), created_at").eq("tenant_id", profile.tenant_id).is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
-        supabase.from("bookings").select("id, status, pilgrim_count, price, total").eq("tenant_id", profile.tenant_id).is("deleted_at", null),
+        supabase.from("packages").select("id", { count: "exact", head: true }).eq("tenant_id", tId).is("deleted_at", null),
+        supabase.from("bookings").select("id, status, pilgrim_count, price, fee, total, package:packages(name), customer:users(full_name), created_at").eq("tenant_id", tId).is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
+        supabase.from("bookings").select("id, status, pilgrim_count, price, total").eq("tenant_id", tId).is("deleted_at", null),
       ])
 
       const bookings = bookingsRes.data || []

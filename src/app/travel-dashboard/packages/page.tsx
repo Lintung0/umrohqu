@@ -8,6 +8,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { formatRupiah } from "@/lib/constants"
 import { toast } from "sonner"
+import { getTravelTenantId } from "@/lib/get-travel-tenant"
 
 interface TravelPackage {
   id: string
@@ -39,14 +40,14 @@ export default function TravelPackagesPage() {
       setUser(user)
       if (!user) { setLoading(false); return }
 
-      const { data: profile } = await supabase.from("users").select("tenant_id").eq("id", user.id).single()
-      if (!profile?.tenant_id) { setLoading(false); return }
-      setTenantId(profile.tenant_id)
+      const tId = await getTravelTenantId(supabase, user.id)
+      if (!tId) { setLoading(false); return }
+      setTenantId(tId)
 
       const { data } = await supabase
         .from("packages")
         .select("id, name, slug, price, quota, status, departure_city, departure_date, duration_days, airline, hotel_info, image_url")
-        .eq("tenant_id", profile.tenant_id)
+        .eq("tenant_id", tId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
 
