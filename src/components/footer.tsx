@@ -5,6 +5,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import { useTranslation } from "@/lib/i18n"
+import dynamic from "next/dynamic"
+
+const Kaaba3D = dynamic(() => import("@/components/ui/home/kaaba-3d"), { ssr: false })
 
 interface FooterItem {
   href: string
@@ -55,13 +58,33 @@ const Footer = () => {
   ]
   return (
     <footer className="relative mt-auto overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary" />
-      <div className="absolute inset-0 text-white">
+      {/* Smooth gradient transition from background to deep navy footer */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-deep to-emerald-deep -z-20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary -z-30" />
+      <div className="absolute inset-0 text-white -z-10">
         <IslamicPattern opacity={0.02} />
       </div>
 
-      <div className="relative">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-14 px-6 md:px-12 max-w-7xl mx-auto">
+      <div className="relative max-w-7xl mx-auto pt-16 pb-6 px-6 md:px-12">
+        {/* 3D Kaaba Interactive Showcase combined inside Footer */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-14 pb-14 border-b border-white/10">
+          <div className="space-y-4 text-center lg:text-left">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 text-gold text-xs font-semibold">
+              Perjalanan Suci Berkualitas
+            </span>
+            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+              Wujudkan Niat Suci Bersama UmrohQu
+            </h2>
+            <p className="text-sm text-white/70 leading-relaxed max-w-lg">
+              Platform marketplace umroh terpercaya yang menghubungkan Anda dengan travel agency resmi berizin Kemenag dari berbagai belahan dunia dengan transparansi harga dan pembayaran aman.
+            </p>
+          </div>
+          <div className="w-full h-[300px]">
+            <Kaaba3D />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-6">
           {/* Brand + Contact */}
           <div className="col-span-1 md:col-span-4 space-y-6">
             <div className="[&>a>img]:brightness-0 [&>a>img]:invert">
@@ -83,7 +106,7 @@ const Footer = () => {
                 </div>
               </Link>
               <Link
-                href="mailto:ul01092022@gmail.com"
+                href="mailto:info@umrohq.com"
                 className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors"
               >
                 <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/15 transition-colors">
@@ -140,8 +163,8 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-white/10">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex items-center justify-between">
+        <div className="border-t border-white/10 mt-10 pt-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-white/30">
               &copy; 2026 PT. Universal Big Data - UmrohQu. All rights reserved.
             </p>
