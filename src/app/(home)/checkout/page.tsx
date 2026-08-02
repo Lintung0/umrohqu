@@ -32,6 +32,8 @@ function CheckoutContent() {
 
   const [step, setStep] = useState(0)
   const [pilgrimCount, setPilgrimCount] = useState(1)
+  const [pilgrims, setPilgrims] = useState<Array<{ full_name: string; nik: string; passport_no: string; gender: string; phone: string; relation: string }>>([])
+  const [savedParticipants, setSavedParticipants] = useState<Array<{ id: string; full_name: string; nik: string | null; passport_number: string | null; gender: string | null; phone: string | null }>>([])
   const [paymentType, setPaymentType] = useState<"full" | "dp">("full")
   const [dpPercentage, setDpPercentage] = useState(30)
   const [useWallet, setUseWallet] = useState(true)
@@ -60,12 +62,54 @@ function CheckoutContent() {
           .eq("user_id", user.id)
           .single()
         setWalletBalance(wallet?.balance || 0)
+
+        const { data: parts } = await supabase
+          .from("participants")
+          .select("id, full_name, nik, passport_number, gender, phone")
+          .eq("user_id", user.id)
+          .order("is_main", { ascending: false })
+        if (parts) setSavedParticipants(parts)
       }
 
       setLoading(false)
     }
     fetchData()
   }, [packageId])
+
+  useEffect(() => {
+    setPilgrims((prev) => {
+      const next = [...prev]
+      while (next.length < pilgrimCount) {
+        next.push({ full_name: "", nik: "", passport_no: "", gender: "", phone: "", relation: "self" })
+      }
+      return next.slice(0, pilgrimCount)
+    })
+  }, [pilgrimCount])
+
+  const updatePilgrim = (index: number, field: string, value: string) => {
+    setPilgrims((prev) => {
+      const next = [...prev]
+      next[index] = { ...next[index], [field]: value }
+      return next
+    })
+  }
+
+  const fillFromSaved = (index: number, saved: typeof savedParticipants[0]) => {
+    setPilgrims((prev) => {
+      const next = [...prev]
+      next[index] = {
+        full_name: saved.full_name,
+        nik: saved.nik || "",
+        passport_no: saved.passport_number || "",
+        gender: saved.gender || "",
+        phone: saved.phone || "",
+        relation: "self",
+      }
+      return next
+    })
+  }
+
+  const allPilgrimsFilled = pilgrims.every((p) => p.full_name.trim().length > 0)
 
   if (loading) {
     return (
@@ -107,6 +151,14 @@ function CheckoutContent() {
         body: JSON.stringify({
           packageId: pkg.id,
           pilgrimCount,
+          pilgrims: pilgrims.map((p) => ({
+            full_name: p.full_name,
+            nik: p.nik || null,
+            passport_no: p.passport_no || null,
+            gender: p.gender || null,
+            phone: p.phone || null,
+            relation: p.relation || "self",
+          })),
           paymentType,
           dpPercentage: paymentType === "dp" ? dpPercentage : undefined,
           useWallet,
@@ -217,8 +269,108 @@ function CheckoutContent() {
                   </div>
                 </div>
 
+                {/* Pilgrim Details */}
+                {pilgrims.map((pilgrim, idx) => (
+                  <div key={idx} className="bg-white border border-border rounded-2xl p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-semibold flex items-center gap-2">
+                        <Users className="w-4 h-4 text-primary" />
+                        Jamaah {idx + 1}
+                      </label>
+                      {idx === 0 && <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Utama</span>}
+                    </div>
+
+                    {savedParticipants.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {savedParticipants.map((sp) => (
+                          <button
+                            key={sp.id}
+                            type="button"
+                            onClick={() => fillFromSaved(idx, sp)}
+                            className="text-xs px-2.5 py-1 rounded-full border border-dashed border-emerald-300 text-emerald-700 hover:bg-emerald-50 transition-colors"
+                          >
+                            {sp.full_name}
+                          </button>
+                        ))}
+                        <span className="text-[10px] text-muted-foreground self-center ml-1">pilih dari data tersimpan</span>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Nama Lengkap *</label>
+                        <input
+                          type="text"
+                          value={pilgrim.full_name}
+                          onChange={(e) => updatePilgrim(idx, "full_name", e.target.value)}
+                          placeholder="Nama sesuai KTP/Paspor"
+                          className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">NIK</label>
+                        <input
+                          type="text"
+                          value={pilgrim.nik}
+                          onChange={(e) => updatePilgrim(idx, "nik", e.target.value)}
+                          placeholder="16 digit NIK"
+                          maxLength={16}
+                          className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">No. Paspor</label>
+                        <input
+                          type="text"
+                          value={pilgrim.passport_no}
+                          onChange={(e) => updatePilgrim(idx, "passport_no", e.target.value)}
+                          placeholder="Nomor paspor"
+                          className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Jenis Kelamin</label>
+                        <select
+                          value={pilgrim.gender}
+                          onChange={(e) => updatePilgrim(idx, "gender", e.target.value)}
+                          className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
+                        >
+                          <option value="">Pilih</option>
+                          <option value="male">Laki-laki</option>
+                          <option value="female">Perempuan</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">No. Telepon</label>
+                        <input
+                          type="tel"
+                          value={pilgrim.phone}
+                          onChange={(e) => updatePilgrim(idx, "phone", e.target.value)}
+                          placeholder="08xxxxxxxxxx"
+                          className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Hubungan</label>
+                        <select
+                          value={pilgrim.relation}
+                          onChange={(e) => updatePilgrim(idx, "relation", e.target.value)}
+                          className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
+                        >
+                          <option value="self">Diri Sendiri</option>
+                          <option value="spouse">Suami/Istri</option>
+                          <option value="child">Anak</option>
+                          <option value="parent">Orang Tua</option>
+                          <option value="sibling">Saudara</option>
+                          <option value="other">Lainnya</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
                 <div className="flex justify-end">
-                  <Button onClick={() => setStep(1)} className="gap-2">
+                  <Button onClick={() => setStep(1)} disabled={!allPilgrimsFilled} className="gap-2">
                     Lanjut ke Pembayaran <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>

@@ -24,8 +24,28 @@ export default function PackageSection() {
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(6)
-      .then(({ data }) => {
-        setPackages((data as Package[]) || []);
+      .then(async ({ data }) => {
+        const pkgs = (data as Package[]) || [];
+        if (pkgs.length > 0) {
+          const ids = pkgs.map((p) => p.id);
+          const { data: reviews } = await supabase
+            .from("reviews")
+            .select("package_id, rating")
+            .in("package_id", ids);
+          const ratingMap = new Map<string, { sum: number; count: number }>();
+          (reviews || []).forEach((r: any) => {
+            const existing = ratingMap.get(r.package_id) || { sum: 0, count: 0 };
+            existing.sum += r.rating;
+            existing.count += 1;
+            ratingMap.set(r.package_id, existing);
+          });
+          (pkgs as any).forEach((p: any) => {
+            const r = ratingMap.get(p.id);
+            p.avg_rating = r ? Math.round((r.sum / r.count) * 10) / 10 : null;
+            p.review_count = r ? r.count : 0;
+          });
+        }
+        setPackages(pkgs);
         setLoading(false);
       });
   }, []);
@@ -150,10 +170,12 @@ export default function PackageSection() {
                   )}
                   <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
                     <div className="text-xs text-white/80">{pkg.airline} \u00b7 Hotel Bintang {pkg.hotel_makkah_stars}</div>
-                    <div className="flex items-center gap-1">
-                      <Star size={11} fill="#E8C97A" stroke="none" />
-                      <span className="text-xs text-white font-medium">4.8</span>
-                    </div>
+                    {(pkg as any).avg_rating && (
+                      <div className="flex items-center gap-1">
+                        <Star size={11} fill="#E8C97A" stroke="none" />
+                        <span className="text-xs text-white font-medium">{(pkg as any).avg_rating}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

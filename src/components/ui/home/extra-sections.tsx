@@ -195,8 +195,28 @@ export function TravelAgenciesSection() {
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(4)
-      .then(({ data }) => {
-        setAgencies((data as Tenant[]) || [])
+      .then(async ({ data }) => {
+        const ags = (data as Tenant[]) || []
+        if (ags.length > 0) {
+          const tenantIds = ags.map((a) => a.id)
+          const { data: pkgs } = await supabase.from("packages").select("id, tenant_id").in("tenant_id", tenantIds)
+          const pkgIds = (pkgs || []).map((p: any) => p.id)
+          if (pkgIds.length > 0) {
+            const { data: revs } = await supabase.from("reviews").select("package_id, rating").in("package_id", pkgIds)
+            const ratingMap = new Map<string, { sum: number; count: number }>()
+            ;(pkgs || []).forEach((p: any) => {
+              const pkgReviews = (revs || []).filter((r: any) => r.package_id === p.id)
+              const existing = ratingMap.get(p.tenant_id) || { sum: 0, count: 0 }
+              pkgReviews.forEach((r: any) => { existing.sum += r.rating; existing.count += 1 })
+              ratingMap.set(p.tenant_id, existing)
+            })
+            ags.forEach((a: any) => {
+              const r = ratingMap.get(a.id)
+              a.avg_rating = r && r.count > 0 ? Math.round((r.sum / r.count) * 10) / 10 : null
+            })
+          }
+        }
+        setAgencies(ags)
         setLoading(false)
       })
   }, [])
@@ -283,7 +303,11 @@ export function TravelAgenciesSection() {
                 <h3 className="font-bold text-sm group-hover:text-primary transition-colors">{agency.name}</h3>
                 <div className="flex items-center gap-1 mt-1.5">
                   <Star className="w-3.5 h-3.5 fill-gold text-gold" />
-                  <span className="text-xs font-medium">4.{8 - (idx % 2)}</span>
+                  {(agency as any).avg_rating ? (
+                    <span className="text-xs font-medium">{(agency as any).avg_rating}</span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Baru</span>
+                  )}
                   <span className="text-xs text-muted-foreground ml-1">
                     {agency.packages_count || 0} {t.package.title}
                   </span>
@@ -389,11 +413,23 @@ export function TestimonialSection() {
 
 export function TrustSection() {
   const { t } = useTranslation()
+  const [stats, setStats] = useState({ packages: 0, travels: 0 })
+
+  useEffect(() => {
+    const supabase = createClient()
+    Promise.all([
+      supabase.from("packages").select("id", { count: "exact", head: true }).eq("status", "published"),
+      supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified"),
+    ]).then(([pkgs, tnts]) => {
+      setStats({ packages: pkgs.count || 0, travels: tnts.count || 0 })
+    })
+  }, [])
+
   const items = [
     { icon: Shield, title: "Transaksi Aman", desc: "Dana escrow terjamin" },
     { icon: Award, title: "Travel Terverifikasi", desc: "Seleksi ketat & berlisensi" },
     { icon: TrendingUp, title: "Harga Terbaik", desc: "Garansi harga kompetitif" },
-    { icon: Users, title: "50K+ Jamaah", desc: "Dipercaya jutaan jamaah" },
+    { icon: Users, title: `${stats.travels} Travel`, desc: `${stats.packages} paket tersedia` },
   ]
 
   return (

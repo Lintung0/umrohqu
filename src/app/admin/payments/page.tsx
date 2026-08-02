@@ -27,6 +27,7 @@ interface PayoutRow {
 export default function AdminPaymentsPage() {
   const [tenants, setTenants] = useState<TenantRow[]>([])
   const [payouts, setPayouts] = useState<PayoutRow[]>([])
+  const [serviceFeePercent, setServiceFeePercent] = useState(2)
   const [loading, setLoading] = useState(true)
   const [processingPayout, setProcessingPayout] = useState<string | null>(null)
   const [confirmPayout, setConfirmPayout] = useState<TenantRow | null>(null)
@@ -38,19 +39,19 @@ export default function AdminPaymentsPage() {
 
   async function fetchData() {
     const supabase = createClient()
-    const { data: tnts } = await supabase
-      .from("tenants")
-      .select("id, name, logo_url, status, total_revenue")
-      .is("deleted_at", null)
+    const [tntsRes, pRes, feeRes] = await Promise.all([
+      supabase.from("tenants").select("id, name, logo_url, status, total_revenue").is("deleted_at", null),
+      supabase.from("payouts").select("id, tenant_id, amount, status, created_at, tenants(name, logo_url)").order("created_at", { ascending: false }),
+      supabase.from("fee_config").select("service_fee_percent").limit(1).single(),
+    ])
 
-    setTenants((tnts as TenantRow[]) || [])
+    setTenants((tntsRes.data as TenantRow[]) || [])
 
-    const { data: p } = await supabase
-      .from("payouts")
-      .select("id, tenant_id, amount, status, created_at, tenants(name, logo_url)")
-      .order("created_at", { ascending: false })
+    if (feeRes.data?.service_fee_percent) {
+      setServiceFeePercent(feeRes.data.service_fee_percent)
+    }
 
-    const payoutRows = (p || []).map((d: any) => ({
+    const payoutRows = (pRes.data || []).map((d: any) => ({
       ...d,
       tenants: Array.isArray(d.tenants) ? d.tenants[0] : d.tenants,
     }))
@@ -172,7 +173,7 @@ export default function AdminPaymentsPage() {
               ) : payouts.map((payout) => {
                 const tenantName = (payout.tenants as any)?.name || "-"
                 const tenantLogo = (payout.tenants as any)?.logo_url
-                const serviceFee = Math.round(payout.amount * 0.003)
+                const serviceFee = Math.round(payout.amount * serviceFeePercent / 100)
                 return (
                   <tr key={payout.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-4 py-3">
@@ -227,11 +228,11 @@ export default function AdminPaymentsPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Service Fee (0.3%)</span>
-                <span className="text-red-500">-{formatRupiah(Math.round((confirmPayout.total_revenue || 0) * 0.003))}</span>
+                <span className="text-red-500">-{formatRupiah(Math.round((confirmPayout.total_revenue || 0) * serviceFeePercent / 100))}</span>
               </div>
               <div className="border-t border-border pt-2 flex justify-between font-bold">
                 <span>Net Payout</span>
-                <span className="text-emerald-600">{formatRupiah((confirmPayout.total_revenue || 0) - Math.round((confirmPayout.total_revenue || 0) * 0.003))}</span>
+                <span className="text-emerald-600">{formatRupiah((confirmPayout.total_revenue || 0) - Math.round((confirmPayout.total_revenue || 0) * serviceFeePercent / 100))}</span>
               </div>
             </div>
             <div className="flex justify-end gap-3">

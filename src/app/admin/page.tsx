@@ -6,15 +6,6 @@ import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, XCircle, C
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 
-const MOCK_CHART = [
-  { month: "Feb", gmv: 3200000000 },
-  { month: "Mar", gmv: 4100000000 },
-  { month: "Apr", gmv: 3600000000 },
-  { month: "Mei", gmv: 5800000000 },
-  { month: "Jun", gmv: 7200000000 },
-  { month: "Jul", gmv: 9400000000 },
-]
-
 const STATUS_COLORS: Record<string, string> = {
   pending: "#C9A24B",
   verified: "#0E5C4E",
@@ -60,6 +51,7 @@ export default function AdminOverviewPage() {
   const [recentBookings, setRecentBookings] = useState<any[]>([])
   const [pendingTravels, setPendingTravels] = useState<any[]>([])
   const [recentTickets, setRecentTickets] = useState<any[]>([])
+  const [chartData, setChartData] = useState<{ month: string; gmv: number }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -87,6 +79,25 @@ export default function AdminOverviewPage() {
       setRecentBookings(bookingRes.data || [])
       setPendingTravels(pendingTravelRes.data || [])
       setRecentTickets(ticketsRes.data || [])
+
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+      const revenueByMonth = new Map<string, number>()
+      allBookings
+        .filter((b: any) => (b.status === "confirmed" || b.status === "completed") && b.created_at)
+        .forEach((b: any) => {
+          const d = new Date(b.created_at)
+          const key = monthNames[d.getMonth()]
+          revenueByMonth.set(key, (revenueByMonth.get(key) || 0) + (b.total || 0))
+        })
+      const now = new Date()
+      const chart: { month: string; gmv: number }[] = []
+      for (let i = 5; i >= 0; i--) {
+        const m = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const name = monthNames[m.getMonth()]
+        chart.push({ month: name, gmv: revenueByMonth.get(name) || 0 })
+      }
+      setChartData(chart)
+
       setLoading(false)
     }
     load()
@@ -152,12 +163,12 @@ export default function AdminOverviewPage() {
               <p className="text-xs text-muted-foreground mt-0.5">6 bulan terakhir</p>
             </div>
             <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-full bg-primary/10">
-              Rp {(MOCK_CHART[MOCK_CHART.length - 1].gmv / 1_000_000_000).toFixed(1)}M
+              Rp {(chartData[chartData.length - 1].gmv / 1_000_000_000).toFixed(1)}M
             </span>
           </div>
-          <MiniChart data={MOCK_CHART} />
+          <MiniChart data={chartData} />
           <div className="flex justify-between mt-2">
-            {MOCK_CHART.map((d) => (
+            {chartData.map((d) => (
               <span key={d.month} className="text-xs text-muted-foreground">{d.month}</span>
             ))}
           </div>

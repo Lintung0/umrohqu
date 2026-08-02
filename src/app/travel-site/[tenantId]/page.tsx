@@ -47,12 +47,12 @@ export default function TravelSitePage() {
     )
   }
 
-  const brandColor = tenant.brand_color || "#0D7C5F"
+  const brandColor = tenant.brand_color || tenant.config?.brand_color || "#0D7C5F"
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Hero header */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary py-16 px-6">
+      <section className="relative overflow-hidden py-16 px-6" style={{ background: `linear-gradient(135deg, ${brandColor}, ${brandColor}dd, ${brandColor}aa)` }}>
         <div className="absolute inset-0 text-white"><IslamicPattern opacity={0.03} /></div>
         <div className="relative max-w-5xl mx-auto text-center">
           {tenant.logo_url ? (

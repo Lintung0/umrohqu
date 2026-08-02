@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { z } from "zod"
 
+const pilgrimSchema = z.object({
+  full_name: z.string().min(1),
+  nik: z.string().nullable().optional(),
+  passport_no: z.string().nullable().optional(),
+  gender: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  relation: z.string().default("self"),
+})
+
 const schema = z.object({
   packageId: z.string().uuid(),
   pilgrimCount: z.number().min(1).max(99),
+  pilgrims: z.array(pilgrimSchema).optional(),
   paymentType: z.enum(["full", "dp"]),
   dpPercentage: z.number().min(10).max(90).optional(),
   useWallet: z.boolean().default(false),
@@ -29,7 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Data tidak valid" }, { status: 400 })
     }
 
-    const { packageId, pilgrimCount, paymentType, dpPercentage, useWallet, platformFee, serviceFee, taxAmount, feeChannel, notes } = parsed.data
+    const { packageId, pilgrimCount, pilgrims, paymentType, dpPercentage, useWallet, platformFee, serviceFee, taxAmount, feeChannel, notes } = parsed.data
     const admin = createAdminClient()
 
     // 1. Get package
@@ -144,6 +154,20 @@ export async function POST(request: NextRequest) {
 
     if (insertErr) {
       return NextResponse.json({ error: "Gagal membuat booking: " + insertErr.message }, { status: 500 })
+    }
+
+    // 3b. Insert booking_participants
+    if (pilgrims && pilgrims.length > 0) {
+      const participantRecords = pilgrims.map((p) => ({
+        booking_id: booking.id,
+        full_name: p.full_name,
+        nik: p.nik || null,
+        passport_no: p.passport_no || null,
+        gender: p.gender || null,
+        phone: p.phone || null,
+        relation: p.relation || "self",
+      }))
+      await admin.from("booking_participants").insert(participantRecords)
     }
 
     // 4. Update package quota

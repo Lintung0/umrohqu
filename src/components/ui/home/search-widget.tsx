@@ -29,9 +29,9 @@ export default function SearchWidget() {
     const date = form.get("date") as string;
 
     const params = new URLSearchParams();
-    if (q) params.set("q", q);
+    if (q) params.set("search", q);
     if (country && country !== "all") params.set("country", country);
-    if (date) params.set("date", date);
+    if (date) params.set("month", date);
     router.push(`/search?${params.toString()}`);
   };
 

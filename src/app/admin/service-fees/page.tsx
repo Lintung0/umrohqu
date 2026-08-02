@@ -18,6 +18,7 @@ interface BookingRow {
 }
 
 export default function AdminServiceFeesPage() {
+  const [configId, setConfigId] = useState<string | null>(null)
   const [percent, setPercent] = useState(2)
   const [flatFee, setFlatFee] = useState(250000)
   const [bookings, setBookings] = useState<BookingRow[]>([])
@@ -29,12 +30,14 @@ export default function AdminServiceFeesPage() {
     const fetch = async () => {
       const { data: feeConfig } = await supabase
         .from("fee_config")
-        .select("service_fee_percent, service_fee_flat")
+        .select("id, service_fee_percent, service_fee_flat")
+        .limit(1)
         .single()
 
       if (feeConfig) {
-        setPercent((feeConfig as FeeConfigRow).service_fee_percent || 2)
-        setFlatFee((feeConfig as FeeConfigRow).service_fee_flat || 250000)
+        setConfigId(feeConfig.id)
+        setPercent((feeConfig as any).service_fee_percent || 2)
+        setFlatFee((feeConfig as any).service_fee_flat || 250000)
       }
 
       const { data: bkgs } = await supabase
@@ -49,11 +52,16 @@ export default function AdminServiceFeesPage() {
   }, [])
 
   async function handleSave() {
+    if (!configId) {
+      toast.error("Konfigurasi fee tidak ditemukan")
+      return
+    }
     setSaving(true)
     const supabase = createClient()
     const { error } = await supabase
       .from("fee_config")
-      .upsert({ id: 1, service_fee_percent: percent, service_fee_flat: flatFee }, { onConflict: "id" })
+      .update({ service_fee_percent: percent, service_fee_flat: flatFee })
+      .eq("id", configId)
     setSaving(false)
     if (error) {
       toast.error("Gagal menyimpan: " + error.message)

@@ -48,15 +48,19 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [userName, setUserName] = useState("")
+  const [userEmail, setUserEmail] = useState("")
   const visibleNav = ADMIN_NAV.filter((item) => item.roles.includes(currentRole))
 
-  const ROLE_USERS: Record<AdminRole, { name: string; email: string }> = {
-    marketplace_admin: { name: "Super Admin", email: "admin@umrohq.com" },
-    marketplace_operational: { name: "Operational Staff", email: "operational@umrohq.com" },
-    marketplace_finance: { name: "Finance Staff", email: "finance@umrohq.com" },
-  }
-
-  const currentUser = ROLE_USERS[currentRole]
+  useState(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserName(user.user_metadata?.full_name || user.email?.split("@")[0] || "Admin")
+        setUserEmail(user.email || "")
+      }
+    })
+  })
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -83,10 +87,10 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
       <div className="p-3 border-b border-border">
         <div className="flex items-center gap-2 px-1">
           <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-            <span className="text-[10px] font-bold text-emerald-700">{currentUser.name.charAt(0)}</span>
+            <span className="text-[10px] font-bold text-emerald-700">{(userName || "A").charAt(0)}</span>
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium truncate">{currentUser.name}</p>
+            <p className="text-xs font-medium truncate">{userName || "Admin"}</p>
             <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${ROLE_COLORS[currentRole]}`}>
               {ROLE_LABELS[currentRole]}
             </span>
