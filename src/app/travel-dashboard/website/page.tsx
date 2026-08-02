@@ -2,8 +2,24 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Globe, Palette, Save, Loader2 } from "lucide-react"
+import { Globe, Palette, Save, Loader2, Check, Layout, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
+import Link from "next/link"
+
+interface TemplateRow {
+  id: string
+  name: string
+  description: string | null
+  preview_url: string | null
+  is_active: boolean
+  category: string | null
+}
+
+const TEMPLATE_PREVIEWS: Record<string, { gradient: string; accent: string; label: string }> = {
+  "c0000000-0000-0000-0000-000000000001": { gradient: "from-emerald-600 to-emerald-800", accent: "#0D7C5F", label: "Modern Islamic" },
+  "c0000000-0000-0000-0000-000000000002": { gradient: "from-gray-800 to-gray-900", accent: "#111827", label: "Clean Minimal" },
+  "c0000000-0000-0000-0000-000000000003": { gradient: "from-slate-900 to-indigo-950", accent: "#0F172A", label: "Royal Gold" },
+}
 
 export default function TravelWebsitePage() {
   const supabase = createClient()
@@ -15,6 +31,12 @@ export default function TravelWebsitePage() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // Template state
+  const [templates, setTemplates] = useState<TemplateRow[]>([])
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+  const [savingTemplate, setSavingTemplate] = useState(false)
+  const [tenantSlug, setTenantSlug] = useState("")
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -24,14 +46,26 @@ export default function TravelWebsitePage() {
       if (!profile?.tenant_id) { setLoading(false); return }
       setTenantId(profile.tenant_id)
 
-      const { data: tenant } = await supabase.from("tenants").select("slug, custom_domain, config").eq("id", profile.tenant_id).single()
-      if (tenant) {
-        setSubdomain(tenant.slug || "")
-        setCustomDomain(tenant.custom_domain || "")
-        const config = (tenant.config || {}) as any
+      const [tenantRes, websiteRes, templatesRes] = await Promise.all([
+        supabase.from("tenants").select("slug, custom_domain, config").eq("id", profile.tenant_id).single(),
+        supabase.from("tenant_websites").select("template_id").eq("tenant_id", profile.tenant_id).single(),
+        supabase.from("website_templates").select("id, name, description, preview_url, is_active, category").order("created_at", { ascending: false }),
+      ])
+
+      if (tenantRes.data) {
+        setSubdomain(tenantRes.data.slug || "")
+        setTenantSlug(tenantRes.data.slug || "")
+        setCustomDomain(tenantRes.data.custom_domain || "")
+        const config = (tenantRes.data.config || {}) as any
         if (config.brand_color) setBrandColor(config.brand_color)
         if (config.description) setDescription(config.description)
       }
+
+      if (websiteRes.data) {
+        setSelectedTemplateId(websiteRes.data.template_id)
+      }
+
+      setTemplates((templatesRes.data as TemplateRow[]) || [])
       setLoading(false)
     }
     load()
@@ -52,11 +86,30 @@ export default function TravelWebsitePage() {
     setSaving(false)
   }
 
+  async function handleSelectTemplate(templateId: string) {
+    if (!tenantId || savingTemplate) return
+    setSavingTemplate(true)
+
+    const { error } = await supabase.from("tenant_websites").upsert(
+      { tenant_id: tenantId, template_id: templateId },
+      { onConflict: "tenant_id" }
+    )
+
+    if (error) {
+      toast.error("Gagal mengubah template: " + error.message)
+    } else {
+      setSelectedTemplateId(templateId)
+      toast.success("Template berhasil diubah")
+    }
+    setSavingTemplate(false)
+  }
+
   if (loading) {
     return (
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-8 w-56 bg-muted rounded animate-pulse" />
         <div className="h-48 bg-muted rounded-2xl animate-pulse" />
+        <div className="h-64 bg-muted rounded-2xl animate-pulse" />
       </div>
     )
   }
@@ -66,6 +119,93 @@ export default function TravelWebsitePage() {
       <div>
         <h1 className="text-2xl font-bold">Pengaturan Website</h1>
         <p className="text-muted-foreground mt-1">Atur tampilan website travel Anda</p>
+      </div>
+
+      {/* Template Selector */}
+      <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layout className="w-5 h-5 text-emerald-600" />
+            <h2 className="font-semibold">Template Website</h2>
+          </div>
+          {selectedTemplateId && tenantSlug && (
+            <Link
+              href={`/travel-site/${tenantSlug}`}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Lihat Website
+            </Link>
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground">Pilih tampilan template untuk website travel Anda</p>
+
+        {templates.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {templates.map((tpl) => {
+              const preview = TEMPLATE_PREVIEWS[tpl.id]
+              const isSelected = selectedTemplateId === tpl.id
+
+              return (
+                <button
+                  key={tpl.id}
+                  onClick={() => handleSelectTemplate(tpl.id)}
+                  disabled={savingTemplate || !tpl.is_active}
+                  className={`relative group text-left rounded-2xl border-2 overflow-hidden transition-all duration-200 ${
+                    isSelected
+                      ? "border-emerald-500 shadow-lg shadow-emerald-500/10"
+                      : "border-border/60 hover:border-emerald-300 hover:shadow-md"
+                  } ${!tpl.is_active ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                >
+                  {/* Template Preview */}
+                  <div className={`relative h-32 overflow-hidden bg-gradient-to-br ${preview?.gradient || "from-emerald-100 to-blue-100"}`}>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-12 h-8 mx-auto mb-1 rounded bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                          <Layout className="w-4 h-4 text-white/60" />
+                        </div>
+                        <div className="flex gap-0.5 justify-center">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="w-6 h-4 rounded-sm bg-white/10" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
+                        <Check className="w-3.5 h-3.5 text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Template Info */}
+                  <div className="p-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-sm">{tpl.name}</h3>
+                      {tpl.category && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-muted-foreground">{tpl.category}</span>
+                      )}
+                    </div>
+                    {tpl.description && (
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{tpl.description}</p>
+                    )}
+                  </div>
+
+                  {/* Selected indicator */}
+                  {isSelected && (
+                    <div className="absolute inset-0 rounded-2xl ring-2 ring-emerald-500 ring-offset-2 pointer-events-none" />
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8 border border-dashed border-border rounded-2xl">
+            <Layout className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Belum ada template tersedia</p>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-6 space-y-4">

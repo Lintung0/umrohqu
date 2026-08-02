@@ -27,6 +27,9 @@ const PUBLIC_ROUTES = [
 
 const SKIP_SUBDOMAIN_HOSTS = ["www", "api", "localhost", "127.0.0.1"]
 
+const CUSTOM_DOMAIN_CACHE = new Map<string, { tenantId: string; expiresAt: number }>()
+const CACHE_TTL_MS = 60_000
+
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.some((route) => {
     if (route === "/") return pathname === "/"
@@ -36,10 +39,9 @@ function isPublicRoute(pathname: string): boolean {
 
 function getSubdomain(hostname: string): string | null {
   const parts = hostname.split(".")
-  
-  // Handle Vercel deployments (e.g., umrohqu.vercel.app or tenant.umrohqu.vercel.app)
+
   if (hostname.endsWith(".vercel.app")) {
-    if (parts.length === 3) return null // main vercel domain, e.g. umrohqu.vercel.app
+    if (parts.length === 3) return null
     if (parts.length === 4) {
       const sub = parts[0]
       if (SKIP_SUBDOMAIN_HOSTS.includes(sub)) return null
@@ -47,11 +49,16 @@ function getSubdomain(hostname: string): string | null {
     }
   }
 
-  // Standard domain logic (e.g., umrohqu.com or tenant.umrohqu.com)
   if (parts.length < 3) return null
   const sub = parts[0]
   if (SKIP_SUBDOMAIN_HOSTS.includes(sub)) return null
   return sub
+}
+
+function isIpOrLocalhost(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "127.0.0.1") return true
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) return true
+  return false
 }
 
 export async function middleware(request: NextRequest) {
@@ -93,6 +100,51 @@ export async function middleware(request: NextRequest) {
     response.headers.set("x-tenant-id", tenant.id)
     response.headers.set("x-tenant-data", JSON.stringify(tenant))
     return response
+  }
+
+  if (!isIpOrLocalhost(hostname)) {
+    const cached = CUSTOM_DOMAIN_CACHE.get(hostname)
+    if (cached && cached.expiresAt > Date.now()) {
+      const response = NextResponse.rewrite(
+        new URL(`/travel-site/${cached.tenantId}${pathname === "/" ? "" : pathname}`, request.url)
+      )
+      response.headers.set("x-tenant-id", cached.tenantId)
+      return response
+    }
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return request.cookies.getAll() },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          },
+        },
+      }
+    )
+
+    const { data: customTenant } = await supabase
+      .from("tenants")
+      .select("id, slug, name, logo_url, brand_color, custom_domain, description")
+      .eq("custom_domain", hostname)
+      .eq("status", "verified")
+      .single()
+
+    if (customTenant) {
+      CUSTOM_DOMAIN_CACHE.set(hostname, {
+        tenantId: customTenant.id,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      })
+
+      const response = NextResponse.rewrite(
+        new URL(`/travel-site/${customTenant.id}${pathname === "/" ? "" : pathname}`, request.url)
+      )
+      response.headers.set("x-tenant-id", customTenant.id)
+      response.headers.set("x-tenant-data", JSON.stringify(customTenant))
+      return response
+    }
   }
 
   let supabaseResponse = NextResponse.next({ request })

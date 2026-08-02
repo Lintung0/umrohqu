@@ -92,7 +92,7 @@ const Footer = () => {
             </div>
             <div className="space-y-3">
               <Link
-                href="https://wa.me/6282232169960?text=Assalamualaikum,%20saya%20mau%20tanya%20paket%20umroh%20terbaik%20untuk%20keluarga%20saya"
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "6281234567890"}?text=Assalamualaikum,%20saya%20mau%20tanya%20paket%20umroh%20terbaik%20untuk%20keluarga%20saya`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors"

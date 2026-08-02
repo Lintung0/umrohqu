@@ -1,5 +1,5 @@
 // ─── Service Abstraction Layer ────────────────────────────────────────────────
-// This layer abstracts data access. When DB is ready, swap implementations.
+// Generic CRUD interface and providers for data access.
 
 export interface ServiceConfig {
   apiBaseUrl: string
@@ -18,7 +18,7 @@ export interface DataProvider<T, ID = string> {
   count(filter?: Record<string, any>): Promise<number>
 }
 
-// ─── In-Memory Provider (for dummy data) ─────────────────────────────────────
+// ─── In-Memory Provider ─────────────────────────────────────────────────────
 
 export class InMemoryProvider<T extends { id: string }> implements DataProvider<T> {
   private data: T[] = []

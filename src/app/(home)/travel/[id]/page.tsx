@@ -238,28 +238,48 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ i
           <h2 className="text-lg font-bold">Hubungi {tenantData.name}</h2>
           <p className="text-sm text-muted-foreground">Ada pertanyaan? Hubungi travel langsung atau kirim pesan.</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <a
-              href={`https://wa.me/${(tenantData.phone || "6282232169960").replace(/[^0-9]/g, "")}?text=Assalamualaikum,%20saya%20tertarik%20dengan%20paket%20umroh%20${encodeURIComponent(tenantData.name)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 border border-green-200 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
-            >
-              <MessageCircle className="w-5 h-5 text-green-600 shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-green-800">WhatsApp</p>
-                <p className="text-xs text-green-600">Chat langsung</p>
+            {tenantData.phone ? (
+              <a
+                href={`https://wa.me/${tenantData.phone.replace(/[^0-9]/g, "")}?text=Assalamualaikum,%20saya%20tertarik%20dengan%20paket%20umroh%20${encodeURIComponent(tenantData.name)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-4 border border-green-200 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 text-green-600 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-green-800">WhatsApp</p>
+                  <p className="text-xs text-green-600">Chat langsung</p>
+                </div>
+              </a>
+            ) : (
+              <div className="flex items-center gap-3 p-4 border border-border rounded-xl opacity-50">
+                <MessageCircle className="w-5 h-5 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground">WhatsApp</p>
+                  <p className="text-xs text-muted-foreground">Belum tersedia</p>
+                </div>
               </div>
-            </a>
-            <a
-              href={`tel:${tenantData.phone || "+6282232169960"}`}
-              className="flex items-center gap-3 p-4 border border-border rounded-xl hover:bg-gray-50 transition-colors"
-            >
+            )}
+            {tenantData.phone ? (
+              <a
+                href={`tel:${tenantData.phone}`}
+                className="flex items-center gap-3 p-4 border border-border rounded-xl hover:bg-gray-50 transition-colors"
+              >
               <Phone className="w-5 h-5 text-primary shrink-0" />
               <div>
                 <p className="text-sm font-semibold">Telepon</p>
-                <p className="text-xs text-muted-foreground">{tenantData.phone || "+62 822-3216-9960"}</p>
+                <p className="text-xs text-muted-foreground">{tenantData.phone}</p>
               </div>
             </a>
+            ) : (
+              <div className="flex items-center gap-3 p-4 border border-border rounded-xl opacity-50">
+                <Phone className="w-5 h-5 text-muted-foreground shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground">Telepon</p>
+                  <p className="text-xs text-muted-foreground">Belum tersedia</p>
+                </div>
+              </div>
+            )}
             <a
               href={`mailto:${tenantData.contact_email || `info@${tenantData.slug}.com`}`}
               className="flex items-center gap-3 p-4 border border-border rounded-xl hover:bg-gray-50 transition-colors"
