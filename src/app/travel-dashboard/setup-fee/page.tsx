@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, CheckCircle, AlertCircle, CreditCard, ExternalLink } from "lucide-react"
 import { formatRupiah } from "@/lib/constants"
+import { DEFAULT_FEE_CONFIG } from "@/lib/business-logic/fees"
 
 export default function SetupFeePage() {
   const router = useRouter()
@@ -117,7 +118,7 @@ export default function SetupFeePage() {
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Setup Fee</span>
               <span className="font-semibold text-lg text-emerald-700">
-                {formatRupiah(tenant?.setup_fee || 5000000)}
+                {formatRupiah(tenant?.setup_fee || DEFAULT_FEE_CONFIG.setupFee)}
               </span>
             </div>
           </div>

@@ -102,7 +102,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">WhatsApp</p>
-                  <p className="text-sm font-medium">+62 82232169960</p>
+                  <p className="text-sm font-medium">{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</p>
                 </div>
               </Link>
               <Link

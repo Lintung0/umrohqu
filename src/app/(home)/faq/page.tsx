@@ -171,7 +171,7 @@ export default function FAQPage() {
         <div className="mt-12 bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-4">
           <div>
             <p className="font-semibold text-emerald-800">Belum menemukan jawaban?</p>
-            <p className="text-sm text-emerald-700 mt-1">Hubungi kami via WhatsApp di <strong>+62 82232169960</strong></p>
+            <p className="text-sm text-emerald-700 mt-1">Hubungi kami via WhatsApp di <strong>{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</strong></p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
             <Link

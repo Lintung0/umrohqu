@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 import { createInvoice } from "@/lib/services/xendit"
+import { DEFAULT_FEE_CONFIG } from "@/lib/business-logic/fees"
 
 export async function GET() {
   try {
@@ -69,7 +70,7 @@ export async function POST() {
       return NextResponse.json({ error: "Setup fee sudah dibayar" }, { status: 400 })
     }
 
-    const feeAmount = Number(tenant.setup_fee) || 5000000
+    const feeAmount = Number(tenant.setup_fee) || DEFAULT_FEE_CONFIG.setupFee
     const externalId = `setupfee-${tenant.id}-${Date.now()}`
 
     const invoice = await createInvoice({

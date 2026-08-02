@@ -44,7 +44,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="font-semibold text-foreground mb-2">7. Hubungi Kami</h2>
-            <p>Untuk pertanyaan terkait privasi, hubungi kami di <strong>privacy@umrohq.com</strong> atau WhatsApp <strong>+62 82232169960</strong>.</p>
+            <p>Untuk pertanyaan terkait privasi, hubungi kami di <strong>privacy@umrohq.com</strong> atau WhatsApp <strong>{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</strong>.</p>
           </section>
         </div>
       </div>

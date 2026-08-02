@@ -76,7 +76,7 @@ export default function AboutPage() {
             <p>UmrohQ adalah produk dari <strong>PT. Universal Big Data</strong>.</p>
             <p>Platform ini dibangun dengan visi menjadi ekosistem digital terpadu untuk industri haji dan umroh di Indonesia.</p>
             <p className="pt-2">Email: <strong>info@umrohq.com</strong></p>
-            <p>WhatsApp: <strong>+62 82232169960</strong></p>
+            <p>WhatsApp: <strong>{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</strong></p>
           </div>
         </div>
       </div>
