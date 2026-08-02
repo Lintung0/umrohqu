@@ -105,6 +105,9 @@ function SearchContent() {
     fetchData()
   }, [searchQueryParam])
 
+  // Client-side search
+  const [searchQuery, setSearchQuery] = useState("")
+
   // Sync search query from URL
   useEffect(() => {
     const paramQuery = searchParams.get("search")
@@ -112,23 +115,6 @@ function SearchContent() {
       setSearchQuery(paramQuery || "")
     }
   }, [searchParams.get("search")])
-
-  // Client-side search
-  const [searchQuery, setSearchQuery] = useState("")
-
-  const filteredWithSearch = filtered.filter((pkg) => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    const tenant = tenants.get(pkg.tenant_id)
-    
-    return (
-      pkg.name.toLowerCase().includes(query) ||
-      tenant?.name.toLowerCase().includes(query) ||
-      pkg.departure_city?.toLowerCase().includes(query) ||
-      pkg.slug.toLowerCase().includes(query) ||
-      pkg.description?.toLowerCase().includes(query)
-    )
-  })
 
   const filtered = packages
     .filter((pkg) => {
@@ -140,9 +126,8 @@ function SearchContent() {
         const dep = departure.toLowerCase()
         const cities = (pkg.departure_cities || [pkg.departure_city]).map((c) => c?.toLowerCase() || "")
         if (!cities.some((c) => c.includes(dep))) return false
-        
-        // Search in package name and travel name
-        if (!pkg.name.toLowerCase().includes(dep) && !pkg.tenant_name?.toLowerCase().includes(dep)) {
+        const depTenant = tenants.get(pkg.tenant_id)
+        if (!pkg.name.toLowerCase().includes(dep) && !depTenant?.name?.toLowerCase().includes(dep)) {
           return false
         }
       }
@@ -182,6 +167,19 @@ function SearchContent() {
       return scoreB - scoreA
     })
 
+  const filteredWithSearch = filtered.filter((pkg) => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
+    const tenant = tenants.get(pkg.tenant_id)
+    return (
+      pkg.name.toLowerCase().includes(query) ||
+      tenant?.name.toLowerCase().includes(query) ||
+      pkg.departure_city?.toLowerCase().includes(query) ||
+      pkg.slug.toLowerCase().includes(query) ||
+      pkg.description?.toLowerCase().includes(query)
+    )
+  })
+
   const handleSearch = () => {
     const params = new URLSearchParams()
     if (departure) params.set("departure", departure)
@@ -194,14 +192,6 @@ function SearchContent() {
     if (searchQuery) params.set("search", searchQuery)
     router.push(`/search?${params.toString()}`)
   }
-
-  // Sync search query from URL
-  useEffect(() => {
-    const searchQueryParam = searchParams.get("search")
-    if (searchQueryParam && searchQueryParam !== searchQuery) {
-      setSearchQuery(searchQueryParam)
-    }
-  }, [searchParams.get("search"), searchQuery])
 
   const clearFilters = () => {
     setDeparture("")
@@ -390,18 +380,18 @@ function SearchContent() {
                   </button>
                 )
               })}
-            )}
-
-            {/* Results count with search */}
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-muted-foreground">
-                {filteredWithSearch.length} paket ditemukan dari total {filtered.length} paket
-                {searchQuery && `· Pencarian kata kunci "${searchQuery}"`}
-                {departure && `· Keberangkatan dari ${departure}`}
-                {month && `· ${month}`}
-                {cost && cost !== "Semua Biaya" && `· ${cost}`}
-              </p>
             </div>
+
+          {/* Results count with search */}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-muted-foreground">
+              {filteredWithSearch.length} paket ditemukan dari total {filtered.length} paket
+              {searchQuery && `· Pencarian kata kunci \"${searchQuery}\"}`}
+              {departure && `· Keberangkatan dari ${departure}`}
+              {month && `· ${month}`}
+              {cost && cost !== "Semua Biaya" && `· ${cost}`}
+            </p>
+          </div>
 
             {hasActiveFilters && (
               <div className="flex flex-wrap gap-2 mb-4">

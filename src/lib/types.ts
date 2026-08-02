@@ -109,6 +109,8 @@ export interface Booking {
   created_at: string
   updated_at: string
   deleted_at: string | null
+  // fee_channel from booking creation
+  fee_channel?: string
   // backward compatibility fields for travel-dashboard
   channel?: string
   price_per_person?: number
