@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
           amount: payNow,
           description: `Pembayaran ${paymentType === "dp" ? "DP " : ""}booking ${booking.id.slice(0, 8)}`,
           customer: { email: user.email },
-          successRedirectUrl: `${BASE_URL}/dashboard/bookings/${booking.id}`,
+          successRedirectUrl: `${BASE_URL}/booking-success/${booking.id}`,
           failureRedirectUrl: `${BASE_URL}/checkout?package=${packageId}&failed=true`,
         })
 

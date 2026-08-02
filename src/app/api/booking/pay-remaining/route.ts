@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
           amount: remaining,
           description: `Pelunasan sisa booking #${bookingId.slice(0, 8).toUpperCase()}`,
           customer: { email: user.email },
-          successRedirectUrl: `${BASE_URL}/dashboard/bookings/${bookingId}`,
+          successRedirectUrl: `${BASE_URL}/booking-success/${bookingId}`,
           failureRedirectUrl: `${BASE_URL}/dashboard/bookings/${bookingId}?failed=true`,
         })
         xenditInvoice = { id: inv.id, invoice_url: inv.invoice_url }

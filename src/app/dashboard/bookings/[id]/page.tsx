@@ -316,7 +316,7 @@ export default function BookingDetailPage() {
       )}
 
       {/* DP: Pay Remaining */}
-      {booking.payment_type === "dp" && (booking.remaining_amount || 0) > 0 && booking.status === "pending_payment" && (
+      {booking.payment_type === "dp" && (booking.remaining_amount || 0) > 0 && (booking.status === "processing" || booking.status === "pending_payment") && (
         <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />

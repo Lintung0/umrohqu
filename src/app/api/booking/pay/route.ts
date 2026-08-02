@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         amount: payAmount,
         description: `Pembayaran ${booking.payment_type === "dp" ? "DP " : ""}booking #${booking.id.slice(0, 8).toUpperCase()}`,
         customer: { email: user.email },
-        successRedirectUrl: `${BASE_URL}/dashboard/bookings/${booking.id}`,
+        successRedirectUrl: `${BASE_URL}/booking-success/${booking.id}`,
         failureRedirectUrl: `${BASE_URL}/dashboard/bookings/${booking.id}?failed=true`,
       })
 
