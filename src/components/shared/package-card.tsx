@@ -18,8 +18,12 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
 
+  const available = pkg.available ?? pkg.quota
+  const seatPercent = pkg.quota > 0 ? (available / pkg.quota) * 100 : 100
+  const seatColor = seatPercent <= 20 ? "bg-red-500" : seatPercent <= 50 ? "bg-amber-500" : "bg-emerald-500"
+
   return (
-    <div className="group relative bg-white border border-border/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 hover:border-primary/20">
+    <Link href={`/package/${pkg.slug}`} className="group block relative bg-white border border-border/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 hover:border-primary/20">
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <Image
@@ -59,9 +63,9 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
       {/* Content */}
       <div className="p-4 space-y-3">
         {showTravel && travel && (
-          <Link
-            href={`/travel/${travel.id}`}
-            className="inline-flex items-center gap-2 group/travel"
+          <span
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/travel/${travel.id}` }}
+            className="inline-flex items-center gap-2 cursor-pointer group/travel"
           >
             {travel.logo_url ? (
               <Image
@@ -80,7 +84,7 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
               {travel.name}
             </span>
             {travel.status === "verified" && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
-          </Link>
+          </span>
         )}
 
         <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem]">
@@ -106,11 +110,18 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
             </div>
             <span className="truncate">{pkg.hotel_makkah} ({'★'.repeat(pkg.hotel_makkah_stars || 0)})</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <div className="w-5 h-5 rounded-md bg-primary/5 flex items-center justify-center shrink-0">
-              <Users className="w-3 h-3 text-primary" />
-            </div>
-            <span>Sisa <span className="font-semibold text-foreground">{pkg.available ?? pkg.quota}</span> dari {pkg.quota} kursi</span>
+        </div>
+
+        {/* Seat Availability Progress Bar */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <Users className="w-3 h-3" /> Kursi tersisa
+            </span>
+            <span className="font-semibold">{available}/{pkg.quota}</span>
+          </div>
+          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full transition-all duration-500 ${seatColor}`} style={{ width: `${seatPercent}%` }} />
           </div>
         </div>
 
@@ -142,17 +153,11 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
               <p className="text-[10px] text-muted-foreground">/org</p>
             </div>
           </div>
-          <Link href={`/package/${pkg.slug}`}>
-            <Button
-              size="sm"
-              className="text-xs h-8 rounded-xl bg-gradient-to-r from-primary to-emerald-glow text-white shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/25 transition-all duration-200 group/btn"
-            >
-              Lihat
-              <ArrowRight className="w-3 h-3 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
-            </Button>
-          </Link>
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
+            Lihat <ArrowRight className="w-3.5 h-3.5" />
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
