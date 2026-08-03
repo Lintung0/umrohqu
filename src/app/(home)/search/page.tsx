@@ -210,7 +210,7 @@ function SearchContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-zinc-50/50">
-        <div className="bg-white border-b border-border px-6 py-5">
+        <div className="bg-white border-b border-border px-4 sm:px-6 py-5">
           <div className="max-w-7xl mx-auto">
             <div className="h-6 bg-muted rounded animate-pulse w-64 mb-2" />
             <div className="h-4 bg-muted rounded animate-pulse w-48" />
@@ -236,7 +236,7 @@ function SearchContent() {
 
   return (
     <main className="min-h-screen bg-zinc-50/50">
-      <div className="bg-white border-b border-border px-6 py-5">
+      <div className="bg-white border-b border-border px-4 sm:px-6 py-5">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-xl font-bold">Hasil Pencarian Paket Umroh</h1>
           <p className="text-sm text-muted-foreground mt-1">
