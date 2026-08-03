@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, ArrowRight } from "lucide-react"
+import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, ArrowRight, Users, DollarSign, Package, Zap } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 
@@ -16,7 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
-  const max = Math.max(...data.map((d) => d.gmv))
+  const max = Math.max(...data.map((d) => d.gmv), 1)
   const w = 300
   const h = 80
   const points = data.map((d, i) => {
@@ -27,7 +27,7 @@ function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
   const area = `0,${h} ${points.join(" ")} ${w},${h}`
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-20">
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-24">
       <defs>
         <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#0E5C4E" stopOpacity="0.3" />
@@ -35,11 +35,11 @@ function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
         </linearGradient>
       </defs>
       <polygon points={area} fill="url(#chartGrad)" />
-      <polyline points={points.join(" ")} fill="none" stroke="#0E5C4E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={points.join(" ")} fill="none" stroke="#0E5C4E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       {data.map((d, i) => {
         const x = (i / (data.length - 1)) * w
         const y = h - (d.gmv / max) * (h - 10)
-        return <circle key={i} cx={x} cy={y} r="3" fill="#0E5C4E" />
+        return <circle key={i} cx={x} cy={y} r="4" fill="#0E5C4E" stroke="white" strokeWidth="2" />
       })}
     </svg>
   )
@@ -105,9 +105,9 @@ export default function AdminOverviewPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <div className="h-8 w-56 bg-muted rounded animate-pulse" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4].map((i) => <div key={i} className="h-28 bg-muted rounded-2xl animate-pulse" />)}
         </div>
       </div>
@@ -115,55 +115,48 @@ export default function AdminOverviewPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Ringkasan Sistem</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Ringkasan Sistem</h1>
           <p className="text-muted-foreground text-sm mt-1">UmrohQ Platform · {new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
         </div>
-        <Link href="/admin/travels" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">
+        <Link href="/admin/travels" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors w-fit">
           Kelola Travel <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stat Cards - Gradient */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, color: "bg-emerald-50 text-primary", trend: "+12" },
-          { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, sub: "Sepanjang platform", color: "bg-blue-50 text-blue-600", trend: "+8%" },
-          { icon: TrendingUp, label: "Revenue Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", color: "bg-amber-50 text-amber-600", trend: "+31%" },
-          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu review", color: "bg-red-50 text-red-500", trend: null },
+          { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, gradient: "from-emerald-500 to-emerald-700", iconBg: "bg-white/20" },
+          { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, sub: "Sepanjang platform", gradient: "from-blue-500 to-blue-700", iconBg: "bg-white/20" },
+          { icon: DollarSign, label: "Revenue Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", gradient: "from-amber-500 to-orange-600", iconBg: "bg-white/20" },
+          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu review", gradient: "from-red-500 to-rose-600", iconBg: "bg-white/20" },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl border border-border p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.color}`}>
-                <s.icon className="w-5 h-5" />
-              </div>
-              {s.trend && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-primary flex items-center gap-0.5">
-                  <TrendingUp className="w-3 h-3" /> {s.trend}
-                </span>
-              )}
+          <div key={s.label} className={`bg-gradient-to-br ${s.gradient} rounded-2xl p-4 sm:p-5 text-white hover:shadow-lg transition-shadow`}>
+            <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center mb-3`}>
+              <s.icon className="w-5 h-5" />
             </div>
             <p className="text-2xl font-bold">{s.value}</p>
-            <p className="text-sm font-medium mt-0.5">{s.label}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{s.sub}</p>
+            <p className="text-sm font-medium mt-0.5 opacity-90">{s.label}</p>
+            <p className="text-xs opacity-70 mt-0.5">{s.sub}</p>
           </div>
         ))}
       </div>
 
       {/* GMV Chart + Pending Travels */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* GMV Trend */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-border p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-border p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="font-semibold">Tren GMV Platform</h2>
               <p className="text-xs text-muted-foreground mt-0.5">6 bulan terakhir</p>
             </div>
             <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-full bg-primary/10">
-              Rp {(chartData[chartData.length - 1].gmv / 1_000_000_000).toFixed(1)}M
+              Rp {((chartData[chartData.length - 1]?.gmv || 0) / 1_000_000_000).toFixed(1)}M
             </span>
           </div>
           <MiniChart data={chartData} />
@@ -188,8 +181,8 @@ export default function AdminOverviewPage() {
           ) : (
             <div className="space-y-3">
               {pendingTravels.map((t) => (
-                <div key={t.id} className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100">
-                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-sm font-bold text-amber-700 shrink-0">
+                <div key={t.id} className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100 hover:bg-amber-100 transition-colors">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-sm font-bold text-white shrink-0">
                     {t.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -205,9 +198,9 @@ export default function AdminOverviewPage() {
       </div>
 
       {/* Recent Bookings + Support Tickets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Recent Bookings */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-border">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-border overflow-hidden">
           <div className="flex items-center justify-between p-5 border-b border-border">
             <h2 className="font-semibold">Booking Terbaru</h2>
             <Link href="/admin/invoices" className="text-sm text-primary hover:underline">Lihat Semua</Link>
@@ -216,15 +209,15 @@ export default function AdminOverviewPage() {
             {recentBookings.length === 0 ? (
               <p className="p-8 text-center text-muted-foreground text-sm">Belum ada booking</p>
             ) : recentBookings.map((b: any) => (
-              <div key={b.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+              <div key={b.id} className="flex items-center gap-3 sm:gap-4 p-4 hover:bg-gray-50 transition-colors">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-xs font-bold text-primary shrink-0">
                   {(b.customer?.full_name || "P").charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{b.customer?.full_name || "Pelanggan"}</p>
-                  <p className="text-xs text-muted-foreground">{b.package?.name || "Paket"} · {b.pilgrim_count} jamaah</p>
+                  <p className="text-xs text-muted-foreground truncate">{b.package?.name || "Paket"} · {b.pilgrim_count} jamaah</p>
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(b.status, "booking")}`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${getStatusColor(b.status, "booking")}`}>
                   {getStatusLabel(b.status, "booking")}
                 </span>
                 <p className="text-sm font-semibold shrink-0">{formatRupiah(b.total)}</p>
@@ -234,7 +227,7 @@ export default function AdminOverviewPage() {
         </div>
 
         {/* Support Tickets */}
-        <div className="bg-white rounded-2xl border border-border">
+        <div className="bg-white rounded-2xl border border-border overflow-hidden">
           <div className="flex items-center justify-between p-5 border-b border-border">
             <h2 className="font-semibold text-sm">Tiket Terbaru</h2>
             <Link href="/admin/tickets" className="text-xs text-primary hover:underline">Lihat Semua</Link>
@@ -261,12 +254,13 @@ export default function AdminOverviewPage() {
       {/* Quick Links */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Verifikasi Travel", href: "/admin/verification", color: "bg-emerald-600 text-white" },
-          { label: "Promo Platform", href: "/admin/billing-promos", color: "bg-amber-500 text-white" },
-          { label: "Konfigurasi Fee", href: "/admin/service-fees", color: "bg-blue-600 text-white" },
-          { label: "Laporan Keuangan", href: "/admin/billing-reports", color: "bg-purple-600 text-white" },
+          { label: "Verifikasi Travel", href: "/admin/verification", icon: CheckCircle, gradient: "from-emerald-500 to-emerald-700" },
+          { label: "Promo Platform", href: "/admin/billing-promos", icon: Zap, gradient: "from-amber-500 to-orange-600" },
+          { label: "Konfigurasi Fee", href: "/admin/service-fees", icon: DollarSign, gradient: "from-blue-500 to-blue-700" },
+          { label: "Laporan Keuangan", href: "/admin/billing-reports", icon: TrendingUp, gradient: "from-purple-500 to-purple-700" },
         ].map((l) => (
-          <Link key={l.href} href={l.href} className={`rounded-2xl p-4 text-sm font-semibold hover:opacity-90 transition-opacity ${l.color}`}>
+          <Link key={l.href} href={l.href} className={`rounded-2xl p-4 text-white text-sm font-semibold hover:shadow-lg hover:opacity-90 transition-all bg-gradient-to-br ${l.gradient} flex items-center gap-3`}>
+            <l.icon className="w-5 h-5 opacity-80" />
             {l.label}
           </Link>
         ))}
