@@ -58,19 +58,23 @@ export default function BookingDetailPage() {
       setBooking(b)
       setLoading(false)
 
-      if (b && b.status === "pending_payment" && b.xendit_invoice_id) {
-        try {
-          const res = await fetch("/api/booking/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ bookingId: params.id }),
-          })
-          const result = await res.json()
-          if (result.status && result.status !== "pending_payment") {
-            setBooking((prev) => prev ? { ...prev, status: result.status } : prev)
+      if (b && b.xendit_invoice_id) {
+        const shouldVerify = b.status === "pending_payment" ||
+          (b.status === "processing" && b.payment_type === "dp" && (b.remaining_amount || 0) > 0 && b.xendit_invoice_id?.startsWith("booking-remaining-"))
+        if (shouldVerify) {
+          try {
+            const res = await fetch("/api/booking/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ bookingId: params.id }),
+            })
+            const result = await res.json()
+            if (result.status && result.status !== b.status) {
+              setBooking((prev) => prev ? { ...prev, status: result.status, remaining_amount: result.status === "confirmed" ? 0 : prev.remaining_amount } : prev)
+            }
+          } catch (e) {
+            console.error("Verify payment error:", e)
           }
-        } catch (e) {
-          console.error("Verify payment error:", e)
         }
       }
     }

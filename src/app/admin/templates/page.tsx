@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Plus, Eye, Edit, Trash2, Users, X, Loader2 } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Plus, Eye, Edit, Trash2, Users, X, Loader2, Search, Filter, Layout, Sparkles, Globe } from "lucide-react"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
+import { TEMPLATE_REGISTRY, LiveTemplatePreview } from "@/components/travel-site/templates"
+import type { TemplateRegistryEntry } from "@/components/travel-site/templates"
 
 interface TemplateRow {
   id: string
@@ -25,7 +27,7 @@ const EMPTY_FORM = {
   is_active: true,
 }
 
-const CATEGORIES = ["Umum", "Premium", "Budget", "VIP"]
+const CATEGORIES = ["Semua", "Umum", "Premium", "Budget", "VIP"]
 
 export default function AdminTemplatesPage() {
   const [templates, setTemplates] = useState<TemplateRow[]>([])
@@ -36,20 +38,43 @@ export default function AdminTemplatesPage() {
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
-  const [previewTemplate, setPreviewTemplate] = useState<TemplateRow | null>(null)
+  const [previewId, setPreviewId] = useState<string | null>(null)
 
-  const fetchTemplates = async () => {
+  // Search & Filter
+  const [searchQuery, setSearchQuery] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState("Semua")
+
+  const fetchTemplates = useCallback(async () => {
     const supabase = createClient()
     const { data } = await supabase
       .from("website_templates")
       .select("id, name, description, category, preview_url, is_active, used_by_count, created_at")
       .order("created_at", { ascending: false })
     setTemplates((data as TemplateRow[]) || [])
-  }
+  }, [])
 
   useEffect(() => {
     fetchTemplates().finally(() => setLoading(false))
-  }, [])
+  }, [fetchTemplates])
+
+  // Realtime subscription
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel("templates-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "website_templates" },
+        () => {
+          fetchTemplates()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchTemplates])
 
   const openAddModal = () => {
     setEditingTemplate(null)
@@ -94,7 +119,6 @@ export default function AdminTemplatesPage() {
       } else {
         toast.success("Template berhasil diupdate")
         setShowModal(false)
-        fetchTemplates()
       }
     } else {
       const { error } = await supabase.from("website_templates").insert({
@@ -110,7 +134,6 @@ export default function AdminTemplatesPage() {
       } else {
         toast.success("Template berhasil ditambahkan")
         setShowModal(false)
-        fetchTemplates()
       }
     }
     setSaving(false)
@@ -126,10 +149,23 @@ export default function AdminTemplatesPage() {
     } else {
       toast.success("Template berhasil dihapus")
       setDeleteId(null)
-      fetchTemplates()
     }
     setDeleting(false)
   }
+
+  // Check if template has a built-in component
+  const getRegistryEntry = (tpl: TemplateRow): TemplateRegistryEntry | undefined => {
+    return TEMPLATE_REGISTRY.find((r) => r.id === tpl.id)
+  }
+
+  // Filter templates
+  const filteredTemplates = templates.filter((tpl) => {
+    const matchesSearch =
+      tpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (tpl.description || "").toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = categoryFilter === "Semua" || tpl.category === categoryFilter
+    return matchesSearch && matchesCategory
+  })
 
   if (loading) {
     return (
@@ -153,6 +189,7 @@ export default function AdminTemplatesPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Template Website</h1>
@@ -167,56 +204,170 @@ export default function AdminTemplatesPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {templates.map((tpl) => (
-          <div key={tpl.id} className="bg-white rounded-2xl border border-border overflow-hidden group">
-            <div className="relative h-44 overflow-hidden">
-              {tpl.preview_url ? (
-                <Image src={tpl.preview_url} alt={tpl.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-emerald-600/30">{tpl.name.charAt(0)}</span>
-                </div>
-              )}
-              <div className="absolute top-3 right-3 flex gap-2">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tpl.is_active ? "bg-emerald-500 text-white" : "bg-gray-500 text-white"}`}>
-                  {tpl.is_active ? "Aktif" : "Draft"}
-                </span>
-              </div>
-            </div>
-            <div className="p-4 space-y-3">
-              <div>
-                <h3 className="font-semibold">{tpl.name}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{tpl.description}</p>
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span className="px-2 py-0.5 bg-gray-100 rounded">{tpl.category || "Umum"}</span>
-                <span className="flex items-center gap-1"><Users className="w-3 h-3" />{tpl.used_by_count || 0} travel</span>
-              </div>
-              <div className="flex gap-2 pt-2 border-t border-border">
-                <button
-                  onClick={() => setPreviewTemplate(tpl)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-                >
-                  <Eye className="w-3.5 h-3.5" /> Preview
-                </button>
-                <button
-                  onClick={() => openEditModal(tpl)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-                >
-                  <Edit className="w-3.5 h-3.5" /> Edit
-                </button>
-                <button
-                  onClick={() => setDeleteId(tpl.id)}
-                  className="px-3 py-2 border border-red-200 text-red-500 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
+      {/* Built-in Templates Info */}
+      <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl border border-emerald-200/60 p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-emerald-600" />
           </div>
-        ))}
+          <div>
+            <h3 className="font-semibold text-sm text-emerald-900">Template Built-in</h3>
+            <p className="text-xs text-emerald-700/70 mt-0.5">
+              {TEMPLATE_REGISTRY.length} template siap pakai:{" "}
+              {TEMPLATE_REGISTRY.map((t) => t.name).join(", ")}. Template ini sudah memiliki tampilan interaktif.
+            </p>
+          </div>
+        </div>
       </div>
+
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari template..."
+            className="w-full pl-9 pr-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategoryFilter(cat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                categoryFilter === cat
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-gray-100 text-muted-foreground hover:bg-gray-200"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white rounded-xl border border-border p-3">
+          <div className="text-2xl font-bold">{templates.length}</div>
+          <div className="text-xs text-muted-foreground">Total Template</div>
+        </div>
+        <div className="bg-white rounded-xl border border-border p-3">
+          <div className="text-2xl font-bold text-emerald-600">{templates.filter((t) => t.is_active).length}</div>
+          <div className="text-xs text-muted-foreground">Aktif</div>
+        </div>
+        <div className="bg-white rounded-xl border border-border p-3">
+          <div className="text-2xl font-bold text-gray-500">{templates.filter((t) => !t.is_active).length}</div>
+          <div className="text-xs text-muted-foreground">Draft</div>
+        </div>
+        <div className="bg-white rounded-xl border border-border p-3">
+          <div className="text-2xl font-bold text-blue-600">{templates.reduce((sum, t) => sum + (t.used_by_count || 0), 0)}</div>
+          <div className="text-xs text-muted-foreground">Total Pengguna</div>
+        </div>
+      </div>
+
+      {/* Template Grid */}
+      {filteredTemplates.length === 0 ? (
+        <div className="text-center py-12 border border-dashed border-border rounded-2xl">
+          <Layout className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
+            {searchQuery || categoryFilter !== "Semua" ? "Tidak ada template yang cocok" : "Belum ada template"}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {filteredTemplates.map((tpl) => {
+            const registry = getRegistryEntry(tpl)
+            return (
+              <div key={tpl.id} className="bg-white rounded-2xl border border-border overflow-hidden group">
+                {/* Preview Image */}
+                <div className="relative h-44 overflow-hidden">
+                  {registry ? (
+                    <div className={`w-full h-full bg-gradient-to-br ${registry.gradient} flex items-center justify-center`}>
+                      <div className="text-center">
+                        <div className="w-14 h-10 mx-auto mb-2 rounded-lg bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                          <Layout className="w-5 h-5 text-white/70" />
+                        </div>
+                        <div className="flex gap-1 justify-center">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="w-7 h-5 rounded-sm bg-white/10" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : tpl.preview_url ? (
+                    <Image src={tpl.preview_url} alt={tpl.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-emerald-600/30">{tpl.name.charAt(0)}</span>
+                    </div>
+                  )}
+
+                  {/* Badges */}
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    {registry && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500 text-white flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" /> Built-in
+                      </span>
+                    )}
+                  </div>
+                  <div className="absolute top-3 right-3">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tpl.is_active ? "bg-emerald-500 text-white" : "bg-gray-500 text-white"}`}>
+                      {tpl.is_active ? "Aktif" : "Draft"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div className="p-4 space-y-3">
+                  <div>
+                    <h3 className="font-semibold">{tpl.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{tpl.description}</p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="px-2 py-0.5 bg-gray-100 rounded">{tpl.category || "Umum"}</span>
+                    <span className="flex items-center gap-1"><Users className="w-3 h-3" />{tpl.used_by_count || 0} travel</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-2 border-t border-border">
+                    <button
+                      onClick={() => setPreviewId(tpl.id)}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      <Eye className="w-3.5 h-3.5" /> Preview
+                    </button>
+                    <button
+                      onClick={() => openEditModal(tpl)}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      <Edit className="w-3.5 h-3.5" /> Edit
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(tpl.id)}
+                      className="px-3 py-2 border border-red-200 text-red-500 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Live Preview Modal */}
+      {previewId && (
+        <LiveTemplatePreview
+          templateId={previewId}
+          onClose={() => setPreviewId(null)}
+        />
+      )}
 
       {/* Add / Edit Modal */}
       {showModal && (
@@ -257,7 +408,7 @@ export default function AdminTemplatesPage() {
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
                   className="w-full px-3 py-2 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
-                  {CATEGORIES.map((cat) => (
+                  {CATEGORIES.filter((c) => c !== "Semua").map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
@@ -298,53 +449,6 @@ export default function AdminTemplatesPage() {
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                 {editingTemplate ? "Simpan" : "Tambah"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Preview Modal */}
-      {previewTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setPreviewTemplate(null)} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="text-lg font-semibold">Preview Template</h2>
-              <button onClick={() => setPreviewTemplate(null)} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="relative h-56 rounded-xl overflow-hidden">
-                {previewTemplate.preview_url ? (
-                  <Image src={previewTemplate.preview_url} alt={previewTemplate.name} fill className="object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-emerald-100 to-blue-100 flex items-center justify-center">
-                    <span className="text-4xl font-bold text-emerald-600/30">{previewTemplate.name.charAt(0)}</span>
-                  </div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold">{previewTemplate.name}</h3>
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${previewTemplate.is_active ? "bg-emerald-500 text-white" : "bg-gray-500 text-white"}`}>
-                    {previewTemplate.is_active ? "Aktif" : "Draft"}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">{previewTemplate.description || "Tidak ada deskripsi"}</p>
-                <div className="flex items-center gap-4 pt-2 text-sm text-muted-foreground">
-                  <span className="px-2 py-0.5 bg-gray-100 rounded">{previewTemplate.category || "Umum"}</span>
-                  <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{previewTemplate.used_by_count || 0} travel</span>
-                </div>
-              </div>
-            </div>
-            <div className="p-5 border-t border-border">
-              <button
-                onClick={() => setPreviewTemplate(null)}
-                className="w-full px-4 py-2.5 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-              >
-                Tutup
               </button>
             </div>
           </div>

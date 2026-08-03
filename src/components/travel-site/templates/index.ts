@@ -1,3 +1,6 @@
 export { default as ModernIslamicTemplate } from "./modern-islamic"
 export { default as CleanMinimalTemplate } from "./clean-minimal"
 export { default as RoyalGoldTemplate } from "./royal-gold"
+export { default as LiveTemplatePreview } from "./live-template-preview"
+export { TEMPLATE_REGISTRY, TEMPLATE_MAP, TEMPLATE_BY_ID, MOCK_TENANT, MOCK_PACKAGES } from "./template-registry"
+export type { TemplateRegistryEntry } from "./template-registry"

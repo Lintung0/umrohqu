@@ -4,16 +4,8 @@ import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Loader2 } from "lucide-react"
-import { ModernIslamicTemplate } from "@/components/travel-site/templates"
-import { CleanMinimalTemplate } from "@/components/travel-site/templates"
-import { RoyalGoldTemplate } from "@/components/travel-site/templates"
+import { TEMPLATE_MAP } from "@/components/travel-site/templates"
 import type { Tenant, Package } from "@/lib/types"
-
-const TEMPLATE_MAP: Record<string, React.ComponentType<{ tenant: Tenant; packages: Package[]; themeConfig?: Record<string, unknown> }>> = {
-  "c0000000-0000-0000-0000-000000000001": ModernIslamicTemplate,
-  "c0000000-0000-0000-0000-000000000002": CleanMinimalTemplate,
-  "c0000000-0000-0000-0000-000000000003": RoyalGoldTemplate,
-}
 
 export default function TravelSitePage() {
   const params = useParams()
@@ -67,7 +59,7 @@ export default function TravelSitePage() {
     )
   }
 
-  const TemplateComponent = TEMPLATE_MAP[templateId || ""] || ModernIslamicTemplate
+  const TemplateComponent = TEMPLATE_MAP[templateId || ""] || TEMPLATE_MAP["c0000000-0000-0000-0000-000000000001"]
 
   return <TemplateComponent tenant={tenant} packages={packages} themeConfig={themeConfig} />
 }

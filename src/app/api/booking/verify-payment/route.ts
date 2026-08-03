@@ -35,7 +35,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 
-    if (booking.status !== "pending_payment") {
+    const isRemaining = booking.xendit_invoice_id?.startsWith("booking-remaining-") || false
+    const canVerify = booking.status === "pending_payment" || (booking.status === "processing" && isRemaining && (booking.remaining_amount || 0) > 0)
+
+    if (!canVerify) {
       return NextResponse.json({ status: booking.status })
     }
 
@@ -46,10 +49,9 @@ export async function POST(request: NextRequest) {
     const invoice = await getInvoice(booking.xendit_invoice_id)
 
     if (invoice.status !== "PAID") {
-      return NextResponse.json({ status: "pending_payment", xendit_status: invoice.status })
+      return NextResponse.json({ status: isRemaining ? "processing" : "pending_payment", xendit_status: invoice.status })
     }
 
-    const isRemaining = invoice.external_id.startsWith("booking-remaining-")
     const newStatus = isRemaining ? "confirmed" : "processing"
     const updateData: Record<string, any> = {
       status: newStatus,
