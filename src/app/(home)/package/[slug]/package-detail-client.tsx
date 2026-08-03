@@ -12,6 +12,7 @@ import { formatRupiah } from "@/lib/constants"
 import ImageGallery from "@/components/shared/image-gallery"
 import { useTranslation } from "@/lib/i18n"
 import { Button } from "@/components/ui/button"
+import { getSeatAvailability } from "@/lib/utils"
 
 interface PackageDetail {
   id: string
@@ -69,10 +70,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
     ? initialReviews.reduce((s, r) => s + r.rating, 0) / initialReviews.length
     : 0
 
-  const available = pkg.available ?? pkg.quota
-  const seatPercent = pkg.quota > 0 ? (available / pkg.quota) * 100 : 100
-  const seatColor = seatPercent <= 20 ? "bg-red-500" : seatPercent <= 50 ? "bg-amber-500" : "bg-emerald-500"
-  const seatLabel = seatPercent <= 20 ? "Segera Habis!" : seatPercent <= 50 ? "Terbatas" : "Tersedia"
+  const seat = getSeatAvailability(pkg.available, pkg.quota)
 
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
@@ -361,20 +359,16 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                   <span className="text-sm font-medium flex items-center gap-1.5">
                     <Users className="w-4 h-4 text-primary" /> Kursi Tersisa
                   </span>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                    seatPercent <= 20 ? "bg-red-100 text-red-600" :
-                    seatPercent <= 50 ? "bg-amber-100 text-amber-600" :
-                    "bg-emerald-100 text-emerald-600"
-                  }`}>
-                    {seatLabel}
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${seat.bgColor} ${seat.textColor}`}>
+                    {seat.label}
                   </span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all duration-700 ${seatColor}`} style={{ width: `${seatPercent}%` }} />
+                  <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{available} dari {pkg.quota} kursi</span>
-                  <span>{Math.round(seatPercent)}%</span>
+                  <span>{seat.available} dari {pkg.quota} kursi</span>
+                  <span>{Math.round(seat.percent)}%</span>
                 </div>
               </div>
 

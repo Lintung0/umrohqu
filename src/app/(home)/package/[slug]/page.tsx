@@ -10,7 +10,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
 
   const { data: pkg } = await supabase
     .from("packages")
-    .select("*, travel:tenants(id, name, slug)")
+    .select("*, travel:tenants(id, name, slug, status, logo_url, city, description)")
     .eq("slug", slug)
     .eq("status", "published")
     .single()

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { Star, MapPin, Clock, Users, Plane, Hotel, BadgeCheck, Shield, Package, ChevronRight, Phone, Mail, MessageCircle, Zap, Camera, Building2, Globe } from "lucide-react"
-import { formatRupiah } from "@/lib/utils"
+import { formatRupiah, getSeatAvailability } from "@/lib/utils"
 import { createAdminClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
@@ -48,10 +48,7 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
 
-  const available = pkg.available ?? pkg.quota ?? 0
-  const quota = pkg.quota ?? 0
-  const seatPercent = quota > 0 ? (available / quota) * 100 : 100
-  const seatColor = seatPercent <= 20 ? "bg-red-500" : seatPercent <= 50 ? "bg-amber-500" : "bg-emerald-500"
+  const seat = getSeatAvailability(pkg.available, pkg.quota ?? 0)
 
   return (
     <Link href={`/package/${pkg.slug}`} className="block bg-white border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-primary/8 hover:-translate-y-0.5 hover:border-primary/20 transition-all duration-300 group">
@@ -105,12 +102,12 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
               )}
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Users className="w-3 h-3 text-primary shrink-0" />
-                Sisa {available} kursi
+                Sisa {seat.available} kursi
               </div>
             </div>
             {/* Seat progress bar */}
             <div className="h-1 bg-gray-100 rounded-full overflow-hidden mb-2">
-              <div className={`h-full rounded-full ${seatColor}`} style={{ width: `${seatPercent}%` }} />
+              <div className={`h-full rounded-full ${seat.color}`} style={{ width: `${seat.percent}%` }} />
             </div>
           </div>
 

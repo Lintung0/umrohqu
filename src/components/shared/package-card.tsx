@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Clock, MapPin, Plane, Hotel, Users, BadgeCheck, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatRupiah } from "@/lib/utils"
+import { formatRupiah, getSeatAvailability } from "@/lib/utils"
 import type { Package, Tenant } from "@/lib/types"
 
 interface PackageCardProps {
@@ -18,9 +18,7 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
 
-  const available = pkg.available ?? pkg.quota
-  const seatPercent = pkg.quota > 0 ? (available / pkg.quota) * 100 : 100
-  const seatColor = seatPercent <= 20 ? "bg-red-500" : seatPercent <= 50 ? "bg-amber-500" : "bg-emerald-500"
+  const seat = getSeatAvailability(pkg.available, pkg.quota)
 
   return (
     <Link href={`/package/${pkg.slug}`} className="group block relative bg-white border border-border/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 hover:border-primary/20">
@@ -118,10 +116,10 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
             <span className="text-muted-foreground flex items-center gap-1">
               <Users className="w-3 h-3" /> Kursi tersisa
             </span>
-            <span className="font-semibold">{available}/{pkg.quota}</span>
+            <span className="font-semibold">{seat.available}/{pkg.quota}</span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full transition-all duration-500 ${seatColor}`} style={{ width: `${seatPercent}%` }} />
+            <div className={`h-full rounded-full transition-all duration-500 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
           </div>
         </div>
 

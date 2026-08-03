@@ -21,3 +21,13 @@ export function parseRupiahInput(formatted: string): number {
   const cleaned = formatted.replace(/[^0-9]/g, "")
   return cleaned ? parseInt(cleaned, 10) : 0
 }
+
+export function getSeatAvailability(available: number | null | undefined, quota: number) {
+  const avail = available ?? quota
+  const percent = quota > 0 ? (avail / quota) * 100 : 100
+  const color = percent <= 20 ? "bg-red-500" : percent <= 50 ? "bg-amber-500" : "bg-emerald-500"
+  const textColor = percent <= 20 ? "text-red-600" : percent <= 50 ? "text-amber-600" : "text-emerald-600"
+  const bgColor = percent <= 20 ? "bg-red-100" : percent <= 50 ? "bg-amber-100" : "bg-emerald-100"
+  const label = percent <= 20 ? "Segera Habis!" : percent <= 50 ? "Terbatas" : "Tersedia"
+  return { available: avail, percent, color, textColor, bgColor, label }
+}
