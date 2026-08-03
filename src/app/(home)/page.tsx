@@ -1,6 +1,7 @@
 import PackageSection from "@/components/ui/home/package-section"
 import SearchWidget from "@/components/ui/home/search-widget"
 import { IslamicWidgets } from "@/components/ui/islamic-widgets"
+import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import {
   StatsSection,
   WhyUsSection,
@@ -12,18 +13,34 @@ import {
 export default function Home() {
   return (
     <main className="flex-1">
-      {/* Quick Search & Filter Bar right below Navbar */}
-      <section className="bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary py-10 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-6 space-y-2">
-            <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight">
-              Temukan Paket Umroh Impian Anda
-            </h1>
-            <p className="text-sm text-white/70 max-w-lg mx-auto">
-              Bandingkan ratusan paket umroh resmi dari berbagai travel partner terpercaya
-            </p>
+      {/* Hero Section with Background Image */}
+      <section className="relative min-h-[380px] md:min-h-[420px] flex items-center overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80')",
+          }}
+        />
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep/85 via-emerald-dark/80 to-primary/75" />
+        {/* Islamic Pattern */}
+        <div className="absolute inset-0 text-white">
+          <IslamicPattern opacity={0.06} />
+        </div>
+
+        <div className="relative z-10 w-full py-10 px-6 md:px-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-6 space-y-2">
+              <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight drop-shadow-lg">
+                Temukan Paket Umroh Impian Anda
+              </h1>
+              <p className="text-sm text-white/80 max-w-lg mx-auto drop-shadow">
+                Bandingkan ratusan paket umroh resmi dari berbagai travel partner terpercaya
+              </p>
+            </div>
+            <SearchWidget />
           </div>
-          <SearchWidget />
         </div>
       </section>
 
