@@ -120,7 +120,7 @@ export default function TravelListPage() {
           {travels.map((travel) => (
             <Link
               key={travel.id}
-              href={`/travel/${travel.id}`}
+              href={`/travel/${travel.slug}`}
               className="bg-white border border-border rounded-2xl p-6 hover:shadow-md hover:border-primary/30 transition-all group"
             >
               <div className="flex items-start gap-4">

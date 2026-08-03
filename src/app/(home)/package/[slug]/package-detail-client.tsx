@@ -166,7 +166,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
 
             {/* Travel Info - Fully Clickable */}
             {pkg.travel && (
-              <Link href={`/travel/${pkg.travel.id}`} className="block bg-white border border-border rounded-2xl p-4 hover:shadow-md hover:border-primary/20 transition-all group">
+              <Link href={`/travel/${pkg.travel.slug}`} className="block bg-white border border-border rounded-2xl p-4 hover:shadow-md hover:border-primary/20 transition-all group">
                 <div className="flex items-center gap-3">
                   {pkg.travel.logo_url ? (
                     <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={44} height={44} className="rounded-xl object-cover" />

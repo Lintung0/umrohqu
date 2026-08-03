@@ -276,7 +276,7 @@ export function TravelAgenciesSection() {
           {agencies.map((agency, idx) => (
             <Link
               key={agency.id}
-              href={`/travel/${agency.id}`}
+              href={`/travel/${agency.slug}`}
               className="group rounded-2xl overflow-hidden border border-border/60 bg-white hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 hover:-translate-y-1"
             >
               <div className="h-36 relative overflow-hidden">

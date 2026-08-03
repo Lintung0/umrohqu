@@ -64,7 +64,7 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
       <div className="p-4 space-y-3">
         {showTravel && travel && (
           <span
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/travel/${travel.id}` }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/travel/${travel.slug}` }}
             className="inline-flex items-center gap-2 cursor-pointer group/travel"
           >
             {travel.logo_url ? (
