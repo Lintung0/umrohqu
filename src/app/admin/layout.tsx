@@ -5,7 +5,7 @@ import AdminSidebar from "@/components/dashboard/AdminSidebar"
 import { createClient } from "@/lib/supabase/client"
 import type { AdminRole } from "@/lib/types"
 
-const ADMIN_ROLES: AdminRole[] = ["marketplace_admin", "marketplace_finance", "marketplace_operational"]
+const ADMIN_ROLES: AdminRole[] = ["super_admin", "marketplace_admin", "marketplace_finance", "marketplace_operational"]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<AdminRole | null>(null)
@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground">Akses ditolak</p>
-          <a href="/dashboard" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Dashboard</a>
+          <a href="/admin" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Admin</a>
         </div>
       </div>
     )

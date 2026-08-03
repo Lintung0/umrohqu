@@ -8,33 +8,35 @@ import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 
 const ADMIN_NAV = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["marketplace_admin", "marketplace_operational", "marketplace_finance"] as AdminRole[] },
-  { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["marketplace_admin"] },
-  { href: "/admin/users", label: "Pengguna", icon: Shield, roles: ["marketplace_admin"] },
-  { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["marketplace_admin"] },
-  { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["marketplace_admin"] },
-  { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["marketplace_admin"] },
-  { href: "/admin/promos", label: "Promo & Diskon", icon: Tag, roles: ["marketplace_admin"] },
-  { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["marketplace_admin"] },
-  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["marketplace_operational"] },
-  { href: "/admin/verification", label: "Verifikasi Travel", icon: Shield, roles: ["marketplace_operational"] },
-  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["marketplace_operational"] },
-  { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["marketplace_operational"] },
-  { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["marketplace_finance"] },
-  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["marketplace_finance"] },
-  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["marketplace_finance"] },
-  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["marketplace_finance"] },
-  { href: "/admin/billing-promos", label: "Promo & Diskon", icon: Tag, roles: ["marketplace_finance"] },
-  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["marketplace_finance"] },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["super_admin", "marketplace_admin", "marketplace_operational", "marketplace_finance"] as AdminRole[] },
+  { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["super_admin", "marketplace_admin"] },
+  { href: "/admin/users", label: "Pengguna", icon: Shield, roles: ["super_admin", "marketplace_admin"] },
+  { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["super_admin", "marketplace_admin"] },
+  { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["super_admin", "marketplace_admin"] },
+  { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["super_admin", "marketplace_admin"] },
+  { href: "/admin/promos", label: "Promo & Diskon", icon: Tag, roles: ["super_admin", "marketplace_admin"] },
+  { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["super_admin", "marketplace_admin"] },
+  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["super_admin", "marketplace_operational"] },
+  { href: "/admin/verification", label: "Verifikasi Travel", icon: Shield, roles: ["super_admin", "marketplace_operational"] },
+  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["super_admin", "marketplace_operational"] },
+  { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["super_admin", "marketplace_operational"] },
+  { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["super_admin", "marketplace_finance"] },
+  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["super_admin", "marketplace_finance"] },
+  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["super_admin", "marketplace_finance"] },
+  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["super_admin", "marketplace_finance"] },
+  { href: "/admin/billing-promos", label: "Promo & Diskon", icon: Tag, roles: ["super_admin", "marketplace_finance"] },
+  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["super_admin", "marketplace_finance"] },
 ]
 
 const ROLE_LABELS: Record<AdminRole, string> = {
+  super_admin: "Super Admin",
   marketplace_admin: "Admin",
   marketplace_operational: "Operational",
   marketplace_finance: "Finance",
 }
 
 const ROLE_COLORS: Record<AdminRole, string> = {
+  super_admin: "bg-purple-100 text-purple-700",
   marketplace_admin: "bg-emerald-100 text-emerald-700",
   marketplace_operational: "bg-blue-100 text-blue-700",
   marketplace_finance: "bg-amber-100 text-amber-700",
