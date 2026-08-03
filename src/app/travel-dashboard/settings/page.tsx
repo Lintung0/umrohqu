@@ -44,15 +44,25 @@ export default function TravelSettingsPage() {
   async function handleSaveProfile() {
     if (!tenantId) return
     setSaving(true)
-    const { error } = await supabase.from("tenants").update({
-      name: tenantName,
-      contact_email: tenantEmail,
-      contact_phone: tenantPhone,
-    }).eq("id", tenantId)
-    if (error) {
-      toast.error(t("toast.error") + ": " + error.message)
-    } else {
-      toast.success(t("toast.profile_updated"))
+    try {
+      const res = await fetch("/api/tenant/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenantId,
+          name: tenantName,
+          contact_email: tenantEmail || null,
+          contact_phone: tenantPhone || null,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error || t("toast.error"))
+      } else {
+        toast.success(t("toast.profile_updated"))
+      }
+    } catch {
+      toast.error(t("toast.error"))
     }
     setSaving(false)
   }
