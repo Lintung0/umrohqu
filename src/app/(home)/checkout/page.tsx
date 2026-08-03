@@ -66,12 +66,16 @@ function CheckoutContent() {
           .single()
         setWalletBalance(wallet?.balance || 0)
 
-        const { data: parts } = await supabase
-          .from("participants")
-          .select("id, full_name, nik, passport_number, gender, phone")
-          .eq("user_id", user.id)
-          .order("is_main", { ascending: false })
-        if (parts) setSavedParticipants(parts)
+        try {
+          const { data: parts } = await supabase
+            .from("participants")
+            .select("id, full_name, nik, passport_number, gender, phone")
+            .eq("user_id", user.id)
+            .order("is_main", { ascending: false })
+          if (parts && Array.isArray(parts)) setSavedParticipants(parts)
+        } catch {
+          // participants table may not exist yet — safe to ignore
+        }
       }
 
       setLoading(false)
@@ -490,15 +494,15 @@ function CheckoutContent() {
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t.checkout.package_price({ count: pilgrimCount, price: formatRupiah(pkg.price) })}</span>
+                      <span className="text-muted-foreground">Harga paket ({pilgrimCount} x {formatRupiah(pkg.price)})</span>
                       <span className="font-medium">{formatRupiah(totalPrice)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t.checkout.platform_fee({ count: pilgrimCount, price: formatRupiah(feeBreakdown.platformFeePerPerson) })}</span>
+                      <span className="text-muted-foreground">Biaya layanan platform ({pilgrimCount} x {formatRupiah(feeBreakdown.platformFeePerPerson)})</span>
                       <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t.checkout.service_fee_label({ type: feeBreakdown.serviceFee > totalPrice * 0.03 / 100 ? t.checkout.minimum : `${feeBreakdown.serviceFee}%` })}</span>
+                      <span className="text-muted-foreground">Service fee ({feeBreakdown.serviceFee > totalPrice * 0.03 / 100 ? "Minimum" : `${feeBreakdown.serviceFee}%`})</span>
                       <span className="font-medium">{formatRupiah(feeBreakdown.serviceFee)}</span>
                     </div>
                     <div className="border-t border-dashed border-border pt-2 flex justify-between text-sm">
@@ -506,7 +510,7 @@ function CheckoutContent() {
                       <span className="font-medium">{formatRupiah(feeBreakdown.subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t.checkout.tax({ percent: 11 })}</span>
+                      <span className="text-muted-foreground">PPN 11%</span>
                       <span className="font-medium">{formatRupiah(feeBreakdown.tax)}</span>
                     </div>
                   </div>
@@ -526,8 +530,8 @@ function CheckoutContent() {
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium">{t.booking.dp_remaining({ percent: dpPercentage })}</p>
-                        <p className="text-amber-700 mt-0.5">{t.booking.dp_remaining_info({ amount: formatRupiah(remainingAmount) })}</p>
+                        <p className="font-medium">Sisa pembayaran ({100 - dpPercentage}%)</p>
+                        <p className="text-amber-700 mt-0.5">Anda perlu membayar {formatRupiah(remainingAmount)} lagi setelah ini</p>
                       </div>
                     </div>
                   )}

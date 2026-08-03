@@ -29,7 +29,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
   const { data: reviews } = await supabase
     .from("reviews")
     .select("id, rating, review, created_at, customer:users(full_name)")
-    .eq("tenant_id", pkg.tenant_id)
+    .eq("package_id", pkg.id)
     .eq("status", "published")
     .order("created_at", { ascending: false })
     .limit(20)

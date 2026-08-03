@@ -332,13 +332,14 @@ export function TestimonialSection() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase
-      .from("reviews")
-      .select("id, rating, review, created_at, customer:users(full_name), tenant:tenants(name)")
-      .eq("status", "published")
-      .order("created_at", { ascending: false })
-      .limit(3)
-      .then(({ data }) => {
+    async function loadTestimonials() {
+      try {
+        const { data } = await supabase
+          .from("reviews")
+          .select("id, rating, review, created_at, customer:users(full_name), package:packages(name)")
+          .eq("status", "published")
+          .order("created_at", { ascending: false })
+          .limit(3)
         if (data && data.length > 0) {
           const mapped = data.map((r: any) => ({
             id: r.id,
@@ -346,12 +347,16 @@ export function TestimonialSection() {
             city: "Indonesia",
             avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(r.customer?.full_name || "U")}&background=E8F5EE&color=2A7D4F&size=80&bold=true`,
             rating: r.rating,
-            package: r.tenant?.name || "Umroh",
+            package: r.package?.name || "Umroh",
             comment: r.review || "Paket bagus, pelayanan memuaskan!",
           }))
           setTestimonials(mapped)
         }
-      })
+      } catch {
+        // reviews table may have column mismatch — safe to ignore
+      }
+    }
+    loadTestimonials()
   }, [])
 
   return (
