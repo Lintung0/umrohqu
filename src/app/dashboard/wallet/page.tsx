@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle, Loader2, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatRupiah } from "@/lib/utils"
+import { formatRupiah, formatRupiahInput, parseRupiahInput } from "@/lib/utils"
+import { useTranslation } from "@/lib/i18n"
 
 interface Transaction {
   id: string
@@ -45,11 +46,13 @@ const STATUS_CLASS: Record<string, string> = {
 }
 
 export default function WalletPage() {
+  const { t } = useTranslation()
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [showTopup, setShowTopup] = useState(false)
   const [topupAmount, setTopupAmount] = useState(500000)
+  const [topupDisplay, setTopupDisplay] = useState("500.000")
   const [topupLoading, setTopupLoading] = useState(false)
   const [topupUrl, setTopupUrl] = useState("")
 
@@ -149,7 +152,7 @@ export default function WalletPage() {
                 {quickAmounts.map((amt) => (
                   <button
                     key={amt}
-                    onClick={() => setTopupAmount(amt)}
+                    onClick={() => { setTopupAmount(amt); setTopupDisplay(formatRupiahInput(amt)) }}
                     className={`py-2.5 rounded-xl text-sm font-semibold border transition-all ${
                       topupAmount === amt
                         ? "border-emerald-500 bg-emerald-50 text-emerald-700"
@@ -165,11 +168,17 @@ export default function WalletPage() {
             <div>
               <label className="text-sm font-medium text-muted-foreground">Nominal Lainnya</label>
               <input
-                type="number"
-                value={topupAmount}
-                onChange={(e) => setTopupAmount(Number(e.target.value) || 0)}
+                type="text"
+                inputMode="numeric"
+                value={topupDisplay}
+                onChange={(e) => {
+                  const raw = parseRupiahInput(e.target.value)
+                  setTopupAmount(raw)
+                  setTopupDisplay(raw > 0 ? formatRupiahInput(raw) : "")
+                }}
+                onFocus={() => { if (topupAmount === 0) setTopupDisplay("") }}
+                onBlur={() => { if (!topupDisplay) setTopupDisplay(formatRupiahInput(topupAmount)) }}
                 className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                min={10000}
               />
             </div>
 
@@ -180,7 +189,7 @@ export default function WalletPage() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-primary font-medium hover:underline"
               >
-                <ExternalLink className="w-4 h-4" /> Buka halaman pembayaran
+                <ExternalLink className="w-4 h-4" /> {t.common.view} {t("booking.payment_info")}
               </a>
             )}
 

@@ -7,7 +7,7 @@ import {
   Plus, Tag, Target, Trash2, Edit, X, Loader2,
   DollarSign, Eye, EyeOff, MousePointerClick, TrendingUp, Calendar, Package
 } from "lucide-react"
-import { formatRupiah } from "@/lib/constants"
+import { formatRupiah, formatRupiahInput, parseRupiahInput } from "@/lib/utils"
 import { toast } from "sonner"
 import { getTravelTenantId } from "@/lib/get-travel-tenant"
 import { calculateCTR } from "@/lib/business-logic/bidding"
@@ -78,6 +78,7 @@ export default function TravelPromotionsPage() {
   const [showBidModal, setShowBidModal] = useState(false)
   const [editingBid, setEditingBid] = useState<BidRow | null>(null)
   const [bidForm, setBidForm] = useState(EMPTY_BID)
+  const [bidDisplay, setBidDisplay] = useState("0")
   const [bidSaving, setBidSaving] = useState(false)
   const [deleteBidId, setDeleteBidId] = useState<string | null>(null)
   const [deletingBid, setDeletingBid] = useState(false)
@@ -223,6 +224,7 @@ export default function TravelPromotionsPage() {
   function openBidCreate() {
     setEditingBid(null)
     setBidForm(EMPTY_BID)
+    setBidDisplay("0")
     setShowBidModal(true)
   }
 
@@ -234,6 +236,7 @@ export default function TravelPromotionsPage() {
       start_date: bid.start_date.split("T")[0],
       end_date: bid.end_date.split("T")[0],
     })
+    setBidDisplay(formatRupiahInput(bid.bid_value))
     setShowBidModal(true)
   }
 
@@ -648,12 +651,18 @@ export default function TravelPromotionsPage() {
               <div>
                 <label className="block text-sm font-medium mb-1">Nilai Bid per Hari (Rp) *</label>
                 <input
-                  type="number"
-                  value={bidForm.bid_value || ""}
-                  onChange={(e) => setBidForm({ ...bidForm, bid_value: Number(e.target.value) })}
+                  type="text"
+                  inputMode="numeric"
+                  value={bidDisplay}
+                  onChange={(e) => {
+                    const raw = parseRupiahInput(e.target.value)
+                    setBidForm({ ...bidForm, bid_value: raw })
+                    setBidDisplay(raw > 0 ? formatRupiahInput(raw) : "")
+                  }}
+                  onFocus={() => { if (bidForm.bid_value === 0) setBidDisplay("") }}
+                  onBlur={() => { if (!bidDisplay) setBidDisplay(formatRupiahInput(bidForm.bid_value)) }}
                   className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                   placeholder="50000"
-                  min={0}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">

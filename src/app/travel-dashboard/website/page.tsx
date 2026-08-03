@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Globe, Palette, Save, Loader2, Check, Layout, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslation } from "@/lib/i18n"
 import Link from "next/link"
 
 interface TemplateRow {
@@ -22,6 +23,7 @@ const TEMPLATE_PREVIEWS: Record<string, { gradient: string; accent: string; labe
 }
 
 export default function TravelWebsitePage() {
+  const { t } = useTranslation()
   const supabase = createClient()
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [subdomain, setSubdomain] = useState("")
@@ -79,9 +81,9 @@ export default function TravelWebsitePage() {
       config: { brand_color: brandColor, description },
     }).eq("id", tenantId)
     if (error) {
-      toast.error("Gagal menyimpan: " + error.message)
+      toast.error(t("toast.error") + ": " + error.message)
     } else {
-      toast.success("Pengaturan website berhasil disimpan")
+      toast.success(t("toast.website_saved"))
     }
     setSaving(false)
   }
@@ -96,10 +98,9 @@ export default function TravelWebsitePage() {
     )
 
     if (error) {
-      toast.error("Gagal mengubah template: " + error.message)
+      toast.error(t("toast.error") + ": " + error.message)
     } else {
-      setSelectedTemplateId(templateId)
-      toast.success("Template berhasil diubah")
+      toast.success(t("toast.template_changed"))
     }
     setSavingTemplate(false)
   }

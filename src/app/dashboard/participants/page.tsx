@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Pencil, Trash2, User, Phone, Calendar, CheckCircle, X, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTranslation } from "@/lib/i18n"
 import MobileBottomNav from "@/components/shared/mobile-bottom-nav"
 
 interface Participant {
@@ -25,6 +26,7 @@ const emptyForm = {
 }
 
 export default function ParticipantsPage() {
+  const { t } = useTranslation()
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -117,7 +119,7 @@ export default function ParticipantsPage() {
             <p className="text-sm text-muted-foreground mt-0.5">Kelola data jamaah untuk mempercepat pemesanan</p>
           </div>
           <Button onClick={openNew} className="gap-1.5">
-            <Plus className="w-4 h-4" /> Tambah
+            <Plus className="w-4 h-4" /> {t.common.add}
           </Button>
         </div>
       </div>
@@ -128,7 +130,7 @@ export default function ParticipantsPage() {
             <User className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="font-semibold mb-2">Belum ada peserta</h3>
             <p className="text-sm text-muted-foreground mb-6">Tambah data jamaah agar lebih cepat saat booking</p>
-            <Button onClick={openNew}><Plus className="w-4 h-4 mr-1.5" /> Tambah Peserta</Button>
+            <Button onClick={openNew}><Plus className="w-4 h-4 mr-1.5" /> {t.common.add}</Button>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -167,7 +169,7 @@ export default function ParticipantsPage() {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-white">
-              <h3 className="font-semibold">{editingId ? "Edit Peserta" : "Tambah Peserta"}</h3>
+              <h3 className="font-semibold">{editingId ? t.common.edit : t.common.add}</h3>
               <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-muted-foreground" /></button>
             </div>
             <div className="p-5 space-y-4">
@@ -219,7 +221,7 @@ export default function ParticipantsPage() {
                 Jadikan peserta utama
               </label>
               <Button onClick={save} disabled={saving} className="w-full">
-                {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Menyimpan...</> : "Simpan"}
+                {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t.common.saving}</> : t.common.save}
               </Button>
             </div>
           </div>

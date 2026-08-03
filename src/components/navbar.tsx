@@ -132,7 +132,7 @@ const Navbar = () => {
             </Link>
             <Link
               href="/promotions"
-              className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary text-gold-dark font-semibold"
+              className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
             >
               {t.nav.promo}
             </Link>
@@ -228,7 +228,7 @@ const Navbar = () => {
             <Link href="/articles" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
               {t.nav.blog}
             </Link>
-            <Link href="/promotions" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gold-dark hover:bg-gold/10 transition-colors">
+            <Link href="/promotions" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
               {t.nav.promo}
             </Link>
             <Link href="/faq" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">

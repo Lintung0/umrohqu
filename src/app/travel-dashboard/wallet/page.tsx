@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle, XCircle, Loader2, ExternalLink, ArrowDownToLine } from "lucide-react"
-import { formatRupiah } from "@/lib/utils"
+import { formatRupiah, formatRupiahInput, parseRupiahInput } from "@/lib/utils"
+import { useTranslation } from "@/lib/i18n"
 
 interface Transaction {
   id: string
@@ -44,13 +45,16 @@ const STATUS_CLASS: Record<string, string> = {
 }
 
 export default function TravelWalletPage() {
+  const { t } = useTranslation()
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [showTopup, setShowTopup] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
   const [topupAmount, setTopupAmount] = useState(500000)
+  const [topupDisplay, setTopupDisplay] = useState("500.000")
   const [withdrawAmount, setWithdrawAmount] = useState(1000000)
+  const [withdrawDisplay, setWithdrawDisplay] = useState("1.000.000")
   const [bankName, setBankName] = useState("BCA")
   const [accountNumber, setAccountNumber] = useState("")
   const [accountName, setAccountName] = useState("")
@@ -146,10 +150,10 @@ export default function TravelWalletPage() {
           </button>
           <button
             onClick={() => { setShowTopup(!showTopup); setShowWithdraw(false) }}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold shadow-sm hover:bg-emerald-700 transition-all"
           >
             <Plus className="w-4 h-4" />
-            Topup Saldo
+            {t.common.topup}
           </button>
         </div>
       </div>
@@ -223,7 +227,7 @@ export default function TravelWalletPage() {
               disabled={withdrawLoading || withdrawAmount <= 0 || withdrawAmount > balance || !accountNumber || !accountName}
               className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold disabled:opacity-50"
             >
-              {withdrawLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ajukan Penarikan"}
+              {withdrawLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "              {t.common.withdraw}"}
             </button>
           </div>
         </div>
@@ -238,7 +242,7 @@ export default function TravelWalletPage() {
             {[100000, 300000, 500000, 1000000, 2000000, 5000000].map((amount) => (
               <button
                 key={amount}
-                onClick={() => setTopupAmount(amount)}
+                onClick={() => { setTopupAmount(amount); setTopupDisplay(formatRupiahInput(amount)) }}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   topupAmount === amount
                     ? "bg-emerald-600 text-white"
@@ -253,10 +257,16 @@ export default function TravelWalletPage() {
             <div className="relative flex-1">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">Rp</span>
               <input
-                type="number"
-                value={topupAmount}
-                onChange={(e) => setTopupAmount(Number(e.target.value))}
-                min={10000}
+                type="text"
+                inputMode="numeric"
+                value={topupDisplay}
+                onChange={(e) => {
+                  const raw = parseRupiahInput(e.target.value)
+                  setTopupAmount(raw)
+                  setTopupDisplay(raw > 0 ? formatRupiahInput(raw) : "")
+                }}
+                onFocus={() => { if (topupAmount === 0) setTopupDisplay("") }}
+                onBlur={() => { if (!topupDisplay) setTopupDisplay(formatRupiahInput(topupAmount)) }}
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
             </div>
@@ -279,7 +289,7 @@ export default function TravelWalletPage() {
               className="inline-flex items-center gap-2 text-sm text-emerald-600 hover:underline"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              Buka halaman pembayaran
+              {t.common.view} {t("booking.payment_info")}
             </a>
           )}
         </div>

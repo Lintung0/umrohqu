@@ -3,12 +3,13 @@
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { CheckCircle, Loader2, ArrowRight, Copy } from "lucide-react"
-import { toast } from "sonner"
+import { CheckCircle, Loader2, ArrowRight } from "lucide-react"
+import { useTranslation } from "@/lib/i18n"
 
 export default function BookingSuccessPage() {
   const params = useParams()
   const router = useRouter()
+  const { t } = useTranslation()
   const supabase = createClient()
   const bookingId = params.id as string
 
@@ -75,9 +76,9 @@ export default function BookingSuccessPage() {
               <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Memverifikasi Pembayaran</h1>
+              <h1 className="text-xl font-bold">{t.booking.verifying_payment}</h1>
               <p className="text-sm text-muted-foreground mt-2">
-                Mohon tunggu sebentar, kami sedang memastikan pembayaran Anda berhasil...
+                {t.booking.verifying_desc}
               </p>
             </div>
           </>
@@ -89,9 +90,9 @@ export default function BookingSuccessPage() {
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Pembayaran Berhasil!</h1>
+              <h1 className="text-xl font-bold">{t.booking.payment_success}</h1>
               <p className="text-sm text-muted-foreground mt-2">
-                Alhamdulillah, pembayaran Anda telah diterima.
+                {t.booking.payment_success_desc}
               </p>
               {packageName && (
                 <p className="text-sm font-medium mt-1">{packageName}</p>
@@ -100,7 +101,7 @@ export default function BookingSuccessPage() {
 
             <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
               <p className="text-xs text-emerald-700">
-                Booking Anda sedang diproses oleh travel. Anda akan menerima konfirmasi melalui dashboard.
+                {t.booking.payment_processing_desc}
               </p>
             </div>
 
@@ -109,14 +110,14 @@ export default function BookingSuccessPage() {
                 onClick={() => router.push(`/dashboard/bookings/${bookingId}`)}
                 className="w-full bg-emerald-600 text-white py-3 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
               >
-                Lihat Detail Booking
+                {t.booking.view_booking}
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => router.push("/dashboard/bookings")}
                 className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
               >
-                Lihat Semua Booking
+                {t.booking.view_all_bookings}
               </button>
             </div>
           </>
@@ -128,9 +129,9 @@ export default function BookingSuccessPage() {
               <CheckCircle className="w-8 h-8 text-amber-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Pembayaran Terkirim</h1>
+              <h1 className="text-xl font-bold">{t.booking.payment_submitted}</h1>
               <p className="text-sm text-muted-foreground mt-2">
-                Pembayaran Anda telah terkirim. Status akan diperbarui secara otomatis.
+                {t.booking.payment_submitted_desc}
               </p>
             </div>
 
@@ -138,7 +139,7 @@ export default function BookingSuccessPage() {
               onClick={() => router.push(`/dashboard/bookings/${bookingId}`)}
               className="w-full bg-emerald-600 text-white py-3 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
             >
-              Lihat Detail Booking
+              {t.booking.view_booking}
               <ArrowRight className="w-4 h-4" />
             </button>
           </>

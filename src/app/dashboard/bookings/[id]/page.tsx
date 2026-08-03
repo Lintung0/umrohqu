@@ -214,7 +214,7 @@ export default function BookingDetailPage() {
             {booking.platform_fee ? (
               <>
                 <div className="flex justify-between pl-3">
-                  <span className="text-muted-foreground text-xs">Biaya layanan platform</span>
+                  <span className="text-muted-foreground text-xs">{t("booking.platform_fee")}</span>
                   <span className="text-xs">{formatRupiah(booking.platform_fee)}</span>
                 </div>
                 <div className="flex justify-between pl-3">
@@ -222,7 +222,7 @@ export default function BookingDetailPage() {
                   <span className="text-xs">{formatRupiah(booking.service_fee || 0)}</span>
                 </div>
                 <div className="flex justify-between pl-3">
-                  <span className="text-muted-foreground text-xs">PPN 11%</span>
+                  <span className="text-muted-foreground text-xs">{t("booking.tax", { percent: 11 })}</span>
                   <span className="text-xs">{formatRupiah(booking.tax_amount || 0)}</span>
                 </div>
               </>
@@ -242,7 +242,7 @@ export default function BookingDetailPage() {
                   <span className="font-bold">{formatRupiah(booking.dp_amount || 0)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Sisa cicilan</span>
+                  <span>{t("booking.dp_remaining", { percent: "" })}</span>
                   <span className="font-medium">{formatRupiah(booking.remaining_amount || 0)}</span>
                 </div>
                 {booking.remaining_due_date && (
@@ -273,11 +273,11 @@ export default function BookingDetailPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-muted-foreground">
-                    <th className="pb-2 font-medium">Nama Lengkap</th>
+                    <th className="pb-2 font-medium">{t("booking.personal_info")}</th>
                     <th className="pb-2 font-medium">NIK</th>
-                    <th className="pb-2 font-medium">Paspor</th>
-                    <th className="pb-2 font-medium">Jenis Kelamin</th>
-                    <th className="pb-2 font-medium">Telepon</th>
+                    <th className="pb-2 font-medium">{t("booking.participants")}</th>
+                    <th className="pb-2 font-medium">{t("checkout.gender")}</th>
+                    <th className="pb-2 font-medium">{t("checkout.phone")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -286,7 +286,7 @@ export default function BookingDetailPage() {
                       <td className="py-3 font-medium">{p.full_name}</td>
                       <td className="py-3">{p.nik || "-"}</td>
                       <td className="py-3">{p.passport_no || "-"}</td>
-                      <td className="py-3">{p.gender === "male" ? "Laki-laki" : p.gender === "female" ? "Perempuan" : "-"}</td>
+                      <td className="py-3">{p.gender === "male" ? t("checkout.gender_male") : p.gender === "female" ? t("checkout.gender_female") : "-"}</td>
                       <td className="py-3">{p.phone || "-"}</td>
                     </tr>
                   ))}
@@ -353,10 +353,10 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
       if (res.ok && data.xendit?.invoice_url) {
         window.location.href = data.xendit.invoice_url
       } else {
-        toast.error(data.error || "Gagal memproses pembayaran")
+        toast.error(data.error || t("common.error"))
       }
     } catch {
-      toast.error("Terjadi kesalahan jaringan")
+      toast.error(t("checkout.network_error"))
     }
     setSubmitting(false)
   }
@@ -374,7 +374,7 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
           <button
             onClick={() => {
               navigator.clipboard.writeText(bookingId.slice(0, 8).toUpperCase())
-              toast.success("Kode booking disalin")
+              toast.success(t("booking.booking_id") + " ✓")
             }}
             className="p-1 hover:bg-gray-200 rounded transition-colors"
           >
@@ -436,14 +436,14 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
         if (data.xendit?.invoice_url) {
           window.location.href = data.xendit.invoice_url
         } else {
-          toast.success("Pembayaran sisa berhasil!")
+          toast.success(t("booking.booking_success"))
           setTimeout(() => window.location.reload(), 1000)
         }
       } else {
-        toast.error(data.error || "Pembayaran gagal")
+        toast.error(data.error || t("common.error"))
       }
     } catch {
-      toast.error("Terjadi kesalahan jaringan")
+      toast.error(t("checkout.network_error"))
     }
     setSubmitting(false)
   }
@@ -461,10 +461,10 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
         >
           <Wallet className={`w-5 h-5 ${useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
           <div className="flex-1">
-            <p className="text-sm font-semibold">Dompet UmrohQ</p>
+            <p className="text-sm font-semibold">{t("booking.wallet")}</p>
             <p className={`text-xs ${walletSufficient ? "text-emerald-600" : "text-red-500"}`}>
-              Saldo: {walletBalance !== null ? formatRupiah(walletBalance) : "-"}
-              {!walletSufficient && ` (${formatRupiah(remainingAmount - (walletBalance || 0))} kurang)`}
+              {t("booking.balance")}: {walletBalance !== null ? formatRupiah(walletBalance) : "-"}
+              {!walletSufficient && ` (${formatRupiah(remainingAmount - (walletBalance || 0))} ${t("booking.insufficient")})`}
             </p>
           </div>
           <CheckCircle className={`w-4 h-4 ${useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
@@ -476,8 +476,8 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
       >
         <CreditCard className={`w-5 h-5 ${!useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
         <div className="flex-1">
-          <p className="text-sm font-semibold">Transfer Bank / QRIS</p>
-          <p className="text-xs text-muted-foreground">Bayar via transfer bank atau QRIS</p>
+          <p className="text-sm font-semibold">{t("booking.bank_transfer")}</p>
+          <p className="text-xs text-muted-foreground">{t("booking.bank_transfer_desc")}</p>
         </div>
         <CheckCircle className={`w-4 h-4 ${!useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
       </button>

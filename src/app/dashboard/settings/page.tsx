@@ -6,8 +6,10 @@ import { User } from "@supabase/supabase-js"
 import { User as UserIcon, Mail, Phone, Calendar, Camera, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
+import { useTranslation } from "@/lib/i18n"
 
 export default function SettingsPage() {
+  const { t } = useTranslation()
   const supabase = createClient()
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [name, setName] = useState("")
@@ -34,10 +36,10 @@ export default function SettingsPage() {
       data: { full_name: name, phone },
     })
     if (error) {
-      toast.error("Gagal menyimpan: " + error.message)
+      toast.error(t("toast.error") + ": " + error.message)
     } else {
       setSaved(true)
-      toast.success("Profil berhasil diperbarui")
+      toast.success(t("toast.profile_updated"))
       setTimeout(() => setSaved(false), 2000)
     }
     setSaving(false)

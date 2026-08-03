@@ -9,18 +9,15 @@ import { Loader2, ArrowLeft, Wallet, CreditCard, Users, CheckCircle, AlertCircle
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { calculateTotalFee } from "@/lib/business-logic/fees"
+import { useTranslation } from "@/lib/i18n"
 import type { Package, Tenant } from "@/lib/types"
 
 const DP_OPTIONS = [30, 40, 50]
-const STEPS = [
-  { id: "package", label: "Paket & Jamaah" },
-  { id: "payment", label: "Pembayaran" },
-  { id: "confirm", label: "Konfirmasi" },
-]
 
 function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { t } = useTranslation()
   const packageId = searchParams.get("package")
 
   const [pkg, setPkg] = useState<Package | null>(null)
@@ -38,6 +35,12 @@ function CheckoutContent() {
   const [dpPercentage, setDpPercentage] = useState(30)
   const [useWallet, setUseWallet] = useState(true)
   const [notes, setNotes] = useState("")
+
+  const STEPS = [
+    { id: "package", label: t.checkout.step_package },
+    { id: "payment", label: t.checkout.step_payment },
+    { id: "confirm", label: t.checkout.step_confirm },
+  ]
 
   const supabase = createClient()
 
@@ -116,7 +119,7 @@ function CheckoutContent() {
       <main className="min-h-screen bg-zinc-50/50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-muted-foreground animate-pulse">Memuat data checkout...</p>
+          <p className="text-sm text-muted-foreground animate-pulse">{t.checkout.loading_data}</p>
         </div>
       </main>
     )
@@ -127,8 +130,8 @@ function CheckoutContent() {
       <main className="min-h-screen bg-zinc-50/50 flex items-center justify-center">
         <div className="text-center space-y-3">
           <AlertCircle className="w-10 h-10 text-muted-foreground mx-auto" />
-          <p className="font-semibold">Paket tidak ditemukan</p>
-          <Link href="/search"><Button variant="outline">Cari Paket Lain</Button></Link>
+          <p className="font-semibold">{t.checkout.package_not_found}</p>
+          <Link href="/search"><Button variant="outline">{t.common.search_again}</Button></Link>
         </div>
       </main>
     )
@@ -181,7 +184,7 @@ function CheckoutContent() {
         setResult({ success: false, error: data.error, balance: data.balance, need: data.need })
       }
     } catch {
-      setResult({ success: false, error: "Terjadi kesalahan jaringan" })
+      setResult({ success: false, error: t.checkout.network_error })
     }
     setSubmitting(false)
   }
@@ -192,7 +195,7 @@ function CheckoutContent() {
         <div className="max-w-3xl mx-auto flex items-center gap-2 text-sm text-muted-foreground">
           <Link href="/" className="hover:text-primary">Home</Link>
           <span>/</span>
-          <Link href="/search" className="hover:text-primary">Cari Paket</Link>
+          <Link href="/search" className="hover:text-primary">{t.nav.search_packages}</Link>
           <span>/</span>
           <Link href={`/package/${pkg.slug}`} className="hover:text-primary truncate">{pkg.name}</Link>
           <span>/</span>
@@ -206,8 +209,8 @@ function CheckoutContent() {
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
-            <h2 className="text-xl font-bold">Booking Berhasil!</h2>
-            <p className="text-sm text-muted-foreground">Mengalihkan ke detail booking...</p>
+            <h2 className="text-xl font-bold">{t.checkout.booking_success}</h2>
+            <p className="text-sm text-muted-foreground">{t.checkout.redirecting}</p>
             <Loader2 className="w-5 h-5 animate-spin text-emerald-600 mx-auto" />
           </div>
         ) : (
@@ -261,7 +264,7 @@ function CheckoutContent() {
 
                 {/* Pilgrim Count */}
                 <div className="bg-white border border-border rounded-2xl p-5 space-y-3">
-                  <label className="text-sm font-semibold flex items-center gap-2"><Users className="w-4 h-4 text-primary" />Jumlah Jamaah</label>
+                  <label className="text-sm font-semibold flex items-center gap-2"><Users className="w-4 h-4 text-primary" />{t.checkout.pilgrim_count}</label>
                   <div className="flex items-center gap-3">
                     <button onClick={() => setPilgrimCount(Math.max(1, pilgrimCount - 1))} className="w-9 h-9 rounded-xl border border-border hover:bg-muted transition-colors font-bold text-lg">-</button>
                     <span className="w-12 text-center font-bold text-lg">{pilgrimCount}</span>
@@ -275,9 +278,9 @@ function CheckoutContent() {
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-semibold flex items-center gap-2">
                         <Users className="w-4 h-4 text-primary" />
-                        Jamaah {idx + 1}
+                        {t.checkout.pilgrim} {idx + 1}
                       </label>
-                      {idx === 0 && <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Utama</span>}
+                      {idx === 0 && <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{t.checkout.primary}</span>}
                     </div>
 
                     {savedParticipants.length > 0 && (
@@ -292,77 +295,81 @@ function CheckoutContent() {
                             {sp.full_name}
                           </button>
                         ))}
-                        <span className="text-[10px] text-muted-foreground self-center ml-1">pilih dari data tersimpan</span>
+                        <span className="text-[10px] text-muted-foreground self-center ml-1">{t.checkout.saved_data}</span>
                       </div>
                     )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">Nama Lengkap *</label>
+                        <label className="text-xs text-muted-foreground mb-1 block">{t.checkout.full_name} *</label>
                         <input
                           type="text"
                           value={pilgrim.full_name}
                           onChange={(e) => updatePilgrim(idx, "full_name", e.target.value)}
-                          placeholder="Nama sesuai KTP/Paspor"
+                          placeholder={t.checkout.full_name_placeholder}
                           className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">NIK</label>
+                        <label className="text-xs text-muted-foreground mb-1 block">{t.checkout.nik}</label>
                         <input
                           type="text"
+                          inputMode="numeric"
                           value={pilgrim.nik}
-                          onChange={(e) => updatePilgrim(idx, "nik", e.target.value)}
-                          placeholder="16 digit NIK"
+                          onChange={(e) => { const v = e.target.value.replace(/[^0-9]/g, "").slice(0, 16); updatePilgrim(idx, "nik", v) }}
+                          placeholder={t.checkout.nik_placeholder}
                           maxLength={16}
                           className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">No. Paspor</label>
+                        <label className="text-xs text-muted-foreground mb-1 block">{t.checkout.passport}</label>
                         <input
                           type="text"
                           value={pilgrim.passport_no}
-                          onChange={(e) => updatePilgrim(idx, "passport_no", e.target.value)}
-                          placeholder="Nomor paspor"
+                          onChange={(e) => { const v = e.target.value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 20); updatePilgrim(idx, "passport_no", v) }}
+                          placeholder={t.checkout.passport_placeholder}
+                          maxLength={20}
                           className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">Jenis Kelamin</label>
+                        <label className="text-xs text-muted-foreground mb-1 block">{t.checkout.gender}</label>
                         <select
                           value={pilgrim.gender}
                           onChange={(e) => updatePilgrim(idx, "gender", e.target.value)}
                           className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
                         >
-                          <option value="">Pilih</option>
-                          <option value="male">Laki-laki</option>
-                          <option value="female">Perempuan</option>
+                          <option value="">{t.checkout.gender_select}</option>
+                          <option value="male">{t.checkout.gender_male}</option>
+                          <option value="female">{t.checkout.gender_female}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">No. Telepon</label>
+                        <label className="text-xs text-muted-foreground mb-1 block">{t.checkout.phone}</label>
                         <input
                           type="tel"
+                          inputMode="numeric"
                           value={pilgrim.phone}
-                          onChange={(e) => updatePilgrim(idx, "phone", e.target.value)}
-                          placeholder="08xxxxxxxxxx"
+                          onChange={(e) => { const v = e.target.value.replace(/[^0-9+]/g, "").replace(/\+/g, (m, i) => i === 0 ? m : "").slice(0, 15); updatePilgrim(idx, "phone", v) }}
+                          placeholder={t.checkout.phone_placeholder}
+                          maxLength={15}
                           className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">Hubungan</label>
+                        <label className="text-xs text-muted-foreground mb-1 block">{t.checkout.relation}</label>
                         <select
                           value={pilgrim.relation}
                           onChange={(e) => updatePilgrim(idx, "relation", e.target.value)}
                           className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 bg-white"
                         >
-                          <option value="self">Diri Sendiri</option>
-                          <option value="spouse">Suami/Istri</option>
-                          <option value="child">Anak</option>
-                          <option value="parent">Orang Tua</option>
-                          <option value="sibling">Saudara</option>
-                          <option value="other">Lainnya</option>
+                          <option value="self">{t.checkout.relation_self}</option>
+                          <option value="spouse">{t.checkout.relation_spouse}</option>
+                          <option value="child">{t.checkout.relation_child}</option>
+                          <option value="parent">{t.checkout.relation_parent}</option>
+                          <option value="sibling">{t.checkout.relation_sibling}</option>
+                          <option value="other">{t.checkout.relation_other}</option>
                         </select>
                       </div>
                     </div>
@@ -371,7 +378,7 @@ function CheckoutContent() {
 
                 <div className="flex justify-end">
                   <Button onClick={() => setStep(1)} disabled={!allPilgrimsFilled} className="gap-2">
-                    Lanjut ke Pembayaran <ChevronRight className="w-4 h-4" />
+                    {t.checkout.continue_to_payment} <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
               </>
@@ -381,29 +388,29 @@ function CheckoutContent() {
               <>
                 {/* Payment Type */}
                 <div className="bg-white border border-border rounded-2xl p-5 space-y-3">
-                  <label className="text-sm font-semibold">Tipe Pembayaran</label>
+                  <label className="text-sm font-semibold">{t.checkout.payment_type}</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setPaymentType("full")}
                       className={`p-3 rounded-xl border-2 text-left transition-all ${paymentType === "full" ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
                     >
                       <CheckCircle className={`w-5 h-5 mb-1 ${paymentType === "full" ? "text-emerald-600" : "text-muted-foreground"}`} />
-                      <p className="text-sm font-semibold">Bayar Lunas</p>
-                      <p className="text-xs text-muted-foreground">Bayar penuh sekarang</p>
+                      <p className="text-sm font-semibold">{t.booking.pay_full}</p>
+                      <p className="text-xs text-muted-foreground">{t.booking.pay_now_desc}</p>
                     </button>
                     <button
                       onClick={() => setPaymentType("dp")}
                       className={`p-3 rounded-xl border-2 text-left transition-all ${paymentType === "dp" ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
                     >
                       <Sparkles className={`w-5 h-5 mb-1 ${paymentType === "dp" ? "text-emerald-600" : "text-muted-foreground"}`} />
-                      <p className="text-sm font-semibold">DP (Cicil)</p>
-                      <p className="text-xs text-muted-foreground">Bayar DP dulu, lunas nanti</p>
+                      <p className="text-sm font-semibold">{t.booking.dp}</p>
+                      <p className="text-xs text-muted-foreground">{t.booking.dp_desc}</p>
                     </button>
                   </div>
 
                   {paymentType === "dp" && (
                     <div>
-                      <p className="text-xs text-muted-foreground mb-2">Besaran DP</p>
+                      <p className="text-xs text-muted-foreground mb-2">{t.booking.dp_amount}</p>
                       <div className="flex gap-2">
                         {DP_OPTIONS.map((pct) => (
                           <button
@@ -424,17 +431,17 @@ function CheckoutContent() {
                 {/* Payment Method */}
                 {walletBalance !== null && (
                   <div className="bg-white border border-border rounded-2xl p-5 space-y-3">
-                    <label className="text-sm font-semibold">Metode Pembayaran</label>
+                    <label className="text-sm font-semibold">{t.checkout.payment_method}</label>
                     <button
                       onClick={() => setUseWallet(true)}
                       className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
                     >
                       <Wallet className={`w-5 h-5 ${useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
                       <div className="flex-1">
-                        <p className="text-sm font-semibold">Dompet UmrohQ</p>
+                        <p className="text-sm font-semibold">{t.booking.wallet}</p>
                         <p className={`text-xs ${walletSufficient ? "text-emerald-600" : "text-red-500"}`}>
-                          Saldo: {formatRupiah(walletBalance)}
-                          {!walletSufficient && ` (${formatRupiah(dpAmount - walletBalance)} kurang)`}
+                          {t.booking.balance}: {formatRupiah(walletBalance)}
+                          {!walletSufficient && ` (${formatRupiah(dpAmount - walletBalance)} ${t.booking.insufficient})`}
                         </p>
                       </div>
                       <CheckCircle className={`w-4 h-4 ${useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
@@ -445,8 +452,8 @@ function CheckoutContent() {
                     >
                       <CreditCard className={`w-5 h-5 ${!useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
                       <div className="flex-1">
-                        <p className="text-sm font-semibold">Transfer Bank / QRIS</p>
-                        <p className="text-xs text-muted-foreground">Bayar via Xendit (BCA, Mandiri, BRI, QRIS)</p>
+                        <p className="text-sm font-semibold">{t.booking.bank_transfer}</p>
+                        <p className="text-xs text-muted-foreground">{t.booking.bank_transfer_desc}</p>
                       </div>
                       <CheckCircle className={`w-4 h-4 ${!useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
                     </button>
@@ -455,20 +462,20 @@ function CheckoutContent() {
 
                 {/* Notes */}
                 <div className="bg-white border border-border rounded-2xl p-5 space-y-3">
-                  <label className="text-sm font-semibold">Catatan (opsional)</label>
+                  <label className="text-sm font-semibold">{t.checkout.notes}</label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Contoh: request kursi dekat jendela, gabung dengan rombongan..."
+                    placeholder={t.booking.notes_placeholder}
                     rows={2}
                     className="w-full border border-border rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
                   />
                 </div>
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setStep(0)}>← Kembali</Button>
+                  <Button variant="outline" onClick={() => setStep(0)}>← {t.common.back}</Button>
                   <Button onClick={() => setStep(2)} className="gap-2">
-                    Lanjut ke Konfirmasi <ChevronRight className="w-4 h-4" />
+                    {t.checkout.continue_to_confirm} <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
               </>
@@ -479,38 +486,38 @@ function CheckoutContent() {
                 {/* Fee Breakdown */}
                 <div className="bg-white border border-border rounded-2xl p-5 space-y-3">
                   <h3 className="font-semibold text-sm flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-primary" /> Ringkasan Pembayaran
+                    <Shield className="w-4 h-4 text-primary" /> {t.checkout.summary_title}
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Harga paket ({pilgrimCount} org x {formatRupiah(pkg.price)})</span>
+                      <span className="text-muted-foreground">{t.checkout.package_price({ count: pilgrimCount, price: formatRupiah(pkg.price) })}</span>
                       <span className="font-medium">{formatRupiah(totalPrice)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Biaya layanan platform ({pilgrimCount} org x {formatRupiah(feeBreakdown.platformFeePerPerson)})</span>
+                      <span className="text-muted-foreground">{t.checkout.platform_fee({ count: pilgrimCount, price: formatRupiah(feeBreakdown.platformFeePerPerson) })}</span>
                       <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Service fee ({feeBreakdown.serviceFee > totalPrice * 0.03 / 100 ? "minimal" : `${feeBreakdown.serviceFee}%`})</span>
+                      <span className="text-muted-foreground">{t.checkout.service_fee_label({ type: feeBreakdown.serviceFee > totalPrice * 0.03 / 100 ? t.checkout.minimum : `${feeBreakdown.serviceFee}%` })}</span>
                       <span className="font-medium">{formatRupiah(feeBreakdown.serviceFee)}</span>
                     </div>
                     <div className="border-t border-dashed border-border pt-2 flex justify-between text-sm">
-                      <span className="text-muted-foreground">Subtotal (platform + service)</span>
+                      <span className="text-muted-foreground">{t.checkout.subtotal_label}</span>
                       <span className="font-medium">{formatRupiah(feeBreakdown.subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">PPN 11%</span>
+                      <span className="text-muted-foreground">{t.checkout.tax({ percent: 11 })}</span>
                       <span className="font-medium">{formatRupiah(feeBreakdown.tax)}</span>
                     </div>
                   </div>
 
                   <div className="bg-emerald-50 rounded-xl p-4 space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="font-semibold text-sm">Total tagihan</span>
+                      <span className="font-semibold text-sm">{t.checkout.total_due}</span>
                       <span className="text-xl font-bold text-primary">{formatRupiah(totalPrice + feeBreakdown.total)}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Total dibayar sekarang</span>
+                      <span className="text-muted-foreground">{t.checkout.total_now}</span>
                       <span className="font-bold text-emerald-700">{formatRupiah(dpAmount + (paymentType === "full" ? feeBreakdown.total : 0))}</span>
                     </div>
                   </div>
@@ -519,8 +526,8 @@ function CheckoutContent() {
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium">Pembayaran DP {dpPercentage}%</p>
-                        <p className="text-amber-700 mt-0.5">Sisa {formatRupiah(remainingAmount)} dilunasi sesuai ketentuan travel.</p>
+                        <p className="font-medium">{t.booking.dp_remaining({ percent: dpPercentage })}</p>
+                        <p className="text-amber-700 mt-0.5">{t.booking.dp_remaining_info({ amount: formatRupiah(remainingAmount) })}</p>
                       </div>
                     </div>
                   )}
@@ -529,7 +536,7 @@ function CheckoutContent() {
                     onClick={() => setUseWallet(!useWallet)}
                     className="text-xs text-primary hover:underline"
                   >
-                    {useWallet ? "Ubah metode pembayaran" : "Gunakan dompet"}
+                    {useWallet ? t.booking.change_method : t.booking.use_wallet}
                   </button>
                 </div>
 
@@ -542,10 +549,10 @@ function CheckoutContent() {
                 )}
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setStep(1)}>← Kembali</Button>
+                  <Button variant="outline" onClick={() => setStep(1)}>← {t.common.back}</Button>
                   <div className="flex gap-2">
                     <Link href={`/package/${pkg.slug}`}>
-                      <Button variant="ghost" size="sm" className="text-xs">Batal</Button>
+                      <Button variant="ghost" size="sm" className="text-xs">{t.common.cancel}</Button>
                     </Link>
                     <Button
                       onClick={handleSubmit}
@@ -553,9 +560,9 @@ function CheckoutContent() {
                       className="gap-2"
                     >
                       {submitting ? (
-                        <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+                        <><Loader2 className="w-4 h-4 animate-spin" /> {t.common.processing}</>
                       ) : (
-                        `Bayar ${formatRupiah(dpAmount)}`
+                        `${t.booking.pay_now} ${formatRupiah(dpAmount)}`
                       )}
                     </Button>
                   </div>

@@ -6,9 +6,11 @@ import { User } from "@supabase/supabase-js"
 import { User as UserIcon, Lock, Bell, CreditCard, Save, Upload, Loader2 } from "lucide-react"
 import { formatRupiah } from "@/lib/constants"
 import { toast } from "sonner"
+import { useTranslation } from "@/lib/i18n"
 
 export default function TravelSettingsPage() {
   const supabase = createClient()
+  const { t } = useTranslation()
   const [user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [tenantName, setTenantName] = useState("")
@@ -48,9 +50,9 @@ export default function TravelSettingsPage() {
       contact_phone: tenantPhone,
     }).eq("id", tenantId)
     if (error) {
-      toast.error("Gagal menyimpan: " + error.message)
+      toast.error(t("toast.error") + ": " + error.message)
     } else {
-      toast.success("Profil travel berhasil diperbarui")
+      toast.success(t("toast.profile_updated"))
     }
     setSaving(false)
   }
@@ -58,9 +60,9 @@ export default function TravelSettingsPage() {
   async function handleChangePassword(newPassword: string) {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     if (error) {
-      toast.error("Gagal ubah password: " + error.message)
+      toast.error(t("toast.error") + ": " + error.message)
     } else {
-      toast.success("Password berhasil diubah")
+      toast.success(t("toast.password_changed"))
     }
   }
 
@@ -136,7 +138,7 @@ export default function TravelSettingsPage() {
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Simpan Perubahan
+              {t.common.save}
             </button>
           </div>
         </div>
@@ -150,6 +152,7 @@ export default function TravelSettingsPage() {
 }
 
 function PasswordTab({ onChangePassword }: { onChangePassword: (pw: string) => Promise<void> }) {
+  const { t } = useTranslation()
   const [current, setCurrent] = useState("")
   const [newPw, setNewPw] = useState("")
   const [confirm, setConfirm] = useState("")
@@ -157,11 +160,11 @@ function PasswordTab({ onChangePassword }: { onChangePassword: (pw: string) => P
 
   async function handleSubmit() {
     if (newPw !== confirm) {
-      toast.error("Password baru tidak cocok")
+      toast.error(t("auth.password_mismatch"))
       return
     }
     if (newPw.length < 6) {
-      toast.error("Password minimal 6 karakter")
+      toast.error(t("auth.password_min", { min: 6 }))
       return
     }
     setSaving(true)
@@ -174,14 +177,14 @@ function PasswordTab({ onChangePassword }: { onChangePassword: (pw: string) => P
 
   return (
     <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
-      <h2 className="font-semibold">Ubah Password</h2>
+      <h2 className="font-semibold">{t.auth.password}</h2>
       <div className="space-y-4 max-w-md">
         <div>
-          <label className="block text-sm font-medium mb-1.5">Password Baru</label>
+          <label className="block text-sm font-medium mb-1.5">{t.auth.password}</label>
           <input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1.5">Konfirmasi Password Baru</label>
+          <label className="block text-sm font-medium mb-1.5">{t.auth.confirm_password}</label>
           <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
         </div>
       </div>
@@ -192,7 +195,7 @@ function PasswordTab({ onChangePassword }: { onChangePassword: (pw: string) => P
           className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          Ubah Password
+          {t.common.save}
         </button>
       </div>
     </div>
