@@ -88,7 +88,7 @@ VALUES (
 
 
 -- 2. TRAVEL ACCOUNTS
--- Travel 1
+-- Travel 1 (linked to tenant b0000000-0000-0000-0000-000000000001)
 INSERT INTO auth.users (
   instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change, raw_app_meta_data, raw_user_meta_data, is_super_admin, last_sign_in_at
 ) VALUES (
@@ -112,11 +112,11 @@ VALUES (
   'travel1@gmail.com',
   'Travel Berkah',
   'travel_admin',
-  'd0000000-0000-0000-0000-000000000001',
+  'b0000000-0000-0000-0000-000000000001',
   now(), now()
 ) ON CONFLICT (id) DO NOTHING;
 
--- Travel 2
+-- Travel 2 (linked to tenant b0000000-0000-0000-0000-000000000002)
 INSERT INTO auth.users (
   instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change, raw_app_meta_data, raw_user_meta_data, is_super_admin, last_sign_in_at
 ) VALUES (
@@ -140,7 +140,7 @@ VALUES (
   'travel2@gmail.com',
   'Travel Madinah',
   'travel_admin',
-  'd0000000-0000-0000-0000-000000000002',
+  'b0000000-0000-0000-0000-000000000002',
   now(), now()
 ) ON CONFLICT (id) DO NOTHING;
 
@@ -169,7 +169,7 @@ VALUES (
   'a0000000-0000-0000-0000-000000000006',
   'jamaah1@gmail.com',
   'Ahmad Fauzi',
-  'jamaah',
+  'customer',
   now(), now()
 ) ON CONFLICT (id) DO NOTHING;
 
@@ -196,6 +196,6 @@ VALUES (
   'a0000000-0000-0000-0000-000000000007',
   'jamaah2@gmail.com',
   'Siti Aminah',
-  'jamaah',
+  'customer',
   now(), now()
 ) ON CONFLICT (id) DO NOTHING;
