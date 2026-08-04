@@ -106,8 +106,8 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
               </div>
             </div>
             {/* Seat progress bar */}
-            <div className="h-1 bg-gray-100 rounded-full overflow-hidden mb-2">
-              <div className={`h-full rounded-full ${seat.color}`} style={{ width: `${seat.percent}%` }} />
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+              <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
             </div>
           </div>
 
