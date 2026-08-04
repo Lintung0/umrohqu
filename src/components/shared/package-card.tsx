@@ -22,7 +22,7 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
   return (
     <Link href={`/package/${pkg.slug}`} className="group block relative bg-white border border-border/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 hover:border-primary/20 cursor-pointer">
       {/* Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden pointer-events-none">
         <Image
           src={pkg.image_url || "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=800&q=80"}
           alt={pkg.name}

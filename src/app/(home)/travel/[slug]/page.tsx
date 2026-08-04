@@ -54,7 +54,7 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
     <Link href={`/package/${pkg.slug}`} className="block bg-white border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-primary/8 hover:-translate-y-0.5 hover:border-primary/20 transition-all duration-300 group">
       <div className="flex flex-col sm:flex-row">
         {/* Image */}
-        <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden">
+        <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden pointer-events-none">
           <Image
             src={pkg.image_url || "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=800&q=80"}
             alt={pkg.name}
