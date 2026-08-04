@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { Clock, MapPin, Plane, Hotel, Users, BadgeCheck, ArrowRight } from "lucide-react"
@@ -13,14 +14,26 @@ interface PackageCardProps {
 }
 
 export default function PackageCard({ pkg, travel, showTravel = true }: PackageCardProps) {
+  const router = useRouter()
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
 
   const seat = getSeatAvailability(pkg.available, pkg.quota)
 
+  function handleClick(e: React.MouseEvent) {
+    e.preventDefault()
+    router.push(`/package/${pkg.slug}`)
+  }
+
+  function handleTravelClick(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/travel/${travel!.slug}`)
+  }
+
   return (
-    <Link href={`/package/${pkg.slug}`} className="group block relative bg-white border border-border/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 hover:border-primary/20 cursor-pointer">
+    <div onClick={handleClick} className="group block relative bg-white border border-border/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 hover:border-primary/20 cursor-pointer">
       {/* Image */}
       <div className="relative h-48 overflow-hidden pointer-events-none">
         <Image
@@ -61,7 +74,7 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
       <div className="p-4 space-y-3">
         {showTravel && travel && (
           <span
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/travel/${travel.slug}` }}
+            onClick={handleTravelClick}
             className="inline-flex items-center gap-2 cursor-pointer group/travel"
           >
             {travel.logo_url ? (
@@ -155,6 +168,6 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
           </span>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
