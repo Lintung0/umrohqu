@@ -13,6 +13,7 @@ import { formatRupiah } from "@/lib/constants"
 import ImageGallery from "@/components/shared/image-gallery"
 import { useTranslation } from "@/lib/i18n"
 import { Button } from "@/components/ui/button"
+import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
 import { getSeatAvailability } from "@/lib/utils"
 
 interface PackageDetail {
@@ -72,7 +73,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
     : 0
 
   const seat = getSeatAvailability(pkg.available, pkg.quota)
-
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
@@ -428,24 +428,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                 <p className="text-xs text-muted-foreground mt-1">per orang · belum termasuk biaya layanan</p>
               </div>
 
-              {/* Seat Availability Progress Bar - Consistent with card */}
-              <div className="bg-muted/40 rounded-xl p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-primary" /> Kursi Tersisa
-                  </span>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${seat.bgColor} ${seat.textColor}`}>
-                    {seat.label}
-                  </span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{seat.available} dari {pkg.quota} kursi</span>
-                  <span>{Math.round(seat.percent)}%</span>
-                </div>
-              </div>
+              {/* Seat Availability Progress Bar */}
+              <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="detail" />
 
               {/* Quick Info */}
               <div className="space-y-2.5 text-sm">

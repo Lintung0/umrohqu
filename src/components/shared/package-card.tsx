@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { Clock, MapPin, Plane, Hotel, Users, BadgeCheck, ArrowRight } from "lucide-react"
-import { formatRupiah, getSeatAvailability } from "@/lib/utils"
+import { Clock, MapPin, Plane, Hotel, BadgeCheck, ArrowRight } from "lucide-react"
+import { formatRupiah } from "@/lib/utils"
+import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
 interface PackageCardProps {
@@ -18,8 +19,6 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
-
-  const seat = getSeatAvailability(pkg.available, pkg.quota)
 
   function handleClick(e: React.MouseEvent) {
     e.preventDefault()
@@ -123,17 +122,7 @@ export default function PackageCard({ pkg, travel, showTravel = true }: PackageC
         </div>
 
         {/* Seat Availability Progress Bar */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground flex items-center gap-1">
-              <Users className="w-3 h-3" /> Kursi tersisa
-            </span>
-            <span className="font-semibold">{seat.available}/{pkg.quota}</span>
-          </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
-          </div>
-        </div>
+        <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
 
         {pkg.facilities && pkg.facilities.length > 0 && (
           <div className="flex flex-wrap gap-1">
