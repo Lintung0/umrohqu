@@ -23,6 +23,7 @@ import {
 import Link from "next/link"
 import { ImageUpload } from "@/components/shared/image-upload"
 import CommaInput from "@/components/shared/comma-input"
+import CityAutocomplete from "@/components/shared/city-autocomplete"
 import { getTravelTenantId } from "@/lib/get-travel-tenant"
 
 const packageSchema = z.object({
@@ -462,10 +463,10 @@ export default function NewPackagePage() {
                   </span>
                 ))}
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 mb-2">
                 {POPULAR_CITIES.filter(
                   (c) => !departureCities.includes(c)
-                ).map((city) => (
+                ).slice(0, 6).map((city) => (
                   <button
                     key={city}
                     type="button"
@@ -478,20 +479,14 @@ export default function NewPackagePage() {
                   </button>
                 ))}
               </div>
-              <input
-                type="text"
-                placeholder="Atau ketik nama kota lalu tekan Enter..."
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault()
-                    const val = (e.target as HTMLInputElement).value.trim()
-                    if (val && !departureCities.includes(val)) {
-                      setDepartureCities([...departureCities, val])
-                    }
-                    ;(e.target as HTMLInputElement).value = ""
+              <CityAutocomplete
+                value=""
+                onChange={(val) => {
+                  if (val && !departureCities.includes(val)) {
+                    setDepartureCities([...departureCities, val])
                   }
                 }}
-                className="w-full mt-2 px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground"
+                placeholder="Cari kota keberangkatan..."
               />
               {fieldError("departure_cities")}
             </div>
