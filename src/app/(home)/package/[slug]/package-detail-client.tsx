@@ -476,10 +476,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
               </div>
 
               {/* CTA */}
-              <div className="space-y-2 pt-1">
+              <div className="space-y-[3px] pt-1">
                 <Link href={`/checkout?package=${pkg.id}`}>
                   <Button className="w-full h-12 font-semibold text-sm bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30">
-                    Booking Sekarang
+                    Booking
                   </Button>
                 </Link>
                 <div className="grid grid-cols-2 gap-2">

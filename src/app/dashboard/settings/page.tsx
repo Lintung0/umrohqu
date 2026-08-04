@@ -153,7 +153,7 @@ export default function SettingsPage() {
             className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            {saving ? "Menyimpan..." : "Simpan Perubahan"}
+            {saving ? "Menyimpan..." : "Simpan"}
           </button>
           {saved && (
             <span className="text-sm text-emerald-600 font-medium">✓ Tersimpan</span>

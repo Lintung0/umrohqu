@@ -142,7 +142,7 @@ export default function ForgotPasswordPage() {
         <form onSubmit={(e) => { e.preventDefault(); handleSendOtp() }} className="flex flex-col gap-5">
           <PhoneInput value={phone} onChange={setPhone} error={error} />
           <PrimaryButton type="submit" loading={loading}>
-            {loading ? "Mengirim..." : "Kirim OTP via WhatsApp"}
+            {loading ? "Mengirim..." : "Kirim OTP"}
           </PrimaryButton>
         </form>
       )}

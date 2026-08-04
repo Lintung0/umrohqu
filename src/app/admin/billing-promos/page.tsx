@@ -290,7 +290,7 @@ export default function AdminBillingPromosPage() {
               <button onClick={() => setShowModal(false)} className="px-4 py-2.5 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">Batal</button>
               <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2">
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                {editingPromo ? "Simpan Perubahan" : "Buat Promo"}
+                {editingPromo ? "Simpan" : "Buat Promo"}
               </button>
             </div>
           </div>

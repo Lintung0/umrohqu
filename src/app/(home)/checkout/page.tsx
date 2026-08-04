@@ -108,7 +108,7 @@ function CheckoutContent() {
         <div className="text-center space-y-3">
           <AlertCircle className="w-10 h-10 text-muted-foreground mx-auto" />
           <p className="font-semibold">Paket tidak ditemukan</p>
-          <Link href="/search"><Button variant="outline">Cari paket lain</Button></Link>
+          <Link href="/search"><Button variant="outline">Cari Lagi</Button></Link>
         </div>
       </main>
     )
@@ -353,7 +353,7 @@ function CheckoutContent() {
 
                 <div className="flex justify-end">
                   <Button onClick={() => setStep(1)} disabled={!allPilgrimsFilled} className="gap-2 px-6">
-                    Lanjut ke Pembayaran <ChevronRight className="w-4 h-4" />
+                    Lanjut <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
               </>
@@ -450,7 +450,7 @@ function CheckoutContent() {
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={() => setStep(0)}>← Kembali</Button>
                   <Button onClick={() => setStep(2)} className="gap-2 px-6">
-                    Review Pesanan <ChevronRight className="w-4 h-4" />
+                    Review <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
               </>

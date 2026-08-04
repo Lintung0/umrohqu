@@ -886,7 +886,7 @@ export default function EditPackagePage() {
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              {saving ? "Menyimpan..." : "Simpan Perubahan"}
+              {saving ? "Menyimpan..." : "Simpan"}
             </button>
           </div>
         </div>

@@ -153,7 +153,7 @@ export default function SetupFeePage() {
         ) : (
           <ExternalLink className="w-5 h-5" />
         )}
-        {paying ? "Memproses..." : "Bayar Setup Fee Sekarang"}
+        {paying ? "Memproses..." : "Bayar Setup Fee"}
       </button>
     </div>
   )
