@@ -153,7 +153,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
           <ImageGallery images={initialImages} title={pkg.name} />
         ) : (
           <div
-            className="relative h-64 sm:h-80 md:h-96 cursor-pointer"
+            className="relative h-48 sm:h-64 md:h-80 cursor-pointer"
             onClick={() => setIsImageZoomed(!isImageZoomed)}
           >
             {pkg.image_url ? (

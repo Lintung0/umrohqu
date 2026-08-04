@@ -487,6 +487,7 @@ export default function NewPackagePage() {
                   }
                 }}
                 placeholder="Cari kota keberangkatan..."
+                countryFilter="id"
               />
               {fieldError("departure_cities")}
             </div>
