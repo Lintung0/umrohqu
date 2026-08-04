@@ -346,9 +346,9 @@ function SearchContent() {
                 { label: "Bulan Ramadhan", preset: { month: "Ramadhan" } },
                 { label: "Promo Terbaik", preset: { cost: "< Rp 25 Juta" } },
                 { label: "Plus Turki", preset: { type: "plus" } },
-                { label: "Umroh Keluarga", preset: { type: "keluarga" } },
-                { label: "Umroh Premium", preset: { type: "premium" } },
-                { label: "Wisata Halal", preset: { type: "wisata" } },
+                { label: "Umroh Reguler", preset: { type: "reguler" } },
+                { label: "Umroh VIP", preset: { type: "vip" } },
+                { label: "Furoda", preset: { type: "furoda" } },
               ].map((q) => {
                 const isActive = Object.entries(q.preset).some(([k, v]) => {
                   if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())

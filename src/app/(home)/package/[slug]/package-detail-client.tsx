@@ -14,6 +14,7 @@ import ImageGallery from "@/components/shared/image-gallery"
 import { Button } from "@/components/ui/button"
 import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
 import { getSeatAvailability } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface PackageDetail {
   id: string
@@ -36,7 +37,7 @@ interface PackageDetail {
   tenant_id: string
   is_promo: boolean
   type: string | null
-  travel: { id: string; name: string; slug: string; verified?: boolean; logo_url?: string | null; city?: string | null; description?: string | null; phone?: string | null } | null
+  travel: { id: string; name: string; slug: string; is_verified?: boolean; logo_url?: string | null; city?: string | null; description?: string | null; phone?: string | null } | null
 }
 
 interface ReviewRow {
@@ -301,7 +302,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="font-semibold text-sm group-hover:text-primary transition-colors">{pkg.travel.name}</span>
-                        {pkg.travel.verified && <BadgeCheck className="w-4 h-4 text-primary shrink-0" />}
+                        {pkg.travel.is_verified && <BadgeCheck className="w-4 h-4 text-primary shrink-0" />}
                       </div>
                       {pkg.travel.city && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{pkg.travel.city}</p>}
                     </div>
@@ -550,11 +551,25 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                     )}
                     {isWishlisted ? "Tersimpan" : "Simpan"}
                   </Button>
-                  <Link href={`/compare?pkg=${pkg.id}`}>
-                    <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5">
-                      <GitCompare className="w-3.5 h-3.5" /> Bandingkan
+                   <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full h-9 text-xs gap-1.5"
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: pkg.name,
+                            text: `Lihat paket umroh: ${pkg.name}`,
+                            url: window.location.href,
+                          })
+                        } else {
+                          navigator.clipboard.writeText(window.location.href)
+                          toast.success("Link disalin ke clipboard")
+                        }
+                      }}
+                    >
+                      <Share2 className="w-3.5 h-3.5" /> Bagikan
                     </Button>
-                  </Link>
                 </div>
               </div>
 

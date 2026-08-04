@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground">Akses ditolak</p>
-          <a href="/admin" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Admin</a>
+          <a href="/" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Beranda</a>
         </div>
       </div>
     )

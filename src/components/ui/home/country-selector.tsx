@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
 import { useEffect } from "react"
 import type { Tenant } from "@/lib/types"
 
@@ -30,7 +30,6 @@ export default function CountrySelector() {
   const router = useRouter()
 
   useEffect(() => {
-    const supabase = createClient()
     async function load() {
       const { data } = await supabase
         .from("tenants")

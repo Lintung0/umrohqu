@@ -5,7 +5,7 @@ import { useTranslation } from "@/lib/i18n";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, Hotel, Plane, Clock, MapPin, Star } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 import type { Package } from "@/lib/types";
 
 export default function PackageSection() {
@@ -15,7 +15,6 @@ export default function PackageSection() {
   const [compared, setCompared] = useState<string[]>([]);
 
   useEffect(() => {
-    const supabase = createClient();
     supabase
       .from("packages")
       .select("*")

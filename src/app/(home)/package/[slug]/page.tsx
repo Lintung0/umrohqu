@@ -1,8 +1,39 @@
 import { notFound } from "next/navigation"
 import { createAdminClient } from "@/lib/supabase/server"
 import PackageDetailClient from "./package-detail-client"
+import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const supabase = createAdminClient()
+
+  const { data: pkg } = await supabase
+    .from("packages")
+    .select("name, description, price, image_url, travel:tenants(name)")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .single()
+
+  if (!pkg) {
+    return { title: "Paket Tidak Ditemukan - UmrahQu" }
+  }
+
+  const travelName = (pkg.travel as any)?.name || "UmrahQu"
+  const description = pkg.description || `Paket umroh ${pkg.name} dari ${travelName} mulai dari Rp ${(pkg.price || 0).toLocaleString("id-ID")}`
+
+  return {
+    title: `${pkg.name} - UmrahQu`,
+    description,
+    openGraph: {
+      title: pkg.name,
+      description,
+      images: pkg.image_url ? [pkg.image_url] : [],
+      type: "website",
+    },
+  }
+}
 
 export default async function PackageDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -10,7 +41,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
 
   const { data: pkg } = await supabase
     .from("packages")
-    .select("*, travel:tenants(id, name, slug, status, logo_url, city, description)")
+    .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, city, description)")
     .eq("slug", slug)
     .eq("status", "published")
     .single()

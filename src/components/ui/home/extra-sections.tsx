@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight, TrendingUp } from "lucide-react"
 import { useEffect, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabase/client"
 import type { Tenant } from "@/lib/types"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 
@@ -54,13 +54,12 @@ export function StatsSection() {
   const [stats, setStats] = useState<HomeStats>({ travelCount: 0, packageCount: 0, bookingCount: 0, avgRating: 0 })
 
   useEffect(() => {
-    const supabase = createClient()
     async function load() {
       const [tenantsRes, packagesRes, bookingsRes, reviewsRes] = await Promise.all([
         supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified"),
         supabase.from("packages").select("id", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("bookings").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
-        supabase.from("reviews").select("rating"),
+        supabase.from("reviews").select("rating").limit(100),
       ])
 
       const allRatings = reviewsRes.data || []
@@ -115,7 +114,6 @@ export function WhyUsSection() {
   const [travelCount, setTravelCount] = useState(0)
 
   useEffect(() => {
-    const supabase = createClient()
     supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified").then(({ count }) => {
       setTravelCount(count || 0)
     })
@@ -187,7 +185,6 @@ export function TravelAgenciesSection() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const supabase = createClient()
     supabase
       .from("tenants")
       .select("*")
@@ -331,7 +328,6 @@ export function TestimonialSection() {
   const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS)
 
   useEffect(() => {
-    const supabase = createClient()
     async function loadTestimonials() {
       try {
         const { data } = await supabase
@@ -421,7 +417,6 @@ export function TrustSection() {
   const [stats, setStats] = useState({ packages: 0, travels: 0 })
 
   useEffect(() => {
-    const supabase = createClient()
     Promise.all([
       supabase.from("packages").select("id", { count: "exact", head: true }).eq("status", "published"),
       supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified"),

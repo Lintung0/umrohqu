@@ -117,9 +117,10 @@ function CheckoutContent() {
   const totalPrice = pkg.price * pilgrimCount
   const dpAmount = paymentType === "dp" ? Math.round(totalPrice * dpPercentage / 100) : totalPrice
   const remainingAmount = paymentType === "dp" ? totalPrice - dpAmount : 0
-  const walletSufficient = walletBalance !== null && walletBalance >= dpAmount
 
   const feeBreakdown = calculateTotalFee(pkg.price, pilgrimCount, "portal")
+  const amountToPayNow = paymentType === "dp" ? dpAmount + feeBreakdown.serviceFee : totalPrice + feeBreakdown.total
+  const walletSufficient = walletBalance !== null && walletBalance >= amountToPayNow
 
   const handleSubmit = async () => {
     setSubmitting(true)
@@ -416,7 +417,7 @@ function CheckoutContent() {
                         <p className="text-sm font-semibold">Dompet Digital</p>
                         <p className={`text-xs ${walletSufficient ? "text-emerald-600" : "text-red-500"}`}>
                           Saldo: {formatRupiah(walletBalance)}
-                          {!walletSufficient && ` (${formatRupiah(dpAmount - walletBalance)} kurang)`}
+                          {!walletSufficient && ` (${formatRupiah(amountToPayNow - walletBalance)} kurang)`}
                         </p>
                       </div>
                       <CheckCircle className={`w-4 h-4 ${useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
@@ -493,7 +494,7 @@ function CheckoutContent() {
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-muted-foreground">Bayar sekarang</span>
-                      <span className="font-bold text-emerald-700">{formatRupiah(dpAmount + (paymentType === "full" ? feeBreakdown.total : 0))}</span>
+                      <span className="font-bold text-emerald-700">{formatRupiah(amountToPayNow)}</span>
                     </div>
                   </div>
 
@@ -558,7 +559,7 @@ function CheckoutContent() {
                       {submitting ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
                       ) : (
-                        `Bayar ${formatRupiah(dpAmount)}`
+                        `Bayar ${formatRupiah(amountToPayNow)}`
                       )}
                     </Button>
                   </div>
