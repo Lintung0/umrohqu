@@ -6,6 +6,7 @@ import { User } from "@supabase/supabase-js"
 import { Package, BookOpen, Users, DollarSign, TrendingUp, CheckCircle, ArrowRight, ClipboardCheck } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
+import StatCard from "@/components/shared/stat-card"
 import { getTravelTenantId } from "@/lib/get-travel-tenant"
 
 interface TravelStats {
@@ -157,17 +158,7 @@ export default function TravelDashboardOverview() {
           { icon: DollarSign, label: "Total Revenue", value: formatRupiah(stats.totalRevenue), color: "bg-purple-100 text-purple-600" },
           { icon: Users, label: "Total Jamaah", value: stats.totalPilgrims, color: "bg-amber-100 text-amber-600" },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl border border-border p-5">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.color}`}>
-                <s.icon className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{s.value}</p>
-                <p className="text-sm text-muted-foreground">{s.label}</p>
-              </div>
-            </div>
-          </div>
+          <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} color={s.color} />
         ))}
       </div>
 

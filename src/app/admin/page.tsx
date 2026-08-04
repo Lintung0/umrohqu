@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, ArrowRight, Users, DollarSign, Package, Zap } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
+import StatCard from "@/components/shared/stat-card"
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "#C9A24B",
@@ -130,19 +131,12 @@ export default function AdminOverviewPage() {
       {/* Stat Cards - Gradient */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, gradient: "from-emerald-500 to-emerald-700", iconBg: "bg-white/20" },
-          { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, sub: "Sepanjang platform", gradient: "from-blue-500 to-blue-700", iconBg: "bg-white/20" },
-          { icon: DollarSign, label: "Revenue Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", gradient: "from-amber-500 to-orange-600", iconBg: "bg-white/20" },
-          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu review", gradient: "from-red-500 to-rose-600", iconBg: "bg-white/20" },
+          { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, gradient: "from-emerald-500 to-emerald-700" },
+          { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, sub: "Sepanjang platform", gradient: "from-blue-500 to-blue-700" },
+          { icon: DollarSign, label: "Revenue Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", gradient: "from-amber-500 to-orange-600" },
+          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu review", gradient: "from-red-500 to-rose-600" },
         ].map((s) => (
-          <div key={s.label} className={`bg-gradient-to-br ${s.gradient} rounded-2xl p-4 sm:p-5 text-white hover:shadow-lg transition-shadow`}>
-            <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center mb-3`}>
-              <s.icon className="w-5 h-5" />
-            </div>
-            <p className="text-2xl font-bold">{s.value}</p>
-            <p className="text-sm font-medium mt-0.5 opacity-90">{s.label}</p>
-            <p className="text-xs opacity-70 mt-0.5">{s.sub}</p>
-          </div>
+          <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} subtitle={s.sub} variant="gradient" gradient={s.gradient} />
         ))}
       </div>
 

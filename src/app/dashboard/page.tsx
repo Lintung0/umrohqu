@@ -5,6 +5,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BookOpen, Heart, Clock, Package, ArrowRight } from "lucide-react"
+import StatCard from "@/components/shared/stat-card"
 
 export default function DashboardOverview() {
   const supabase = createClient()
@@ -60,47 +61,9 @@ export default function DashboardOverview() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Link href="/dashboard/bookings" className="bg-white rounded-2xl border border-border p-5 hover:shadow-md transition-shadow group">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.bookings}</p>
-              <p className="text-xs text-muted-foreground">Booking Aktif</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-primary mt-3 group-hover:underline">
-            Lihat Semua <ArrowRight className="w-3 h-3" />
-          </div>
-        </Link>
-
-        <Link href="/dashboard/wishlist" className="bg-white rounded-2xl border border-border p-5 hover:shadow-md transition-shadow group">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
-              <Heart className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.wishlist}</p>
-              <p className="text-xs text-muted-foreground">Wishlist</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-primary mt-3 group-hover:underline">
-            Lihat Semua <ArrowRight className="w-3 h-3" />
-          </div>
-        </Link>
-
-        <div className="bg-white rounded-2xl border border-border p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-              <Package className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.completed}</p>
-              <p className="text-xs text-muted-foreground">Selesai</p>
-            </div>
-          </div>
-        </div>
+        <StatCard icon={BookOpen} label="Booking Aktif" value={stats.bookings} color="bg-emerald-100 text-emerald-600" href="/dashboard/bookings" />
+        <StatCard icon={Heart} label="Wishlist" value={stats.wishlist} color="bg-rose-100 text-rose-600" href="/dashboard/wishlist" />
+        <StatCard icon={Package} label="Selesai" value={stats.completed} color="bg-blue-100 text-blue-600" />
       </div>
 
       {/* Quick Actions */}
