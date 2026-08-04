@@ -54,7 +54,7 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
   const [userEmail, setUserEmail] = useState("")
   const visibleNav = ADMIN_NAV.filter((item) => item.roles.includes(currentRole))
 
-  useState(() => {
+  useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
@@ -62,7 +62,7 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
         setUserEmail(user.email || "")
       }
     })
-  })
+  }, [])
 
   const handleLogout = async () => {
     const supabase = createClient()

@@ -67,7 +67,7 @@ const DAILY_HADITS: DailyContent[] = [
   {
     arabic: "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ",
     latin: "Al-Muslimu man salimal muslimuna min lisanihi wa yadih",
-    translation: "Seorang muslim adalah orang yang使使使 other Muslims aman dari lisan dan tangannya.",
+    translation: "Seorang muslim adalah orang yang aman dari lisan dan tangannya.",
     source: "HR. Bukhari & Muslim",
     type: "hadits",
   },

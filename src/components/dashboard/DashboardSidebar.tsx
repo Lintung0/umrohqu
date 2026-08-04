@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Users, Home } from "lucide-react"
+import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Users, Home, Menu, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Image from "next/image"
@@ -21,6 +21,7 @@ export default function DashboardSidebar() {
   const router = useRouter()
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
@@ -31,8 +32,8 @@ export default function DashboardSidebar() {
     router.push("/")
   }
 
-  return (
-    <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-white border-r border-border min-h-screen">
+  const sidebarContent = (
+    <>
       <div className="p-5 border-b border-border">
         <div className="flex items-center gap-3">
           <Image
@@ -56,6 +57,7 @@ export default function DashboardSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors ${
                 isActive ? "bg-emerald-50 text-emerald-700 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
@@ -83,6 +85,37 @@ export default function DashboardSidebar() {
           Keluar
         </button>
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-border px-4 py-3 flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">U</span>
+          </div>
+          <p className="font-bold text-sm">UmrohQ</p>
+        </Link>
+        <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-xl hover:bg-muted">
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-30 bg-black/50" onClick={() => setMobileOpen(false)}>
+          <aside className="w-64 h-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-white border-r border-border min-h-screen sticky top-0">
+        {sidebarContent}
+      </aside>
+    </>
   )
 }

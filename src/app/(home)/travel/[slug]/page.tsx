@@ -145,7 +145,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
     .from("packages")
     .select("id, name, slug, type, departure_cities, duration_days, departure_month, price, original_price, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars, available, quota, image_url, is_promo")
     .eq("tenant_id", tenant.id)
-    .eq("status", "active")
+    .eq("status", "published")
     .is("deleted_at", null)
     .order("price", { ascending: true })
 

@@ -126,10 +126,6 @@ function SearchContent() {
         const dep = departure.toLowerCase()
         const cities = (pkg.departure_cities || [pkg.departure_city]).map((c) => c?.toLowerCase() || "")
         if (!cities.some((c) => c.includes(dep))) return false
-        const depTenant = tenants.get(pkg.tenant_id)
-        if (!pkg.name.toLowerCase().includes(dep) && !depTenant?.name?.toLowerCase().includes(dep)) {
-          return false
-        }
       }
       if (month && month !== "") {
         if (!pkg.departure_month?.toLowerCase().includes(month.toLowerCase())) return false
@@ -386,7 +382,7 @@ function SearchContent() {
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-muted-foreground">
               {filteredWithSearch.length} paket ditemukan dari total {filtered.length} paket
-              {searchQuery && `· Pencarian kata kunci \"${searchQuery}\"}`}
+              {searchQuery && `· Pencarian kata kunci "${searchQuery}"`}
               {departure && `· Keberangkatan dari ${departure}`}
               {month && `· ${month}`}
               {cost && cost !== "Semua Biaya" && `· ${cost}`}
