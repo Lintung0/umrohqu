@@ -96,7 +96,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <p className="text-base font-bold text-primary">{formatRupiah(pkg.price)}<span className="text-[10px] text-muted-foreground font-normal">/org</span></p>
               </div>
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
-                Lihat <ChevronRight className="w-3.5 h-3.5" />
+                Detail <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </div>
@@ -227,7 +227,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             </div>
           </div>
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/5 px-3 py-1.5 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
-            Lihat <ChevronRight className="w-3.5 h-3.5" />
+            Detail <ChevronRight className="w-3.5 h-3.5" />
           </span>
         </div>
       </div>

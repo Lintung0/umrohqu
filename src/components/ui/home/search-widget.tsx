@@ -96,8 +96,7 @@ export default function SearchWidget() {
               type="submit"
               className="w-full h-11 font-semibold rounded-xl bg-gradient-to-r from-gold to-gold-light text-emerald-deep shadow-lg shadow-gold/20 hover:shadow-xl hover:shadow-gold/30 transition-all duration-300 hover:-translate-y-0.5"
             >
-              <Search className="w-4 h-4 mr-1.5" />
-              {t.hero.search}
+              <Search className="w-5 h-5" />
             </Button>
           </div>
         </form>

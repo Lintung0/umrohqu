@@ -138,41 +138,41 @@ const Navbar = () => {
           <Logo />
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-0.5">
             <Link
               href="/search"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-3.5 h-3.5" />
               {t.nav.search_packages}
             </Link>
             <Link
               href="/articles"
-              className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+              className="px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
             >
               {t.nav.blog}
             </Link>
             <Link
               href="/promotions"
-              className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+              className="px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
             >
               {t.nav.promo}
             </Link>
             <Link
               href="/faq"
-              className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+              className="px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
             >
               {t.nav.faq}
             </Link>
           </nav>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1.5 ml-2 pl-2 border-l border-border/40">
             <CountrySelect value={country} onChange={handleCountryChange} />
             <LanguageSwitcher />
             {loading ? (
-              <div className="w-20 h-9 bg-muted rounded-xl animate-pulse ml-2" />
+              <div className="w-20 h-9 bg-muted rounded-xl animate-pulse ml-1" />
             ) : user ? (
-              <div className="relative ml-2">
+              <div className="relative ml-1">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
@@ -214,16 +214,16 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5 ml-1">
                 <Link
                   href="/login"
-                  className="px-5 py-2 text-sm font-semibold rounded-xl border border-primary/20 text-primary hover:bg-primary/10 transition-all duration-200"
+                  className="px-4 py-2 text-sm font-semibold rounded-xl border border-primary/20 text-primary hover:bg-primary/10 transition-all duration-200"
                 >
                   {t.nav.login}
                 </Link>
                 <Link
                   href="/register"
-                  className="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary to-emerald-glow text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200"
+                  className="px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary to-emerald-glow text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200"
                 >
                   {t.nav.register}
                 </Link>

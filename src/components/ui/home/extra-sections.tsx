@@ -3,7 +3,7 @@
 import { useTranslation } from "@/lib/i18n"
 import Image from "next/image"
 import Link from "next/link"
-import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight, TrendingUp } from "lucide-react"
+import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight, TrendingUp, BadgeCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase/client"
 import type { Tenant } from "@/lib/types"
@@ -111,37 +111,33 @@ export function StatsSection() {
 
 export function WhyUsSection() {
   const { t } = useTranslation()
-  const [travelCount, setTravelCount] = useState(0)
-
-  useEffect(() => {
-    supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified").then(({ count }) => {
-      setTravelCount(count || 0)
-    })
-  }, [])
 
   const WHY_US = [
     {
       icon: Award,
       title: t.landing.why_us_compare_title,
       desc: t.landing.why_us_compare_desc,
-      bg: "bg-amber-50",
+      color: "from-amber-500 to-orange-500",
+      bgColor: "bg-amber-50",
     },
     {
       icon: Shield,
       title: t.landing.why_us_trusted_title,
       desc: t.landing.why_us_trusted_desc,
-      bg: "bg-emerald-50",
+      color: "from-emerald-500 to-teal-500",
+      bgColor: "bg-emerald-50",
     },
     {
       icon: Headphones,
       title: t.landing.why_us_easy_title,
       desc: t.landing.why_us_easy_desc,
-      bg: "bg-blue-50",
+      color: "from-blue-500 to-indigo-500",
+      bgColor: "bg-blue-50",
     },
   ]
 
   return (
-    <section className="relative py-20 px-6 md:px-12 overflow-hidden">
+    <section className="relative py-20 px-6 md:px-12 overflow-hidden bg-white">
       <div className="absolute top-0 right-0 text-primary/5">
         <IslamicPattern opacity={0.03} />
       </div>
@@ -157,18 +153,18 @@ export function WhyUsSection() {
             {t.landing.why_us_desc}
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {WHY_US.map((item, index) => (
             <div
               key={item.title}
-              className="group relative flex flex-col items-start gap-4 p-6 rounded-2xl border border-border/60 bg-white card-hover card-animate"
+              className="group relative flex flex-col items-start gap-5 p-7 rounded-2xl border border-border/60 bg-white hover:shadow-xl hover:shadow-primary/5 hover:border-primary/15 transition-all duration-300 hover:-translate-y-1"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className={`p-3 rounded-xl ${item.bg} transition-transform duration-300 group-hover:scale-110`}>
-                <item.icon className="size-6 text-primary" />
+              <div className={`p-3.5 rounded-2xl bg-gradient-to-br ${item.color} shadow-lg shadow-primary/10 transition-transform duration-300 group-hover:scale-110`}>
+                <item.icon className="size-6 text-white" />
               </div>
-              <div className="space-y-1">
-                <h3 className="font-semibold text-foreground">{item.title}</h3>
+              <div className="space-y-2">
+                <h3 className="font-bold text-lg text-foreground">{item.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
               </div>
             </div>
@@ -191,7 +187,7 @@ export function TravelAgenciesSection() {
       .eq("status", "verified")
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(4)
+      .limit(8)
       .then(async ({ data }) => {
         const ags = (data as Tenant[]) || []
         if (ags.length > 0) {
@@ -218,30 +214,17 @@ export function TravelAgenciesSection() {
       })
   }, [])
 
-  const COVER_IMAGES = [
-    "photo-1591604466107-ec97de577aff",
-    "photo-1566438480900-0609be27a4be",
-    "photo-1564769625392-651b89c653b2",
-    "photo-1592609931041-40265b692757",
-  ]
-
   if (loading) {
     return (
-      <section className="py-20 px-6 md:px-12 bg-muted/30">
+      <section className="py-16 px-6 md:px-12 bg-muted/20">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-end justify-between mb-10">
-            <div className="space-y-2">
-              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-              <div className="h-8 w-56 bg-muted rounded animate-pulse" />
-            </div>
+          <div className="text-center mb-10 space-y-2">
+            <div className="h-4 w-32 bg-muted rounded animate-pulse mx-auto" />
+            <div className="h-8 w-64 bg-muted rounded animate-pulse mx-auto" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-border bg-white">
-                <div className="w-full h-36 bg-muted rounded-xl animate-pulse" />
-                <div className="h-4 w-24 bg-muted rounded animate-pulse" />
-                <div className="h-3 w-16 bg-muted rounded animate-pulse" />
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-24 bg-muted rounded-2xl animate-pulse" />
             ))}
           </div>
         </div>
@@ -249,73 +232,71 @@ export function TravelAgenciesSection() {
     )
   }
 
+  if (agencies.length === 0) return null
+
   return (
-    <section className="py-20 px-6 md:px-12 bg-white">
+    <section className="py-16 px-6 md:px-12 bg-muted/20">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-              {t.landing.travel_section_title}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t.landing.travel_section_desc}
-            </p>
-          </div>
-          <Link
-            href="/travel"
-            className="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group/link"
-          >
-            {t.common.view_all}
-            <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-0.5" />
-          </Link>
+        <div className="text-center mb-10 space-y-2">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-xs font-semibold">
+            <Shield className="w-3 h-3" />
+            Terverifikasi
+          </span>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+            {t.landing.travel_section_title}
+          </h2>
+          <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+            {t.landing.travel_section_desc}
+          </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {agencies.map((agency, idx) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {agencies.map((agency) => (
             <Link
               key={agency.id}
               href={`/travel/${agency.slug}`}
-              className="group rounded-2xl overflow-hidden border border-border/60 bg-white hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 hover:-translate-y-1"
+              className="group flex items-center gap-3 p-4 rounded-2xl border border-border/60 bg-white hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300"
             >
-              <div className="h-36 relative overflow-hidden">
+              {agency.logo_url ? (
                 <Image
-                  src={`https://images.unsplash.com/${COVER_IMAGES[idx % COVER_IMAGES.length]}?w=400&h=200&fit=crop&auto=format`}
+                  src={agency.logo_url}
                   alt={agency.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 25vw"
+                  width={40}
+                  height={40}
+                  className="rounded-xl object-cover shrink-0"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                {agency.is_verified && (
-                  <span className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs bg-primary text-white">
-                    <CheckCircle className="w-4 h-4" />
-                  </span>
-                )}
-                {agency.is_featured && (
-                  <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-gold to-gold-light text-emerald-deep">
-                    Unggulan
-                  </span>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-sm group-hover:text-primary transition-colors">{agency.name}</h3>
-                <div className="flex items-center gap-1 mt-1.5">
-                  <Star className="w-3.5 h-3.5 fill-gold text-gold" />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shrink-0">
+                  <span className="text-sm font-bold text-white">{agency.name.charAt(0)}</span>
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                  {agency.name}
+                </h3>
+                <div className="flex items-center gap-1 mt-0.5">
                   {(agency as any).avg_rating ? (
-                    <span className="text-xs font-medium">{(agency as any).avg_rating}</span>
+                    <>
+                      <Star className="w-3 h-3 fill-gold text-gold" />
+                      <span className="text-xs text-muted-foreground">{(agency as any).avg_rating}</span>
+                    </>
                   ) : (
                     <span className="text-xs text-muted-foreground">Baru</span>
                   )}
-                  <span className="text-xs text-muted-foreground ml-1">
-                    {agency.packages_count || 0} {t.package.title}
-                  </span>
+                  {agency.is_verified && (
+                    <BadgeCheck className="w-3 h-3 text-primary ml-0.5" />
+                  )}
                 </div>
               </div>
             </Link>
           ))}
         </div>
-        <div className="mt-6 text-center md:hidden">
-          <Link href="/travel" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-            {t.common.view_all} <ArrowRight className="w-4 h-4" />
+        <div className="mt-8 text-center">
+          <Link
+            href="/travel"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group/link"
+          >
+            {t.common.view_all}
+            <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         </div>
       </div>
@@ -429,24 +410,22 @@ export function TrustSection() {
     { icon: Shield, title: "Transaksi Aman", desc: "Dana escrow terjamin" },
     { icon: Award, title: "Travel Terverifikasi", desc: "Seleksi ketat & berlisensi" },
     { icon: TrendingUp, title: "Harga Terbaik", desc: "Garansi harga kompetitif" },
-    { icon: Users, title: `${stats.travels} Travel`, desc: `${stats.packages} paket tersedia` },
+    { icon: Users, title: `${stats.travels}+ Travel`, desc: `${stats.packages}+ paket tersedia` },
   ]
 
   return (
-    <section className="py-12 px-6 md:px-12">
+    <section className="py-14 px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-10 space-y-2">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t.landing.trust_title}</h2>
-          <p className="text-muted-foreground text-sm">{t.landing.trust_desc}</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {items.map((item) => (
-            <div key={item.title} className="text-center p-6 rounded-2xl bg-white shadow-sm">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 bg-primary/10 text-primary">
-                <item.icon className="size-6" />
+            <div key={item.title} className="flex items-center gap-4 p-5 rounded-2xl bg-muted/30 border border-border/40">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                <item.icon className="size-5" />
               </div>
-              <h3 className="font-bold text-sm mb-1">{item.title}</h3>
-              <p className="text-xs text-muted-foreground">{item.desc}</p>
+              <div>
+                <h3 className="font-bold text-sm">{item.title}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+              </div>
             </div>
           ))}
         </div>
