@@ -19,7 +19,7 @@ export default function Home() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80')",
+            backgroundImage: "url('https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80&fm=webp&auto=format')",
           }}
         />
         {/* Dark Overlay */}

@@ -305,7 +305,7 @@ function CompareContent() {
                     : "border-primary/30"
                 }`}>
                   <div className="relative h-28">
-                    <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"} alt={pkg.name} fill className="object-cover" />
+                    <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name} fill className="object-cover" />
                     <button
                       onClick={() => removePackage(pkg.id)}
                       className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
@@ -436,7 +436,7 @@ function CompareContent() {
                     className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-xl transition-colors text-left"
                   >
                     <div className="relative w-16 h-12 rounded-lg overflow-hidden shrink-0">
-                      <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"} alt={pkg.name} fill className="object-cover" />
+                      <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name} fill className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-muted-foreground">{travel?.name}</p>

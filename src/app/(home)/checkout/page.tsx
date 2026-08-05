@@ -224,7 +224,7 @@ function CheckoutContent() {
                 <div className="bg-white border border-border rounded-2xl p-4">
                   <div className="flex gap-3">
                     <div className="relative w-20 h-16 rounded-xl overflow-hidden shrink-0">
-                      <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"} alt={pkg.name} fill className="object-cover" />
+                      <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name} fill className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-muted-foreground">{travel?.name}</p>

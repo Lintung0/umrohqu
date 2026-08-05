@@ -8,7 +8,7 @@ import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"
 
 interface PackageCardProps {
   pkg: Package
