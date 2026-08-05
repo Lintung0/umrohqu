@@ -184,7 +184,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
         {initialImages && initialImages.length > 1 ? (
           <ImageGallery images={initialImages} title={pkg.name} />
         ) : (
-          <div className="relative h-72 sm:h-80 md:h-[28rem]">
+          <div className="relative h-48 sm:h-56 md:h-64">
             {pkg.image_url ? (
               <Image
                 src={pkg.image_url}

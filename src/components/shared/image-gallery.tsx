@@ -26,12 +26,12 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
   return (
     <>
       <div className="grid grid-cols-4 gap-2">
-        <div className="col-span-4 sm:col-span-2 sm:row-span-2 relative h-64 sm:h-80 rounded-2xl overflow-hidden cursor-pointer group" onClick={() => openLightbox(0)}>
+        <div className="col-span-4 sm:col-span-2 sm:row-span-2 relative h-48 sm:h-56 rounded-2xl overflow-hidden cursor-pointer group" onClick={() => openLightbox(0)}>
           <Image src={allImages[0]} alt={title || "Gallery"} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
         {allImages.slice(1, 5).map((img, i) => (
-          <div key={i} className="relative h-28 sm:h-[calc(50%-0.25rem)] rounded-xl overflow-hidden cursor-pointer group" onClick={() => openLightbox(i + 1)}>
+          <div key={i} className="relative h-24 sm:h-[calc(50%-0.25rem)] rounded-xl overflow-hidden cursor-pointer group" onClick={() => openLightbox(i + 1)}>
             <Image src={img} alt={`${title || "Gallery"} ${i + 2}`} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
