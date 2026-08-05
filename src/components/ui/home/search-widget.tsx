@@ -72,7 +72,7 @@ export default function SearchWidget() {
               onChange={setDepartureCity}
               placeholder="Contoh: Jakarta, Bandung..."
               countryFilter={country}
-              className="h-11 text-sm bg-white/10 border-white/10 text-white placeholder:text-white/40 focus:border-gold/40 focus:ring-gold/10 rounded-xl"
+              className="h-11 w-full text-sm bg-white/10 border-white/10 text-white pl-9 pr-3 outline-none placeholder:text-white/40 focus:border-gold/40 focus:ring-gold/10 rounded-xl"
             />
           </div>
 
