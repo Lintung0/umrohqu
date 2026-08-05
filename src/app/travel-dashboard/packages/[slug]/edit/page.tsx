@@ -91,8 +91,9 @@ const POPULAR_CITIES = [
 export default function EditPackagePage() {
   const router = useRouter()
   const params = useParams()
-  const id = params.id as string
+  const slug = params.slug as string
   const supabase = createClient()
+  const [packageId, setPackageId] = useState<string | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -145,7 +146,7 @@ export default function EditPackagePage() {
       const { data: pkg, error } = await supabase
         .from("packages")
         .select("*")
-        .eq("id", id)
+        .eq("slug", slug)
         .is("deleted_at", null)
         .single()
 
@@ -155,6 +156,7 @@ export default function EditPackagePage() {
         return
       }
 
+      setPackageId(pkg.id)
       setOriginalSlug(pkg.slug || "")
       setName(pkg.name || "")
       setType(pkg.type || "reguler")
@@ -191,7 +193,7 @@ export default function EditPackagePage() {
       setLoading(false)
     }
     load()
-  }, [id])
+  }, [slug])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -279,7 +281,7 @@ export default function EditPackagePage() {
         status: isActive ? "published" : "draft",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id)
+      .eq("id", packageId)
 
     if (error) {
       toast.error("Gagal mengupdate paket: " + error.message)
@@ -297,7 +299,7 @@ export default function EditPackagePage() {
     const { error } = await supabase
       .from("packages")
       .update({ deleted_at: new Date().toISOString() })
-      .eq("id", id)
+      .eq("id", packageId)
     if (error) {
       toast.error("Gagal menghapus paket")
     } else {

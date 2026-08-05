@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // 1. Get package
     const { data: pkg, error: pkgErr } = await admin
       .from("packages")
-      .select("id, tenant_id, price, quota, available")
+      .select("id, tenant_id, price, quota, available, slug")
       .eq("id", packageId)
       .eq("status", "published")
       .is("deleted_at", null)
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
           description: `Pembayaran ${paymentType === "dp" ? "DP " : ""}booking ${booking.id.slice(0, 8)}`,
           customer: { email: user.email },
           successRedirectUrl: `${BASE_URL}/booking-success/${booking.id}`,
-          failureRedirectUrl: `${BASE_URL}/checkout?package=${packageId}&failed=true`,
+          failureRedirectUrl: `${BASE_URL}/checkout?slug=${pkg.slug}&failed=true`,
         })
 
         xenditInvoice = { id: inv.id, invoice_url: inv.invoice_url }

@@ -18,7 +18,7 @@ function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { t } = useTranslation()
-  const packageId = searchParams.get("package")
+  const packageSlug = searchParams.get("slug")
 
   const [pkg, setPkg] = useState<Package | null>(null)
   const [travel, setTravel] = useState<Tenant | null>(null)
@@ -44,12 +44,12 @@ function CheckoutContent() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (!packageId) return
+    if (!packageSlug) return
     async function fetchData() {
       const { data: pkgData } = await supabase
         .from("packages")
         .select("*, travel:tenants(*)")
-        .eq("id", packageId)
+        .eq("slug", packageSlug)
         .single()
 
       if (!pkgData) return
@@ -69,7 +69,7 @@ function CheckoutContent() {
       setLoading(false)
     }
     fetchData()
-  }, [packageId])
+  }, [packageSlug])
 
   useEffect(() => {
     setPilgrims((prev) => {

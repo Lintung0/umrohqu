@@ -153,7 +153,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
           <ImageGallery images={initialImages} title={pkg.name} />
         ) : (
           <div
-            className="relative h-48 sm:h-64 md:h-80 cursor-pointer"
+            className="relative h-64 sm:h-80 md:h-96 cursor-pointer"
             onClick={() => setIsImageZoomed(!isImageZoomed)}
           >
             {pkg.image_url ? (
@@ -529,7 +529,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
 
               {/* CTA Buttons */}
               <div className="space-y-2.5 pt-1">
-                <Link href={`/checkout?package=${pkg.id}`} className="block">
+                <Link href={`/checkout?slug=${pkg.slug}`} className="block">
                   <Button className="w-full h-12 font-semibold text-sm bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0">
                     Booking
                   </Button>
@@ -622,7 +622,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
               <p className="text-lg font-bold text-primary truncate">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-muted-foreground">per orang</p>
             </div>
-            <Link href={`/checkout?package=${pkg.id}`}>
+            <Link href={`/checkout?slug=${pkg.slug}`}>
               <Button className="h-11 px-6 font-semibold text-sm bg-gradient-to-r from-primary to-emerald-600 shadow-lg shadow-primary/20">
                 Booking
               </Button>
