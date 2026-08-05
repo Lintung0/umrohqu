@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "@/lib/i18n";
-import { Search, Calendar, Package } from "lucide-react";
+import { Search, Calendar, Package, MapPin } from "lucide-react";
 import CityAutocomplete from "@/components/shared/city-autocomplete";
 import { getAseanCountryByCode } from "@/lib/constants";
 
@@ -64,13 +64,13 @@ export default function SearchWidget() {
           {/* Departure City */}
           <div className="space-y-1">
             <Label className="flex items-center gap-1.5 text-xs font-semibold text-white/50">
-              <Package className="w-3 h-3" />
+              <MapPin className="w-3 h-3" />
               Kota Keberangkatan
             </Label>
             <CityAutocomplete
               value={departureCity}
               onChange={setDepartureCity}
-              placeholder="Pilih kota..."
+              placeholder="Contoh: Jakarta, Bandung..."
               countryFilter={country}
               className="h-11 text-sm bg-white/10 border-white/10 text-white placeholder:text-white/40 focus:border-gold/40 focus:ring-gold/10 rounded-xl"
             />
