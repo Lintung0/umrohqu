@@ -1,6 +1,7 @@
 -- =============================================
 -- SEED DATA: 8 Umrah Packages
 -- Run after seed-accounts.sql
+-- NOTE: All single quotes in JSON strings escaped as ''
 -- =============================================
 
 -- Package 1: Reguler 12 Hari
@@ -23,13 +24,13 @@ INSERT INTO public.packages (
   45,
   28,
   'Jakarta',
-  ARRAY['Jakarta', 'Bandung'],
+  '["Jakarta", "Bandung"]'::jsonb,
   '2026-03-15',
   'Maret 2026',
   12,
   'Pullman Zamzam',
   5,
-  'Madinah Mövenpick',
+  'Madinah Movenpick',
   5,
   'Saudi Airlines',
   'regular',
@@ -39,10 +40,10 @@ INSERT INTO public.packages (
   true,
   'https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=80',
   38000000,
-  ARRAY['Hotel Bintang 5', 'Makan 3x', 'Bus AC', 'Pembimbing', 'Visa', 'Tiket Pesawat'],
-  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Soekarno-Hatta, penerbangan ke Jeddah"},{"day":2,"title":"Tiba di Jeddah","description":"Tiba di Bandara King Abdulaziz, transfer ke hotel di Makkah, istirahat"},{"day":3,"title":"Umrah Pertama","description":"Umrah pertama: Ihram dari Miqat, Tawaf, Sa'i, dan Tahallul"},{"day":4,"title":"Ibadah Bebas","description":"Ibadah mandiri di Masjidil Haram, shalat 5 waktu di Masjidil Haram"},{"day":5,"title":"Ziarah Makkah","description":"Ziarah ke Jabal Rahmah, Mina, Arafah, dan Muzdalifah"},{"day":6,"title":"Ibadah Bebas","description":"Ibadah mandiri dan kuliner khas Makkah"},{"day":7,"title":"Perjalanan ke Madinah","description":"Perjalanan ke Madinah, check-in hotel, istirahat"},{"day":8,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi, makam Rasulullah SAW, dan Raudhah"},{"day":9,"title":"Ziarah Madinah","description":"Ziarah ke Masjid Quba, Uhud, dan tempat bersejarah lainnya"},{"day":10,"title":"Ibadah Bebas","description":"Ibadah mandiri di Masjid Nabawi"},{"day":11,"title":"Persiapan Pulang","description":"Packing, check-out hotel, perjalanan ke bandara"},{"day":12,"title":"Kepulangan","description":"Penerbangan dari Jeddah ke Jakarta, tiba di tanah air"}]'::jsonb,
-  ARRAY['Visa Umroh', 'Tiket Pesawat PP', 'Hotel Bintang 5', 'Makan 3x Sehari', 'Bus AC', 'Pembimbing Haji', 'Air Zam-Zam 5L', 'Perlengkapan Umroh'],
-  ARRAY['Tiket Pesawat Tambahan', 'Laundry', 'Telepon', 'Tips Guide', 'Perlengkapan Pribadi'],
+  '["Hotel Bintang 5", "Makan 3x", "Bus AC", "Pembimbing", "Visa", "Tiket Pesawat"]'::jsonb,
+  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Soekarno-Hatta, penerbangan ke Jeddah"},{"day":2,"title":"Tiba di Jeddah","description":"Tiba di Bandara King Abdulaziz, transfer ke hotel di Makkah, istirahat"},{"day":3,"title":"Umrah Pertama","description":"Umrah pertama: Ihram dari Miqat, Tawaf, Sa''i, dan Tahallul"},{"day":4,"title":"Ibadah Bebas","description":"Ibadah mandiri di Masjidil Haram, shalat 5 waktu di Masjidil Haram"},{"day":5,"title":"Ziarah Makkah","description":"Ziarah ke Jabal Rahmah, Mina, Arafah, dan Muzdalifah"},{"day":6,"title":"Ibadah Bebas","description":"Ibadah mandiri dan kuliner khas Makkah"},{"day":7,"title":"Perjalanan ke Madinah","description":"Perjalanan ke Madinah, check-in hotel, istirahat"},{"day":8,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi, makam Rasulullah SAW, dan Raudhah"},{"day":9,"title":"Ziarah Madinah","description":"Ziarah ke Masjid Quba, Uhud, dan tempat bersejarah lainnya"},{"day":10,"title":"Ibadah Bebas","description":"Ibadah mandiri di Masjid Nabawi"},{"day":11,"title":"Persiapan Pulang","description":"Packing, check-out hotel, perjalanan ke bandara"},{"day":12,"title":"Kepulangan","description":"Penerbangan dari Jeddah ke Jakarta, tiba di tanah air"}]'::jsonb,
+  '["Visa Umroh", "Tiket Pesawat PP", "Hotel Bintang 5", "Makan 3x Sehari", "Bus AC", "Pembimbing Haji", "Air Zam-Zam 5L", "Perlengkapan Umroh"]'::jsonb,
+  '["Tiket Pesawat Tambahan", "Laundry", "Telepon", "Tips Guide", "Perlengkapan Pribadi"]'::jsonb,
   'Indonesia', 'ID', 'Jakarta',
   now(), now()
 );
@@ -67,7 +68,7 @@ INSERT INTO public.packages (
   20,
   15,
   'Jakarta',
-  ARRAY['Jakarta'],
+  '["Jakarta"]'::jsonb,
   '2026-04-10',
   'April 2026',
   9,
@@ -83,15 +84,15 @@ INSERT INTO public.packages (
   true,
   'https://images.unsplash.com/photo-1590077428593-a55bb07c4665?w=800&q=80',
   72000000,
-  ARRAY['Hotel Bintang 7', 'Makan 3x Premium', 'Private Transport', 'VIP Lounge', 'Concierge', 'Visa', 'Tiket Pesawat'],
+  '["Hotel Bintang 7", "Makan 3x Premium", "Private Transport", "VIP Lounge", "Concierge", "Visa", "Tiket Pesawat"]'::jsonb,
   '[{"day":1,"title":"Keberangkatan VIP","description":"Berkummul di VIP Lounge Bandara, penerbangan kelas bisnis ke Jeddah"},{"day":2,"title":"Tiba di Makkah","description":"Transfer private ke hotel bintang 7, check-in suite room"},{"day":3,"title":"Umrah VIP","description":"Umrah dengan layanan VIP: ruang khusus, zam-zam private"},{"day":4,"title":"Ibadah VIP","description":"Ibadah di area VIP Masjidil Haram, makan di hotel berbintang"},{"day":5,"title":"Ziarah VIP","description":"Ziarah dengan transportasi private, makan siang mewah"},{"day":6,"title":"Perjalanan Madinah","description":"Transfer ke Madinah dengan kendaraan VIP"},{"day":7,"title":"Ziarah Madinah VIP","description":"Ziarah Masjid Nabawi dengan layanan VIP, kunjungan Raudhah"},{"day":8,"title":"Ibadah & Belanja","description":"Ibadah bebas, waktu belanja di pasar Madinah"},{"day":9,"title":"Kepulangan VIP","description":"Transfer ke bandara, penerbangan kelas bisnis ke Jakarta"}]'::jsonb,
-  ARRAY['Visa VIP', 'Tiket Bisnis', 'Hotel Bintang 7', 'Makan Premium 3x', 'Private Transport', 'Concierge 24 Jam', 'VIP Lounge', 'Air Zam-Zam 5L'],
-  ARRAY['Laundry Premium', 'Spa & Massage', 'Telepon Internasional', 'Tips VIP'],
+  '["Visa VIP", "Tiket Bisnis", "Hotel Bintang 7", "Makan Premium 3x", "Private Transport", "Concierge 24 Jam", "VIP Lounge", "Air Zam-Zam 5L"]'::jsonb,
+  '["Laundry Premium", "Spa & Massage", "Telepon Internasional", "Tips VIP"]'::jsonb,
   'Indonesia', 'ID', 'Jakarta',
   now(), now()
 );
 
--- Package 3: Plus 14 Hari
+-- Package 3: Plus Aqsa 14 Hari
 INSERT INTO public.packages (
   id, tenant_id, name, slug, description, price, currency, quota, available,
   departure_city, departure_cities, departure_date, departure_month, duration_days,
@@ -111,13 +112,13 @@ INSERT INTO public.packages (
   30,
   22,
   'Surabaya',
-  ARRAY['Surabaya', 'Yogyakarta'],
+  '["Surabaya", "Yogyakarta"]'::jsonb,
   '2026-05-01',
   'Mei 2026',
   14,
-  'Swissôtel Makkah',
+  'Swissotel Makkah',
   5,
-  'Anwar Al Madinah Mövenpick',
+  'Anwar Al Madinah Movenpick',
   5,
   'Qatar Airways',
   'plus',
@@ -127,15 +128,15 @@ INSERT INTO public.packages (
   true,
   'https://images.unsplash.com/photo-1567496146600-38e9fa3d8de8?w=800&q=80',
   60000000,
-  ARRAY['Hotel Bintang 5', 'Makan 3x', 'Bus AC', 'Pembimbing', 'Visa', 'Tiket Pesawat', 'Ziarah Aqsa'],
-  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Juanda, penerbangan ke Jeddah via Doha"},{"day":2,"title":"Tiba di Makkah","description":"Tiba di Jeddah, transfer ke hotel, istirahat"},{"day":3,"title":"Umrah Pertama","description":"Umrah pertama: Tawaf, Sa\'i, dan Tahallul"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Ibadah Makkah","description":"Ibadah mandiri dan kuliner Makkah"},{"day":6,"title":"Ziarah Makkah","description":"Ziarah ke tempat bersejarah di Makkah"},{"day":7,"title":"Perjalanan ke Madinah","description":"Perjalanan ke Madinah, check-in hotel"},{"day":8,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi dan tempat bersejarah"},{"day":9,"title":"Ziarah Madinah","description":"Ziarah ke Masjid Quba dan Uhud"},{"day":10,"title":"Persiapan Aqsa","description":"Persiapan perjalanan ke Jerusalem"},{"day":11,"title":"Masjid Al-Aqsa","description":"Ziarah Masjid Al-Aqsa, Dome of the Rock"},{"day":12,"title":"Jerusalem","description":"Ziarah tempat bersejarah di Jerusalem"},{"day":13,"title":"Kembali ke Makkah","description":"Kembali ke Jeddah, transit di Makkah"},{"day":14,"title":"Kepulangan","description":"Penerbangan ke Surabaya"}]'::jsonb,
-  ARRAY['Visa Umroh', 'Visa Israel', 'Tiket Pesawat PP', 'Hotel Bintang 5', 'Makan 3x Sehari', 'Bus AC', 'Pembimbing', 'Air Zam-Zam 5L'],
-  ARRAY['Tiket Tambahan', 'Laundry', 'Telepon', 'Tips Guide'],
+  '["Hotel Bintang 5", "Makan 3x", "Bus AC", "Pembimbing", "Visa", "Tiket Pesawat", "Ziarah Aqsa"]'::jsonb,
+  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Juanda, penerbangan ke Jeddah via Doha"},{"day":2,"title":"Tiba di Makkah","description":"Tiba di Jeddah, transfer ke hotel, istirahat"},{"day":3,"title":"Umrah Pertama","description":"Umrah pertama: Tawaf, Sa''i, dan Tahallul"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Ibadah Makkah","description":"Ibadah mandiri dan kuliner Makkah"},{"day":6,"title":"Ziarah Makkah","description":"Ziarah ke tempat bersejarah di Makkah"},{"day":7,"title":"Perjalanan ke Madinah","description":"Perjalanan ke Madinah, check-in hotel"},{"day":8,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi dan tempat bersejarah"},{"day":9,"title":"Ziarah Madinah","description":"Ziarah ke Masjid Quba dan Uhud"},{"day":10,"title":"Persiapan Aqsa","description":"Persiapan perjalanan ke Jerusalem"},{"day":11,"title":"Masjid Al-Aqsa","description":"Ziarah Masjid Al-Aqsa, Dome of the Rock"},{"day":12,"title":"Jerusalem","description":"Ziarah tempat bersejarah di Jerusalem"},{"day":13,"title":"Kembali ke Makkah","description":"Kembali ke Jeddah, transit di Makkah"},{"day":14,"title":"Kepulangan","description":"Penerbangan ke Surabaya"}]'::jsonb,
+  '["Visa Umroh", "Visa Israel", "Tiket Pesawat PP", "Hotel Bintang 5", "Makan 3x Sehari", "Bus AC", "Pembimbing", "Air Zam-Zam 5L"]'::jsonb,
+  '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide"]'::jsonb,
   'Indonesia', 'ID', 'Surabaya',
   now(), now()
 );
 
--- Package 4: Reguler 10 Hari
+-- Package 4: Hemat 10 Hari
 INSERT INTO public.packages (
   id, tenant_id, name, slug, description, price, currency, quota, available,
   departure_city, departure_cities, departure_date, departure_month, duration_days,
@@ -155,7 +156,7 @@ INSERT INTO public.packages (
   50,
   35,
   'Bandung',
-  ARRAY['Bandung', 'Jakarta'],
+  '["Bandung", "Jakarta"]'::jsonb,
   '2026-03-20',
   'Maret 2026',
   10,
@@ -171,10 +172,10 @@ INSERT INTO public.packages (
   true,
   'https://images.unsplash.com/photo-1584738766473-61c083514bf4?w=800&q=80',
   32000000,
-  ARRAY['Hotel Bintang 3', 'Makan 3x', 'Bus AC', 'Pembimbing', 'Visa', 'Tiket Pesawat'],
-  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Husein Sastranegara, penerbangan ke Jeddah"},{"day":2,"title":"Tiba di Jeddah","description":"Tiba di Jeddah, transfer ke hotel di Makkah"},{"day":3,"title":"Umrah","description":"Umrah: Tawaf, Sa\'i, dan Tahallul"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Ibadah Makkah","description":"Ibadah mandiri, shalat berjamaah"},{"day":6,"title":"Perjalanan Madinah","description":"Bus ke Madinah, check-in hotel"},{"day":7,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi"},{"day":8,"title":"Ziarah Madinah","description":"Ziarah Masjid Quba, Uhud"},{"day":9,"title":"Persiapan Pulang","description":"Check-out, perjalanan ke bandara"},{"day":10,"title":"Kepulangan","description":"Penerbangan ke Bandung"}]'::jsonb,
-  ARRAY['Visa Umroh', 'Tiket Pesawat PP', 'Hotel Bintang 3', 'Makan 3x Sehari', 'Bus AC', 'Pembimbing', 'Perlengkapan Umroh'],
-  ARRAY['Tiket Tambahan', 'Laundry', 'Telepon', 'Tips Guide', 'Ziarah Tambahan'],
+  '["Hotel Bintang 3", "Makan 3x", "Bus AC", "Pembimbing", "Visa", "Tiket Pesawat"]'::jsonb,
+  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Husein Sastranegara, penerbangan ke Jeddah"},{"day":2,"title":"Tiba di Jeddah","description":"Tiba di Jeddah, transfer ke hotel di Makkah"},{"day":3,"title":"Umrah","description":"Umrah: Tawaf, Sa''i, dan Tahallul"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Ibadah Makkah","description":"Ibadah mandiri, shalat berjamaah"},{"day":6,"title":"Perjalanan Madinah","description":"Bus ke Madinah, check-in hotel"},{"day":7,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi"},{"day":8,"title":"Ziarah Madinah","description":"Ziarah Masjid Quba, Uhud"},{"day":9,"title":"Persiapan Pulang","description":"Check-out, perjalanan ke bandara"},{"day":10,"title":"Kepulangan","description":"Penerbangan ke Bandung"}]'::jsonb,
+  '["Visa Umroh", "Tiket Pesawat PP", "Hotel Bintang 3", "Makan 3x Sehari", "Bus AC", "Pembimbing", "Perlengkapan Umroh"]'::jsonb,
+  '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide", "Ziarah Tambahan"]'::jsonb,
   'Indonesia', 'ID', 'Bandung',
   now(), now()
 );
@@ -199,7 +200,7 @@ INSERT INTO public.packages (
   35,
   25,
   'Jakarta',
-  ARRAY['Jakarta', 'Tangerang'],
+  '["Jakarta", "Tangerang"]'::jsonb,
   '2026-06-05',
   'Juni 2026',
   11,
@@ -215,10 +216,10 @@ INSERT INTO public.packages (
   true,
   'https://images.unsplash.com/photo-1549888834-3ec93abae044?w=800&q=80',
   48000000,
-  ARRAY['Hotel Bintang 5', 'Makan 3x', 'Bus AC', 'Pembimbing', 'Visa', 'Tiket Pesawat', 'Furoda'],
-  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Soekarno-Hatta, transit di Singapore"},{"day":2,"title":"Tiba di Makkah","description":"Tiba di Jeddah, transfer ke hotel"},{"day":3,"title":"Umrah","description":"Umrah pertama: Tawaf, Sa\'i"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Ibadah Makkah","description":"Ibadah mandiri, ziarah ringan"},{"day":6,"title":"Ziarah Makkah","description":"Ziarah ke Mina, Arafah, Muzdalifah"},{"day":7,"title":"Perjalanan Madinah","description":"Bus ke Madinah, check-in hotel"},{"day":8,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi, Raudhah"},{"day":9,"title":"Ziarah Madinah","description":"Ziarah Masjid Quba, Uhud"},{"day":10,"title":"Persiapan Pulang","description":"Check-out, perjalanan ke bandara"},{"day":11,"title":"Kepulangan","description":"Penerbangan via Singapore ke Jakarta"}]'::jsonb,
-  ARRAY['Visa Umroh', 'Tiket Pesawat PP', 'Hotel Bintang 5', 'Makan 3x Sehari', 'Bus AC', 'Pembimbing', 'Air Zam-Zam 5L', 'Perlengkapan Umroh'],
-  ARRAY['Tiket Tambahan', 'Laundry', 'Telepon', 'Tips Guide'],
+  '["Hotel Bintang 5", "Makan 3x", "Bus AC", "Pembimbing", "Visa", "Tiket Pesawat", "Furoda"]'::jsonb,
+  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Soekarno-Hatta, transit di Singapore"},{"day":2,"title":"Tiba di Makkah","description":"Tiba di Jeddah, transfer ke hotel"},{"day":3,"title":"Umrah","description":"Umrah pertama: Tawaf, Sa''i"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Ibadah Makkah","description":"Ibadah mandiri, ziarah ringan"},{"day":6,"title":"Ziarah Makkah","description":"Ziarah ke Mina, Arafah, Muzdalifah"},{"day":7,"title":"Perjalanan Madinah","description":"Bus ke Madinah, check-in hotel"},{"day":8,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi, Raudhah"},{"day":9,"title":"Ziarah Madinah","description":"Ziarah Masjid Quba, Uhud"},{"day":10,"title":"Persiapan Pulang","description":"Check-out, perjalanan ke bandara"},{"day":11,"title":"Kepulangan","description":"Penerbangan via Singapore ke Jakarta"}]'::jsonb,
+  '["Visa Umroh", "Tiket Pesawat PP", "Hotel Bintang 5", "Makan 3x Sehari", "Bus AC", "Pembimbing", "Air Zam-Zam 5L", "Perlengkapan Umroh"]'::jsonb,
+  '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide"]'::jsonb,
   'Indonesia', 'ID', 'Jakarta',
   now(), now()
 );
@@ -243,7 +244,7 @@ INSERT INTO public.packages (
   40,
   30,
   'Yogyakarta',
-  ARRAY['Yogyakarta', 'Semarang'],
+  '["Yogyakarta", "Semarang"]'::jsonb,
   '2026-04-25',
   'April 2026',
   9,
@@ -259,10 +260,10 @@ INSERT INTO public.packages (
   true,
   'https://images.unsplash.com/photo-1565552645632-d725f8bfc19a?w=800&q=80',
   NULL,
-  ARRAY['Hotel Bintang 4', 'Makan 3x', 'Bus AC', 'Pembimbing', 'Visa', 'Tiket Pesawat'],
-  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Adisucipto, penerbangan ke Jeddah"},{"day":2,"title":"Tiba di Makkah","description":"Tiba di Jeddah, transfer ke hotel"},{"day":3,"title":"Umrah","description":"Umrah: Tawaf, Sa\'i, Tahallul"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Perjalanan Madinah","description":"Bus ke Madinah, check-in hotel"},{"day":6,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi"},{"day":7,"title":"Ziarah Madinah","description":"Ziarah Masjid Quba, Uhud"},{"day":8,"title":"Persiapan Pulang","description":"Check-out, perjalanan ke bandara"},{"day":9,"title":"Kepulangan","description":"Penerbangan ke Yogyakarta"}]'::jsonb,
-  ARRAY['Visa Umroh', 'Tiket Pesawat PP', 'Hotel Bintang 4', 'Makan 3x Sehari', 'Bus AC', 'Pembimbing', 'Perlengkapan Umroh'],
-  ARRAY['Tiket Tambahan', 'Laundry', 'Telepon', 'Tips Guide', 'Ziarah Tambahan'],
+  '["Hotel Bintang 4", "Makan 3x", "Bus AC", "Pembimbing", "Visa", "Tiket Pesawat"]'::jsonb,
+  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Adisucipto, penerbangan ke Jeddah"},{"day":2,"title":"Tiba di Makkah","description":"Tiba di Jeddah, transfer ke hotel"},{"day":3,"title":"Umrah","description":"Umrah: Tawaf, Sa''i, Tahallul"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Perjalanan Madinah","description":"Bus ke Madinah, check-in hotel"},{"day":6,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi"},{"day":7,"title":"Ziarah Madinah","description":"Ziarah Masjid Quba, Uhud"},{"day":8,"title":"Persiapan Pulang","description":"Check-out, perjalanan ke bandara"},{"day":9,"title":"Kepulangan","description":"Penerbangan ke Yogyakarta"}]'::jsonb,
+  '["Visa Umroh", "Tiket Pesawat PP", "Hotel Bintang 4", "Makan 3x Sehari", "Bus AC", "Pembimbing", "Perlengkapan Umroh"]'::jsonb,
+  '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide", "Ziarah Tambahan"]'::jsonb,
   'Indonesia', 'ID', 'Yogyakarta',
   now(), now()
 );
@@ -287,7 +288,7 @@ INSERT INTO public.packages (
   15,
   10,
   'Jakarta',
-  ARRAY['Jakarta'],
+  '["Jakarta"]'::jsonb,
   '2026-07-01',
   'Juli 2026',
   13,
@@ -303,10 +304,10 @@ INSERT INTO public.packages (
   true,
   'https://images.unsplash.com/photo-1590077428593-a55bb07c4665?w=800&q=80',
   95000000,
-  ARRAY['Hotel Bintang 7', 'Makan Premium 3x', 'Private Transport', 'VIP Lounge', 'Concierge', 'Visa', 'Tiket Bisnis'],
+  '["Hotel Bintang 7", "Makan Premium 3x", "Private Transport", "VIP Lounge", "Concierge", "Visa", "Tiket Bisnis"]'::jsonb,
   '[{"day":1,"title":"Keberangkatan VIP","description":"VIP Lounge, penerbangan kelas bisnis ke Jeddah"},{"day":2,"title":"Tiba di Makkah","description":"Private transfer, check-in suite room"},{"day":3,"title":"Umrah VIP","description":"Umrah dengan layanan VIP penuh"},{"day":4,"title":"Ibadah VIP","description":"Ibadah di area VIP Masjidil Haram"},{"day":5,"title":"Ibadah VIP","description":"Ibadah mandiri dengan fasilitas premium"},{"day":6,"title":"Ziarah VIP","description":"Ziarah dengan private transport"},{"day":7,"title":"Perjalanan Madinah","description":"Transfer VIP ke Madinah"},{"day":8,"title":"Ziarah Madinah VIP","description":"Ziarah Masjid Nabawi VIP"},{"day":9,"title":"Ziarah Madinah","description":"Ziarah tempat bersejarah dengan private guide"},{"day":10,"title":"Ibadah Bebas","description":"Ibadah mandiri, waktu bebas"},{"day":11,"title":"Waktu Bebas","description":"Waktu belanja dan istirahat"},{"day":12,"title":"Persiapan Pulang","description":"Check-out, transfer ke bandara"},{"day":13,"title":"Kepulangan","description":"Penerbangan kelas bisnis ke Jakarta"}]'::jsonb,
-  ARRAY['Visa VIP', 'Tiket Bisnis', 'Hotel Bintang 7', 'Makan Premium 3x', 'Private Transport', 'Concierge 24 Jam', 'VIP Lounge', 'Air Zam-Zam 5L', 'Perlengkapan Premium'],
-  ARRAY['Spa Premium', 'Laundry VIP', 'Telepon Internasional', 'Tips VIP'],
+  '["Visa VIP", "Tiket Bisnis", "Hotel Bintang 7", "Makan Premium 3x", "Private Transport", "Concierge 24 Jam", "VIP Lounge", "Air Zam-Zam 5L", "Perlengkapan Premium"]'::jsonb,
+  '["Spa Premium", "Laundry VIP", "Telepon Internasional", "Tips VIP"]'::jsonb,
   'Indonesia', 'ID', 'Jakarta',
   now(), now()
 );
@@ -331,7 +332,7 @@ INSERT INTO public.packages (
   35,
   20,
   'Makassar',
-  ARRAY['Makassar', 'Balikpapan'],
+  '["Makassar", "Balikpapan"]'::jsonb,
   '2026-08-10',
   'Agustus 2026',
   15,
@@ -347,10 +348,10 @@ INSERT INTO public.packages (
   true,
   'https://images.unsplash.com/photo-1567496146600-38e9fa3d8de8?w=800&q=80',
   45000000,
-  ARRAY['Hotel Bintang 5', 'Makan 3x', 'Bus AC', 'Pembimbing', 'Visa', 'Tiket Pesawat', 'Ibadah Panjang'],
-  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Sultan Hasanuddin, penerbangan ke Jeddah"},{"day":2,"title":"Tiba di Makkah","description":"Tiba di Jeddah, transfer ke hotel"},{"day":3,"title":"Umrah","description":"Umrah: Tawaf, Sa\'i, Tahallul"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Ibadah Makkah","description":"Ibadah mandiri, shalat berjamaah"},{"day":6,"title":"Ibadah Makkah","description":"Ibadah mandiri, tadarus Al-Quran"},{"day":7,"title":"Ziarah Makkah","description":"Ziarah ke tempat bersejarah"},{"day":8,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":9,"title":"Perjalanan Madinah","description":"Bus ke Madinah, check-in hotel"},{"day":10,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi, Raudhah"},{"day":11,"title":"Ziarah Madinah","description":"Ziarah Masjid Quba, Uhud"},{"day":12,"title":"Ibadah Madinah","description":"Ibadah mandiri di Masjid Nabawi"},{"day":13,"title":"Ibadah Madinah","description":"Ibadah mandiri, tadarus Al-Quran"},{"day":14,"title":"Persiapan Pulang","description":"Check-out, perjalanan ke bandara"},{"day":15,"title":"Kepulangan","description":"Penerbangan ke Makassar"}]'::jsonb,
-  ARRAY['Visa Umroh', 'Tiket Pesawat PP', 'Hotel Bintang 5', 'Makan 3x Sehari', 'Bus AC', 'Pembimbing', 'Air Zam-Zam 5L', 'Perlengkapan Umroh'],
-  ARRAY['Tiket Tambahan', 'Laundry', 'Telepon', 'Tips Guide', 'Ziarah Tambahan'],
+  '["Hotel Bintang 5", "Makan 3x", "Bus AC", "Pembimbing", "Visa", "Tiket Pesawat", "Ibadah Panjang"]'::jsonb,
+  '[{"day":1,"title":"Keberangkatan","description":"Berkumpul di Bandara Sultan Hasanuddin, penerbangan ke Jeddah"},{"day":2,"title":"Tiba di Makkah","description":"Tiba di Jeddah, transfer ke hotel"},{"day":3,"title":"Umrah","description":"Umrah: Tawaf, Sa''i, Tahallul"},{"day":4,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":5,"title":"Ibadah Makkah","description":"Ibadah mandiri, shalat berjamaah"},{"day":6,"title":"Ibadah Makkah","description":"Ibadah mandiri, tadarus Al-Quran"},{"day":7,"title":"Ziarah Makkah","description":"Ziarah ke tempat bersejarah"},{"day":8,"title":"Ibadah Makkah","description":"Ibadah mandiri di Masjidil Haram"},{"day":9,"title":"Perjalanan Madinah","description":"Bus ke Madinah, check-in hotel"},{"day":10,"title":"Ziarah Madinah","description":"Ziarah Masjid Nabawi, Raudhah"},{"day":11,"title":"Ziarah Madinah","description":"Ziarah Masjid Quba, Uhud"},{"day":12,"title":"Ibadah Madinah","description":"Ibadah mandiri di Masjid Nabawi"},{"day":13,"title":"Ibadah Madinah","description":"Ibadah mandiri, tadarus Al-Quran"},{"day":14,"title":"Persiapan Pulang","description":"Check-out, perjalanan ke bandara"},{"day":15,"title":"Kepulangan","description":"Penerbangan ke Makassar"}]'::jsonb,
+  '["Visa Umroh", "Tiket Pesawat PP", "Hotel Bintang 5", "Makan 3x Sehari", "Bus AC", "Pembimbing", "Air Zam-Zam 5L", "Perlengkapan Umroh"]'::jsonb,
+  '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide", "Ziarah Tambahan"]'::jsonb,
   'Indonesia', 'ID', 'Makassar',
   now(), now()
 );
