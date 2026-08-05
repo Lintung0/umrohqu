@@ -102,10 +102,12 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
     ? className
     : "h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-1 focus:ring-primary"
 
+  const hasCustomStyle = !!className
+
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+        <div className={`absolute left-3 top-1/2 -translate-y-1/2 ${hasCustomStyle ? "text-white/40" : "text-muted-foreground"}`}>
           <MapPin size={15} />
         </div>
         <input
@@ -118,23 +120,23 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
         />
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <div className={`h-3.5 w-3.5 animate-spin rounded-full border-2 ${hasCustomStyle ? "border-white/40 border-t-transparent" : "border-primary border-t-transparent"}`} />
           </div>
         )}
       </div>
 
       {open && suggestions.length > 0 && (
-        <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-lg border border-border bg-background shadow-lg">
+        <ul className={`absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-lg border shadow-lg ${hasCustomStyle ? "border-white/20 bg-zinc-900" : "border-border bg-background"}`}>
           {suggestions.map((s, i) => (
             <li
               key={i}
               onClick={() => selectSuggestion(s)}
-              className="flex cursor-pointer items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-accent transition-colors"
+              className={`flex cursor-pointer items-center gap-2.5 px-3 py-2.5 text-sm transition-colors ${hasCustomStyle ? "hover:bg-white/10 text-white" : "hover:bg-accent"}`}
             >
-              <MapPin size={14} className="shrink-0 text-muted-foreground" />
+              <MapPin size={14} className={`shrink-0 ${hasCustomStyle ? "text-white/40" : "text-muted-foreground"}`} />
               <div className="min-w-0 flex-1">
                 <span className="font-medium">{s.name}</span>
-                {s.country && <span className="ml-1.5 text-xs text-muted-foreground">· {s.country}</span>}
+                {s.country && <span className={`ml-1.5 text-xs ${hasCustomStyle ? "text-white/50" : "text-muted-foreground"}`}>· {s.country}</span>}
               </div>
             </li>
           ))}
