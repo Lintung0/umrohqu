@@ -242,6 +242,30 @@ export const COUNTRY_CODE_MAP: Record<string, string> = Object.fromEntries(
   COUNTRIES.map((c) => [c.name, c.code])
 )
 
+export const ASEAN_COUNTRIES = [
+  { code: "id", name: "Indonesia", emoji: "🇮🇩" },
+  { code: "my", name: "Malaysia", emoji: "🇲🇾" },
+  { code: "sg", name: "Singapura", emoji: "🇸🇬" },
+  { code: "th", name: "Thailand", emoji: "🇹🇭" },
+  { code: "ph", name: "Filipina", emoji: "🇵🇭" },
+  { code: "vn", name: "Vietnam", emoji: "🇻🇳" },
+  { code: "mm", name: "Myanmar", emoji: "🇲🇲" },
+  { code: "kh", name: "Kamboja", emoji: "🇰🇭" },
+  { code: "la", name: "Laos", emoji: "🇱🇦" },
+  { code: "bn", name: "Brunei", emoji: "🇧🇳" },
+  { code: "tl", name: "Timor Leste", emoji: "🇹🇱" },
+] as const
+
+export type AseanCountryCode = typeof ASEAN_COUNTRIES[number]["code"]
+
+export function getAseanCountryByCode(code: string) {
+  return ASEAN_COUNTRIES.find((c) => c.code === code.toLowerCase()) || null
+}
+
+export function getAseanCountryByName(name: string) {
+  return ASEAN_COUNTRIES.find((c) => c.name.toLowerCase() === name.toLowerCase()) || null
+}
+
 export function getStatusColor(status: string, type: "booking" | "travel" | "ticket" | "invoice"): string {
   const statusMap = {
     booking: Object.fromEntries(BOOKING_STATUSES.map((s) => [s.value, s.color])),

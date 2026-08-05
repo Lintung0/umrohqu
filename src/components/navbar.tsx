@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Logo from "./logo"
 import { LanguageSwitcher } from "@/components/shared/language-switcher"
+import CountrySelect from "@/components/shared/country-select"
 import { LayoutDashboard, LogOut, ChevronDown, Search, Menu, X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -29,6 +30,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [scrolled, setScrolled] = useState(false)
+  const [country, setCountry] = useState("id")
   const router = useRouter()
   const { t } = useTranslation()
 
@@ -80,12 +82,32 @@ const Navbar = () => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
     window.addEventListener("scroll", handleScroll, { passive: true })
 
+    const fetchCountry = async () => {
+      try {
+        const res = await fetch("/api/user/country")
+        const data = await res.json()
+        if (data.country) setCountry(data.country)
+      } catch {}
+    }
+    fetchCountry()
+
     return () => {
       mounted = false
       subscription.unsubscribe()
       window.removeEventListener("scroll", handleScroll)
     }
   }, [])
+
+  const handleCountryChange = async (code: string) => {
+    setCountry(code)
+    try {
+      await fetch("/api/user/country", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ country: code }),
+      })
+    } catch {}
+  }
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -145,6 +167,7 @@ const Navbar = () => {
           </nav>
 
           <div className="hidden md:flex items-center gap-1">
+            <CountrySelect value={country} onChange={handleCountryChange} />
             <LanguageSwitcher />
             {loading ? (
               <div className="w-20 h-9 bg-muted rounded-xl animate-pulse ml-2" />
@@ -234,7 +257,8 @@ const Navbar = () => {
             <Link href="/faq" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
               {t.nav.faq}
             </Link>
-            <div className="flex items-center px-4 py-2">
+            <div className="flex items-center gap-2 px-4 py-2">
+              <CountrySelect value={country} onChange={handleCountryChange} />
               <LanguageSwitcher />
             </div>
             <div className="pt-2 border-t border-border/50 mt-2">

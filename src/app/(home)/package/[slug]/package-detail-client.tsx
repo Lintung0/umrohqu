@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
   Star, MapPin, Clock, Users, Plane, Hotel, Shield, CheckCircle,
@@ -98,6 +99,7 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
 }
 
 export default function PackageDetailClient({ pkg, reviews: initialReviews, images: initialImages }: Props) {
+  const router = useRouter()
   const TAB_ITEMS = [
     { id: "overview", label: "Ringkasan", icon: Info },
     { id: "itinerary", label: "Itinerary", icon: Calendar },
@@ -456,6 +458,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                   <Share2 className="w-3.5 h-3.5" /> Bagikan
                 </Button>
               </div>
+              <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5" onClick={() => router.push(`/compare?packages=${pkg.slug}`)}>
+                <Package className="w-3.5 h-3.5" /> Bandingkan
+              </Button>
             </div>
 
             {/* Travel */}

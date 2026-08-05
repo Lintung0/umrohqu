@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { COST_RANGES, PACKAGE_TYPES, AIRLINES, HOTEL_STARS, COUNTRY_CODE_MAP } from "@/lib/constants"
+import { COST_RANGES, PACKAGE_TYPES, AIRLINES, HOTEL_STARS, getAseanCountryByCode } from "@/lib/constants"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import type { Package, Tenant } from "@/lib/types"
@@ -119,8 +119,8 @@ function SearchContent() {
   const filtered = packages
     .filter((pkg) => {
       if (country) {
-        const pkgCountry = pkg.country || ""
-        if (pkgCountry.toLowerCase() !== country.toLowerCase()) return false
+        const pkgCountryCode = pkg.country_code || ""
+        if (pkgCountryCode.toLowerCase() !== country.toLowerCase()) return false
       }
       if (departure) {
         const dep = departure.toLowerCase()
@@ -201,7 +201,7 @@ function SearchContent() {
 
   const hasActiveFilters = departure || country || month || cost || type !== "semua" || airline !== "semua" || hotelStars !== "semua"
 
-  const countryCode = country ? COUNTRY_CODE_MAP[country] : undefined
+  const countryCode = country || undefined
 
   if (loading) {
     return (
@@ -393,7 +393,7 @@ function SearchContent() {
               <div className="flex flex-wrap gap-2 mb-4">
                 {country && (
                   <Badge variant="secondary" className="gap-1 text-xs">
-                    {country}
+                    {getAseanCountryByCode(country)?.name || country}
                     <button onClick={() => setCountry("")}><X className="w-3 h-3" /></button>
                   </Badge>
                 )}
