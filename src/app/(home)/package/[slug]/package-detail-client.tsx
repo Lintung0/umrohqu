@@ -8,7 +8,7 @@ import {
   Star, MapPin, Clock, Users, Plane, Hotel, Shield, CheckCircle,
   XCircle, BadgeCheck, Zap, Calendar, BookmarkPlus, BookmarkCheck, Loader2, ChevronRight,
   Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
-  Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles,
+  Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package,
 } from "lucide-react"
 import { formatRupiah } from "@/lib/constants"
 import ImageGallery from "@/components/shared/image-gallery"
@@ -178,232 +178,132 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Image */}
-      <div className="relative bg-black">
-        {initialImages && initialImages.length > 1 ? (
-          <ImageGallery images={initialImages} title={pkg.name} />
-        ) : (
-          <div className="relative h-48 sm:h-56 md:h-64">
-            {pkg.image_url ? (
-              <Image
-                src={pkg.image_url}
-                alt={pkg.name}
-                fill
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary/30 to-emerald-900/20" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          </div>
-        )}
-
-        {/* Floating Actions */}
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex gap-2 z-20">
-          <button
-            onClick={handleShare}
-            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-all active:scale-95"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={toggleWishlist}
-            className={`w-10 h-10 rounded-full backdrop-blur-md border border-white/20 flex items-center justify-center transition-all active:scale-95 ${
-              isWishlisted ? "bg-rose-500 text-white" : "bg-white/20 text-white hover:bg-white/30"
-            }`}
-          >
-            {togglingWishlist ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className={`w-4 h-4 ${isWishlisted ? "fill-white" : ""}`} />}
-          </button>
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+          <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
+          <ChevronRight className="w-3 h-3" />
+          <Link href="/search" className="hover:text-primary transition-colors">Cari Paket</Link>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-foreground truncate">{pkg.name}</span>
         </div>
 
-        {/* Type Badge */}
-        {pkg.type && (
-          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
-            <span className={`text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20 ${
-              pkg.type === "vip" ? "bg-amber-400/90 text-amber-900" :
-              pkg.type === "plus" ? "bg-purple-500/90 text-white" :
-              pkg.type === "furoda" ? "bg-rose-500/90 text-white" :
-              "bg-emerald-500/90 text-white"
-            }`}>
-              {pkg.type === "vip" ? "★ VIP" : pkg.type === "plus" ? "+ Plus" : pkg.type === "furoda" ? "Furoda" : "Reguler"}
-            </span>
-          </div>
-        )}
-
-        {/* Promo Badge */}
-        {pkg.is_promo && discount > 0 && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 sm:top-6">
-            <span className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-xl flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5" /> PROMO -{discount}%
-            </span>
-          </div>
-        )}
-
-        {/* Title Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 z-20">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center gap-2 text-xs text-white/60 mb-2">
-              <Link href="/" className="hover:text-white transition-colors">Beranda</Link>
-              <ChevronRight className="w-3 h-3" />
-              <Link href="/search" className="hover:text-white transition-colors">Cari Paket</Link>
-              <ChevronRight className="w-3 h-3" />
-              <span className="text-white/80 truncate">{pkg.name}</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white leading-tight">{pkg.name}</h1>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-6 relative z-30">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-
-          {/* LEFT: Main Content */}
-          <div className="lg:col-span-2 space-y-5">
-
-            {/* Quick Info Chips */}
-            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm">
-              <div className="flex flex-wrap gap-2">
-                {pkg.duration_days && (
-                  <span className="inline-flex items-center gap-1.5 bg-primary/5 text-primary text-xs font-medium px-3 py-2 rounded-xl">
-                    <Clock className="w-3.5 h-3.5" /> {pkg.duration_days} Hari{pkg.duration_nights ? ` / ${pkg.duration_nights} Malam` : ""}
-                  </span>
-                )}
-                {pkg.airline && (
-                  <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 text-xs font-medium px-3 py-2 rounded-xl">
-                    <Plane className="w-3.5 h-3.5" /> {pkg.airline}
-                  </span>
-                )}
-                {pkg.departure_city && (
-                  <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 text-xs font-medium px-3 py-2 rounded-xl">
-                    <MapPin className="w-3.5 h-3.5" /> {pkg.departure_city}
-                  </span>
-                )}
-                {pkg.departure_date && (
-                  <span className="inline-flex items-center gap-1.5 bg-purple-50 text-purple-600 text-xs font-medium px-3 py-2 rounded-xl">
-                    <Calendar className="w-3.5 h-3.5" /> {new Date(pkg.departure_date).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
-                  </span>
-                )}
-                {avgRating > 0 && (
-                  <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-600 text-xs font-medium px-3 py-2 rounded-xl">
-                    <Star className="w-3.5 h-3.5 fill-amber-400" /> {avgRating.toFixed(1)} ({initialReviews.length})
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Travel Partner Card */}
-            {pkg.travel && (
-              <Link href={`/travel/${pkg.travel.slug}`} className="block group">
-                <div className="bg-white border border-border/60 rounded-2xl p-4 hover:shadow-lg hover:border-primary/20 transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    {pkg.travel.logo_url ? (
-                      <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={44} height={44} className="rounded-xl object-cover" />
-                    ) : (
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center">
-                        <span className="text-base font-bold text-white">{pkg.travel.name.charAt(0)}</span>
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-semibold text-sm group-hover:text-primary transition-colors">{pkg.travel.name}</span>
-                        {pkg.travel.is_verified && <BadgeCheck className="w-4 h-4 text-primary shrink-0" />}
-                      </div>
-                      {pkg.travel.city && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{pkg.travel.city}</p>}
+          {/* LEFT: Image Gallery */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm">
+              {initialImages && initialImages.length > 1 ? (
+                <ImageGallery images={initialImages} title={pkg.name} />
+              ) : (
+                <div className="relative aspect-[16/9]">
+                  {pkg.image_url ? (
+                    <Image src={pkg.image_url} alt={pkg.name} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/10 to-emerald-50 flex items-center justify-center">
+                      <Package className="w-16 h-16 text-primary/30" />
                     </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                  )}
+                  {/* Badges */}
+                  <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                    {pkg.type && (
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
+                        pkg.type === "vip" ? "bg-amber-400 text-amber-900" :
+                        pkg.type === "plus" ? "bg-purple-500 text-white" :
+                        pkg.type === "furoda" ? "bg-rose-500 text-white" :
+                        "bg-emerald-500 text-white"
+                      }`}>
+                        {pkg.type === "vip" ? "★ VIP" : pkg.type === "plus" ? "+ Plus" : pkg.type === "furoda" ? "Furoda" : "Reguler"}
+                      </span>
+                    )}
+                    {pkg.is_promo && discount > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">
+                        -{discount}%
+                      </span>
+                    )}
+                  </div>
+                  {/* Actions */}
+                  <div className="absolute top-3 right-3 flex gap-1.5">
+                    <button onClick={handleShare} className="w-8 h-8 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-gray-600 hover:bg-white hover:text-primary transition-all shadow-sm">
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={toggleWishlist} className={`w-8 h-8 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center transition-all shadow-sm ${isWishlisted ? "text-rose-500" : "text-gray-600 hover:bg-white hover:text-rose-500"}`}>
+                      {togglingWishlist ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`} />}
+                    </button>
                   </div>
                 </div>
-              </Link>
-            )}
+              )}
+            </div>
 
             {/* Tabs */}
-            <div className="bg-white border border-border/60 rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm mt-4">
               <div className="flex border-b border-border/50 overflow-x-auto scrollbar-hide">
                 {TAB_ITEMS.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`relative flex items-center gap-1.5 px-4 sm:px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-all ${
-                      activeTab === tab.id
-                        ? "text-primary"
-                        : "text-muted-foreground hover:text-foreground"
+                      activeTab === tab.id ? "text-primary" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     <tab.icon className="w-4 h-4" />
                     {tab.label}
-                    {activeTab === tab.id && (
-                      <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />
-                    )}
+                    {activeTab === tab.id && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
                   </button>
                 ))}
               </div>
 
-              <div className="p-5 sm:p-6">
-                {/* Overview Tab */}
+              <div className="p-5">
+                {/* Overview */}
                 {activeTab === "overview" && (
-                  <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="space-y-4 animate-in fade-in duration-200">
                     {pkg.description && (
-                      <div className="bg-gradient-to-br from-primary/5 via-emerald-50/30 to-transparent rounded-2xl p-5 border border-primary/10">
-                        <p className="text-sm text-muted-foreground leading-relaxed">{pkg.description}</p>
-                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{pkg.description}</p>
                     )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {pkg.airline && <InfoCard icon={Plane} label="Maskapai" value={pkg.airline} color="blue" />}
                       {pkg.duration_days && <InfoCard icon={Clock} label="Durasi" value={`${pkg.duration_days} Hari`} />}
-                      {pkg.hotel_makkah && <InfoCard icon={Hotel} label="Hotel Makkah" value={`${pkg.hotel_makkah}${pkg.hotel_makkah_stars ? ` (${pkg.hotel_makkah_stars}★)` : ""}`} color="amber" />}
-                      {pkg.hotel_madinah && <InfoCard icon={Hotel} label="Hotel Madinah" value={`${pkg.hotel_madinah}${pkg.hotel_madinah_stars ? ` (${pkg.hotel_madinah_stars}★)` : ""}`} color="amber" />}
-                      {pkg.departure_city && <InfoCard icon={MapPin} label="Kota Keberangkatan" value={pkg.departure_city} />}
+                      {pkg.hotel_makkah && <InfoCard icon={Hotel} label="Hotel Makkah" value={pkg.hotel_makkah} color="amber" />}
+                      {pkg.hotel_madinah && <InfoCard icon={Hotel} label="Hotel Madinah" value={pkg.hotel_madinah} color="amber" />}
+                      {pkg.departure_city && <InfoCard icon={MapPin} label="Berangkat dari" value={pkg.departure_city} />}
                       {pkg.quota && <InfoCard icon={Users} label="Kuota" value={`${pkg.quota} orang`} color="blue" />}
                     </div>
                   </div>
                 )}
 
-                {/* Itinerary Tab */}
+                {/* Itinerary */}
                 {activeTab === "itinerary" && (
-                  <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="space-y-3 animate-in fade-in duration-200">
                     {itineraryList.length > 0 ? (
                       itineraryList.map((item, idx) => (
                         <div key={idx} className="flex gap-3">
                           <div className="flex flex-col items-center">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                              <span className="text-xs font-bold text-primary">{idx + 1}</span>
+                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                              <span className="text-[10px] font-bold text-primary">{idx + 1}</span>
                             </div>
                             {idx < itineraryList.length - 1 && <div className="w-px flex-1 bg-border/50 my-1" />}
                           </div>
-                          <div className="pb-4 flex-1">
-                            <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
-                          </div>
+                          <p className="text-sm text-muted-foreground pb-3">{item}</p>
                         </div>
                       ))
                     ) : (
-                      <div className="text-center py-12">
-                        <Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                        <p className="text-sm text-muted-foreground">Belum ada itinerary</p>
-                      </div>
+                      <p className="text-sm text-muted-foreground text-center py-8">Belum ada itinerary</p>
                     )}
                   </div>
                 )}
 
-                {/* Facilities Tab */}
+                {/* Facilities */}
                 {activeTab === "facilities" && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="space-y-5 animate-in fade-in duration-200">
                     {includesList.length > 0 && (
                       <div>
-                        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                          </div>
-                          Termasuk
+                        <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-500" /> Termasuk
                         </h3>
-                        <div className="grid sm:grid-cols-2 gap-2">
+                        <div className="grid sm:grid-cols-2 gap-1.5">
                           {includesList.map((item: string) => (
-                            <div key={item} className="flex items-center gap-2.5 text-sm text-muted-foreground bg-emerald-50/50 rounded-xl px-3 py-2.5">
-                              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                              {item}
+                            <div key={item} className="flex items-center gap-2 text-sm text-muted-foreground bg-emerald-50/50 rounded-lg px-3 py-2">
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {item}
                             </div>
                           ))}
                         </div>
@@ -411,104 +311,71 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                     )}
                     {excludesList.length > 0 && (
                       <div>
-                        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-red-50 flex items-center justify-center">
-                            <XCircle className="w-3.5 h-3.5 text-red-500" />
-                          </div>
-                          Tidak Termasuk
+                        <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                          <XCircle className="w-4 h-4 text-red-500" /> Tidak Termasuk
                         </h3>
-                        <div className="grid sm:grid-cols-2 gap-2">
+                        <div className="grid sm:grid-cols-2 gap-1.5">
                           {excludesList.map((item: string) => (
-                            <div key={item} className="flex items-center gap-2.5 text-sm text-muted-foreground bg-red-50/50 rounded-xl px-3 py-2.5">
-                              <XCircle className="w-4 h-4 text-red-400 shrink-0" />
-                              {item}
+                            <div key={item} className="flex items-center gap-2 text-sm text-muted-foreground bg-red-50/50 rounded-lg px-3 py-2">
+                              <XCircle className="w-3.5 h-3.5 text-red-400 shrink-0" /> {item}
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
-                    {facilitiesList.length > 0 && includesList.length === 0 && (
-                      <div>
-                        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                          </div>
-                          Fasilitas
-                        </h3>
-                        <div className="grid sm:grid-cols-2 gap-2">
-                          {facilitiesList.map((item: string) => (
-                            <div key={item} className="flex items-center gap-2.5 text-sm text-muted-foreground bg-emerald-50/50 rounded-xl px-3 py-2.5">
-                              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                              {item}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {facilitiesList.length === 0 && includesList.length === 0 && excludesList.length === 0 && (
-                      <div className="text-center py-12">
-                        <CheckCircle className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                        <p className="text-sm text-muted-foreground">Belum ada info fasilitas</p>
-                      </div>
+                    {includesList.length === 0 && excludesList.length === 0 && facilitiesList.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-8">Belum ada info fasilitas</p>
                     )}
                   </div>
                 )}
 
-                {/* Reviews Tab */}
+                {/* Reviews */}
                 {activeTab === "reviews" && (
-                  <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="space-y-4 animate-in fade-in duration-200">
                     {initialReviews.length > 0 ? (
                       <>
-                        <div className="flex flex-col sm:flex-row items-center gap-4 p-5 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 rounded-2xl border border-amber-200/50">
+                        <div className="flex items-center gap-4 p-4 bg-amber-50 rounded-xl border border-amber-200/50">
                           <div className="text-center">
-                            <div className="text-5xl font-bold text-amber-600">{avgRating.toFixed(1)}</div>
-                            <div className="flex gap-0.5 justify-center mt-2">
+                            <div className="text-4xl font-bold text-amber-600">{avgRating.toFixed(1)}</div>
+                            <div className="flex gap-0.5 justify-center mt-1">
                               {[1,2,3,4,5].map((s) => (
-                                <Star key={s} className={`w-5 h-5 ${s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+                                <Star key={s} className={`w-4 h-4 ${s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
                               ))}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1.5">{initialReviews.length} ulasan</div>
+                            <div className="text-xs text-muted-foreground mt-1">{initialReviews.length} ulasan</div>
                           </div>
-                          <div className="flex-1 w-full sm:w-auto space-y-1.5">
+                          <div className="flex-1 space-y-1">
                             {ratingBreakdown.map(({ star, count }) => (
                               <RatingBar key={star} star={star} count={count} total={initialReviews.length} />
                             ))}
                           </div>
                         </div>
-
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           {initialReviews.map((r) => (
-                            <div key={r.id} className="border-b border-border/50 pb-4 last:border-0">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/10 to-emerald-50 flex items-center justify-center ring-2 ring-primary/5">
-                                  <span className="text-xs font-bold text-primary">
-                                    {r.customer?.full_name?.charAt(0) || "U"}
-                                  </span>
+                            <div key={r.id} className="border-b border-border/50 pb-3 last:border-0">
+                              <div className="flex items-center gap-2.5 mb-1.5">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                  <span className="text-xs font-bold text-primary">{r.customer?.full_name?.charAt(0) || "U"}</span>
                                 </div>
                                 <div>
-                                  <p className="text-sm font-semibold">{r.customer?.full_name || "Pengguna"}</p>
+                                  <p className="text-sm font-medium">{r.customer?.full_name || "Pengguna"}</p>
                                   <div className="flex items-center gap-1.5">
                                     <div className="flex gap-0.5">
                                       {[1,2,3,4,5].map((s) => (
-                                        <Star key={s} className={`w-3 h-3 ${s <= r.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+                                        <Star key={s} className={`w-2.5 h-2.5 ${s <= r.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
                                       ))}
                                     </div>
-                                    <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString("id-ID")}</span>
+                                    <span className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("id-ID")}</span>
                                   </div>
                                 </div>
                               </div>
-                              {r.review && <p className="text-sm text-muted-foreground leading-relaxed ml-12">{r.review}</p>}
+                              {r.review && <p className="text-sm text-muted-foreground ml-10">{r.review}</p>}
                             </div>
                           ))}
                         </div>
                       </>
                     ) : (
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
-                          <Star className="w-7 h-7 text-muted-foreground/50" />
-                        </div>
-                        <p className="text-sm text-muted-foreground">Belum ada ulasan</p>
-                      </div>
+                      <p className="text-sm text-muted-foreground text-center py-8">Belum ada ulasan</p>
                     )}
                   </div>
                 )}
@@ -516,110 +383,121 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
             </div>
           </div>
 
-          {/* RIGHT: Booking Sidebar */}
+          {/* RIGHT: Info & Booking */}
           <div className="lg:col-span-1" ref={sidebarRef}>
-            <div className="bg-white border border-border/60 rounded-2xl p-5 sticky top-20 space-y-4 shadow-sm">
-              {/* Price */}
-              <div className="text-center pb-4 border-b border-border/50">
-                {pkg.original_price && (
-                  <p className="text-sm text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>
+            {/* Title & Price */}
+            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h1 className="text-lg font-bold leading-tight">{pkg.name}</h1>
+                {avgRating > 0 && (
+                  <span className="flex items-center gap-1 bg-amber-50 text-amber-600 text-xs font-medium px-2 py-1 rounded-lg shrink-0">
+                    <Star className="w-3 h-3 fill-amber-400" /> {avgRating.toFixed(1)}
+                  </span>
                 )}
-                <div className="flex items-baseline justify-center gap-2">
-                  <p className="text-3xl font-bold text-primary">{formatRupiah(pkg.price)}</p>
-                  {discount > 0 && (
-                    <span className="text-xs font-bold text-white bg-gradient-to-r from-red-500 to-rose-500 px-2 py-0.5 rounded-full">-{discount}%</span>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">per orang · belum termasuk biaya layanan</p>
               </div>
-
-              {/* Seat Availability */}
-              <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="detail" />
+              {pkg.original_price && (
+                <p className="text-sm text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>
+              )}
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-primary">{formatRupiah(pkg.price)}</p>
+                {discount > 0 && (
+                  <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded">-{discount}%</span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">per orang · belum termasuk biaya layanan</p>
 
               {/* Quick Info */}
-              <div className="space-y-2.5 text-sm">
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border/50">
                 {pkg.duration_days && (
-                  <div className="flex items-center gap-2.5">
-                    <Clock className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-xs"><span className="text-muted-foreground">Durasi:</span> <span className="font-semibold">{pkg.duration_days} Hari</span></span>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Clock className="w-3.5 h-3.5 text-primary" />
+                    <span>{pkg.duration_days} Hari</span>
                   </div>
                 )}
                 {pkg.airline && (
-                  <div className="flex items-center gap-2.5">
-                    <Plane className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-xs"><span className="text-muted-foreground">Maskapai:</span> <span className="font-semibold">{pkg.airline}</span></span>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Plane className="w-3.5 h-3.5 text-primary" />
+                    <span className="truncate">{pkg.airline}</span>
                   </div>
                 )}
                 {pkg.departure_city && (
-                  <div className="flex items-center gap-2.5">
-                    <MapPin className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-xs"><span className="text-muted-foreground">Berangkat dari:</span> <span className="font-semibold">{pkg.departure_city}</span></span>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                    <span>{pkg.departure_city}</span>
+                  </div>
+                )}
+                {pkg.departure_date && (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Calendar className="w-3.5 h-3.5 text-primary" />
+                    <span>{new Date(pkg.departure_date).toLocaleDateString("id-ID", { month: "short", year: "numeric" })}</span>
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* CTA Buttons */}
-              <div className="space-y-2.5 pt-1">
-                <Link href={`/checkout?slug=${pkg.slug}`} className="block">
-                  <Button className="w-full h-12 font-semibold text-sm bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0">
-                    Booking Sekarang
-                  </Button>
-                </Link>
-                <div className="grid grid-cols-2 gap-2.5">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`h-9 text-xs gap-1.5 transition-all ${isWishlisted ? "border-emerald-500 text-emerald-600 bg-emerald-50" : ""}`}
-                    onClick={toggleWishlist}
-                    disabled={togglingWishlist}
-                  >
-                    {togglingWishlist ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : isWishlisted ? (
-                      <BookmarkCheck className="w-3.5 h-3.5" />
-                    ) : (
-                      <BookmarkPlus className="w-3.5 h-3.5" />
-                    )}
-                    {isWishlisted ? "Tersimpan" : "Simpan"}
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-9 text-xs gap-1.5" onClick={handleShare}>
-                    <Share2 className="w-3.5 h-3.5" /> Bagikan
-                  </Button>
-                </div>
+            {/* Seat */}
+            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3">
+              <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="detail" />
+            </div>
+
+            {/* CTA */}
+            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3 space-y-2.5">
+              <Link href={`/checkout?slug=${pkg.slug}`} className="block">
+                <Button className="w-full h-11 font-semibold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all">
+                  Booking Sekarang
+                </Button>
+              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" className={`h-9 text-xs gap-1.5 ${isWishlisted ? "border-emerald-500 text-emerald-600 bg-emerald-50" : ""}`} onClick={toggleWishlist} disabled={togglingWishlist}>
+                  {togglingWishlist ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : isWishlisted ? <BookmarkCheck className="w-3.5 h-3.5" /> : <BookmarkPlus className="w-3.5 h-3.5" />}
+                  {isWishlisted ? "Tersimpan" : "Simpan"}
+                </Button>
+                <Button variant="outline" size="sm" className="h-9 text-xs gap-1.5" onClick={handleShare}>
+                  <Share2 className="w-3.5 h-3.5" /> Bagikan
+                </Button>
               </div>
+            </div>
 
-              {/* Contact */}
-              {pkg.travel && (
-                <div className="border-t border-border/50 pt-3">
-                  <p className="text-xs text-muted-foreground mb-2.5">Hubungi travel langsung:</p>
-                  <div className="flex gap-2">
-                    {pkg.travel.phone && (
-                      <a href={`https://wa.me/${pkg.travel.phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all">
-                          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
-                        </Button>
-                      </a>
-                    )}
-                    <Link href={`/travel/${pkg.travel.slug}`} className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5">
-                        <Phone className="w-3.5 h-3.5" /> Lihat Travel
-                      </Button>
-                    </Link>
+            {/* Travel */}
+            {pkg.travel && (
+              <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3">
+                <Link href={`/travel/${pkg.travel.slug}`} className="flex items-center gap-3 group">
+                  {pkg.travel.logo_url ? (
+                    <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={40} height={40} className="rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-white">{pkg.travel.name.charAt(0)}</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-semibold group-hover:text-primary transition-colors truncate">{pkg.travel.name}</span>
+                      {pkg.travel.is_verified && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
+                    </div>
+                    {pkg.travel.city && <p className="text-[10px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{pkg.travel.city}</p>}
                   </div>
-                </div>
-              )}
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                </Link>
+                {pkg.travel.phone && (
+                  <a href={`https://wa.me/${pkg.travel.phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="mt-3 block">
+                    <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all">
+                      <MessageCircle className="w-3.5 h-3.5" /> Hubungi via WhatsApp
+                    </Button>
+                  </a>
+                )}
+              </div>
+            )}
 
-              {/* Trust */}
-              <div className="border-t border-border/50 pt-3 space-y-2">
+            {/* Trust */}
+            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm">
+              <div className="space-y-2">
                 {[
                   { icon: Shield, text: "Pembayaran aman & terenkripsi" },
                   { icon: BadgeCheck, text: "Travel partner terverifikasi" },
                   { icon: CheckCircle, text: "Jaminan keberangkatan" },
                 ].map((item) => (
                   <div key={item.text} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                      <item.icon className="w-3 h-3 text-emerald-600" />
-                    </div>
+                    <item.icon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     {item.text}
                   </div>
                 ))}
@@ -631,16 +509,14 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
 
       {/* Sticky Mobile CTA */}
       {showStickyCta && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 p-3 z-50 lg:hidden animate-in slide-in-from-bottom duration-300">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 p-3 z-50 lg:hidden">
           <div className="max-w-lg mx-auto flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-lg font-bold text-primary truncate">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-muted-foreground">per orang</p>
             </div>
             <Link href={`/checkout?slug=${pkg.slug}`}>
-              <Button className="h-11 px-6 font-semibold text-sm bg-gradient-to-r from-primary to-emerald-600 shadow-lg shadow-primary/20">
-                Booking
-              </Button>
+              <Button className="h-10 px-5 font-semibold text-sm bg-primary shadow-lg shadow-primary/20">Booking</Button>
             </Link>
           </div>
         </div>
@@ -650,7 +526,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-20 right-4 sm:bottom-8 sm:right-8 w-10 h-10 rounded-full bg-white border border-border shadow-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-all z-40 animate-in fade-in zoom-in duration-200"
+          className="fixed bottom-20 right-4 w-9 h-9 rounded-full bg-white border border-border shadow flex items-center justify-center text-muted-foreground hover:text-primary transition-all z-40"
         >
           <ArrowUp className="w-4 h-4" />
         </button>
