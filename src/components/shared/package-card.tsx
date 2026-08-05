@@ -2,10 +2,13 @@
 
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useState } from "react"
 import { Clock, MapPin, Plane, Hotel, BadgeCheck, ChevronRight } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
+
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"
 
 interface PackageCardProps {
   pkg: Package
@@ -16,9 +19,19 @@ interface PackageCardProps {
 
 export default function PackageCard({ pkg, travel, showTravel = true, variant = "vertical" }: PackageCardProps) {
   const router = useRouter()
+  const [imgSrc, setImgSrc] = useState(pkg.image_url || FALLBACK_IMAGE)
+  const [imgError, setImgError] = useState(false)
+
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
+
+  function handleError() {
+    if (!imgError) {
+      setImgError(true)
+      setImgSrc(FALLBACK_IMAGE)
+    }
+  }
 
   function handleClick(e: React.MouseEvent) {
     e.preventDefault()
@@ -35,13 +48,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     return (
       <div onClick={handleClick} className="block bg-white border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-primary/8 hover:-translate-y-0.5 hover:border-primary/20 transition-all duration-300 group cursor-pointer">
         <div className="flex flex-col sm:flex-row">
-          {/* Image */}
           <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden pointer-events-none">
             <Image
-              src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"}
+              src={imgSrc}
               alt={pkg.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={handleError}
+              unoptimized={imgSrc.startsWith("http")}
             />
             <div className="absolute top-2 left-2 flex gap-1.5">
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${
@@ -59,7 +73,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             </div>
           </div>
 
-          {/* Content */}
           <div className="flex-1 p-4 flex flex-col justify-between">
             <div>
               <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors mb-2">{pkg.name}</h3>
@@ -107,17 +120,17 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
   return (
     <div onClick={handleClick} className="group block relative bg-white border border-border/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 hover:border-primary/20 cursor-pointer">
-      {/* Image */}
       <div className="relative h-48 overflow-hidden pointer-events-none">
         <Image
-          src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"}
+          src={imgSrc}
           alt={pkg.name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
+          onError={handleError}
+          unoptimized={imgSrc.startsWith("http")}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-        {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           {pkg.is_promo && (
             <span className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg">
@@ -134,7 +147,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </span>
         </div>
 
-        {/* Duration chip */}
         <div className="absolute bottom-3 left-3">
           <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
             <Clock className="w-3 h-3" />
@@ -143,7 +155,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-4 space-y-3">
         {showTravel && travel && (
           <span
@@ -157,6 +168,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 width={18}
                 height={18}
                 className="rounded-full"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
               />
             ) : (
               <div className="w-[18px] h-[18px] rounded-full bg-primary/10 flex items-center justify-center">
@@ -195,7 +207,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        {/* Seat Availability Progress Bar */}
         <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
 
         {pkg.facilities && pkg.facilities.length > 0 && (
@@ -213,7 +224,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         )}
 
-        {/* Price + CTA */}
         <div className="flex items-end justify-between pt-3 border-t border-border/50">
           <div>
             {pkg.original_price && (

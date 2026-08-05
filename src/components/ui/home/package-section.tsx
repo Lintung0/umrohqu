@@ -1,53 +1,88 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Hotel, Plane, Clock, MapPin, Star } from "lucide-react";
+import { Calendar, Clock, Loader2, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils";
+import PackageCard from "@/components/shared/package-card";
 import type { Package } from "@/lib/types";
+
+const PAGE_SIZE = 6;
 
 export default function PackageSection() {
   const { t } = useTranslation();
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [compared, setCompared] = useState<string[]>([]);
+  const initialLoadDone = useRef(false);
 
-  useEffect(() => {
-    supabase
+  const fetchPackages = useCallback(async (pageNum: number) => {
+    const isInitial = pageNum === 1;
+    if (isInitial) setLoading(true);
+    else setLoadingMore(true);
+
+    const from = 0;
+    const to = pageNum * PAGE_SIZE - 1;
+
+    const { data, error } = await supabase
       .from("packages")
       .select("*")
       .eq("status", "published")
       .eq("is_active", true)
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
-      .limit(6)
-      .then(async ({ data }) => {
-        const pkgs = (data as Package[]) || [];
-        if (pkgs.length > 0) {
-          const ids = pkgs.map((p) => p.id);
-          const { data: reviews } = await supabase
-            .from("reviews")
-            .select("package_id, rating")
-            .in("package_id", ids);
-          const ratingMap = new Map<string, { sum: number; count: number }>();
-          (reviews || []).forEach((r: any) => {
-            const existing = ratingMap.get(r.package_id) || { sum: 0, count: 0 };
-            existing.sum += r.rating;
-            existing.count += 1;
-            ratingMap.set(r.package_id, existing);
-          });
-          (pkgs as any).forEach((p: any) => {
-            const r = ratingMap.get(p.id);
-            p.avg_rating = r ? Math.round((r.sum / r.count) * 10) / 10 : null;
-            p.review_count = r ? r.count : 0;
-          });
-        }
-        setPackages(pkgs);
-        setLoading(false);
-      });
+      .range(from, to);
+
+    if (!error && data) {
+      const pkgs = (data as Package[]) || [];
+      if (pkgs.length > 0) {
+        const ids = pkgs.map((p) => p.id);
+        const { data: reviews } = await supabase
+          .from("reviews")
+          .select("package_id, rating")
+          .in("package_id", ids);
+
+        const ratingMap = new Map<string, { sum: number; count: number }>();
+        (reviews || []).forEach((r: any) => {
+          const existing = ratingMap.get(r.package_id) || { sum: 0, count: 0 };
+          existing.sum += r.rating;
+          existing.count += 1;
+          ratingMap.set(r.package_id, existing);
+        });
+
+        (pkgs as any).forEach((p: any) => {
+          const r = ratingMap.get(p.id);
+          p.avg_rating = r ? Math.round((r.sum / r.count) * 10) / 10 : null;
+          p.review_count = r ? r.count : 0;
+        });
+      }
+
+      setPackages(pkgs);
+      setHasMore(pkgs.length > pageNum * PAGE_SIZE);
+    }
+
+    setLoading(false);
+    setLoadingMore(false);
   }, []);
+
+  useEffect(() => {
+    if (!initialLoadDone.current) {
+      initialLoadDone.current = true;
+      fetchPackages(1);
+    }
+  }, [fetchPackages]);
+
+  function loadMore() {
+    const next = page + 1;
+    setPage(next);
+    fetchPackages(next);
+  }
 
   const toggleCompare = (id: string) => {
     setCompared((prev) =>
@@ -68,9 +103,7 @@ export default function PackageSection() {
       { threshold: 0.1 }
     );
 
-    const animatedElements = document.querySelectorAll(".card-animate");
-    animatedElements.forEach((el) => observer.observe(el));
-
+    document.querySelectorAll(".card-animate").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [packages]);
 
@@ -82,7 +115,7 @@ export default function PackageSection() {
             <div className="h-8 w-72 bg-muted rounded animate-pulse" />
             <div className="h-4 w-48 bg-muted rounded animate-pulse" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-2xl overflow-hidden bg-white border animate-shimmer-skeleton">
                 <div className="h-44" />
@@ -118,7 +151,6 @@ export default function PackageSection() {
           </Link>
         </div>
 
-        {/* Compare bar */}
         {compared.length > 0 && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-4 rounded-2xl z-40 flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/40">
             <span className="text-sm font-medium">{compared.length} paket dipilih untuk dibandingkan</span>
@@ -131,110 +163,56 @@ export default function PackageSection() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {packages.map((pkg, index) => {
-            const seatsLeft = pkg.available ?? pkg.quota;
-            const fillPercentage = ((pkg.quota - seatsLeft) / pkg.quota) * 100;
-            const isCompared = compared.includes(pkg.id);
-
-            return (
-              <div
-                key={pkg.id}
-                className="rounded-2xl overflow-hidden bg-white border card-hover card-animate"
-                style={{
-                  borderColor: isCompared ? "rgb(201,162,75)" : "rgba(0,0,0,0.07)",
-                  borderWidth: isCompared ? "2px" : "1px",
-                  animationDelay: `${index * 50}ms`,
-                }}
-              >
-                {/* Image header */}
-                <div className="h-44 relative overflow-hidden">
-                  <Image
-                    src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=600&h=300&fit=crop&auto=format"}
-                    alt={pkg.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  {pkg.is_promo && (
-                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-green-500 text-white">
-                      {t.card.promo}
-                    </span>
-                  )}
-                  {pkg.type === "premium" && (
-                    <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-gold to-gold-light text-emerald-deep">
-                      {t.card.premium}
-                    </span>
-                  )}
-                  <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
-                    <div className="text-xs text-white/80">{pkg.airline} \u00b7 Hotel Bintang {pkg.hotel_makkah_stars}</div>
-                    {(pkg as any).avg_rating && (
-                      <div className="flex items-center gap-1">
-                        <Star size={11} fill="#E8C97A" stroke="none" />
-                        <span className="text-xs text-white font-medium">{(pkg as any).avg_rating}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-4">
-                  <p className="text-xs font-semibold text-primary mb-1">
-                    Paket {pkg.type || "Reguler"}
-                  </p>
-                  <h3 className="font-bold text-sm leading-snug line-clamp-2 mb-3">
-                    <Link href={`/package/${pkg.slug}`}>{pkg.name}</Link>
-                  </h3>
-
-                  <div className="flex gap-4 mb-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Clock size={12} /> {pkg.duration_days} {t.package.day}</span>
-                    <span className="flex items-center gap-1"><Calendar size={12} /> {pkg.departure_month || "TBA"}</span>
-                  </div>
-
-                  {/* Seat bar */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex-1 h-4 bg-zinc-100 rounded-full overflow-hidden relative flex items-center">
-                      <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{ width: `${100 - fillPercentage}%` }} />
-                      <span className="absolute right-2 z-10 text-[9px] font-bold text-zinc-600">
-                        {t.card.seats_left} {seatsLeft}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Price + actions */}
-                  <div className="flex items-center justify-between pt-3 border-t border-border/60">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t.package.price_from}</p>
-                      <p className="font-bold text-base text-primary">
-                        Rp {(pkg.price / 1_000_000).toFixed(0)}jt
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => toggleCompare(pkg.id)}
-                        className="px-3 py-2 rounded-xl text-xs font-medium transition-all"
-                        style={{
-                          background: isCompared ? "rgba(201,162,75,0.15)" : "rgba(0,0,0,0.05)",
-                          color: isCompared ? "#8B6B20" : "#666",
-                          border: isCompared ? "1px solid rgba(201,162,75,0.4)" : "none",
-                        }}
-                      >
-                        {isCompared ? `✓ ${t.card.compared}` : t.card.compare}
-                      </button>
-                      <Link
-                        href={`/package/${pkg.slug}`}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-primary text-white hover:bg-primary/90 transition-colors"
-                      >
-                        {t.card.detail}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {packages.map((pkg, index) => (
+            <div
+              key={pkg.id}
+              className="card-animate"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <PackageCard pkg={pkg} showTravel={false} />
+            </div>
+          ))}
         </div>
+
+        {packages.length === 0 && (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Search className="w-7 h-7 text-primary/40" />
+            </div>
+            <p className="text-muted-foreground font-medium">Belum ada paket tersedia</p>
+          </div>
+        )}
+
+        {hasMore && packages.length > 0 && (
+          <div className="mt-10 text-center">
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold border-2 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Memuat...
+                </>
+              ) : (
+                <>
+                  Muat Lebih Banyak
+                  <span className="text-xs text-muted-foreground">({packages.length} paket)</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {!hasMore && packages.length > 0 && (
+          <div className="mt-10 text-center">
+            <p className="text-sm text-muted-foreground">
+              Semua paket sudah ditampilkan ({packages.length} paket)
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
