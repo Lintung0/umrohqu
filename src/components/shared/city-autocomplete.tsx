@@ -98,8 +98,12 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
     setSuggestions([])
   }
 
+  const inputClasses = className
+    ? className
+    : "h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-1 focus:ring-primary"
+
   return (
-    <div ref={containerRef} className={`relative ${className}`}>
+    <div ref={containerRef} className="relative">
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
           <MapPin size={15} />
@@ -110,7 +114,7 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => { if (suggestions.length > 0) setOpen(true) }}
           placeholder={placeholder}
-          className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-1 focus:ring-primary"
+          className={inputClasses}
         />
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
