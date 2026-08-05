@@ -150,7 +150,7 @@ export default function PackageSection() {
                 {/* Image header */}
                 <div className="h-44 relative overflow-hidden">
                   <Image
-                    src={pkg.image_url || "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=600&h=300&fit=crop&auto=format"}
+                    src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=600&h=300&fit=crop&auto=format"}
                     alt={pkg.name}
                     fill
                     className="object-cover"

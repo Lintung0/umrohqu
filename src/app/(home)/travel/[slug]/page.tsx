@@ -56,7 +56,7 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
         {/* Image */}
         <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden">
           <Image
-            src={pkg.image_url || "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=800&q=80"}
+            src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"}
             alt={pkg.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

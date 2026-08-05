@@ -129,7 +129,7 @@ const Navbar = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
-          ? "glass-strong shadow-lg shadow-primary/5 border-b border-primary/10"
+          ? "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100"
           : "bg-transparent"
       )}
     >
@@ -166,13 +166,13 @@ const Navbar = () => {
             </Link>
           </nav>
 
-          <div className="hidden md:flex items-center gap-1.5 ml-2 pl-2 border-l border-border/40">
+          <div className="hidden md:flex items-center gap-2 ml-3 pl-3 border-l border-gray-200/60">
             <CountrySelect value={country} onChange={handleCountryChange} />
             <LanguageSwitcher />
             {loading ? (
-              <div className="w-20 h-9 bg-muted rounded-xl animate-pulse ml-1" />
+              <div className="w-20 h-9 bg-gray-100 rounded-xl animate-pulse ml-1" />
             ) : user ? (
-              <div className="relative ml-1">
+              <div className="relative ml-2">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
@@ -214,7 +214,7 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 ml-1">
+              <div className="flex items-center gap-2 ml-2">
                 <Link
                   href="/login"
                   className="px-4 py-2 text-sm font-semibold rounded-xl border border-primary/20 text-primary hover:bg-primary/10 transition-all duration-200"

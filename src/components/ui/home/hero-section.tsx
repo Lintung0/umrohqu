@@ -47,7 +47,7 @@ export default function HeroSection() {
             </h1>
 
             {/* Subtitle */}
-            <p className="animate-fade-in-up-delay-2 text-lg sm:text-xl text-white/70 max-w-xl leading-relaxed">
+            <p className="animate-fade-in-up-delay-2 text-lg sm:text-xl text-emerald-100 font-medium max-w-xl leading-relaxed">
               {t.hero.subtitle}
             </p>
 

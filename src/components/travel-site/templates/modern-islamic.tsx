@@ -123,7 +123,7 @@ function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: strin
     <div className="group bg-white border border-border/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1">
       <div className="relative h-48 overflow-hidden">
         <Image
-          src={pkg.image_url || "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=800&q=80"}
+          src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80"}
           alt={pkg.name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
