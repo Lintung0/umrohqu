@@ -46,7 +46,8 @@ INSERT INTO public.packages (
   '["Tiket Pesawat Tambahan", "Laundry", "Telepon", "Tips Guide", "Perlengkapan Pribadi"]'::jsonb,
   'Indonesia', 'ID', 'Jakarta',
   now(), now()
-);
+)
+ON CONFLICT (tenant_id, slug) DO NOTHING;
 
 -- Package 2: VIP 9 Hari
 INSERT INTO public.packages (
@@ -90,7 +91,8 @@ INSERT INTO public.packages (
   '["Laundry Premium", "Spa & Massage", "Telepon Internasional", "Tips VIP"]'::jsonb,
   'Indonesia', 'ID', 'Jakarta',
   now(), now()
-);
+)
+ON CONFLICT (tenant_id, slug) DO NOTHING;
 
 -- Package 3: Plus Aqsa 14 Hari
 INSERT INTO public.packages (
@@ -134,7 +136,8 @@ INSERT INTO public.packages (
   '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide"]'::jsonb,
   'Indonesia', 'ID', 'Surabaya',
   now(), now()
-);
+)
+ON CONFLICT (tenant_id, slug) DO NOTHING;
 
 -- Package 4: Hemat 10 Hari
 INSERT INTO public.packages (
@@ -178,7 +181,8 @@ INSERT INTO public.packages (
   '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide", "Ziarah Tambahan"]'::jsonb,
   'Indonesia', 'ID', 'Bandung',
   now(), now()
-);
+)
+ON CONFLICT (tenant_id, slug) DO NOTHING;
 
 -- Package 5: Furoda 11 Hari
 INSERT INTO public.packages (
@@ -222,7 +226,8 @@ INSERT INTO public.packages (
   '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide"]'::jsonb,
   'Indonesia', 'ID', 'Jakarta',
   now(), now()
-);
+)
+ON CONFLICT (tenant_id, slug) DO NOTHING;
 
 -- Package 6: Reguler 9 Hari
 INSERT INTO public.packages (
@@ -266,7 +271,8 @@ INSERT INTO public.packages (
   '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide", "Ziarah Tambahan"]'::jsonb,
   'Indonesia', 'ID', 'Yogyakarta',
   now(), now()
-);
+)
+ON CONFLICT (tenant_id, slug) DO NOTHING;
 
 -- Package 7: VIP 13 Hari
 INSERT INTO public.packages (
@@ -310,7 +316,8 @@ INSERT INTO public.packages (
   '["Spa Premium", "Laundry VIP", "Telepon Internasional", "Tips VIP"]'::jsonb,
   'Indonesia', 'ID', 'Jakarta',
   now(), now()
-);
+)
+ON CONFLICT (tenant_id, slug) DO NOTHING;
 
 -- Package 8: Reguler 15 Hari
 INSERT INTO public.packages (
@@ -354,4 +361,5 @@ INSERT INTO public.packages (
   '["Tiket Tambahan", "Laundry", "Telepon", "Tips Guide", "Ziarah Tambahan"]'::jsonb,
   'Indonesia', 'ID', 'Makassar',
   now(), now()
-);
+)
+ON CONFLICT (tenant_id, slug) DO NOTHING;
