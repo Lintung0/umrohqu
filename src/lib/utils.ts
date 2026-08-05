@@ -31,3 +31,8 @@ export function getSeatAvailability(available: number | null | undefined, quota:
   const label = percent <= 20 ? "Segera Habis!" : percent <= 50 ? "Terbatas" : "Tersedia"
   return { available: avail, percent, color, textColor, bgColor, label }
 }
+
+export function decodeUnicodeEscapes(str: string): string {
+  if (!str) return str
+  return str.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+}

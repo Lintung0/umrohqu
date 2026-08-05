@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Clock, MapPin, Plane, Hotel, BadgeCheck, ChevronRight } from "lucide-react"
-import { formatRupiah } from "@/lib/utils"
+import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
@@ -79,7 +79,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 {pkg.airline && (
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Plane className="w-3 h-3 text-primary shrink-0" />
-                    {pkg.airline}
+                    <span className="truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -185,7 +185,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <div className="w-5 h-5 rounded-md bg-primary/5 flex items-center justify-center shrink-0">
               <Plane className="w-3 h-3 text-primary" />
             </div>
-            {pkg.airline}
+            <span className="truncate">{decodeUnicodeEscapes(pkg.airline || "")}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <div className="w-5 h-5 rounded-md bg-primary/5 flex items-center justify-center shrink-0">
