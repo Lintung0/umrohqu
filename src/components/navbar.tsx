@@ -134,11 +134,14 @@ const Navbar = () => {
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-18 items-center justify-between">
-          <Logo />
+        <div className="grid grid-cols-3 h-16 items-center">
+          {/* Left: Logo */}
+          <div className="flex items-center justify-start">
+            <Logo />
+          </div>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-0.5">
+          {/* Center: Nav Links */}
+          <nav className="hidden md:flex items-center justify-center gap-1">
             <Link
               href="/search"
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
@@ -166,7 +169,8 @@ const Navbar = () => {
             </Link>
           </nav>
 
-          <div className="hidden md:flex items-center gap-2 ml-3 pl-3 border-l border-gray-200/60">
+          {/* Right: User & Language */}
+          <div className="hidden md:flex items-center justify-end gap-2">
             <CountrySelect value={country} onChange={handleCountryChange} />
             <LanguageSwitcher />
             {loading ? (
@@ -231,13 +235,15 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile toggle */}
-          <button
-            className="md:hidden p-2 rounded-xl hover:bg-primary/10 transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Mobile toggle - visible only on mobile, in 3rd column */}
+          <div className="flex md:hidden items-center justify-end">
+            <button
+              className="p-2 rounded-xl hover:bg-primary/10 transition-colors"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
 
