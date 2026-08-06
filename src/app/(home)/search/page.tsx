@@ -2,28 +2,23 @@
 
 import { useSearchParams, useRouter } from "next/navigation"
 import { useState, useEffect, Suspense } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { MapPin, Filter, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { COST_RANGES, PACKAGE_TYPES, AIRLINES, HOTEL_STARS, getAseanCountryByCode } from "@/lib/constants"
-import { formatRupiah } from "@/lib/utils"
+import { Search, X, SlidersHorizontal, MapPin, Loader2 } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { getAseanCountryByCode } from "@/lib/constants"
 import { createClient } from "@/lib/supabase/client"
 import type { Package, Tenant } from "@/lib/types"
 import SharedPackageCard from "@/components/shared/package-card"
-import CityAutocomplete from "@/components/shared/city-autocomplete"
-import CountrySelect from "@/components/shared/country-select"
+import SearchSidebar from "@/components/search/search-sidebar"
 import { rankTravels, RankingFactors, DEFAULT_RANKING_CONFIG } from "@/lib/business-logic/bidding"
+
+const QUICK_CATEGORIES = [
+  { label: "Semua", preset: {} },
+  { label: "Bulan Ramadhan", preset: { month: "Ramadhan" } },
+  { label: "Promo Terbaik", preset: { cost: "< Rp 25 Juta" } },
+  { label: "Umroh Reguler", preset: { type: "reguler" } },
+  { label: "Umroh VIP", preset: { type: "vip" } },
+  { label: "Haji Furoda", preset: { type: "furoda" } },
+]
 
 function SearchContent() {
   const searchParams = useSearchParams()
@@ -34,10 +29,12 @@ function SearchContent() {
   const [month, setMonth] = useState(searchParams.get("month") ?? "")
   const [cost, setCost] = useState(searchParams.get("cost") ?? "")
   const [type, setType] = useState("semua")
-  const [airline, setAirline] = useState("semua")
-  const [hotelStars, setHotelStars] = useState("semua")
+  const [airline, setAirline] = useState("")
+  const [hotelStars, setHotelStars] = useState("")
   const [sortBy, setSortBy] = useState("relevance")
   const [showMobileFilter, setShowMobileFilter] = useState(false)
+  const [priceRange, setPriceRange] = useState<[number, number]>([10000000, 500000000])
+  const [duration, setDuration] = useState("")
 
   const [packages, setPackages] = useState<Package[]>([])
   const [tenants, setTenants] = useState<Map<string, Tenant>>(new Map())
@@ -56,7 +53,6 @@ function SearchContent() {
           .eq("status", "published")
           .is("deleted_at", null)
 
-        // Apply search filter if present
         if (searchQueryParam) {
           query = query.or(`name.ilike.%${searchQueryParam}%,description.ilike.%${searchQueryParam}%,departure_city.ilike.%${searchQueryParam}%`)
         }
@@ -117,10 +113,8 @@ function SearchContent() {
     fetchData()
   }, [searchQueryParam])
 
-  // Client-side search
   const [searchQuery, setSearchQuery] = useState("")
 
-  // Sync search query from URL
   useEffect(() => {
     const paramQuery = searchParams.get("search")
     if (paramQuery !== searchQuery) {
@@ -150,19 +144,26 @@ function SearchContent() {
         if (cost === "Rp 40 – 50 Juta" && (pkg.price < 40000000 || pkg.price >= 50000000)) return false
         if (cost === "> Rp 50 Juta" && pkg.price < 50000000) return false
       }
+      if (pkg.price < priceRange[0] || pkg.price > priceRange[1]) return false
       if (type && type !== "semua") {
         if (pkg.type !== type) return false
       }
-      if (airline && airline !== "semua") {
+      if (airline) {
         if (!pkg.airline?.toLowerCase().includes(airline.toLowerCase())) return false
       }
-      if (hotelStars !== "semua") {
+      if (hotelStars) {
         const minStars = parseInt(hotelStars)
         if (minStars === 5) {
           if ((pkg.hotel_makkah_stars || 0) !== 5 || (pkg.hotel_madinah_stars || 0) !== 5) return false
         } else {
           if ((pkg.hotel_makkah_stars || 0) < minStars && (pkg.hotel_madinah_stars || 0) < minStars) return false
         }
+      }
+      if (duration) {
+        const days = pkg.duration_days || 0
+        if (duration === "7-10 Hari" && (days < 7 || days > 10)) return false
+        if (duration === "10-14 Hari" && (days < 10 || days > 14)) return false
+        if (duration === "14-21 Hari" && (days < 14 || days > 21)) return false
       }
       return true
     })
@@ -195,8 +196,8 @@ function SearchContent() {
     if (month) params.set("month", month)
     if (cost && cost !== "Semua Biaya") params.set("cost", cost)
     if (type && type !== "semua") params.set("type", type)
-    if (airline && airline !== "semua") params.set("airline", airline)
-    if (hotelStars && hotelStars !== "semua") params.set("hotelStars", hotelStars)
+    if (airline) params.set("airline", airline)
+    if (hotelStars) params.set("hotelStars", hotelStars)
     if (searchQuery) params.set("search", searchQuery)
     router.push(`/search?${params.toString()}`)
   }
@@ -207,36 +208,51 @@ function SearchContent() {
     setMonth("")
     setCost("")
     setType("semua")
-    setAirline("semua")
-    setHotelStars("semua")
+    setAirline("")
+    setHotelStars("")
     setSearchQuery("")
+    setPriceRange([10000000, 500000000])
+    setDuration("")
   }
 
-  const hasActiveFilters = departure || country || month || cost || type !== "semua" || airline !== "semua" || hotelStars !== "semua" || searchQuery
+  const hasActiveFilters = departure || country || month || cost || type !== "semua" || airline || hotelStars || searchQuery || duration || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
+
+  const activeFilterChips: { label: string; onRemove: () => void }[] = []
+  if (departure) activeFilterChips.push({ label: departure, onRemove: () => setDeparture("") })
+  if (country) activeFilterChips.push({ label: getAseanCountryByCode(country)?.name || country, onRemove: () => setCountry("") })
+  if (month) activeFilterChips.push({ label: month, onRemove: () => setMonth("") })
+  if (cost && cost !== "Semua Biaya") activeFilterChips.push({ label: cost, onRemove: () => setCost("") })
+  if (type !== "semua") activeFilterChips.push({ label: type, onRemove: () => setType("semua") })
+  if (airline) activeFilterChips.push({ label: airline, onRemove: () => setAirline("") })
+  if (hotelStars) activeFilterChips.push({ label: `Bintang ${hotelStars}+`, onRemove: () => setHotelStars("") })
+  if (duration) activeFilterChips.push({ label: duration, onRemove: () => setDuration("") })
+  if (searchQuery) activeFilterChips.push({ label: `"${searchQuery}"`, onRemove: () => setSearchQuery("") })
 
   const countryCode = country || undefined
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-zinc-50/50">
-        <div className="bg-white border-b border-border px-4 sm:px-6 py-5">
-          <div className="max-w-7xl mx-auto">
-            <div className="h-6 bg-muted rounded animate-pulse w-64 mb-2" />
-            <div className="h-4 bg-muted rounded animate-pulse w-48" />
-          </div>
-        </div>
+      <main className="min-h-screen bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white border border-border rounded-2xl overflow-hidden">
-                <div className="h-44 bg-muted animate-pulse" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
-                  <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
-                  <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
-                </div>
+          <div className="h-32 bg-gradient-to-r from-emerald-900 to-emerald-800 rounded-2xl animate-pulse mb-6" />
+          <div className="flex gap-7">
+            <div className="hidden lg:block w-72 shrink-0">
+              <div className="h-96 bg-white border border-slate-200 rounded-2xl animate-pulse" />
+            </div>
+            <div className="flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+                    <div className="h-48 bg-slate-100 animate-pulse" />
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-slate-100 rounded animate-pulse w-3/4" />
+                      <div className="h-3 bg-slate-100 rounded animate-pulse w-1/2" />
+                      <div className="h-3 bg-slate-100 rounded animate-pulse w-2/3" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </main>
@@ -244,349 +260,197 @@ function SearchContent() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50/50">
-      <div className="bg-white border-b border-border px-4 sm:px-6 py-5">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-xl font-bold">Hasil Pencarian Paket Umroh</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {filteredWithSearch.length} paket ditemukan dari total {filtered.length} paket
-            {searchQuery && `· Pencarian kata kunci "${searchQuery}"`}
-            {departure && ` · Keberangkatan dari ${departure}`}
-            {month && ` · ${month}`}
-            {cost && cost !== "Semua Biaya" && ` · ${cost}`}
-          </p>
-        </div>
-      </div>
+    <main className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex gap-7">
-          <aside className="hidden lg:block w-64 shrink-0">
-            <div className="bg-white border border-border rounded-2xl p-5 sticky top-24">
-              <FilterPanel
-                departure={departure} setDeparture={setDeparture}
-                country={country} setCountry={setCountry}
-                countryCode={countryCode}
-                month={month} setMonth={setMonth}
-                cost={cost} setCost={setCost}
-                type={type} setType={setType}
-                airline={airline} setAirline={setAirline}
-                hotelStars={hotelStars} setHotelStars={setHotelStars}
-                hasActiveFilters={!!hasActiveFilters}
-                clearFilters={clearFilters}
-                handleSearch={handleSearch}
+        {/* Hero Header Banner */}
+        <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white p-6 rounded-2xl mb-6 shadow-md">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold">Hasil Pencarian Paket Umroh</h1>
+              <p className="text-emerald-100 text-sm mt-1">
+                Menampilkan <span className="font-bold text-white">{filteredWithSearch.length} paket</span> ditemukan
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-emerald-200 hidden sm:block">Urutkan:</span>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
+                <SelectTrigger className="h-10 w-48 text-sm bg-white/15 border-white/20 text-white placeholder:text-white/60">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="relevance">Relevansi</SelectItem>
+                  <SelectItem value="price-asc">Harga Terendah</SelectItem>
+                  <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
+                  <SelectItem value="duration">Durasi Terpendek</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Search Input */}
+        <div className="mb-5">
+          <div className="flex gap-2 max-w-3xl">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Cari nama paket, travel, atau kota..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSearch() }}
+                aria-label="Cari paket umroh"
+                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
               />
             </div>
+            <button
+              onClick={handleSearch}
+              className="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold rounded-xl shadow-md shadow-amber-400/20 hover:shadow-lg hover:shadow-amber-400/30 transition-all active:scale-95 flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" />
+              <span className="hidden sm:inline">Cari</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Category Pills */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {QUICK_CATEGORIES.map((q) => {
+            const isActive = Object.entries(q.preset).every(([k, v]) => {
+              if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())
+              if (k === "cost") return cost === v
+              if (k === "type") return type === v
+              return true
+            }) && (Object.keys(q.preset).length > 0 ? true : type === "semua" && !month && !cost)
+
+            return (
+              <button
+                key={q.label}
+                onClick={() => {
+                  if (Object.keys(q.preset).length === 0) {
+                    clearFilters()
+                    return
+                  }
+                  Object.entries(q.preset).forEach(([k, v]) => {
+                    if (k === "month") setMonth(isActive ? "" : (v as string))
+                    if (k === "cost") setCost(isActive ? "" : (v as string))
+                    if (k === "type") setType(isActive ? "semua" : (v as string))
+                  })
+                }}
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  isActive
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {q.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Active Filter Chips */}
+        {activeFilterChips.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-5">
+            {activeFilterChips.map((chip, i) => (
+              <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                {chip.label}
+                <button onClick={chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="hover:text-emerald-900">
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+            <button onClick={clearFilters} className="text-xs text-slate-500 hover:text-slate-700 underline ml-1 self-center">
+              Hapus semua
+            </button>
+          </div>
+        )}
+
+        <div className="flex gap-7">
+
+          {/* Sidebar */}
+          <aside className="hidden lg:block w-72 shrink-0">
+            <SearchSidebar
+              departure={departure}
+              setDeparture={setDeparture}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              duration={duration}
+              setDuration={setDuration}
+              airline={airline}
+              setAirline={setAirline}
+              hotelStars={hotelStars}
+              setHotelStars={setHotelStars}
+              hasActiveFilters={!!hasActiveFilters}
+              clearFilters={clearFilters}
+            />
           </aside>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-5 gap-3">
-              <button
-                onClick={() => setShowMobileFilter(!showMobileFilter)}
-                aria-expanded={showMobileFilter}
-                aria-controls="mobile-filter-panel"
-                className="lg:hidden flex items-center gap-2 text-sm font-medium border border-border bg-white px-3 py-2 rounded-lg"
-              >
-                <Filter className="w-4 h-4" />
-                Filter
-                {hasActiveFilters && (
-                  <span className="w-2 h-2 rounded-full bg-primary" />
-                )}
-              </button>
+          {/* Mobile Filter Button */}
+          <div className="lg:hidden fixed bottom-6 right-6 z-40">
+            <button
+              onClick={() => setShowMobileFilter(!showMobileFilter)}
+              className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-600/30 font-semibold text-sm hover:bg-emerald-700 transition-all active:scale-95"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              Filter
+              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-amber-400" />}
+            </button>
+          </div>
 
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-sm text-muted-foreground hidden sm:block">Urutkan:</span>
-                <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
-                  <SelectTrigger className="h-9 w-44 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relevance">Relevansi</SelectItem>
-                    <SelectItem value="price-asc">Harga Terendah</SelectItem>
-                    <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
-                    <SelectItem value="duration">Durasi Terpendek</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Global Search Widget */}
-            <div className="mb-6">
-              <div className="relative max-w-2xl mx-auto">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+          {/* Mobile Filter Drawer */}
+          {showMobileFilter && (
+            <div className="lg:hidden fixed inset-0 z-50">
+              <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileFilter(false)} />
+              <div className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-slate-900">Filter</h3>
+                  <button onClick={() => setShowMobileFilter(false)} className="p-2 hover:bg-slate-100 rounded-lg">
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Cari nama paket atau travel..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSearch()
-                  }}
-                  aria-label="Cari paket umroh"
-                  className="w-full pl-12 pr-4 py-3 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground transition-all"
+                <SearchSidebar
+                  departure={departure}
+                  setDeparture={setDeparture}
+                  priceRange={priceRange}
+                  setPriceRange={setPriceRange}
+                  duration={duration}
+                  setDuration={setDuration}
+                  airline={airline}
+                  setAirline={setAirline}
+                  hotelStars={hotelStars}
+                  setHotelStars={setHotelStars}
+                  hasActiveFilters={!!hasActiveFilters}
+                  clearFilters={clearFilters}
                 />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    aria-label="Hapus pencarian"
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:text-foreground transition-colors"
-                  >
-                    <svg className="w-5 h-5 text-muted-foreground hover:text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
               </div>
             </div>
+          )}
 
-            {showMobileFilter && (
-              <div id="mobile-filter-panel" className="lg:hidden bg-white border border-border rounded-2xl p-5 mb-5">
-              <FilterPanel
-                departure={departure} setDeparture={setDeparture}
-                country={country} setCountry={setCountry}
-                countryCode={countryCode}
-                month={month} setMonth={setMonth}
-                cost={cost} setCost={setCost}
-                type={type} setType={setType}
-                airline={airline} setAirline={setAirline}
-                hotelStars={hotelStars} setHotelStars={setHotelStars}
-                hasActiveFilters={!!hasActiveFilters}
-                clearFilters={clearFilters}
-                handleSearch={handleSearch}
-              />
-              </div>
-            )}
-
-            {/* Quick filter presets */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {[
-                { label: "Bulan Ramadhan", preset: { month: "Ramadhan" } },
-                { label: "Promo Terbaik", preset: { cost: "< Rp 25 Juta" } },
-                { label: "Plus Turki", preset: { type: "plus" } },
-                { label: "Umroh Reguler", preset: { type: "reguler" } },
-                { label: "Umroh VIP", preset: { type: "vip" } },
-                { label: "Furoda", preset: { type: "furoda" } },
-              ].map((q) => {
-                const isActive = Object.entries(q.preset).some(([k, v]) => {
-                  if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())
-                  if (k === "cost") return cost === v
-                  if (k === "type") return type === v
-                  return false
-                })
-                return (
-                  <button
-                    key={q.label}
-                    onClick={() => {
-                      Object.entries(q.preset).forEach(([k, v]) => {
-                        if (k === "month") setMonth(isActive ? "" : (v as string))
-                        if (k === "cost") setCost(isActive ? "" : (v as string))
-                        if (k === "type") setType(isActive ? "semua" : (v as string))
-                      })
-                    }}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
-                      isActive
-                        ? "bg-primary/10 border-primary/30 text-primary"
-                        : "bg-white border-border/60 text-muted-foreground hover:border-primary/20 hover:text-primary"
-                    }`}
-                  >
-                    {q.label}
-                  </button>
-                )
-              })}
-            </div>
-
-            {hasActiveFilters && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {country && (
-                  <Badge variant="secondary" className="gap-1 text-xs">
-                    {getAseanCountryByCode(country)?.name || country}
-                    <button onClick={() => setCountry("")} aria-label={`Hapus filter negara ${getAseanCountryByCode(country)?.name || country}`}><X className="w-3 h-3" /></button>
-                  </Badge>
-                )}
-                {departure && (
-                  <Badge variant="secondary" className="gap-1 text-xs">
-                    <MapPin className="w-3 h-3" />{departure}
-                    <button onClick={() => setDeparture("")} aria-label={`Hapus filter kota ${departure}`}><X className="w-3 h-3" /></button>
-                  </Badge>
-                )}
-                {month && (
-                  <Badge variant="secondary" className="gap-1 text-xs">
-                    {month}
-                    <button onClick={() => setMonth("")} aria-label={`Hapus filter bulan ${month}`}><X className="w-3 h-3" /></button>
-                  </Badge>
-                )}
-                {cost && cost !== "Semua Biaya" && (
-                  <Badge variant="secondary" className="gap-1 text-xs">
-                    {cost}
-                    <button onClick={() => setCost("")} aria-label={`Hapus filter biaya ${cost}`}><X className="w-3 h-3" /></button>
-                  </Badge>
-                )}
-                {type !== "semua" && (
-                  <Badge variant="secondary" className="gap-1 text-xs capitalize">
-                    {type}
-                    <button onClick={() => setType("semua")} aria-label={`Hapus filter tipe ${type}`}><X className="w-3 h-3" /></button>
-                  </Badge>
-                )}
-                {airline !== "semua" && (
-                  <Badge variant="secondary" className="gap-1 text-xs">
-                    {airline}
-                    <button onClick={() => setAirline("semua")} aria-label={`Hapus filter maskapai ${airline}`}><X className="w-3 h-3" /></button>
-                  </Badge>
-                )}
-                {hotelStars !== "semua" && (
-                  <Badge variant="secondary" className="gap-1 text-xs">
-                    Hotel Bintang {hotelStars}+
-                    <button onClick={() => setHotelStars("semua")} aria-label={`Hapus filter hotel bintang ${hotelStars}`}><X className="w-3 h-3" /></button>
-                  </Badge>
-                )}
-                {searchQuery && (
-                  <Badge variant="secondary" className="gap-1 text-xs">
-                    &quot;{searchQuery}&quot;
-                    <button onClick={() => setSearchQuery("")} aria-label="Hapus pencarian kata kunci"><X className="w-3 h-3" /></button>
-                  </Badge>
-                )}
-              </div>
-            )}
-
-            {filtered.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-2xl border border-border">
+          {/* Package Grid */}
+          <div className="flex-1 min-w-0">
+            {filteredWithSearch.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
                 <div className="text-5xl mb-4" role="img" aria-label="Pencarian">🔍</div>
-                <h3 className="font-semibold text-lg mb-2">Paket tidak ditemukan</h3>
-                <p className="text-sm text-muted-foreground mb-5">Coba ubah filter pencarian Anda</p>
-                <Button variant="outline" onClick={clearFilters}>Reset Filter</Button>
+                <h3 className="font-semibold text-lg mb-2 text-slate-900">Paket tidak ditemukan</h3>
+                <p className="text-sm text-slate-500 mb-5">Coba ubah filter pencarian Anda</p>
+                <button onClick={clearFilters} className="px-5 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
+                  Reset Filter
+                </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {filtered.map((pkg) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredWithSearch.map((pkg) => (
                   <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} />
                 ))}
               </div>
             )}
           </div>
+
         </div>
       </div>
     </main>
-  )
-}
-
-interface FilterPanelProps {
-  departure: string; setDeparture: (v: string) => void
-  country: string; setCountry: (v: string) => void
-  countryCode: string | undefined
-  month: string; setMonth: (v: string) => void
-  cost: string; setCost: (v: string) => void
-  type: string; setType: (v: string) => void
-  airline: string; setAirline: (v: string) => void
-  hotelStars: string; setHotelStars: (v: string) => void
-  hasActiveFilters: boolean
-  clearFilters: () => void
-  handleSearch: () => void
-}
-
-function FilterPanel({
-  departure, setDeparture, country, setCountry, countryCode, month, setMonth,
-  cost, setCost, type, setType, airline, setAirline, hotelStars, setHotelStars,
-  hasActiveFilters, clearFilters, handleSearch,
-}: FilterPanelProps) {
-  return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-sm">Filter Pencarian</h3>
-        {hasActiveFilters && (
-          <button onClick={clearFilters} className="text-xs text-primary hover:underline flex items-center gap-1">
-            <X className="w-3 h-3" /> Reset
-          </button>
-        )}
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Negara</Label>
-        <CountrySelect value={country} onChange={setCountry} />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Kota Keberangkatan</Label>
-        <CityAutocomplete
-          value={departure}
-          onChange={setDeparture}
-          placeholder="Cari kota keberangkatan..."
-          countryFilter={countryCode}
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bulan Keberangkatan</Label>
-        <Input
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-          placeholder="Contoh: Agustus 2026"
-          className="h-9 text-sm"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Estimasi Biaya</Label>
-        <Select value={cost || "Semua Biaya"} onValueChange={(v) => setCost(v ?? "")}>
-          <SelectTrigger className="h-9 w-full text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {COST_RANGES.map((c) => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tipe Paket</Label>
-        <Select value={type} onValueChange={(v) => setType(v ?? "semua")}>
-          <SelectTrigger className="h-9 w-full text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PACKAGE_TYPES.map((t) => (
-              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Maskapai</Label>
-        <Select value={airline} onValueChange={(v) => setAirline(v ?? "semua")}>
-          <SelectTrigger className="h-9 w-full text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {AIRLINES.map((a) => (
-              <SelectItem key={a} value={a}>{a === "semua" ? "Semua Maskapai" : a}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bintang Hotel</Label>
-        <Select value={hotelStars} onValueChange={(v) => setHotelStars(v ?? "semua")}>
-          <SelectTrigger className="h-9 w-full text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {HOTEL_STARS.map((h) => (
-              <SelectItem key={h.value} value={h.value}>{h.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Button onClick={handleSearch} className="w-full h-9 text-sm">
-        Terapkan Filter
-      </Button>
-    </div>
   )
 }
 

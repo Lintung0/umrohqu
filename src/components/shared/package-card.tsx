@@ -3,12 +3,21 @@
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useState } from "react"
-import { Clock, MapPin, Plane, Hotel, BadgeCheck, ChevronRight } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, BadgeCheck, ChevronRight, Shield } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
+const KAABAH_IMAGE = "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=80&fm=webp&auto=format"
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"
+
+function getSafeImage(url: string | null | undefined): string {
+  if (!url) return KAABAH_IMAGE
+  const blocked = ["wooden-house", "house-wood", "cabin", "cottage", "barn", "shack", "hut"]
+  const lower = url.toLowerCase()
+  if (blocked.some((b) => lower.includes(b))) return KAABAH_IMAGE
+  return url
+}
 
 interface PackageCardProps {
   pkg: Package
@@ -19,7 +28,7 @@ interface PackageCardProps {
 
 export default function PackageCard({ pkg, travel, showTravel = true, variant = "vertical" }: PackageCardProps) {
   const router = useRouter()
-  const [imgSrc, setImgSrc] = useState(pkg.image_url || FALLBACK_IMAGE)
+  const [imgSrc, setImgSrc] = useState(getSafeImage(pkg.image_url))
   const [imgError, setImgError] = useState(false)
 
   const discount = pkg.original_price
@@ -29,7 +38,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   function handleError() {
     if (!imgError) {
       setImgError(true)
-      setImgSrc(FALLBACK_IMAGE)
+      setImgSrc(KAABAH_IMAGE)
     }
   }
 
@@ -46,7 +55,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
   if (variant === "horizontal") {
     return (
-      <div onClick={handleClick} className="block bg-white border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-primary/8 hover:-translate-y-0.5 hover:border-primary/20 transition-all duration-300 group cursor-pointer">
+      <div onClick={handleClick} className="block bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-emerald-500/8 hover:-translate-y-0.5 hover:border-emerald-300/40 transition-all duration-300 group cursor-pointer">
         <div className="flex flex-col sm:flex-row">
           <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden pointer-events-none">
             <Image
@@ -55,13 +64,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               onError={handleError}
-              unoptimized={imgSrc.startsWith("http")}
+              unoptimized
             />
             <div className="absolute top-2 left-2 flex gap-1.5">
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${
                 pkg.type === "vip" ? "bg-amber-400 text-amber-900" :
                 pkg.type === "plus" ? "bg-purple-500 text-white" :
-                "bg-primary text-white"
+                "bg-emerald-600 text-white"
               }`}>
                 {pkg.type}
               </span>
@@ -75,27 +84,37 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
           <div className="flex-1 p-4 flex flex-col justify-between">
             <div>
-              <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors mb-2">{pkg.name}</h3>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
+                  <Shield className="w-2.5 h-2.5" /> PPIU Kemenag RI
+                </span>
+                {travel?.status === "verified" && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+                    <BadgeCheck className="w-2.5 h-2.5" /> Terverifikasi
+                  </span>
+                )}
+              </div>
+              <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors mb-2">{pkg.name}</h3>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2">
                 {pkg.departure_cities?.[0] && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <MapPin className="w-3 h-3 text-primary shrink-0" />
+                  <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
                     <span className="truncate">{pkg.departure_cities.join(", ")}</span>
                   </div>
                 )}
                 {pkg.duration_days && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3 text-primary shrink-0" />
+                  <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
                     {pkg.duration_days} Hari
                   </div>
                 )}
                 {pkg.airline && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Plane className="w-3 h-3 text-primary shrink-0" />
+                  <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
                     <span className="truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs text-slate-500">
                   <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
                 </div>
               </div>
@@ -104,11 +123,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <div className="flex items-end justify-between">
               <div>
                 {pkg.original_price && (
-                  <p className="text-[11px] text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>
+                  <p className="text-[11px] text-slate-400 line-through">{formatRupiah(pkg.original_price)}</p>
                 )}
-                <p className="text-base font-bold text-primary">{formatRupiah(pkg.price)}<span className="text-[10px] text-muted-foreground font-normal">/org</span></p>
+                <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}<span className="text-[10px] text-slate-400 font-normal">/org</span></p>
               </div>
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 group-hover:gap-2 transition-all">
                 Detail <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
@@ -119,7 +138,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   }
 
   return (
-    <div onClick={handleClick} className="group block relative bg-white border border-border/60 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 hover:border-primary/20 cursor-pointer">
+    <div onClick={handleClick} className="group block relative bg-white border border-slate-200 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/8 hover:-translate-y-1 hover:border-emerald-300/40 cursor-pointer">
       <div className="relative h-48 overflow-hidden pointer-events-none">
         <Image
           src={imgSrc}
@@ -127,7 +146,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
           onError={handleError}
-          unoptimized={imgSrc.startsWith("http")}
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
@@ -141,7 +160,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             pkg.type === "vip" ? "bg-amber-400/90 text-amber-900" :
             pkg.type === "plus" ? "bg-purple-500/90 text-white" :
             pkg.type === "furoda" ? "bg-rose-500/90 text-white" :
-            "bg-primary/90 text-white"
+            "bg-emerald-600/90 text-white"
           }`}>
             {pkg.type === "vip" ? "★ VIP" : pkg.type === "plus" ? "+ Plus" : pkg.type === "furoda" ? "Furoda" : "Reguler"}
           </span>
@@ -156,6 +175,19 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       </div>
 
       <div className="p-4 space-y-3">
+
+        {/* Trust Badges */}
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
+            <Shield className="w-2.5 h-2.5" /> PPIU Kemenag RI
+          </span>
+          {travel?.status === "verified" && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+              <BadgeCheck className="w-2.5 h-2.5" /> Terverifikasi
+            </span>
+          )}
+        </div>
+
         {showTravel && travel && (
           <span
             onClick={handleTravelClick}
@@ -171,37 +203,36 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
               />
             ) : (
-              <div className="w-[18px] h-[18px] rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-[7px] font-bold text-primary">{travel.name.charAt(0)}</span>
+              <div className="w-[18px] h-[18px] rounded-full bg-emerald-100 flex items-center justify-center">
+                <span className="text-[7px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
               </div>
             )}
-            <span className="text-xs text-muted-foreground font-medium group-hover/travel:text-primary transition-colors">
+            <span className="text-xs text-slate-500 font-medium group-hover/travel:text-emerald-600 transition-colors">
               {travel.name}
             </span>
-            {travel.status === "verified" && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
           </span>
         )}
 
-        <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem]">
+        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem]">
           {pkg.name}
         </h3>
 
         <div className="space-y-1.5">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <div className="w-5 h-5 rounded-md bg-primary/5 flex items-center justify-center shrink-0">
-              <MapPin className="w-3 h-3 text-primary" />
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="w-5 h-5 rounded-md bg-emerald-50 flex items-center justify-center shrink-0">
+              <MapPin className="w-3 h-3 text-emerald-600" />
             </div>
             <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).slice(0, 2).join(", ")}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <div className="w-5 h-5 rounded-md bg-primary/5 flex items-center justify-center shrink-0">
-              <Plane className="w-3 h-3 text-primary" />
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="w-5 h-5 rounded-md bg-emerald-50 flex items-center justify-center shrink-0">
+              <Plane className="w-3 h-3 text-emerald-600" />
             </div>
             <span className="truncate">{decodeUnicodeEscapes(pkg.airline || "")}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <div className="w-5 h-5 rounded-md bg-primary/5 flex items-center justify-center shrink-0">
-              <Hotel className="w-3 h-3 text-primary" />
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="w-5 h-5 rounded-md bg-emerald-50 flex items-center justify-center shrink-0">
+              <Hotel className="w-3 h-3 text-emerald-600" />
             </div>
             <span className="truncate">{pkg.hotel_makkah} ({'★'.repeat(pkg.hotel_makkah_stars || 0)})</span>
           </div>
@@ -212,31 +243,31 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         {pkg.facilities && pkg.facilities.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {pkg.facilities.slice(0, 3).map((f) => (
-              <span key={f} className="text-[10px] bg-primary/5 text-primary/80 px-2 py-0.5 rounded-full font-medium">
+              <span key={f} className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
                 {f}
               </span>
             ))}
             {pkg.facilities.length > 3 && (
-              <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+              <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
                 +{pkg.facilities.length - 3}
               </span>
             )}
           </div>
         )}
 
-        <div className="flex items-end justify-between pt-3 border-t border-border/50">
+        <div className="flex items-end justify-between pt-3 border-t border-slate-100">
           <div>
             {pkg.original_price && (
-              <p className="text-[11px] text-muted-foreground line-through">
+              <p className="text-[11px] text-slate-400 line-through">
                 {formatRupiah(pkg.original_price)}
               </p>
             )}
             <div className="flex items-baseline gap-1">
-              <p className="text-lg font-bold text-primary">{formatRupiah(pkg.price)}</p>
-              <p className="text-[10px] text-muted-foreground">/org</p>
+              <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
+              <p className="text-[10px] text-slate-400">/org</p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/5 px-3 py-1.5 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full group-hover:bg-emerald-600 group-hover:text-white transition-all">
             Detail <ChevronRight className="w-3.5 h-3.5" />
           </span>
         </div>
