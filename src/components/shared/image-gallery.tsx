@@ -1,69 +1,163 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
-import { X, ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
+import useEmblaCarousel from "embla-carousel-react"
+import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface ImageGalleryProps {
   images: string[]
+  alt?: string
   title?: string
 }
 
-export default function ImageGallery({ images, title }: ImageGalleryProps) {
-  const [lightboxOpen, setLightboxOpen] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState(0)
+export default function ImageGallery({ images, alt = "Gallery", title }: ImageGalleryProps) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [lightbox, setLightbox] = useState<number | null>(null)
 
-  if (!images || images.length === 0) return null
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
 
-  const allImages = images.filter(Boolean)
-  if (allImages.length === 0) return null
+  useEffect(() => {
+    if (!emblaApi) return
+    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap())
+    emblaApi.on("select", onSelect)
 
-  const openLightbox = (idx: number) => {
-    setCurrentIndex(idx)
-    setLightboxOpen(true)
-  }
+    let interval: NodeJS.Timeout
+    const startAutoPlay = () => {
+      interval = setInterval(() => {
+        emblaApi.scrollNext()
+      }, 4000)
+    }
+    startAutoPlay()
+
+    const stopAutoPlay = () => clearInterval(interval)
+    emblaApi.on("pointerDown", stopAutoPlay)
+    emblaApi.on("pointerUp", startAutoPlay)
+
+    return () => {
+      clearInterval(interval)
+      emblaApi.off("select", onSelect)
+      emblaApi.off("pointerDown", stopAutoPlay)
+      emblaApi.off("pointerUp", startAutoPlay)
+    }
+  }, [emblaApi])
+
+  if (!images.length) return null
 
   return (
     <>
-      <div className="grid grid-cols-4 gap-2">
-        <div className="col-span-4 sm:col-span-2 sm:row-span-2 relative h-48 sm:h-56 rounded-2xl overflow-hidden cursor-pointer group" onClick={() => openLightbox(0)}>
-          <Image src={allImages[0]} alt={title || "Gallery"} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        </div>
-        {allImages.slice(1, 5).map((img, i) => (
-          <div key={i} className="relative h-24 sm:h-[calc(50%-0.25rem)] rounded-xl overflow-hidden cursor-pointer group" onClick={() => openLightbox(i + 1)}>
-            <Image src={img} alt={`${title || "Gallery"} ${i + 2}`} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="relative">
+        {/* Main carousel */}
+        <div ref={emblaRef} className="overflow-hidden rounded-2xl">
+          <div className="flex">
+            {images.map((img, i) => (
+              <div key={i} className="flex-[0_0_100%] min-w-0 relative aspect-[16/10]">
+                <Image
+                  src={img}
+                  alt={`${alt} ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                  unoptimized
+                />
+                <button
+                  onClick={() => setLightbox(i)}
+                  className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        {/* Nav buttons */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={scrollPrev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={scrollNext}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </>
+        )}
+
+        {/* Dots */}
+        {images.length > 1 && images.length <= 25 && (
+          <div className="flex items-center justify-center gap-1.5 mt-3">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => emblaApi?.scrollTo(i)}
+                className={cn(
+                  "w-2 h-2 rounded-full transition-all",
+                  selectedIndex === i ? "bg-primary w-5" : "bg-gray-300 hover:bg-gray-400"
+                )}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Counter */}
+        <div className="absolute bottom-3 left-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+          {selectedIndex + 1} / {images.length}
+        </div>
       </div>
 
-      {lightboxOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setLightboxOpen(false)}>
-          <button className="absolute top-4 right-4 p-2 text-white/80 hover:text-white z-10" onClick={() => setLightboxOpen(false)}>
-            <X className="w-6 h-6" />
+      {/* Lightbox */}
+      {lightbox !== null && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
+          >
+            <X className="w-5 h-5" />
           </button>
-          {allImages.length > 1 && (
-            <>
-              <button
-                className="absolute left-4 p-2 text-white/80 hover:text-white z-10"
-                onClick={(e) => { e.stopPropagation(); setCurrentIndex((currentIndex - 1 + allImages.length) % allImages.length) }}
-              >
-                <ChevronLeft className="w-8 h-8" />
-              </button>
-              <button
-                className="absolute right-4 p-2 text-white/80 hover:text-white z-10"
-                onClick={(e) => { e.stopPropagation(); setCurrentIndex((currentIndex + 1) % allImages.length) }}
-              >
-                <ChevronRight className="w-8 h-8" />
-              </button>
-            </>
-          )}
-          <div className="relative w-full max-w-4xl aspect-video mx-4" onClick={(e) => e.stopPropagation()}>
-            <Image src={allImages[currentIndex]} alt={`${title || "Gallery"} ${currentIndex + 1}`} fill className="object-contain" />
-          </div>
-          <div className="absolute bottom-4 text-white/60 text-sm">
-            {currentIndex + 1} / {allImages.length}
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setLightbox((lightbox - 1 + images.length) % images.length)
+            }}
+            className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <Image
+            src={images[lightbox]}
+            alt={`${alt} ${lightbox + 1}`}
+            width={1200}
+            height={800}
+            className="max-h-[85vh] max-w-full object-contain rounded-lg"
+            unoptimized
+          />
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setLightbox((lightbox + 1) % images.length)
+            }}
+            className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          <div className="absolute bottom-4 text-white text-sm">
+            {lightbox + 1} / {images.length}
           </div>
         </div>
       )}

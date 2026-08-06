@@ -13,6 +13,8 @@ const PUBLIC_ROUTES = [
   "/faq",
   "/privacy",
   "/terms",
+  "/al-quran",
+  "/jadwal-sholat",
   "/login",
   "/register",
   "/forgot-password",
@@ -176,8 +178,9 @@ export async function middleware(request: NextRequest) {
 
   if (isPublicRoute(pathname)) {
     if (user && (pathname === "/login" || pathname === "/register")) {
+      const redirectTo = request.nextUrl.searchParams.get("redirect_to") || "/dashboard"
       const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = "/dashboard"
+      redirectUrl.pathname = redirectTo
       return NextResponse.redirect(redirectUrl)
     }
     return supabaseResponse
@@ -186,7 +189,7 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = "/login"
-    redirectUrl.searchParams.set("redirect", pathname)
+    redirectUrl.searchParams.set("redirect_to", pathname)
     return NextResponse.redirect(redirectUrl)
   }
 

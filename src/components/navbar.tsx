@@ -167,6 +167,18 @@ const Navbar = () => {
             >
               {t.nav.faq}
             </Link>
+            <Link
+              href="/al-quran"
+              className="px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+            >
+              {t.nav.al_quran}
+            </Link>
+            <Link
+              href="/jadwal-sholat"
+              className="px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:text-primary"
+            >
+              {t.nav.jadwal_sholat}
+            </Link>
           </nav>
 
           {/* Right: User & Language */}
@@ -262,6 +274,12 @@ const Navbar = () => {
             </Link>
             <Link href="/faq" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
               {t.nav.faq}
+            </Link>
+            <Link href="/al-quran" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
+              {t.nav.al_quran}
+            </Link>
+            <Link href="/jadwal-sholat" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-primary/10 transition-colors">
+              {t.nav.jadwal_sholat}
             </Link>
             <div className="flex items-center gap-2 px-4 py-2">
               <CountrySelect value={country} onChange={handleCountryChange} />

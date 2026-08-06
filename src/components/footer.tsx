@@ -47,6 +47,14 @@ const Footer = () => {
       ],
     },
     {
+      title: "Ibadah",
+      colSpan: "md:col-span-2",
+      items: [
+        { href: "/al-quran", label: "Al-Qur'an" },
+        { href: "/jadwal-sholat", label: "Jadwal Sholat" },
+      ],
+    },
+    {
       title: t.footer.follow_us,
       colSpan: "md:col-span-3",
       items: [

@@ -184,6 +184,9 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                     <BadgeCheck className="w-3.5 h-3.5" /> Terverifikasi
                   </span>
                 )}
+                <span className="flex items-center gap-1 text-xs font-semibold bg-emerald-400/90 text-emerald-900 px-2.5 py-1 rounded-full">
+                  <Shield className="w-3 h-3" /> PPIU Kemenag RI
+                </span>
                 {tenantData.is_featured && (
                   <span className="flex items-center gap-1 text-xs font-semibold bg-amber-400/90 text-amber-900 px-2.5 py-1 rounded-full">
                     <Zap className="w-3 h-3" /> Featured
@@ -251,21 +254,39 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
           </div>
         </div>
 
-        {/* Photo Gallery Placeholder */}
+        {/* Photo Gallery */}
         <div className="bg-white border border-border rounded-2xl p-5">
           <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
             <Camera className="w-4 h-4 text-primary" /> Galeri Dokumentasi
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-[4/3] rounded-xl bg-gradient-to-br from-primary/5 to-primary/0 border border-dashed border-primary/20 flex items-center justify-center">
-                <div className="text-center">
-                  <Camera className="w-6 h-6 text-primary/30 mx-auto mb-1" />
-                  <p className="text-[10px] text-muted-foreground">Foto {i}</p>
+          {(() => {
+            const allGalleryImages = pkgList
+              .flatMap((pkg) => [pkg.image_url])
+              .filter(Boolean) as string[]
+            if (allGalleryImages.length === 0) {
+              return (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="aspect-[4/3] rounded-xl bg-gradient-to-br from-primary/5 to-primary/0 border border-dashed border-primary/20 flex items-center justify-center">
+                      <div className="text-center">
+                        <Camera className="w-6 h-6 text-primary/30 mx-auto mb-1" />
+                        <p className="text-[10px] text-muted-foreground">Foto {i}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              )
+            }
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {allGalleryImages.slice(0, 8).map((img, i) => (
+                  <div key={i} className="aspect-[4/3] rounded-xl overflow-hidden relative group">
+                    <Image src={img} alt={`Galeri ${i + 1}`} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )
+          })()}
           <p className="text-[10px] text-muted-foreground mt-3 text-center">Galeri dokumentasi perjalanan jemaah</p>
         </div>
 
