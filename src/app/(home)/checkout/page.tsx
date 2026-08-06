@@ -127,6 +127,10 @@ function CheckoutContent() {
   const amountToPayNow = paymentType === "dp" ? dpAmount + feeBreakdown.serviceFee : totalPrice + feeBreakdown.total
   const walletSufficient = walletBalance !== null && walletBalance >= amountToPayNow
 
+  useEffect(() => {
+    if (!walletSufficient && useWallet) setUseWallet(false)
+  }, [walletSufficient])
+
   const handleSubmit = async () => {
     setSubmitting(true)
     setResult(null)
@@ -496,18 +500,26 @@ function CheckoutContent() {
                       <div>
                         <p className="text-xs text-slate-500 mb-2">Besaran DP</p>
                         <div className="flex gap-2">
-                          {DP_OPTIONS.map((pct) => (
-                            <button
-                              key={pct}
-                              onClick={() => setDpPercentage(pct)}
-                              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
-                                dpPercentage === pct ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-slate-200 hover:border-emerald-200"
-                              }`}
-                            >
-                              {pct}%
-                            </button>
-                          ))}
+                          {DP_OPTIONS.map((pct) => {
+                            const dpNominal = Math.round(totalPrice * pct / 100)
+                            return (
+                              <button
+                                key={pct}
+                                onClick={() => setDpPercentage(pct)}
+                                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
+                                  dpPercentage === pct ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-slate-200 hover:border-emerald-200"
+                                }`}
+                              >
+                                <span>{pct}%</span>
+                                <span className="block text-[10px] font-normal text-slate-400 mt-0.5">{formatRupiah(dpNominal)}</span>
+                              </button>
+                            )
+                          })}
                         </div>
+                        <p className="text-[11px] text-amber-600 mt-2 flex items-start gap-1.5">
+                          <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
+                          Sisa pelunasan ({formatRupiah(totalPrice - Math.round(totalPrice * dpPercentage / 100))}) wajib dibayarkan maksimal H-30 keberangkatan.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -516,30 +528,58 @@ function CheckoutContent() {
                   {walletBalance !== null && (
                     <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
                       <label className="text-sm font-semibold">Metode Pembayaran</label>
-                      <button
-                        onClick={() => setUseWallet(true)}
-                        className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${useWallet ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-200"}`}
-                      >
-                        <Wallet className={`w-5 h-5 ${useWallet ? "text-emerald-600" : "text-slate-400"}`} />
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold">Dompet Digital</p>
-                          <p className={`text-xs ${walletSufficient ? "text-emerald-600" : "text-red-500"}`}>
-                            Saldo: {formatRupiah(walletBalance)}
-                            {!walletSufficient && ` (${formatRupiah(amountToPayNow - walletBalance)} kurang)`}
-                          </p>
+                      
+                      {/* Dompet Digital */}
+                      {walletSufficient ? (
+                        <button
+                          onClick={() => setUseWallet(true)}
+                          className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${useWallet ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-200"}`}
+                        >
+                          <Wallet className={`w-5 h-5 ${useWallet ? "text-emerald-600" : "text-slate-400"}`} />
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold">Dompet Digital</p>
+                            <p className="text-xs text-emerald-600">Saldo: {formatRupiah(walletBalance)}</p>
+                          </div>
+                          <CheckCircle className={`w-4 h-4 ${useWallet ? "text-emerald-600" : "text-slate-300"}`} />
+                        </button>
+                      ) : (
+                        <div className="w-full p-4 rounded-xl border-2 border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed flex items-center gap-3">
+                          <Wallet className="w-5 h-5 text-slate-300" />
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-slate-400">Dompet Digital</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full font-medium">
+                                Saldo Tidak Cukup ({formatRupiah(walletBalance)})
+                              </span>
+                              <Link href="/dashboard/wallet" className="text-[10px] text-emerald-600 font-semibold hover:underline">
+                                Top Up →
+                              </Link>
+                            </div>
+                          </div>
+                          <AlertCircle className="w-4 h-4 text-red-300" />
                         </div>
-                        <CheckCircle className={`w-4 h-4 ${useWallet ? "text-emerald-600" : "text-slate-300"}`} />
-                      </button>
+                      )}
+
+                      {/* Transfer Bank */}
                       <button
                         onClick={() => setUseWallet(false)}
-                        className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${!useWallet ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-200"}`}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${!useWallet ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-200"}`}
                       >
-                        <CreditCard className={`w-5 h-5 ${!useWallet ? "text-emerald-600" : "text-slate-400"}`} />
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold">Transfer Bank</p>
-                          <p className="text-xs text-slate-500">Bayar via invoice Xendit</p>
+                        <div className="flex items-start gap-3">
+                          <CreditCard className={`w-5 h-5 mt-0.5 shrink-0 ${!useWallet ? "text-emerald-600" : "text-slate-400"}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold">Transfer Bank / Virtual Account</p>
+                            <p className="text-xs text-slate-500 mb-2">Bayar melalui bank pilihan Anda</p>
+                            <div className="flex items-center gap-2">
+                              {["BCA", "Mandiri", "BNI", "BRI", "Permata"].map((bank) => (
+                                <span key={bank} className="px-2 py-1 bg-slate-100 border border-slate-200 rounded-md text-[10px] font-semibold text-slate-600">
+                                  {bank}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <CheckCircle className={`w-4 h-4 mt-0.5 shrink-0 ${!useWallet ? "text-emerald-600" : "text-slate-300"}`} />
                         </div>
-                        <CheckCircle className={`w-4 h-4 ${!useWallet ? "text-emerald-600" : "text-slate-300"}`} />
                       </button>
                     </div>
                   )}
@@ -579,7 +619,7 @@ function CheckoutContent() {
                         </div>
                       </div>
 
-                      <div className="py-4 space-y-2 text-sm">
+                      <div className="py-4 space-y-2 text-sm border-b border-slate-100">
                         <div className="flex justify-between">
                           <span className="text-slate-500">Harga per orang</span>
                           <span className="font-medium">{formatRupiah(pkg.price)}</span>
@@ -592,6 +632,18 @@ function CheckoutContent() {
                           <span className="text-slate-500">Subtotal paket</span>
                           <span className="font-medium">{formatRupiah(totalPrice)}</span>
                         </div>
+                        {paymentType === "dp" && (
+                          <>
+                            <div className="flex justify-between text-emerald-700">
+                              <span className="font-medium">DP ({dpPercentage}%)</span>
+                              <span className="font-semibold">{formatRupiah(dpAmount)}</span>
+                            </div>
+                            <div className="flex justify-between text-xs text-amber-600">
+                              <span>Sisa pelunasan</span>
+                              <span className="font-medium">{formatRupiah(remainingAmount)}</span>
+                            </div>
+                          </>
+                        )}
                         <div className="flex justify-between">
                           <span className="text-slate-500">Biaya layanan</span>
                           <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
@@ -602,7 +654,7 @@ function CheckoutContent() {
                         </div>
                       </div>
 
-                      <div className="bg-emerald-50 rounded-xl p-4 mb-4">
+                      <div className="bg-emerald-50 rounded-xl p-4 mt-4 mb-4">
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-emerald-700 font-medium">Total Pembayaran</span>
                           <span className="text-lg font-bold text-emerald-800">{formatRupiah(totalPrice + feeBreakdown.total)}</span>
@@ -613,11 +665,18 @@ function CheckoutContent() {
                         </div>
                       </div>
 
+                      {paymentType === "dp" && (
+                        <p className="text-[10px] text-amber-600 mb-3 flex items-start gap-1.5">
+                          <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
+                          Sisa pelunasan ({formatRupiah(remainingAmount)}) wajib dibayarkan maksimal H-30 keberangkatan.
+                        </p>
+                      )}
+
                       <Button
                         onClick={() => setStep(2)}
                         className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
                       >
-                        Review Pesanan <ChevronRight className="w-4 h-4" />
+                        Proses Pembayaran <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>
 
@@ -651,6 +710,12 @@ function CheckoutContent() {
                         <span className="text-slate-500">Harga paket ({pilgrimCount} x {formatRupiah(pkg.price)})</span>
                         <span className="font-medium">{formatRupiah(totalPrice)}</span>
                       </div>
+                      {paymentType === "dp" && (
+                        <div className="flex justify-between text-emerald-700">
+                          <span className="font-medium">DP ({dpPercentage}%)</span>
+                          <span className="font-semibold">-{formatRupiah(dpAmount)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-slate-500">Biaya layanan platform</span>
                         <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
@@ -742,7 +807,7 @@ function CheckoutContent() {
                         {submitting ? (
                           <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
                         ) : (
-                          `Bayar ${formatRupiah(amountToPayNow)}`
+                          `Bayar Sekarang ${formatRupiah(amountToPayNow)}`
                         )}
                       </Button>
                     </div>
@@ -778,6 +843,18 @@ function CheckoutContent() {
                           <span className="text-slate-500">Subtotal paket</span>
                           <span className="font-medium">{formatRupiah(totalPrice)}</span>
                         </div>
+                        {paymentType === "dp" && (
+                          <>
+                            <div className="flex justify-between text-emerald-700">
+                              <span className="font-medium">DP ({dpPercentage}%)</span>
+                              <span className="font-semibold">{formatRupiah(dpAmount)}</span>
+                            </div>
+                            <div className="flex justify-between text-xs text-amber-600">
+                              <span>Sisa pelunasan</span>
+                              <span className="font-medium">{formatRupiah(remainingAmount)}</span>
+                            </div>
+                          </>
+                        )}
                         <div className="flex justify-between">
                           <span className="text-slate-500">Biaya layanan</span>
                           <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
@@ -799,6 +876,13 @@ function CheckoutContent() {
                         </div>
                       </div>
 
+                      {paymentType === "dp" && (
+                        <p className="text-[10px] text-amber-600 mb-3 flex items-start gap-1.5">
+                          <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
+                          Sisa pelunasan ({formatRupiah(remainingAmount)}) wajib dibayarkan maksimal H-30 keberangkatan.
+                        </p>
+                      )}
+
                       <Button
                         onClick={handleSubmit}
                         disabled={submitting || (useWallet && !walletSufficient)}
@@ -807,7 +891,7 @@ function CheckoutContent() {
                         {submitting ? (
                           <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
                         ) : (
-                          <>Bayar {formatRupiah(amountToPayNow)}</>
+                          <>Bayar Sekarang <ChevronRight className="w-4 h-4" /></>
                         )}
                       </Button>
 
