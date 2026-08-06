@@ -367,13 +367,15 @@ function SearchContent() {
           </div>
         )}
 
-        <div className="flex gap-7">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
           {/* Sidebar */}
-          <aside className="hidden lg:block w-72 shrink-0">
+          <aside className="hidden lg:block lg:col-span-1">
             <SearchSidebar
               departure={departure}
               setDeparture={setDeparture}
+              country={country}
+              setCountry={setCountry}
               priceRange={priceRange}
               setPriceRange={setPriceRange}
               duration={duration}
@@ -413,6 +415,8 @@ function SearchContent() {
                 <SearchSidebar
                   departure={departure}
                   setDeparture={setDeparture}
+                  country={country}
+                  setCountry={setCountry}
                   priceRange={priceRange}
                   setPriceRange={setPriceRange}
                   duration={duration}
@@ -429,7 +433,7 @@ function SearchContent() {
           )}
 
           {/* Package Grid */}
-          <div className="flex-1 min-w-0">
+          <div className="lg:col-span-3 min-w-0">
             {filteredWithSearch.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
                 <div className="text-5xl mb-4" role="img" aria-label="Pencarian">🔍</div>
