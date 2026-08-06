@@ -13,7 +13,7 @@ const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564769625905-50e93615
 
 function getSafeImage(url: string | null | undefined): string {
   if (!url) return KAABAH_IMAGE
-  const blocked = ["wooden-house", "house-wood", "cabin", "cottage", "barn", "shack", "hut"]
+  const blocked = ["wooden-house", "house-wood", "cabin", "cottage", "barn", "shack", "hut", "1567496146600", "1549888834"]
   const lower = url.toLowerCase()
   if (blocked.some((b) => lower.includes(b))) return KAABAH_IMAGE
   return url
