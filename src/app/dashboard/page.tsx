@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BookOpen, Heart, Clock, Package, ArrowRight } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
+import { getStatusColor, getStatusLabel } from "@/lib/constants"
 
 export default function DashboardOverview() {
   const supabase = createClient()
@@ -118,16 +119,8 @@ export default function DashboardOverview() {
                     {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
                   </p>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                  booking.status === "confirmed" ? "bg-green-100 text-green-700" :
-                  booking.status === "completed" ? "bg-blue-100 text-blue-700" :
-                  booking.status === "cancelled" ? "bg-red-100 text-red-700" :
-                  "bg-yellow-100 text-yellow-700"
-                }`}>
-                  {booking.status === "pending_payment" ? "Menunggu" :
-                   booking.status === "confirmed" ? "Dikonfirmasi" :
-                   booking.status === "completed" ? "Selesai" :
-                   booking.status === "cancelled" ? "Dibatalkan" : booking.status}
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(booking.status, "booking")}`}>
+                  {getStatusLabel(booking.status, "booking")}
                 </span>
               </Link>
             ))}

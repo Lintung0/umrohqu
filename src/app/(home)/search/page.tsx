@@ -398,17 +398,6 @@ function SearchContent() {
               })}
             </div>
 
-          {/* Results count with search */}
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-muted-foreground">
-              {filteredWithSearch.length} paket ditemukan dari total {filtered.length} paket
-              {searchQuery && `· Pencarian kata kunci "${searchQuery}"`}
-              {departure && `· Keberangkatan dari ${departure}`}
-              {month && `· ${month}`}
-              {cost && cost !== "Semua Biaya" && `· ${cost}`}
-            </p>
-          </div>
-
             {hasActiveFilters && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {country && (
