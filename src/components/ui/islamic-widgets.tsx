@@ -9,7 +9,7 @@ export function IslamicWidgets() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10 space-y-3">
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold-dark text-xs font-semibold">
-            🕌 Fitur Islami
+            <span aria-hidden="true">🕌</span> Fitur Islami
           </span>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
             Teman Ibadah <span className="text-gradient-gold">Harian Anda</span>

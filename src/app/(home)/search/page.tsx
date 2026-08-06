@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, Clock, Users, Plane, Hotel, Filter, X } from "lucide-react"
+import { MapPin, Filter, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -464,7 +464,7 @@ function SearchContent() {
 
             {filtered.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-border">
-                <div className="text-5xl mb-4">🔍</div>
+                <div className="text-5xl mb-4" role="img" aria-label="Pencarian">🔍</div>
                 <h3 className="font-semibold text-lg mb-2">Paket tidak ditemukan</h3>
                 <p className="text-sm text-muted-foreground mb-5">Coba ubah filter pencarian Anda</p>
                 <Button variant="outline" onClick={clearFilters}>Reset Filter</Button>

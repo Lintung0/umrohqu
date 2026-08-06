@@ -178,7 +178,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
     <main className="min-h-screen bg-zinc-50/50">
       {/* Hero Banner */}
       <div className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd, ${primaryColor}aa)` }}>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyem0wLTR2Mkg0MHYtMmg0em0tMTYtNHYySDI0di0yaDEyem0tMTYtNHYySDI0di0yaDEyek0yMCAyMHYySDE0di0yaDZ6bTE2IDB2MkgzNHYtMmg2ek0yMCAyNHYySDE0di0yaDZ6bTE2IDB2MkgzNHYtMmg2eiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyem0wLTR2Mkg0MHYtMmg0em0tMTYtNHYySDI0di0yaDEyem0tMTYtNHYySDI0di0yaDEyek0yMCAyMHYySDE0di0yaDZ6bTE2IDB2MkgzNHYtMmg2ek0yMCAyNHYySDE0di0yaDZ6bTE2IDB2MkgzNHYtMmg2eiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" aria-hidden="true" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 relative">
           <Link href="/search" className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors mb-4">
             ← Kembali ke Pencarian

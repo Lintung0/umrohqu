@@ -3,7 +3,6 @@ import SearchWidget from "@/components/ui/home/search-widget"
 import { IslamicWidgets } from "@/components/ui/islamic-widgets"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import {
-  StatsSection,
   WhyUsSection,
   TravelAgenciesSection,
   TestimonialSection,

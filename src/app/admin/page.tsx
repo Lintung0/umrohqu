@@ -27,8 +27,10 @@ function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
   })
   const area = `0,${h} ${points.join(" ")} ${w},${h}`
 
+  const totalRevenue = data.reduce((sum, d) => sum + d.gmv, 0)
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-24">
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-24" role="img" aria-label={`Tren GMV: total ${formatRupiah(totalRevenue)}`}>
       <defs>
         <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#0E5C4E" stopOpacity="0.3" />
