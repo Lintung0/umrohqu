@@ -16,25 +16,30 @@ export default function DashboardOverview() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
 
-      if (user) {
-        const [bookingsRes, allBookingsRes, wishlistRes] = await Promise.all([
-          supabase.from("bookings").select("id, status, created_at, package:packages(name, slug, image_url)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
-          supabase.from("bookings").select("id, status").eq("customer_id", user.id),
-          supabase.from("wishlists").select("id", { count: "exact" }).eq("user_id", user.id),
-        ])
+        if (user) {
+          const [bookingsRes, allBookingsRes, wishlistRes] = await Promise.all([
+            supabase.from("bookings").select("id, status, created_at, package:packages(name, slug, image_url)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
+            supabase.from("bookings").select("id, status").eq("customer_id", user.id),
+            supabase.from("wishlists").select("id", { count: "exact" }).eq("user_id", user.id),
+          ])
 
-        const allBookings = allBookingsRes.data || []
-        setRecentBookings(bookingsRes.data || [])
-        setStats({
-          bookings: allBookings.filter((b: any) => b.status === "pending_payment" || b.status === "confirmed").length,
-          wishlist: wishlistRes.count || 0,
-          completed: allBookings.filter((b: any) => b.status === "completed").length,
-        })
+          const allBookings = allBookingsRes.data || []
+          setRecentBookings(bookingsRes.data || [])
+          setStats({
+            bookings: allBookings.filter((b: any) => b.status === "pending_payment" || b.status === "confirmed").length,
+            wishlist: wishlistRes.count || 0,
+            completed: allBookings.filter((b: any) => b.status === "completed").length,
+          })
+        }
+      } catch (error) {
+        console.error("Dashboard load error:", error)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     load()
   }, [])

@@ -57,49 +57,53 @@ export default function AdminOverviewPage() {
 
   useEffect(() => {
     async function load() {
-      const [travelRes, bookingRes, allBookingsRes, pendingTravelRes, ticketsRes] = await Promise.all([
-        supabase.from("tenants").select("id, status").is("deleted_at", null),
-        supabase.from("bookings").select("id, status, total, pilgrim_count, package:packages(name), customer:users(full_name), created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(5),
-        supabase.from("bookings").select("id, total, status").is("deleted_at", null),
-        supabase.from("tenants").select("id, name, city, status, created_at").eq("status", "pending").is("deleted_at", null).order("created_at", { ascending: false }).limit(4),
-        supabase.from("support_tickets").select("id, subject, status, priority, created_at, user:users(full_name)").order("created_at", { ascending: false }).limit(4),
-      ])
+      try {
+        const [travelRes, bookingRes, allBookingsRes, pendingTravelRes, ticketsRes] = await Promise.all([
+          supabase.from("tenants").select("id, status").is("deleted_at", null),
+          supabase.from("bookings").select("id, status, total, pilgrim_count, package:packages(name), customer:users(full_name), created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(5),
+          supabase.from("bookings").select("id, total, status").is("deleted_at", null),
+          supabase.from("tenants").select("id, name, city, status, created_at").eq("status", "pending").is("deleted_at", null).order("created_at", { ascending: false }).limit(4),
+          supabase.from("support_tickets").select("id, subject, status, priority, created_at, user:users(full_name)").order("created_at", { ascending: false }).limit(4),
+        ])
 
-      const tenants = travelRes.data || []
-      const allBookings = allBookingsRes.data || []
-      const totalRevenue = allBookings
-        .filter((b: any) => b.status === "confirmed" || b.status === "completed")
-        .reduce((s: number, b: any) => s + (b.total || 0), 0)
+        const tenants = travelRes.data || []
+        const allBookings = allBookingsRes.data || []
+        const totalRevenue = allBookings
+          .filter((b: any) => b.status === "confirmed" || b.status === "completed")
+          .reduce((s: number, b: any) => s + (b.total || 0), 0)
 
-      setStats({
-        travelCount: travelRes.data?.length || 0,
-        bookingCount: allBookings.length,
-        totalRevenue,
-        pendingTravel: tenants.filter((t) => t.status === "pending").length,
-      })
-      setRecentBookings(bookingRes.data || [])
-      setPendingTravels(pendingTravelRes.data || [])
-      setRecentTickets(ticketsRes.data || [])
-
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
-      const revenueByMonth = new Map<string, number>()
-      allBookings
-        .filter((b: any) => (b.status === "confirmed" || b.status === "completed") && b.created_at)
-        .forEach((b: any) => {
-          const d = new Date(b.created_at)
-          const key = monthNames[d.getMonth()]
-          revenueByMonth.set(key, (revenueByMonth.get(key) || 0) + (b.total || 0))
+        setStats({
+          travelCount: travelRes.data?.length || 0,
+          bookingCount: allBookings.length,
+          totalRevenue,
+          pendingTravel: tenants.filter((t) => t.status === "pending").length,
         })
-      const now = new Date()
-      const chart: { month: string; gmv: number }[] = []
-      for (let i = 5; i >= 0; i--) {
-        const m = new Date(now.getFullYear(), now.getMonth() - i, 1)
-        const name = monthNames[m.getMonth()]
-        chart.push({ month: name, gmv: revenueByMonth.get(name) || 0 })
-      }
-      setChartData(chart)
+        setRecentBookings(bookingRes.data || [])
+        setPendingTravels(pendingTravelRes.data || [])
+        setRecentTickets(ticketsRes.data || [])
 
-      setLoading(false)
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+        const revenueByMonth = new Map<string, number>()
+        allBookings
+          .filter((b: any) => (b.status === "confirmed" || b.status === "completed") && b.created_at)
+          .forEach((b: any) => {
+            const d = new Date(b.created_at)
+            const key = monthNames[d.getMonth()]
+            revenueByMonth.set(key, (revenueByMonth.get(key) || 0) + (b.total || 0))
+          })
+        const now = new Date()
+        const chart: { month: string; gmv: number }[] = []
+        for (let i = 5; i >= 0; i--) {
+          const m = new Date(now.getFullYear(), now.getMonth() - i, 1)
+          const name = monthNames[m.getMonth()]
+          chart.push({ month: name, gmv: revenueByMonth.get(name) || 0 })
+        }
+        setChartData(chart)
+      } catch (error) {
+        console.error("Admin dashboard load error:", error)
+      } finally {
+        setLoading(false)
+      }
     }
     load()
   }, [])

@@ -132,25 +132,46 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
   const { slug } = await params
   const supabase = createAdminClient()
 
-  const { data: tenant } = await supabase
-    .from("tenants")
-    .select("id, slug, name, logo_url, city, description, founded_year, is_verified, is_featured, phone, contact_email, brand_color")
-    .eq("slug", slug)
-    .is("deleted_at", null)
-    .single()
+  let tenant: TenantRow | null = null
+  let packages: PackageRow[] = []
 
-  if (!tenant) notFound()
+  try {
+    const tenantResult = await supabase
+      .from("tenants")
+      .select("id, slug, name, logo_url, city, description, founded_year, is_verified, is_featured, phone, contact_email, brand_color")
+      .eq("slug", slug)
+      .is("deleted_at", null)
+      .single()
 
-  const { data: packages } = await supabase
-    .from("packages")
-    .select("id, name, slug, type, departure_cities, duration_days, departure_month, price, original_price, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars, available, quota, image_url, is_promo")
-    .eq("tenant_id", tenant.id)
-    .eq("status", "published")
-    .is("deleted_at", null)
-    .order("price", { ascending: true })
+    if (tenantResult.error) {
+      console.error("Error fetching tenant:", tenantResult.error)
+      notFound()
+    }
+    tenant = tenantResult.data as TenantRow
+
+    if (!tenant) notFound()
+
+    const packagesResult = await supabase
+      .from("packages")
+      .select("id, name, slug, type, departure_cities, duration_days, departure_month, price, original_price, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars, available, quota, image_url, is_promo")
+      .eq("tenant_id", tenant.id)
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .order("price", { ascending: true })
+
+    if (packagesResult.error) {
+      console.error("Error fetching packages:", packagesResult.error)
+      packages = []
+    } else {
+      packages = (packagesResult.data as PackageRow[]) || []
+    }
+  } catch (error) {
+    console.error("Travel detail page error:", error)
+    notFound()
+  }
 
   const tenantData = tenant as TenantRow
-  const pkgList = (packages as PackageRow[]) || []
+  const pkgList = packages
   const primaryColor = tenantData.brand_color || "#0E5C4E"
 
   return (

@@ -49,57 +49,69 @@ function SearchContent() {
     const supabase = createClient()
 
     const fetchData = async () => {
-      let query = supabase
-        .from("packages")
-        .select("*")
-        .eq("status", "published")
-        .is("deleted_at", null)
+      try {
+        let query = supabase
+          .from("packages")
+          .select("*")
+          .eq("status", "published")
+          .is("deleted_at", null)
 
-      // Apply search filter if present
-      if (searchQueryParam) {
-        query = query.or(`name.ilike.%${searchQueryParam}%,description.ilike.%${searchQueryParam}%,departure_city.ilike.%${searchQueryParam}%`)
-      }
-
-      const { data: pkgs } = await query
-      setPackages((pkgs as Package[]) || [])
-
-      const { data: tnts } = await supabase
-        .from("tenants")
-        .select("*")
-        .is("deleted_at", null)
-
-      if (tnts) {
-        const tenantMap = new Map<string, Tenant>()
-        tnts.forEach((t) => tenantMap.set(t.id, t as Tenant))
-        setTenants(tenantMap)
-
-        const { data: bids } = await supabase
-          .from("bids")
-          .select("travel_id, bid_value, is_active, impressions, clicks")
-          .eq("is_active", true)
-
-        if (bids && bids.length > 0) {
-          const entries = bids.map((b: any) => ({
-            travelId: b.travel_id,
-            factors: {
-              bidScore: b.bid_value || 0,
-              rating: 0,
-              reviewCount: 0,
-              totalBookings: 0,
-              conversionRate: b.impressions > 0 ? (b.clicks / b.impressions) * 100 : 0,
-              isVerified: tenantMap.get(b.travel_id)?.is_verified ?? false,
-              hasPromo: false,
-              sponsored: false,
-            } as RankingFactors,
-          }))
-          const ranked = rankTravels(entries, DEFAULT_RANKING_CONFIG)
-          const scoreMap = new Map<string, number>()
-          ranked.forEach((r) => scoreMap.set(r.travelId, r.score))
-          setRankingScores(scoreMap)
+        // Apply search filter if present
+        if (searchQueryParam) {
+          query = query.or(`name.ilike.%${searchQueryParam}%,description.ilike.%${searchQueryParam}%,departure_city.ilike.%${searchQueryParam}%`)
         }
-      }
 
-      setLoading(false)
+        const { data: pkgs, error: pkgError } = await query
+        if (pkgError) {
+          console.error("Error fetching packages:", pkgError)
+          setPackages([])
+        } else {
+          setPackages((pkgs as Package[]) || [])
+        }
+
+        const { data: tnts, error: tenantError } = await supabase
+          .from("tenants")
+          .select("*")
+          .is("deleted_at", null)
+
+        if (tenantError) {
+          console.error("Error fetching tenants:", tenantError)
+          setTenants(new Map())
+        } else if (tnts) {
+          const tenantMap = new Map<string, Tenant>()
+          tnts.forEach((t) => tenantMap.set(t.id, t as Tenant))
+          setTenants(tenantMap)
+
+          const { data: bids } = await supabase
+            .from("bids")
+            .select("travel_id, bid_value, is_active, impressions, clicks")
+            .eq("is_active", true)
+
+          if (bids && bids.length > 0) {
+            const entries = bids.map((b: any) => ({
+              travelId: b.travel_id,
+              factors: {
+                bidScore: b.bid_value || 0,
+                rating: 0,
+                reviewCount: 0,
+                totalBookings: 0,
+                conversionRate: b.impressions > 0 ? (b.clicks / b.impressions) * 100 : 0,
+                isVerified: tenantMap.get(b.travel_id)?.is_verified ?? false,
+                hasPromo: false,
+                sponsored: false,
+              } as RankingFactors,
+            }))
+            const ranked = rankTravels(entries, DEFAULT_RANKING_CONFIG)
+            const scoreMap = new Map<string, number>()
+            ranked.forEach((r) => scoreMap.set(r.travelId, r.score))
+            setRankingScores(scoreMap)
+          }
+        }
+      } catch (error) {
+        console.error("Search fetch error:", error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchData()
@@ -197,9 +209,10 @@ function SearchContent() {
     setType("semua")
     setAirline("semua")
     setHotelStars("semua")
+    setSearchQuery("")
   }
 
-  const hasActiveFilters = departure || country || month || cost || type !== "semua" || airline !== "semua" || hotelStars !== "semua"
+  const hasActiveFilters = departure || country || month || cost || type !== "semua" || airline !== "semua" || hotelStars !== "semua" || searchQuery
 
   const countryCode = country || undefined
 
@@ -269,6 +282,8 @@ function SearchContent() {
             <div className="flex items-center justify-between mb-5 gap-3">
               <button
                 onClick={() => setShowMobileFilter(!showMobileFilter)}
+                aria-expanded={showMobileFilter}
+                aria-controls="mobile-filter-panel"
                 className="lg:hidden flex items-center gap-2 text-sm font-medium border border-border bg-white px-3 py-2 rounded-lg"
               >
                 <Filter className="w-4 h-4" />
@@ -307,11 +322,16 @@ function SearchContent() {
                   placeholder="Cari nama paket atau travel..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSearch()
+                  }}
+                  aria-label="Cari paket umroh"
                   className="w-full pl-12 pr-4 py-3 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground transition-all"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
+                    aria-label="Hapus pencarian"
                     className="absolute inset-y-0 right-0 pr-4 flex items-center hover:text-foreground transition-colors"
                   >
                     <svg className="w-5 h-5 text-muted-foreground hover:text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -323,7 +343,7 @@ function SearchContent() {
             </div>
 
             {showMobileFilter && (
-              <div className="lg:hidden bg-white border border-border rounded-2xl p-5 mb-5">
+              <div id="mobile-filter-panel" className="lg:hidden bg-white border border-border rounded-2xl p-5 mb-5">
               <FilterPanel
                 departure={departure} setDeparture={setDeparture}
                 country={country} setCountry={setCountry}
@@ -394,43 +414,49 @@ function SearchContent() {
                 {country && (
                   <Badge variant="secondary" className="gap-1 text-xs">
                     {getAseanCountryByCode(country)?.name || country}
-                    <button onClick={() => setCountry("")}><X className="w-3 h-3" /></button>
+                    <button onClick={() => setCountry("")} aria-label={`Hapus filter negara ${getAseanCountryByCode(country)?.name || country}`}><X className="w-3 h-3" /></button>
                   </Badge>
                 )}
                 {departure && (
                   <Badge variant="secondary" className="gap-1 text-xs">
                     <MapPin className="w-3 h-3" />{departure}
-                    <button onClick={() => setDeparture("")}><X className="w-3 h-3" /></button>
+                    <button onClick={() => setDeparture("")} aria-label={`Hapus filter kota ${departure}`}><X className="w-3 h-3" /></button>
                   </Badge>
                 )}
                 {month && (
                   <Badge variant="secondary" className="gap-1 text-xs">
                     {month}
-                    <button onClick={() => setMonth("")}><X className="w-3 h-3" /></button>
+                    <button onClick={() => setMonth("")} aria-label={`Hapus filter bulan ${month}`}><X className="w-3 h-3" /></button>
                   </Badge>
                 )}
                 {cost && cost !== "Semua Biaya" && (
                   <Badge variant="secondary" className="gap-1 text-xs">
                     {cost}
-                    <button onClick={() => setCost("")}><X className="w-3 h-3" /></button>
+                    <button onClick={() => setCost("")} aria-label={`Hapus filter biaya ${cost}`}><X className="w-3 h-3" /></button>
                   </Badge>
                 )}
                 {type !== "semua" && (
                   <Badge variant="secondary" className="gap-1 text-xs capitalize">
                     {type}
-                    <button onClick={() => setType("semua")}><X className="w-3 h-3" /></button>
+                    <button onClick={() => setType("semua")} aria-label={`Hapus filter tipe ${type}`}><X className="w-3 h-3" /></button>
                   </Badge>
                 )}
                 {airline !== "semua" && (
                   <Badge variant="secondary" className="gap-1 text-xs">
                     {airline}
-                    <button onClick={() => setAirline("semua")}><X className="w-3 h-3" /></button>
+                    <button onClick={() => setAirline("semua")} aria-label={`Hapus filter maskapai ${airline}`}><X className="w-3 h-3" /></button>
                   </Badge>
                 )}
                 {hotelStars !== "semua" && (
                   <Badge variant="secondary" className="gap-1 text-xs">
                     Hotel Bintang {hotelStars}+
-                    <button onClick={() => setHotelStars("semua")}><X className="w-3 h-3" /></button>
+                    <button onClick={() => setHotelStars("semua")} aria-label={`Hapus filter hotel bintang ${hotelStars}`}><X className="w-3 h-3" /></button>
+                  </Badge>
+                )}
+                {searchQuery && (
+                  <Badge variant="secondary" className="gap-1 text-xs">
+                    &quot;{searchQuery}&quot;
+                    <button onClick={() => setSearchQuery("")} aria-label="Hapus pencarian kata kunci"><X className="w-3 h-3" /></button>
                   </Badge>
                 )}
               </div>

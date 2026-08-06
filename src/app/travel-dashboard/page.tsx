@@ -35,49 +35,54 @@ export default function TravelDashboardOverview() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      if (!user) { setLoading(false); return }
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+        if (!user) { setLoading(false); return }
 
-      const tId = await getTravelTenantId(supabase, user.id)
-      if (!tId) { setLoading(false); return }
-      setTenantId(tId)
+        const tId = await getTravelTenantId(supabase, user.id)
+        if (!tId) { setLoading(false); return }
+        setTenantId(tId)
 
-      const [tenantRes, packagesRes, bookingsRes, allBookingsRes] = await Promise.all([
-        supabase.from("tenants").select("config, status").eq("id", tId).single(),
-        supabase.from("packages").select("id", { count: "exact", head: true }).eq("tenant_id", tId).is("deleted_at", null),
-        supabase.from("bookings").select("id, status, pilgrim_count, price, fee, total, package:packages(name), customer:users(full_name), created_at").eq("tenant_id", tId).is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
-        supabase.from("bookings").select("id, status, pilgrim_count, price, total").eq("tenant_id", tId).is("deleted_at", null),
-      ])
+        const [tenantRes, packagesRes, bookingsRes, allBookingsRes] = await Promise.all([
+          supabase.from("tenants").select("config, status").eq("id", tId).single(),
+          supabase.from("packages").select("id", { count: "exact", head: true }).eq("tenant_id", tId).is("deleted_at", null),
+          supabase.from("bookings").select("id, status, pilgrim_count, price, fee, total, package:packages(name), customer:users(full_name), created_at").eq("tenant_id", tId).is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
+          supabase.from("bookings").select("id, status, pilgrim_count, price, total").eq("tenant_id", tId).is("deleted_at", null),
+        ])
 
-      if (tenantRes.data) {
-        const config = (tenantRes.data.config || {}) as any
-        const step = Number(config.onboarding_step)
-        if (step >= 1 && step <= 5) {
-          setOnboardingStep(step)
-        } else if (tenantRes.data.status === "verified") {
-          setOnboardingStep(2)
+        if (tenantRes.data) {
+          const config = (tenantRes.data.config || {}) as any
+          const step = Number(config.onboarding_step)
+          if (step >= 1 && step <= 5) {
+            setOnboardingStep(step)
+          } else if (tenantRes.data.status === "verified") {
+            setOnboardingStep(2)
+          }
         }
+
+        const bookings = bookingsRes.data || []
+        const allBookings = allBookingsRes.data || []
+
+        const totalRevenue = allBookings
+          .filter((b: any) => b.status === "confirmed" || b.status === "completed")
+          .reduce((sum: number, b: any) => sum + (b.total || 0), 0)
+        const totalPilgrims = allBookings
+          .filter((b: any) => b.status !== "cancelled")
+          .reduce((sum: number, b: any) => sum + (b.pilgrim_count || 0), 0)
+
+        setStats({
+          packageCount: packagesRes.count || 0,
+          bookingCount: allBookings.length,
+          totalRevenue,
+          totalPilgrims,
+          recentBookings: bookings,
+        })
+      } catch (error) {
+        console.error("Travel dashboard load error:", error)
+      } finally {
+        setLoading(false)
       }
-
-      const bookings = bookingsRes.data || []
-      const allBookings = allBookingsRes.data || []
-
-      const totalRevenue = allBookings
-        .filter((b: any) => b.status === "confirmed" || b.status === "completed")
-        .reduce((sum: number, b: any) => sum + (b.total || 0), 0)
-      const totalPilgrims = allBookings
-        .filter((b: any) => b.status !== "cancelled")
-        .reduce((sum: number, b: any) => sum + (b.pilgrim_count || 0), 0)
-
-      setStats({
-        packageCount: packagesRes.count || 0,
-        bookingCount: allBookings.length,
-        totalRevenue,
-        totalPilgrims,
-        recentBookings: bookings,
-      })
-      setLoading(false)
     }
     load()
   }, [])

@@ -90,7 +90,7 @@ export default function PrayerTimeWidget() {
 
         try {
           const res = await fetch(
-            `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=d5d7246fcd0f40449b555b02d9de6643&format=json&lang=id`
+            `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY}&format=json&lang=id`
           )
           const data = await res.json()
           setCity(data.features?.[0]?.properties?.city || data.features?.[0]?.properties?.state || "Indonesia")
