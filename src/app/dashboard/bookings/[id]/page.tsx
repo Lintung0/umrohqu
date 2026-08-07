@@ -16,9 +16,13 @@ interface BookingDetail {
   price: number
   fee: number
   total: number
+  paid_amount: number
+  remaining_balance: number
   booking_channel: string
   notes: string | null
   created_at: string
+  paid_at: string | null
+  payment_method: string | null
   payment_type: string | null
   dp_percentage: number | null
   dp_amount: number | null
@@ -301,45 +305,169 @@ export default function BookingDetailPage() {
         )}
       </div>
 
-      {booking.status === "pending_payment" && booking.payment_type !== "dp" && (
-        <PayNowSection bookingId={booking.id} total={booking.total} />
-      )}
-
-      {booking.status === "processing" && (
-        <div className="bg-white rounded-2xl border border-border p-6">
-          <h2 className="font-semibold mb-3 flex items-center gap-2">
-            <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
-            {t("booking.payment_received_title")}
-          </h2>
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
-            <p className="text-sm text-purple-700">
-              {t("booking.processing_message")}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* DP: Pay Remaining */}
-      {booking.payment_type === "dp" && (booking.remaining_amount || 0) > 0 && (booking.status === "processing" || booking.status === "pending_payment") && (
-        <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
-          <h2 className="font-semibold flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
-            {t("booking.pay_remaining")}
-          </h2>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <p className="text-sm text-amber-700">
-              {t("booking.remaining_dp_info", { amount: formatRupiah(booking.remaining_amount || 0) })}
-              {booking.remaining_due_date && (
-                <> {t("booking.due_date")}: {new Date(booking.remaining_due_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</>
-              )}
-            </p>
-          </div>
-          <PayRemainingSection bookingId={booking.id} remainingAmount={booking.remaining_amount || 0} />
-        </div>
-      )}
+      {/* ── Payment Status Sections (3 conditions) ── */}
+      <PaymentStatusSection
+        bookingId={booking.id}
+        status={booking.status}
+        total={booking.total}
+        paidAmount={booking.paid_amount}
+        remainingBalance={booking.remaining_balance}
+        paymentType={booking.payment_type}
+        dpAmount={booking.dp_amount}
+        dpPercentage={booking.dp_percentage}
+        remainingAmount={booking.remaining_amount}
+        remainingDueDate={booking.remaining_due_date}
+        paidAt={booking.paid_at}
+        paymentMethod={booking.payment_method}
+        createdAt={booking.created_at}
+      />
     </div>
   )
 }
+
+// ─── Payment Status Section (3-condition rendering) ──────────────────────────
+
+function PaymentStatusSection({
+  bookingId, status, total, paidAmount, remainingBalance,
+  paymentType, dpAmount, dpPercentage, remainingAmount,
+  remainingDueDate, paidAt, paymentMethod, createdAt,
+}: {
+  bookingId: string
+  status: string
+  total: number
+  paidAmount: number
+  remainingBalance: number
+  paymentType: string | null
+  dpAmount: number | null
+  dpPercentage: number | null
+  remainingAmount: number | null
+  remainingDueDate: string | null
+  paidAt: string | null
+  paymentMethod: string | null
+  createdAt: string
+}) {
+  const { t } = useTranslation()
+  const supabase = createClient()
+
+  const isPaid = status === "PAID" || remainingBalance <= 0
+  const isDpPaid = status === "DP_PAID" && remainingBalance > 0
+  const isPending = status === "PENDING" || status === "UNPAID" || status === "pending_payment"
+
+  // ── KONDISI A: LUNAS FULL ──
+  if (isPaid) {
+    return (
+      <div className="bg-white rounded-2xl border border-emerald-200 p-6 space-y-4">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-center">
+          <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <CheckCircle className="w-7 h-7 text-emerald-600" />
+          </div>
+          <h3 className="text-lg font-bold text-emerald-800">Pembayaran Lunas</h3>
+          <p className="text-sm text-emerald-600 mt-1">Terima kasih, pembayaran Anda telah dikonfirmasi.</p>
+        </div>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="bg-slate-50 rounded-xl p-3">
+            <p className="text-xs text-muted-foreground mb-1">Total Dibayar</p>
+            <p className="font-bold text-emerald-700">{formatRupiah(paidAmount)}</p>
+          </div>
+          <div className="bg-slate-50 rounded-xl p-3">
+            <p className="text-xs text-muted-foreground mb-1">Sisa Tagihan</p>
+            <p className="font-bold text-emerald-700">Rp 0</p>
+          </div>
+          {paidAt && (
+            <div className="bg-slate-50 rounded-xl p-3">
+              <p className="text-xs text-muted-foreground mb-1">Tanggal Pelunasan</p>
+              <p className="font-medium">
+                {new Date(paidAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </p>
+            </div>
+          )}
+          {paymentMethod && (
+            <div className="bg-slate-50 rounded-xl p-3">
+              <p className="text-xs text-muted-foreground mb-1">Metode Pembayaran</p>
+              <p className="font-medium">{paymentMethod}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ── KONDISI B: SUDAH BAYAR DP ──
+  if (isDpPaid) {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+            <CheckCircle className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-emerald-800">DP Terbayar ({formatRupiah(paidAmount)})</p>
+            <p className="text-sm text-emerald-600 mt-0.5">
+              Pembayaran dana talangan telah diterima.
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-amber-800">Sisa Pelunasan</span>
+            <span className="text-lg font-bold text-amber-700">{formatRupiah(remainingBalance)}</span>
+          </div>
+          {remainingDueDate && (
+            <p className="text-xs text-amber-600 flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              Wajib dilunasi maksimal {new Date(remainingDueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} sebelum keberangkatan.
+            </p>
+          )}
+        </div>
+
+        <PayRemainingSection bookingId={bookingId} remainingAmount={remainingBalance} />
+      </div>
+    )
+  }
+
+  // ── KONDISI C: BELUM BAYAR / MENUNGGU ──
+  if (isPending) {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5 text-amber-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-amber-800">Menunggu Pembayaran</p>
+            <p className="text-sm text-amber-600 mt-0.5">
+              Silakan selesaikan pembayaran untuk mengkonfirmasi booking Anda.
+            </p>
+          </div>
+        </div>
+
+        <PayNowSection bookingId={bookingId} total={total} />
+      </div>
+    )
+  }
+
+  // ── Default: processing / confirmed (no payment action) ──
+  if (status === "processing" || status === "confirmed") {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-6">
+        <h2 className="font-semibold mb-3 flex items-center gap-2">
+          <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
+          {t("booking.payment_received_title")}
+        </h2>
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+          <p className="text-sm text-purple-700">
+            {t("booking.processing_message")}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return null
+}
+
+// ─── Pay Now Section (Full Payment) ──────────────────────────────────────────
 
 function PayNowSection({ bookingId, total }: { bookingId: string; total: number }) {
   const { t } = useTranslation()
@@ -366,12 +494,8 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-6">
-      <h2 className="font-semibold mb-3">{t("booking.payment_info")}</h2>
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-4">
-        <p className="text-sm text-emerald-700">{t("booking.pay_now")} <strong>{formatRupiah(total)}</strong></p>
-      </div>
-      <div className="bg-gray-50 rounded-xl p-4 mb-4">
+    <div className="space-y-4">
+      <div className="bg-gray-50 rounded-xl p-4">
         <p className="text-xs text-muted-foreground mb-1">{t("booking.booking_id")}</p>
         <div className="flex items-center gap-2">
           <p className="font-mono font-bold text-lg">{bookingId.slice(0, 8).toUpperCase()}</p>
@@ -380,7 +504,7 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
               navigator.clipboard.writeText(bookingId.slice(0, 8).toUpperCase())
               toast.success(t("booking.booking_id") + " ✓")
             }}
-            className="p-1 hover:bg-gray-200 rounded transition-colors"
+            className="p-1 hover:bg-gray-200 rounded transition-colors cursor-pointer"
           >
             <Copy className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -389,17 +513,19 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
       <button
         onClick={handlePay}
         disabled={submitting}
-        className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+        className="w-full bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-emerald-200 active:scale-[0.98] cursor-pointer"
       >
         {submitting ? (
           <><Loader2 className="w-4 h-4 animate-spin" /> {t("common.loading")}</>
         ) : (
-          <><CreditCard className="w-4 h-4" /> {t("booking.pay_now")} {formatRupiah(total)}</>
+          <><CreditCard className="w-4 h-4" /> Bayar Sekarang ({formatRupiah(total)})</>
         )}
       </button>
     </div>
   )
 }
+
+// ─── Pay Remaining Section (DP Pelunasan) ────────────────────────────────────
 
 function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string; remainingAmount: number }) {
   const { t } = useTranslation()
@@ -423,7 +549,7 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   const walletSufficient = walletBalance !== null && walletBalance >= remainingAmount
 
@@ -461,7 +587,7 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
       {walletBalance !== null && (
         <button
           onClick={() => setUseWallet(true)}
-          className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
+          className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all cursor-pointer ${useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
         >
           <Wallet className={`w-5 h-5 ${useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
           <div className="flex-1">
@@ -476,7 +602,7 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
       )}
       <button
         onClick={() => setUseWallet(false)}
-        className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${!useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
+        className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all cursor-pointer ${!useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
       >
         <CreditCard className={`w-5 h-5 ${!useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
         <div className="flex-1">
@@ -489,12 +615,12 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
       <button
         onClick={handlePay}
         disabled={submitting || (useWallet && !walletSufficient)}
-        className="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+        className="w-full bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-emerald-200 active:scale-[0.98] cursor-pointer"
       >
         {submitting ? (
           <><Loader2 className="w-4 h-4 animate-spin" /> {t("common.loading")}</>
         ) : (
-          <>{t("booking.pay_remaining")} {formatRupiah(remainingAmount)}</>
+          <>Pelunasan Sisa Tagihan ({formatRupiah(remainingAmount)})</>
         )}
       </button>
     </div>
