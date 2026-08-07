@@ -122,15 +122,15 @@ const Navbar = () => {
   return (
     <header className="h-20 w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
       <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-full">
+        <div className="grid grid-cols-12 items-center h-full">
 
-          {/* Left: Logo */}
-          <div className="flex items-center shrink-0">
+          {/* Left: Logo (col-span-3) */}
+          <div className="col-span-3 flex items-center">
             <Logo />
           </div>
 
-          {/* Center: Nav Links */}
-          <nav className="hidden md:flex items-center justify-center gap-6 text-sm font-medium text-slate-700">
+          {/* Center: Nav Links (col-span-6, centered) */}
+          <nav className="col-span-6 hidden md:flex items-center justify-center gap-6 text-sm font-medium text-slate-700">
             <Link href="/search" className="whitespace-nowrap hover:text-emerald-600 transition-colors">
               {t.nav.search_packages}
             </Link>
@@ -151,8 +151,8 @@ const Navbar = () => {
             </Link>
           </nav>
 
-          {/* Right: Actions */}
-          <div className="hidden md:flex items-center gap-3 shrink-0">
+          {/* Right: Actions (col-span-3, end-aligned) */}
+          <div className="col-span-9 md:col-span-3 flex items-center justify-end gap-3 shrink-0">
             <CountrySelect value={country} onChange={handleCountryChange} />
             <LanguageSwitcher />
 
@@ -162,7 +162,7 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200"
+                  className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
                 >
                   <Image
                     src={user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.user_metadata?.full_name || user.email || "U")}&background=0E5C4E&color=fff&size=80&bold=true`}
@@ -192,7 +192,7 @@ const Navbar = () => {
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
                         {t.nav.logout}
@@ -221,7 +221,7 @@ const Navbar = () => {
 
           {/* Mobile: Hamburger */}
           <button
-            className="md:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            className="md:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors col-span-9 justify-self-end"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="w-5 h-5 text-slate-700" /> : <Menu className="w-5 h-5 text-slate-700" />}
