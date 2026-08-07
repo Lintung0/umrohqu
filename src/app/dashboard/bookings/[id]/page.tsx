@@ -325,7 +325,7 @@ export default function BookingDetailPage() {
   )
 }
 
-// ─── Payment Status Section (3-condition rendering) ──────────────────────────
+// ─── Payment Status Section (4-condition rendering) ──────────────────────────
 
 function PaymentStatusSection({
   bookingId, status, total, paidAmount, remainingBalance,
@@ -347,27 +347,26 @@ function PaymentStatusSection({
   createdAt: string
 }) {
   const { t } = useTranslation()
-  const supabase = createClient()
 
-  const isPaid = status === "confirmed" || status === "completed" || remainingBalance <= 0 || (status === "processing" && paymentType !== "dp")
-  const isDpPaid = status === "processing" && paymentType === "dp" && remainingBalance > 0
-  const isPending = status === "pending_payment" || status === "unpaid"
+  const effectiveRemaining = remainingBalance > 0 ? remainingBalance : (remainingAmount || 0)
+  const effectivePaid = paidAmount > 0 ? paidAmount : (total - effectiveRemaining)
 
-  // ── KONDISI A: LUNAS FULL ──
-  if (isPaid) {
+  // ── KONDISI 1: Lunas & Dikonfirmasi ──
+  // status === 'confirmed' | 'completed'
+  if (status === "confirmed" || status === "completed") {
     return (
       <div className="bg-white rounded-2xl border border-emerald-200 p-6 space-y-4">
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-center">
           <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <CheckCircle className="w-7 h-7 text-emerald-600" />
           </div>
-          <h3 className="text-lg font-bold text-emerald-800">Pembayaran Lunas</h3>
-          <p className="text-sm text-emerald-600 mt-1">Terima kasih, pembayaran Anda telah dikonfirmasi.</p>
+          <h3 className="text-lg font-bold text-emerald-800">Pembayaran Lunas & Dikonfirmasi</h3>
+          <p className="text-sm text-emerald-600 mt-1">Terima kasih, pembayaran Anda telah dikonfirmasi oleh sistem dan travel agent.</p>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="bg-slate-50 rounded-xl p-3">
             <p className="text-xs text-muted-foreground mb-1">Total Dibayar</p>
-            <p className="font-bold text-emerald-700">{formatRupiah(paidAmount)}</p>
+            <p className="font-bold text-emerald-700">{formatRupiah(effectivePaid)}</p>
           </div>
           <div className="bg-slate-50 rounded-xl p-3">
             <p className="text-xs text-muted-foreground mb-1">Sisa Tagihan</p>
@@ -392,42 +391,74 @@ function PaymentStatusSection({
     )
   }
 
-  // ── KONDISI B: SUDAH BAYAR DP ──
-  if (isDpPaid) {
+  // ── KONDISI 2: Sudah Bayar, Menunggu Konfirmasi Travel Agent ──
+  // status === 'processing'
+  if (status === "processing") {
+    // Check if this is a DP booking that still needs pelunasan
+    const needsPelunasan = paymentType === "dp" && effectiveRemaining > 0
+
     return (
       <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
-          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
-            <CheckCircle className="w-5 h-5 text-emerald-600" />
+        {/* Processing Banner */}
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 flex items-start gap-3">
+          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
+            <Loader2 className="w-5 h-5 text-purple-600 animate-spin" />
           </div>
           <div>
-            <p className="font-semibold text-emerald-800">DP Terbayar ({formatRupiah(paidAmount)})</p>
-            <p className="text-sm text-emerald-600 mt-0.5">
-              Pembayaran dana talangan telah diterima.
+            <p className="font-semibold text-purple-800">Pembayaran Diterima - Menunggu Konfirmasi Travel Agent</p>
+            <p className="text-sm text-purple-600 mt-0.5">
+              Pembayaran Anda telah berhasil diproses oleh Xendit dan sedang diverifikasi oleh pihak travel agent.
             </p>
           </div>
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-amber-800">Sisa Pelunasan</span>
-            <span className="text-lg font-bold text-amber-700">{formatRupiah(remainingBalance)}</span>
-          </div>
-          {remainingDueDate && (
-            <p className="text-xs text-amber-600 flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              Wajib dilunasi maksimal {new Date(remainingDueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} sebelum keberangkatan.
-            </p>
-          )}
-        </div>
-
-        <PayRemainingSection bookingId={bookingId} remainingAmount={remainingBalance} />
+        {/* DP Pelunasan (if applicable) */}
+        {needsPelunasan && (
+          <>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-amber-800">Sisa Pelunasan</span>
+                <span className="text-lg font-bold text-amber-700">{formatRupiah(effectiveRemaining)}</span>
+              </div>
+              {remainingDueDate && (
+                <p className="text-xs text-amber-600 flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  Wajib dilunasi maksimal {new Date(remainingDueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} sebelum keberangkatan.
+                </p>
+              )}
+            </div>
+            <PayRemainingSection bookingId={bookingId} remainingAmount={effectiveRemaining} />
+          </>
+        )}
       </div>
     )
   }
 
-  // ── KONDISI C: BELUM BAYAR / MENUNGGU ──
-  if (isPending) {
+  // ── KONDISI 3: Belum Lunas, Perlu Pelunasan DP ──
+  // effectiveRemaining > 0 AND status !== 'pending_payment'
+  // (covers: cancelled with DP paid, refunded, etc.)
+  if (effectiveRemaining > 0 && status !== "pending_payment") {
+    return (
+      <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5 text-amber-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-amber-800">Menunggu Pelunasan</p>
+            <p className="text-sm text-amber-600 mt-0.5">
+              Sisa tagihan Rp {formatRupiah(effectiveRemaining)} perlu dilunasi.
+            </p>
+          </div>
+        </div>
+        <PayRemainingSection bookingId={bookingId} remainingAmount={effectiveRemaining} />
+      </div>
+    )
+  }
+
+  // ── KONDISI 4: Belum Bayar Sama Sekali ──
+  // status === 'pending_payment'
+  if (status === "pending_payment") {
     return (
       <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
@@ -441,29 +472,12 @@ function PaymentStatusSection({
             </p>
           </div>
         </div>
-
         <PayNowSection bookingId={bookingId} total={total} />
       </div>
     )
   }
 
-  // ── Default: processing / confirmed (no payment action) ──
-  if (status === "processing" || status === "confirmed") {
-    return (
-      <div className="bg-white rounded-2xl border border-border p-6">
-        <h2 className="font-semibold mb-3 flex items-center gap-2">
-          <Loader2 className="w-4 h-4 text-purple-600 animate-spin" />
-          {t("booking.payment_received_title")}
-        </h2>
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
-          <p className="text-sm text-purple-700">
-            {t("booking.processing_message")}
-          </p>
-        </div>
-      </div>
-    )
-  }
-
+  // ── Default: cancelled / refunded (no payment action) ──
   return null
 }
 

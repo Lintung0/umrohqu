@@ -54,7 +54,7 @@ function SearchContent() {
           .is("deleted_at", null)
 
         if (searchQueryParam) {
-          query = query.or(`name.ilike.%${searchQueryParam}%,description.ilike.%${searchQueryParam}%,departure_city.ilike.%${searchQueryParam}%`)
+          query = query.or(`name.ilike.%${searchQueryParam}%,description.ilike.%${searchQueryParam}%,departure_city.ilike.%${searchQueryParam}%,slug.ilike.%${searchQueryParam}%`)
         }
 
         const { data: pkgs, error: pkgError } = await query
@@ -153,11 +153,7 @@ function SearchContent() {
       }
       if (hotelStars) {
         const minStars = parseInt(hotelStars)
-        if (minStars === 5) {
-          if ((pkg.hotel_makkah_stars || 0) !== 5 || (pkg.hotel_madinah_stars || 0) !== 5) return false
-        } else {
-          if ((pkg.hotel_makkah_stars || 0) < minStars && (pkg.hotel_madinah_stars || 0) < minStars) return false
-        }
+        if ((pkg.hotel_makkah_stars || 0) < minStars && (pkg.hotel_madinah_stars || 0) < minStars) return false
       }
       if (duration) {
         const days = pkg.duration_days || 0
@@ -179,12 +175,9 @@ function SearchContent() {
   const filteredWithSearch = filtered.filter((pkg) => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
-    const tenant = tenants.get(pkg.tenant_id)
     return (
       pkg.name.toLowerCase().includes(query) ||
-      tenant?.name.toLowerCase().includes(query) ||
       pkg.departure_city?.toLowerCase().includes(query) ||
-      pkg.slug.toLowerCase().includes(query) ||
       pkg.description?.toLowerCase().includes(query)
     )
   })
@@ -306,6 +299,7 @@ function SearchContent() {
             </div>
             <button
               onClick={handleSearch}
+              aria-label="Cari paket umroh"
               className="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold rounded-xl shadow-md shadow-amber-400/20 hover:shadow-lg hover:shadow-amber-400/30 transition-all active:scale-95 flex items-center gap-2"
             >
               <Search className="w-4 h-4" />
