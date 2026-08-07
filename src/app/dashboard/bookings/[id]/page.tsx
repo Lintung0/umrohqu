@@ -349,9 +349,9 @@ function PaymentStatusSection({
   const { t } = useTranslation()
   const supabase = createClient()
 
-  const isPaid = status === "PAID" || remainingBalance <= 0
-  const isDpPaid = status === "DP_PAID" && remainingBalance > 0
-  const isPending = status === "PENDING" || status === "UNPAID" || status === "pending_payment"
+  const isPaid = status === "confirmed" || status === "completed" || remainingBalance <= 0 || (status === "processing" && paymentType !== "dp")
+  const isDpPaid = status === "processing" && paymentType === "dp" && remainingBalance > 0
+  const isPending = status === "pending_payment" || status === "unpaid"
 
   // ── KONDISI A: LUNAS FULL ──
   if (isPaid) {
