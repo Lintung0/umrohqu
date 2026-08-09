@@ -12,12 +12,28 @@ export default function BookingSuccessPage() {
   const [status, setStatus] = useState<"loading" | "success" | "processing" | "timeout">("loading")
 
   const checkStatus = useCallback(async () => {
+    // Try client-side first
     const supabase = createClient()
-    const { data } = await supabase
+    let { data } = await supabase
       .from("bookings")
       .select("id, status, payment_status")
       .eq("id", params.id)
       .single()
+
+    // Fallback to API if RLS blocks client-side read
+    if (!data) {
+      try {
+        const res = await fetch("/api/booking/detail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: params.id }),
+        })
+        if (res.ok) {
+          const result = await res.json()
+          data = result.data
+        }
+      } catch {}
+    }
 
     if (data?.payment_status === "paid" || data?.status === "confirmed" || data?.status === "completed") {
       setStatus("success")

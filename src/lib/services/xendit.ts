@@ -30,7 +30,7 @@ export async function createInvoice(params: {
       amount: params.amount,
       description: params.description,
       success_redirect_url: params.successRedirectUrl || `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings`,
-      failure_redirect_url: params.failureRedirectUrl || `${process.env.NEXT_PUBLIC_APP_URL}/checkout?failed=true`,
+      failure_redirect_url: params.failureRedirectUrl || `${process.env.NEXT_PUBLIC_APP_URL}/`,
       customer: params.customer,
       currency: "IDR",
     }),

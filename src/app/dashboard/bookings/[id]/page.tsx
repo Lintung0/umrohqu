@@ -55,47 +55,52 @@ export default function BookingDetailPage() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
 
-      // Fetch booking — try user-scoped first, then fallback for guest/Xendit-redirect cases
-      let query = supabase
-        .from("bookings")
-        .select("*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
-        .eq("id", params.id)
+      // Build the full select query
+      const selectFields = "*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)"
 
-      // If logged in, scope to user; otherwise allow any booking (guest checkout / post-Xendit redirect)
+      let bookingData: any = null
+
+      // Step 1: If logged in, try Supabase client-side query (user-scoped)
       if (user) {
-        query = query.eq("customer_id", user.id)
+        const { data } = await supabase
+          .from("bookings")
+          .select(selectFields)
+          .eq("id", params.id)
+          .eq("customer_id", user.id)
+          .single()
+        bookingData = data
       }
 
-      const { data, error } = await query.single()
-      const b = data as any
-
-      // If no booking found and user is logged in, try without customer_id filter
-      // (handles edge case where session changed after Xendit redirect)
-      if (!b && user) {
-        const { data: fallback } = await supabase
-          .from("bookings")
-          .select("*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
-          .eq("id", params.id)
-          .single()
-        if (fallback) {
-          setBooking(fallback as any)
-          setLoading(false)
-          return
+      // Step 2: If not found, try API fallback (bypasses RLS — works for guest checkout / post-Xendit)
+      if (!bookingData) {
+        try {
+          const res = await fetch("/api/booking/detail", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bookingId: params.id }),
+          })
+          if (res.ok) {
+            const result = await res.json()
+            bookingData = result.data
+          }
+        } catch {
+          // API call failed — will be handled below
         }
       }
 
-      // Redirect to login only if there's truly no booking AND no user
-      if (!b && !user) {
+      // Step 3: If still no booking, redirect to login (only if not logged in)
+      if (!bookingData && !user) {
         router.push(`/login?redirect_to=/dashboard/bookings/${params.id}`)
         return
       }
 
-      setBooking(b)
+      setBooking(bookingData)
       setLoading(false)
 
-      if (b && b.xendit_invoice_id) {
-        const shouldVerify = b.status === "pending_payment" ||
-          (b.status === "processing" && b.payment_type === "dp" && (b.remaining_amount || 0) > 0 && b.xendit_invoice_id?.startsWith("booking-remaining-"))
+      // Step 4: Verify Xendit payment status if applicable
+      if (bookingData && bookingData.xendit_invoice_id) {
+        const shouldVerify = bookingData.status === "pending_payment" ||
+          (bookingData.status === "processing" && bookingData.payment_type === "dp" && (bookingData.remaining_amount || 0) > 0 && bookingData.xendit_invoice_id?.startsWith("booking-remaining-"))
         if (shouldVerify) {
           try {
             const res = await fetch("/api/booking/verify-payment", {
@@ -104,7 +109,7 @@ export default function BookingDetailPage() {
               body: JSON.stringify({ bookingId: params.id }),
             })
             const result = await res.json()
-            if (result.status && result.status !== b.status) {
+            if (result.status && result.status !== bookingData.status) {
               setBooking((prev) => prev ? { ...prev, status: result.status, remaining_amount: result.status === "confirmed" ? 0 : prev.remaining_amount } : prev)
             }
           } catch (e) {

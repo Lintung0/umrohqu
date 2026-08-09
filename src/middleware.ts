@@ -188,6 +188,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!user) {
+    // Allow unauthenticated access to booking detail pages (post-Xendit redirect / guest checkout)
+    const bookingDetailMatch = pathname.match(/^\/dashboard\/bookings\/[0-9a-f-]{36}$/)
+    if (bookingDetailMatch) {
+      return supabaseResponse
+    }
+
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = "/login"
     redirectUrl.searchParams.set("redirect_to", pathname)
