@@ -89,13 +89,23 @@ export default function PrayerTimeWidget() {
         setCurrentPrayer(getCurrentPrayer(times))
 
         try {
-          const res = await fetch(
-            `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY}&format=json&lang=id`
-          )
-          const data = await res.json()
-          setCity(data.features?.[0]?.properties?.city || data.features?.[0]?.properties?.state || "Indonesia")
+          const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY
+          if (!apiKey) {
+            setCity("Jakarta")
+          } else {
+            const res = await fetch(
+              `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}&format=json&lang=id`
+            )
+            if (!res.ok) {
+              // Fallback for 401/403/500 — use default city
+              setCity("Jakarta")
+            } else {
+              const data = await res.json()
+              setCity(data.features?.[0]?.properties?.city || data.features?.[0]?.properties?.state || "Indonesia")
+            }
+          }
         } catch {
-          setCity("Indonesia")
+          setCity("Jakarta")
         }
       } catch {
         const defaultTimes = getPrayerTimes(-6.2088, 106.8456)

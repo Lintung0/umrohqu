@@ -175,8 +175,9 @@ export interface Bidding {
 
 export interface Review {
   id: string
-  package_id: string
-  user_id: string
+  booking_id: string
+  customer_id: string
+  tenant_id: string
   rating: number
   review: string | null
   status: string

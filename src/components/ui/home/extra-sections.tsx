@@ -195,18 +195,29 @@ export function TravelAgenciesSection() {
           const { data: pkgs } = await supabase.from("packages").select("id, tenant_id").in("tenant_id", tenantIds)
           const pkgIds = (pkgs || []).map((p: any) => p.id)
           if (pkgIds.length > 0) {
-            const { data: revs } = await supabase.from("reviews").select("package_id, rating").in("package_id", pkgIds)
-            const ratingMap = new Map<string, { sum: number; count: number }>()
-            ;(pkgs || []).forEach((p: any) => {
-              const pkgReviews = (revs || []).filter((r: any) => r.package_id === p.id)
-              const existing = ratingMap.get(p.tenant_id) || { sum: 0, count: 0 }
-              pkgReviews.forEach((r: any) => { existing.sum += r.rating; existing.count += 1 })
-              ratingMap.set(p.tenant_id, existing)
-            })
-            ags.forEach((a: any) => {
-              const r = ratingMap.get(a.id)
-              a.avg_rating = r && r.count > 0 ? Math.round((r.sum / r.count) * 10) / 10 : null
-            })
+            const { data: bookings } = await supabase.from("bookings").select("id, package_id").in("package_id", pkgIds)
+            const bookingIds = (bookings || []).map((b: any) => b.id)
+            if (bookingIds.length > 0) {
+              const { data: revs } = await supabase.from("reviews").select("rating, booking_id").in("booking_id", bookingIds)
+              const bookingPkgMap = new Map<string, string>()
+              ;(bookings || []).forEach((b: any) => { bookingPkgMap.set(b.id, b.package_id) })
+              const ratingMap = new Map<string, { sum: number; count: number }>()
+              ;(revs || []).forEach((r: any) => {
+                const pkgId = bookingPkgMap.get(r.booking_id)
+                if (pkgId) {
+                  const pkg = (pkgs || []).find((p: any) => p.id === pkgId)
+                  if (pkg) {
+                    const existing = ratingMap.get(pkg.tenant_id) || { sum: 0, count: 0 }
+                    existing.sum += r.rating; existing.count += 1
+                    ratingMap.set(pkg.tenant_id, existing)
+                  }
+                }
+              })
+              ags.forEach((a: any) => {
+                const r = ratingMap.get(a.id)
+                a.avg_rating = r && r.count > 0 ? Math.round((r.sum / r.count) * 10) / 10 : null
+              })
+            }
           }
         }
         setAgencies(ags)
@@ -313,18 +324,38 @@ export function TestimonialSection() {
       try {
         const { data } = await supabase
           .from("reviews")
-          .select("id, rating, review, created_at, customer:users(full_name), package:packages(name)")
+          .select("id, rating, review, created_at, customer_id, booking_id")
           .eq("status", "published")
           .order("created_at", { ascending: false })
           .limit(3)
         if (data && data.length > 0) {
+          const userIds = [...new Set(data.map((r: any) => r.customer_id).filter(Boolean))]
+          let nameMap: Record<string, string> = {}
+          if (userIds.length > 0) {
+            const { data: users } = await supabase.from("users").select("id, full_name").in("id", userIds)
+            if (users) nameMap = Object.fromEntries(users.map((u: any) => [u.id, u.full_name]))
+          }
+          const bookingIds = [...new Set(data.map((r: any) => r.booking_id).filter(Boolean))]
+          let pkgMap: Record<string, string> = {}
+          if (bookingIds.length > 0) {
+            const { data: bookings } = await supabase.from("bookings").select("id, package_id").in("id", bookingIds)
+            const bookingToPkg = new Map<string, string>()
+            ;(bookings || []).forEach((b: any) => { if (b.package_id) bookingToPkg.set(b.id, b.package_id) })
+            const pkgIds = [...new Set((bookings || []).map((b: any) => b.package_id).filter(Boolean))]
+            if (pkgIds.length > 0) {
+              const { data: pkgs } = await supabase.from("packages").select("id, name").in("id", pkgIds)
+              const rawPkgMap = new Map<string, string>()
+              ;(pkgs || []).forEach((p: any) => rawPkgMap.set(p.id, p.name))
+              bookingToPkg.forEach((pkgId, bid) => { pkgMap[bid] = rawPkgMap.get(pkgId) || "Umroh" })
+            }
+          }
           const mapped = data.map((r: any) => ({
             id: r.id,
-            name: r.customer?.full_name || "Pengguna",
+            name: r.customer_id ? (nameMap[r.customer_id] || "Pengguna") : "Pengguna",
             city: "Indonesia",
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(r.customer?.full_name || "U")}&background=E8F5EE&color=2A7D4F&size=80&bold=true`,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(nameMap[r.customer_id] || "U")}&background=E8F5EE&color=2A7D4F&size=80&bold=true`,
             rating: r.rating,
-            package: r.package?.name || "Umroh",
+            package: r.booking_id ? (pkgMap[r.booking_id] || "Umroh") : "Umroh",
             comment: r.review || "Paket bagus, pelayanan memuaskan!",
           }))
           setTestimonials(mapped)

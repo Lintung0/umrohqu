@@ -56,12 +56,13 @@ interface ReviewRow {
   rating: number
   review: string | null
   created_at: string
-  customer: { full_name: string } | null
+  customer_id: string | null
 }
 
 interface Props {
   pkg: PackageDetail
   reviews: ReviewRow[]
+  reviewerMap?: Record<string, string>
   images?: string[]
 }
 
@@ -99,7 +100,7 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
   )
 }
 
-export default function PackageDetailClient({ pkg, reviews: initialReviews, images: initialImages }: Props) {
+export default function PackageDetailClient({ pkg, reviews: initialReviews, reviewerMap = {}, images: initialImages }: Props) {
   const router = useRouter()
   const TAB_ITEMS = [
     { id: "overview", label: "Ringkasan", icon: Info },
@@ -296,10 +297,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                               <div className="bg-gray-50 rounded-xl p-4 border border-border/40 hover:border-primary/20 hover:bg-primary/[0.02] transition-all">
                                 <p className="text-xs font-semibold text-primary mb-1">Hari ke-{idx + 1}</p>
                                 <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
-                              </div>
+                               </div>
+                             </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     ) : (
                       <div className="text-center py-12">
@@ -388,14 +389,16 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                           </div>
                         </div>
                         <div className="space-y-3">
-                          {initialReviews.map((r) => (
+                          {initialReviews.map((r) => {
+                            const reviewerName = r.customer_id ? (reviewerMap[r.customer_id] || "Pengguna") : "Pengguna"
+                            return (
                             <div key={r.id} className="border-b border-border/50 pb-3 last:border-0">
                               <div className="flex items-center gap-2.5 mb-1.5">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                  <span className="text-xs font-bold text-primary">{r.customer?.full_name?.charAt(0) || "U"}</span>
+                                  <span className="text-xs font-bold text-primary">{reviewerName.charAt(0)}</span>
                                 </div>
                                 <div>
-                                  <p className="text-sm font-medium">{r.customer?.full_name || "Pengguna"}</p>
+                                  <p className="text-sm font-medium">{reviewerName}</p>
                                   <div className="flex items-center gap-1.5">
                                     <div className="flex gap-0.5">
                                       {[1,2,3,4,5].map((s) => (
@@ -408,7 +411,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, imag
                               </div>
                               {r.review && <p className="text-sm text-muted-foreground ml-10">{r.review}</p>}
                             </div>
-                          ))}
+                          )
+                          })}
                         </div>
                       </>
                     ) : (

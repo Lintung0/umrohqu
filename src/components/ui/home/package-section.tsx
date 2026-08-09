@@ -43,17 +43,27 @@ export default function PackageSection() {
       const pkgs = (data as Package[]) || [];
       if (pkgs.length > 0) {
         const ids = pkgs.map((p) => p.id);
-        const { data: reviews } = await supabase
-          .from("reviews")
-          .select("package_id, rating")
+        const { data: bookings } = await supabase
+          .from("bookings")
+          .select("id, package_id")
           .in("package_id", ids);
+        const bookingIds = (bookings || []).map((b: any) => b.id);
+        const bookingPkgMap = new Map<string, string>();
+        (bookings || []).forEach((b: any) => { bookingPkgMap.set(b.id, b.package_id); });
+
+        const { data: reviews } = bookingIds.length > 0
+          ? await supabase.from("reviews").select("rating, booking_id").in("booking_id", bookingIds)
+          : { data: null };
 
         const ratingMap = new Map<string, { sum: number; count: number }>();
         (reviews || []).forEach((r: any) => {
-          const existing = ratingMap.get(r.package_id) || { sum: 0, count: 0 };
-          existing.sum += r.rating;
-          existing.count += 1;
-          ratingMap.set(r.package_id, existing);
+          const pkgId = bookingPkgMap.get(r.booking_id);
+          if (pkgId) {
+            const existing = ratingMap.get(pkgId) || { sum: 0, count: 0 };
+            existing.sum += r.rating;
+            existing.count += 1;
+            ratingMap.set(pkgId, existing);
+          }
         });
 
         (pkgs as any).forEach((p: any) => {

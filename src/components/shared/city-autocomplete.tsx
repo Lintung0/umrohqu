@@ -51,18 +51,32 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
 
     setLoading(true)
     try {
+      const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY
+      if (!apiKey) {
+        setSuggestions([])
+        setOpen(false)
+        setLoading(false)
+        return
+      }
+
       const params = new URLSearchParams({
         text: query,
         type: "city",
         lang: "id",
         limit: "7",
-        apiKey: process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY || "",
+        apiKey,
       })
       if (countryFilter) {
         params.set("filter", `countrycode:${countryFilter.toLowerCase()}`)
       }
 
       const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?${params}`)
+      if (!res.ok) {
+        setSuggestions([])
+        setOpen(false)
+        setLoading(false)
+        return
+      }
       const data = await res.json()
 
       const results: Suggestion[] = (data.features || []).map((f: any) => ({

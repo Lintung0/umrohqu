@@ -57,13 +57,34 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     notFound()
   }
 
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select("id, rating, review, created_at, customer:users(full_name)")
+  // Get reviews for this package via bookings join
+  const { data: pkgBookings } = await supabase
+    .from("bookings")
+    .select("id")
     .eq("package_id", pkg.id)
-    .eq("status", "published")
-    .order("created_at", { ascending: false })
-    .limit(20)
+  const pkgBookingIds = (pkgBookings || []).map((b: any) => b.id)
+
+  const { data: reviews } = pkgBookingIds.length > 0
+    ? await supabase
+        .from("reviews")
+        .select("id, rating, review, created_at, customer_id")
+        .in("booking_id", pkgBookingIds)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .limit(20)
+    : { data: null }
+
+  const reviewerIds = [...new Set((reviews || []).map((r: any) => r.customer_id).filter(Boolean))]
+  let reviewerMap: Record<string, string> = {}
+  if (reviewerIds.length > 0) {
+    const { data: reviewers } = await supabase
+      .from("users")
+      .select("id, full_name")
+      .in("id", reviewerIds)
+    if (reviewers) {
+      reviewerMap = Object.fromEntries(reviewers.map((r: any) => [r.id, r.full_name]))
+    }
+  }
 
   const images = [
     pkg.image_url,
@@ -74,6 +95,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     <PackageDetailClient
       pkg={pkg}
       reviews={(reviews as any) || []}
+      reviewerMap={reviewerMap}
       images={images}
     />
   )

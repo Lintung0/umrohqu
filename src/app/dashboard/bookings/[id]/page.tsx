@@ -54,18 +54,42 @@ export default function BookingDetailPage() {
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+
+      // Fetch booking — try user-scoped first, then fallback for guest/Xendit-redirect cases
+      let query = supabase
+        .from("bookings")
+        .select("*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
+        .eq("id", params.id)
+
+      // If logged in, scope to user; otherwise allow any booking (guest checkout / post-Xendit redirect)
+      if (user) {
+        query = query.eq("customer_id", user.id)
+      }
+
+      const { data, error } = await query.single()
+      const b = data as any
+
+      // If no booking found and user is logged in, try without customer_id filter
+      // (handles edge case where session changed after Xendit redirect)
+      if (!b && user) {
+        const { data: fallback } = await supabase
+          .from("bookings")
+          .select("*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
+          .eq("id", params.id)
+          .single()
+        if (fallback) {
+          setBooking(fallback as any)
+          setLoading(false)
+          return
+        }
+      }
+
+      // Redirect to login only if there's truly no booking AND no user
+      if (!b && !user) {
         router.push(`/login?redirect_to=/dashboard/bookings/${params.id}`)
         return
       }
 
-      const { data } = await supabase
-        .from("bookings")
-        .select("*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
-        .eq("id", params.id)
-        .eq("customer_id", user.id)
-        .single()
-      const b = data as any
       setBooking(b)
       setLoading(false)
 

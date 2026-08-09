@@ -87,6 +87,9 @@ function CityAutocompleteFilter({
 
   const fetchSuggestions = useCallback(async (query: string) => {
     if (!query || query.length < 2) { setSuggestions([]); setOpen(false); return }
+    const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY
+    if (!apiKey) { setSuggestions([]); setOpen(false); return }
+
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -94,11 +97,12 @@ function CityAutocompleteFilter({
         type: "city",
         lang: "id",
         limit: "7",
-        apiKey: process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY || "",
+        apiKey,
       })
       if (countryFilter) params.set("filter", `countrycode:${countryFilter.toLowerCase()}`)
 
       const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?${params}`)
+      if (!res.ok) { setSuggestions([]); setOpen(false); setLoading(false); return }
       const data = await res.json()
 
       const results: GeoapifySuggestion[] = (data.features || [])
