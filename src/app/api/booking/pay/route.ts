@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
 
     try {
       const { createInvoice } = await import("@/lib/services/xendit")
-      const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+      const host = request.headers.get("host") || ""
+      const protocol = host.includes("localhost") ? "http" : "https"
+      const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`
       const inv = await createInvoice({
         externalId: `booking-${booking.id}`,
         amount: payAmount,
