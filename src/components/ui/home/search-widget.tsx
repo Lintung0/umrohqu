@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
-import { Search, Package, MapPin, Calendar } from "lucide-react"
+import { Search, Package, MapPin, Calendar, ChevronDown } from "lucide-react"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
 
 const MONTHS = [
@@ -75,7 +75,7 @@ export default function SearchWidget() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Cari nama paket atau travel..."
-              className="w-full h-12 bg-white/15 border border-white/30 rounded-xl px-4 !text-white !placeholder:text-white/50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400/40 transition-all"
+              className="w-full h-12 bg-white/15 border border-white/30 rounded-xl px-4 !text-white placeholder:text-emerald-100/50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400/40 transition-all"
             />
           </div>
 
@@ -90,7 +90,7 @@ export default function SearchWidget() {
               onChange={setDepartureCity}
               placeholder="Kota keberangkatan..."
               countryFilter={country}
-              className="w-full h-12 bg-white/15 border border-white/30 rounded-xl px-4 !text-white !placeholder:text-white/50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400/40 transition-all"
+              className="w-full h-12 bg-white/15 border border-white/30 rounded-xl pl-11 pr-4 !text-white placeholder:text-emerald-100/50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400/40 transition-all"
             />
           </div>
 
@@ -101,26 +101,32 @@ export default function SearchWidget() {
               Bulan & Tahun
             </label>
             <div className="flex gap-2">
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="flex-1 h-12 bg-emerald-900/90 text-white font-semibold border border-white/30 rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400/40 transition-all appearance-none cursor-pointer"
-              >
-                <option value="" className="bg-emerald-950 text-white">Bulan</option>
-                {MONTHS.map((m) => (
-                  <option key={m.value} value={m.value} className="bg-emerald-950 text-white">{m.label}</option>
-                ))}
-              </select>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="w-24 h-12 bg-emerald-900/90 text-white font-semibold border border-white/30 rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400/40 transition-all appearance-none cursor-pointer"
-              >
-                <option value="" className="bg-emerald-950 text-white">Tahun</option>
-                {YEARS.map((y) => (
-                  <option key={y.value} value={y.value} className="bg-emerald-950 text-white">{y.label}</option>
-                ))}
-              </select>
+              <div className="relative flex-1">
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="w-full h-12 bg-emerald-900/90 text-white font-semibold border border-white/30 rounded-xl pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400/40 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-emerald-950 text-white">Bulan</option>
+                  {MONTHS.map((m) => (
+                    <option key={m.value} value={m.value} className="bg-emerald-950 text-white">{m.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+              </div>
+              <div className="relative w-24">
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="w-full h-12 bg-emerald-900/90 text-white font-semibold border border-white/30 rounded-xl pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400/40 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-emerald-950 text-white">Tahun</option>
+                  {YEARS.map((y) => (
+                    <option key={y.value} value={y.value} className="bg-emerald-950 text-white">{y.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+              </div>
             </div>
           </div>
 
