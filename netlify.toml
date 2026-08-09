@@ -2,6 +2,9 @@
   command = "npm run build"
   publish = ".next"
 
+[env]
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_GEOAPIFY_API_KEY,NEXT_PUBLIC_XENDIT_PUBLIC_KEY"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
@@ -11,8 +14,3 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-
-[[redirects]]
-  from = "/.well-known/*"
-  to = "/.well-known/:splat"
-  status = 200
