@@ -5,8 +5,8 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Logo from "./logo"
-import { LanguageSwitcher } from "@/components/shared/language-switcher"
-import { LayoutDashboard, LogOut, ChevronDown, Menu, X } from "lucide-react"
+import { CompactLanguageSwitcher } from "@/components/shared/compact-language-switcher"
+import { LayoutDashboard, LogOut, ChevronDown, Menu, X, Clock } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
@@ -127,11 +127,26 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* ── Right: Language + Auth ── */}
-        <div className="flex items-center justify-end gap-3 shrink-0">
-          <div className="hidden md:flex items-center gap-4">
-            <LanguageSwitcher />
+        {/* ── Right: Utilities + Auth ── */}
+        <div className="flex items-center justify-end shrink-0">
+          <div className="hidden md:flex items-center gap-2">
+            {/* Prayer Times — icon only */}
+            <Link
+              href="/jadwal-sholat"
+              className="flex items-center justify-center w-9 h-9 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-slate-50 transition-colors"
+              title={t.nav.jadwal_sholat}
+            >
+              <Clock className="w-[18px] h-[18px]" />
+            </Link>
 
+            <div className="w-px h-5 bg-slate-200 mx-0.5" />
+
+            {/* Compact Language Selector */}
+            <CompactLanguageSwitcher />
+
+            <div className="w-px h-5 bg-slate-200 mx-0.5" />
+
+            {/* Auth */}
             {loading ? (
               <div className="w-20 h-9 bg-slate-100 rounded-xl animate-pulse" />
             ) : user ? (
@@ -178,10 +193,10 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-3">
+              <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-semibold rounded-xl border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
+                  className="px-4 py-2 text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
                 >
                   {t.nav.login}
                 </Link>
@@ -191,7 +206,7 @@ const Navbar = () => {
                 >
                   {t.nav.register}
                 </Link>
-              </div>
+              </>
             )}
           </div>
 
@@ -220,8 +235,17 @@ const Navbar = () => {
               </Link>
             ))}
 
+            <Link
+              href="/jadwal-sholat"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+            >
+              <Clock className="w-4 h-4 text-emerald-600" />
+              {t.nav.jadwal_sholat}
+            </Link>
+
             <div className="px-4 py-2">
-              <LanguageSwitcher />
+              <CompactLanguageSwitcher />
             </div>
 
             <div className="pt-2 border-t border-slate-100 mt-2">

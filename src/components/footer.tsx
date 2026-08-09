@@ -8,7 +8,7 @@ import { useTranslation } from "@/lib/i18n"
 import dynamic from "next/dynamic"
 import { useState } from "react"
 import CountrySelect from "@/components/shared/country-select"
-import { LanguageSwitcher } from "@/components/shared/language-switcher"
+import { CompactLanguageSwitcher } from "@/components/shared/compact-language-switcher"
 
 const Kaaba3D = dynamic(() => import("@/components/ui/home/kaaba-3d"), { ssr: false })
 
@@ -193,7 +193,7 @@ const Footer = () => {
             </p>
             <div className="flex items-center gap-3">
               <CountrySelect value={country} onChange={handleCountryChange} variant="dark" />
-              <LanguageSwitcher />
+              <CompactLanguageSwitcher />
               <div className="flex items-center gap-1 text-xs text-white/30">
                 Made with
                 <span className="text-gold/60">&hearts;</span>
