@@ -80,7 +80,7 @@ export default function AdminPaymentsPage() {
   }
 
   function handleExport() {
-    const headers = ["Travel", "Revenue", "Status", "Tanggal"]
+    const headers = ["Travel", "Pendapatan", "Status", "Tanggal"]
     const rows = payouts.map((p) => [
       (p.tenants as any)?.name || "-",
       p.amount,
@@ -158,9 +158,9 @@ export default function AdminPaymentsPage() {
               <tr className="border-b border-border bg-gray-50/50">
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Travel</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Periode</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Revenue</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Service Fee</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Net Payout</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Pendapatan</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Biaya Layanan</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Payout Bersih</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tanggal</th>
               </tr>
@@ -198,7 +198,7 @@ export default function AdminPaymentsPage() {
                         payout.status === "pending" ? "bg-yellow-100 text-yellow-700" :
                         "bg-gray-100 text-gray-500"
                       }`}>
-                        <Clock className="w-3 h-3" /> {payout.status === "completed" ? "Selesai" : payout.status === "pending" ? "Pending" : payout.status}
+                        <Clock className="w-3 h-3" /> {payout.status === "completed" ? "Selesai" : payout.status === "pending" ? "Menunggu" : payout.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{new Date(payout.created_at).toLocaleDateString("id-ID")}</td>
@@ -223,15 +223,15 @@ export default function AdminPaymentsPage() {
                 <span className="font-medium">{confirmPayout.name}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Revenue</span>
+                <span className="text-muted-foreground">Total Pendapatan</span>
                 <span className="font-semibold">{formatRupiah(confirmPayout.total_revenue || 0)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Service Fee (0.3%)</span>
+                <span className="text-muted-foreground">Biaya Layanan (0.3%)</span>
                 <span className="text-red-500">-{formatRupiah(Math.round((confirmPayout.total_revenue || 0) * serviceFeePercent / 100))}</span>
               </div>
               <div className="border-t border-border pt-2 flex justify-between font-bold">
-                <span>Net Payout</span>
+                <span>Payout Bersih</span>
                 <span className="text-emerald-600">{formatRupiah((confirmPayout.total_revenue || 0) - Math.round((confirmPayout.total_revenue || 0) * serviceFeePercent / 100))}</span>
               </div>
             </div>

@@ -97,7 +97,7 @@ export default function TravelPilgrimsPage() {
         {[
           { label: "Total Jamaah", value: pilgrims.length, color: "bg-emerald-50 text-emerald-700" },
           { label: "Terkonfirmasi", value: confirmedCount, color: "bg-blue-50 text-blue-700" },
-          { label: "Pending", value: pendingCount, color: "bg-yellow-50 text-yellow-700" },
+          { label: "Menunggu", value: pendingCount, color: "bg-yellow-50 text-yellow-700" },
         ].map((s) => (
           <div key={s.label} className={`rounded-xl p-4 ${s.color}`}>
             <p className="text-2xl font-bold">{s.value}</p>

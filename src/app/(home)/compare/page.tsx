@@ -271,7 +271,7 @@ function CompareContent() {
             <p className="text-sm text-muted-foreground mt-0.5">Pilih hingga {MAX_COMPARE} paket untuk dibandingkan</p>
           </div>
           <Link href="/search">
-            <Button variant="outline" size="sm" className="text-xs">← Cari Paket Lain</Button>
+            <Button variant="outline" size="sm" className="text-xs">← Kembali</Button>
           </Link>
         </div>
       </div>
@@ -398,7 +398,7 @@ function CompareContent() {
               <h3 className="font-semibold text-lg mb-2">Belum ada paket dipilih</h3>
               <p className="text-sm text-muted-foreground mb-6">Pilih paket dari halaman pencarian atau klik tombol + di atas</p>
               <Link href="/search">
-                <Button>Cari Paket Umroh</Button>
+                <Button>Cari Paket</Button>
               </Link>
             </div>
           )}
@@ -419,7 +419,7 @@ function CompareContent() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari nama paket..."
+                placeholder="Cari paket..."
                 className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 autoFocus
               />

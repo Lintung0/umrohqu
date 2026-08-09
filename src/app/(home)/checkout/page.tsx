@@ -567,7 +567,7 @@ function StepDataSingkat({
               disabled={!allPilgrimsFilled}
               className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
             >
-              Lanjut ke Pembayaran <ChevronRight className="w-4 h-4" />
+            Lanjut <ChevronRight className="w-4 h-4" />
             </Button>
 
             {!allPilgrimsFilled && (
@@ -874,7 +874,7 @@ function StepReview({
               <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Service fee</span>
+              <span className="text-slate-500">Biaya layanan</span>
               <span className="font-medium">{formatRupiah(feeBreakdown.serviceFee)}</span>
             </div>
             <div className="border-t border-dashed border-slate-200 pt-2 flex justify-between text-sm">

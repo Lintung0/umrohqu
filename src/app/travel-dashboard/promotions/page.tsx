@@ -525,7 +525,7 @@ export default function TravelPromotionsPage() {
                               <button
                                 onClick={() => openBidEdit(bid)}
                                 className="p-1.5 text-muted-foreground hover:bg-gray-100 rounded-lg transition-colors"
-                                title="Edit"
+                                title="Ubah"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
@@ -571,7 +571,7 @@ export default function TravelPromotionsPage() {
                   <label className="block text-sm font-medium mb-1">Tipe Diskon</label>
                   <select value={form.discount_type} onChange={(e) => setForm({ ...form, discount_type: e.target.value })} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                     <option value="discount_percent">Persentase (%)</option>
-                    <option value="discount_fixed">Fixed Amount (Rp)</option>
+                    <option value="discount_fixed">Nominal Tetap (Rp)</option>
                   </select>
                 </div>
               </div>

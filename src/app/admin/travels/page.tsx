@@ -20,7 +20,7 @@ interface TenantRow {
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  pending: { label: "Menunggu Verifikasi", color: "bg-yellow-100 text-yellow-700" },
+  pending: { label: "Menunggu", color: "bg-yellow-100 text-yellow-700" },
   verified: { label: "Terverifikasi", color: "bg-green-100 text-green-700" },
   suspended: { label: "Ditangguhkan", color: "bg-red-100 text-red-700" },
   rejected: { label: "Ditolak", color: "bg-gray-100 text-gray-500" },
@@ -105,7 +105,7 @@ export default function AdminTravelsPage() {
         {[
           { label: "Total", value: tenants.length, color: "text-foreground" },
           { label: "Terverifikasi", value: verifiedCount, color: "text-green-600" },
-          { label: "Pending", value: pendingCount, color: "text-yellow-600" },
+          { label: "Menunggu", value: pendingCount, color: "text-yellow-600" },
           { label: "Ditangguhkan", value: suspendedCount, color: "text-red-500" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4 text-center">

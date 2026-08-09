@@ -78,11 +78,11 @@ export default function TravelReportsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { icon: DollarSign, label: "Total Revenue", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
-          { icon: BarChart3, label: "Total Fee", value: formatRupiah(totalFees), color: "bg-blue-100 text-blue-700" },
+          { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
+          { icon: BarChart3, label: "Total Biaya", value: formatRupiah(totalFees), color: "bg-blue-100 text-blue-700" },
           { icon: Package, label: "Total Booking", value: totalBookings, color: "bg-purple-100 text-purple-700" },
           { icon: Users, label: "Total Jamaah", value: totalPilgrims, color: "bg-amber-100 text-amber-700" },
-          { icon: TrendingUp, label: "Avg/Booking", value: formatRupiah(avgBooking), color: "bg-pink-100 text-pink-700" },
+          { icon: TrendingUp, label: "Rata-rata/Booking", value: formatRupiah(avgBooking), color: "bg-pink-100 text-pink-700" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4">
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.color} mb-2`}>
@@ -96,7 +96,7 @@ export default function TravelReportsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl border border-border p-5">
-          <h2 className="font-semibold mb-4">Channel Breakdown</h2>
+          <h2 className="font-semibold mb-4">Rincian per Channel</h2>
           <div className="space-y-3">
             {[
               { channel: "marketplace", label: "Portal Utama", bookings: marketplaceBookings, color: "bg-emerald-500" },

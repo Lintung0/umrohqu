@@ -261,7 +261,7 @@ export default function AdminPromosPage() {
                   <label className="block text-sm font-medium mb-1">Tipe Diskon</label>
                   <select value={form.discount_type} onChange={(e) => setForm({ ...form, discount_type: e.target.value })} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                     <option value="discount_percent">Persentase (%)</option>
-                    <option value="discount_fixed">Fixed Amount (Rp)</option>
+                    <option value="discount_fixed">Nominal Tetap (Rp)</option>
                   </select>
                 </div>
               </div>

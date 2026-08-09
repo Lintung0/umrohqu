@@ -93,7 +93,7 @@ export default function PromotionsPage() {
                 </div>
                 <div className="pt-2">
                   <Link href="/search">
-                    <Button size="sm" className="text-xs h-8">Cari Paket Sekarang</Button>
+                    <Button size="sm" className="text-xs h-8">Cari Paket</Button>
                   </Link>
                 </div>
               </div>

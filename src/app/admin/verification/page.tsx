@@ -64,7 +64,7 @@ export default function AdminVerificationPage() {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Menunggu Verifikasi", value: pending.length, color: "bg-yellow-50 text-yellow-700" },
+          { label: "Menunggu", value: pending.length, color: "bg-yellow-50 text-yellow-700" },
           { label: "Terverifikasi", value: verifiedCount, color: "bg-green-50 text-green-700" },
           { label: "Ditolak", value: rejectedCount, color: "bg-red-50 text-red-700" },
         ].map((s) => (

@@ -182,14 +182,14 @@ export default function AdminBillingPromosPage() {
           <div className="border border-border rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="w-5 h-5 text-blue-600" />
-              <h3 className="font-medium text-sm">Fixed Amount</h3>
+              <h3 className="font-medium text-sm">Nominal Tetap</h3>
             </div>
             <p className="text-xs text-muted-foreground">Diskon nominal tetap. Contoh: Rp500.000, Rp1.500.000 per orang</p>
           </div>
           <div className="border border-border rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <Tag className="w-5 h-5 text-purple-600" />
-              <h3 className="font-medium text-sm">Voucher Code</h3>
+              <h3 className="font-medium text-sm">Kode Voucher</h3>
             </div>
             <p className="text-xs text-muted-foreground">Kode voucher yang dimasukkan saat checkout. Bisa dikombinasikan dengan tipe lain</p>
           </div>
@@ -254,7 +254,7 @@ export default function AdminBillingPromosPage() {
                   <label className="block text-sm font-medium mb-1">Tipe Diskon</label>
                   <select value={form.discount_type} onChange={(e) => setForm({ ...form, discount_type: e.target.value })} className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                     <option value="discount_percent">Persentase (%)</option>
-                    <option value="discount_fixed">Fixed Amount (Rp)</option>
+                    <option value="discount_fixed">Nominal Tetap (Rp)</option>
                   </select>
                 </div>
               </div>

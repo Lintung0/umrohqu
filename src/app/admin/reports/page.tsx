@@ -100,11 +100,11 @@ export default function AdminReportsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { icon: DollarSign, label: "Total Revenue", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
+          { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
           { icon: Package, label: "Total Booking", value: totalBookings, color: "bg-blue-100 text-blue-700" },
           { icon: Building2, label: "Total Travel", value: tenants.length, color: "bg-purple-100 text-purple-700" },
           { icon: Users, label: "Travel Aktif", value: verifiedTravels.length, color: "bg-amber-100 text-amber-700" },
-          { icon: TrendingUp, label: "Avg/Travel", value: formatRupiah(verifiedTravels.length > 0 ? Math.round(totalRevenue / verifiedTravels.length) : 0), color: "bg-pink-100 text-pink-700" },
+          { icon: TrendingUp, label: "Rata-rata/Travel", value: formatRupiah(verifiedTravels.length > 0 ? Math.round(totalRevenue / verifiedTravels.length) : 0), color: "bg-pink-100 text-pink-700" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4">
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.color} mb-2`}>
@@ -117,7 +117,7 @@ export default function AdminReportsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-5">
-        <h2 className="font-semibold mb-4">Revenue Platform per Bulan</h2>
+        <h2 className="font-semibold mb-4">Pendapatan Platform per Bulan</h2>
         <div className="flex items-end gap-3 h-48">
           {revenue.map((r) => (
             <div key={r.month} className="flex-1 flex flex-col items-center gap-2">
@@ -133,7 +133,7 @@ export default function AdminReportsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-5">
-        <h2 className="font-semibold mb-4">Top Travel by Revenue</h2>
+        <h2 className="font-semibold mb-4">Travel Teratas berdasarkan Pendapatan</h2>
         <div className="space-y-3">
           {verifiedTravels.sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0)).slice(0, 5).map((travel, idx) => (
             <div key={travel.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50">

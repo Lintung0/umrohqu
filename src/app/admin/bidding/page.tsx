@@ -25,7 +25,7 @@ interface BiddingRow {
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   active: { label: "Aktif", color: "bg-emerald-100 text-emerald-700" },
   outbid: { label: "Kalah", color: "bg-red-100 text-red-700" },
-  expired: { label: "Expired", color: "bg-gray-100 text-gray-500" },
+  expired: { label: "Kedaluwarsa", color: "bg-gray-100 text-gray-500" },
   cancelled: { label: "Dibatalkan", color: "bg-yellow-100 text-yellow-700" },
 }
 
@@ -136,9 +136,9 @@ export default function AdminBiddingPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total Budget/Hari", value: formatRupiah(totalBudget), icon: Target, color: "bg-emerald-100 text-emerald-700" },
-          { label: "Active Bids", value: activeBids, icon: TrendingUp, color: "bg-blue-100 text-blue-700" },
-          { label: "Total Impressions", value: totalImpressions.toLocaleString(), icon: Eye, color: "bg-purple-100 text-purple-700" },
-          { label: "Total Clicks", value: totalClicks.toLocaleString(), icon: MousePointerClick, color: "bg-amber-100 text-amber-700" },
+          { label: "Bidding Aktif", value: activeBids, icon: TrendingUp, color: "bg-blue-100 text-blue-700" },
+          { label: "Total Tayangan", value: totalImpressions.toLocaleString(), icon: Eye, color: "bg-purple-100 text-purple-700" },
+          { label: "Total Klik", value: totalClicks.toLocaleString(), icon: MousePointerClick, color: "bg-amber-100 text-amber-700" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4">
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.color} mb-2`}>
@@ -159,8 +159,8 @@ export default function AdminBiddingPage() {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Travel</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Paket</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Bid/Hari</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Impressions</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Clicks</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tayangan</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Klik</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">CTR</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Periode</th>

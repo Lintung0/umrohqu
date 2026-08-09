@@ -160,7 +160,7 @@ export default function TravelDashboardOverview() {
         {[
           { icon: Package, label: "Paket Aktif", value: stats.packageCount, color: "bg-emerald-100 text-emerald-600" },
           { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, color: "bg-blue-100 text-blue-600" },
-          { icon: DollarSign, label: "Total Revenue", value: formatRupiah(stats.totalRevenue), color: "bg-purple-100 text-purple-600" },
+          { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(stats.totalRevenue), color: "bg-purple-100 text-purple-600" },
           { icon: Users, label: "Total Jamaah", value: stats.totalPilgrims, color: "bg-amber-100 text-amber-600" },
         ].map((s) => (
           <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} color={s.color} />
@@ -201,7 +201,7 @@ export default function TravelDashboardOverview() {
           <Link href="/travel-dashboard/reports" className="block bg-white border border-border rounded-2xl p-5 hover:bg-gray-50 transition-colors">
             <TrendingUp className="w-6 h-6 mb-2 text-emerald-600" />
             <p className="font-semibold">Lihat Laporan</p>
-            <p className="text-muted-foreground text-sm mt-0.5">Revenue & analytics</p>
+            <p className="text-muted-foreground text-sm mt-0.5">Pendapatan & Analitik</p>
           </Link>
         </div>
       </div>

@@ -19,17 +19,17 @@ interface InvoiceRow {
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; icon: typeof Clock }> = {
-  pending: { label: "Pending", color: "bg-yellow-100 text-yellow-700", icon: Clock },
+  pending: { label: "Menunggu", color: "bg-yellow-100 text-yellow-700", icon: Clock },
   paid: { label: "Lunas", color: "bg-green-100 text-green-700", icon: CheckCircle },
   overdue: { label: "Terlambat", color: "bg-red-100 text-red-700", icon: AlertTriangle },
   cancelled: { label: "Dibatalkan", color: "bg-gray-100 text-gray-500", icon: Clock },
 }
 
 const TYPE_MAP: Record<string, string> = {
-  setup_fee: "Setup Fee",
-  service_fee: "Service Fee",
-  subscription: "Subscription",
-  refund: "Refund",
+  setup_fee: "Biaya Setup",
+  service_fee: "Biaya Layanan",
+  subscription: "Langganan",
+  refund: "Pengembalian",
 }
 
 export default function AdminInvoicesPage() {
@@ -151,7 +151,7 @@ Terima kasih.
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Total", value: invoices.length, color: "text-foreground" },
-          { label: "Pending", value: invoices.filter((i) => i.status === "pending").length, color: "text-yellow-600" },
+          { label: "Menunggu", value: invoices.filter((i) => i.status === "pending").length, color: "text-yellow-600" },
           { label: "Terlambat", value: invoices.filter((i) => i.status === "overdue").length, color: "text-red-500" },
           { label: "Total Lunas", value: formatRupiah(totalPaid), color: "text-green-600" },
         ].map((s) => (

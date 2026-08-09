@@ -132,7 +132,7 @@ export default function TravelPackagesPage() {
                 statusFilter === s ? "bg-emerald-600 text-white" : "bg-white border border-border text-muted-foreground hover:bg-gray-50"
               }`}
             >
-              {s === "all" ? "Semua" : s === "published" ? "Aktif" : s === "draft" ? "Draft" : "Arsip"}
+              {s === "all" ? "Semua" : s === "published" ? "Aktif" : s === "draft" ? "Draf" : "Arsip"}
             </button>
           ))}
         </div>
@@ -160,7 +160,7 @@ export default function TravelPackagesPage() {
                 <div className="absolute top-3 left-3 flex gap-2">
                   {pkg.duration_days && <span className="bg-white/90 backdrop-blur text-xs font-medium px-2 py-1 rounded-lg">{pkg.duration_days} Hari</span>}
                   <span className={`px-2 py-1 rounded-lg text-xs font-medium ${pkg.status === "published" ? "bg-emerald-500 text-white" : "bg-gray-500 text-white"}`}>
-                    {pkg.status === "published" ? "Aktif" : pkg.status === "draft" ? "Draft" : "Arsip"}
+                    {pkg.status === "published" ? "Aktif" : pkg.status === "draft" ? "Draf" : "Arsip"}
                   </span>
                 </div>
               </div>

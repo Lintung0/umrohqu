@@ -112,10 +112,10 @@ export default function AdminBillingReportsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { icon: DollarSign, label: "Total Revenue", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
+          { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
           { icon: Receipt, label: "Service Fee Terkumpul", value: formatRupiah(totalPaid), color: "bg-blue-100 text-blue-700" },
           { icon: CreditCard, label: "Belum Dibayar", value: formatRupiah(totalPending), color: "bg-amber-100 text-amber-700" },
-          { icon: AlertTriangle, label: "Overdue", value: invoices.filter((i) => i.status === "overdue").length, color: "bg-red-100 text-red-700" },
+          { icon: AlertTriangle, label: "Terlambat", value: invoices.filter((i) => i.status === "overdue").length, color: "bg-red-100 text-red-700" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4">
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.color} mb-2`}>
@@ -128,7 +128,7 @@ export default function AdminBillingReportsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-border p-5">
-        <h2 className="font-semibold mb-4">Revenue Platform per Bulan</h2>
+        <h2 className="font-semibold mb-4">Pendapatan Platform per Bulan</h2>
         <div className="flex items-end gap-3 h-48">
           {revenue.map((r) => (
             <div key={r.month} className="flex-1 flex flex-col items-center gap-2">
@@ -152,7 +152,7 @@ export default function AdminBillingReportsPage() {
               const total = invs.reduce((s, i) => s + i.amount, 0)
               return (
                 <div key={status} className="flex justify-between items-center p-2 rounded-lg hover:bg-gray-50">
-                  <span className="capitalize text-muted-foreground">{status === "paid" ? "Lunas" : status === "pending" ? "Pending" : status === "overdue" ? "Terlambat" : "Dibatalkan"}</span>
+                  <span className="capitalize text-muted-foreground">{status === "paid" ? "Lunas" : status === "pending" ? "Menunggu" : status === "overdue" ? "Terlambat" : "Dibatalkan"}</span>
                   <span className="font-medium">{invs.length} invoice · {formatRupiah(total)}</span>
                 </div>
               )
@@ -161,7 +161,7 @@ export default function AdminBillingReportsPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-border p-5">
-          <h2 className="font-semibold mb-3">Top Revenue Travel</h2>
+          <h2 className="font-semibold mb-3">Travel dengan Pendapatan Tertinggi</h2>
           <div className="space-y-2">
             {tenants.filter((t) => t.status === "verified").sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0)).slice(0, 5).map((t) => (
               <div key={t.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 text-sm">

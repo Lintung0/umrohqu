@@ -233,7 +233,7 @@ export default function BookingDetailPage() {
                   <span className="text-xs">{formatRupiah(booking.platform_fee)}</span>
                 </div>
                 <div className="flex justify-between pl-3">
-                  <span className="text-muted-foreground text-xs">Service fee</span>
+                  <span className="text-muted-foreground text-xs">Biaya layanan</span>
                   <span className="text-xs">{formatRupiah(booking.service_fee || 0)}</span>
                 </div>
                 <div className="flex justify-between pl-3">

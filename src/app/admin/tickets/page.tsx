@@ -19,17 +19,17 @@ interface TicketRow {
 }
 
 const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
-  low: { label: "Low", color: "bg-gray-100 text-gray-600" },
-  medium: { label: "Medium", color: "bg-yellow-100 text-yellow-700" },
-  high: { label: "High", color: "bg-orange-100 text-orange-700" },
-  urgent: { label: "Urgent", color: "bg-red-100 text-red-700" },
+  low: { label: "Rendah", color: "bg-gray-100 text-gray-600" },
+  medium: { label: "Sedang", color: "bg-yellow-100 text-yellow-700" },
+  high: { label: "Tinggi", color: "bg-orange-100 text-orange-700" },
+  urgent: { label: "Mendesak", color: "bg-red-100 text-red-700" },
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  open: { label: "Open", color: "bg-blue-100 text-blue-700" },
-  in_progress: { label: "In Progress", color: "bg-yellow-100 text-yellow-700" },
-  resolved: { label: "Resolved", color: "bg-green-100 text-green-700" },
-  closed: { label: "Closed", color: "bg-gray-100 text-gray-500" },
+  open: { label: "Terbuka", color: "bg-blue-100 text-blue-700" },
+  in_progress: { label: "Diproses", color: "bg-yellow-100 text-yellow-700" },
+  resolved: { label: "Selesai", color: "bg-green-100 text-green-700" },
+  closed: { label: "Ditutup", color: "bg-gray-100 text-gray-500" },
 }
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -136,9 +136,9 @@ export default function AdminTicketsPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Open", value: tickets.filter((t) => t.status === "open").length, color: "text-blue-600" },
-          { label: "In Progress", value: tickets.filter((t) => t.status === "in_progress").length, color: "text-yellow-600" },
-          { label: "Resolved", value: tickets.filter((t) => t.status === "resolved").length, color: "text-green-600" },
+          { label: "Terbuka", value: tickets.filter((t) => t.status === "open").length, color: "text-blue-600" },
+          { label: "Diproses", value: tickets.filter((t) => t.status === "in_progress").length, color: "text-yellow-600" },
+          { label: "Selesai", value: tickets.filter((t) => t.status === "resolved").length, color: "text-green-600" },
           { label: "Total", value: tickets.length, color: "text-foreground" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4 text-center">

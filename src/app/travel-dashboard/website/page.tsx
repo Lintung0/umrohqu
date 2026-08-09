@@ -197,7 +197,7 @@ export default function TravelWebsitePage() {
                         setPreviewId(tpl.id)
                       }}
                       className="absolute bottom-2 right-2 p-1.5 rounded-lg bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 transition-colors"
-                      title="Preview template"
+                      title="Pratinjau template"
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </button>

@@ -20,9 +20,9 @@ interface Transaction {
 }
 
 const TYPE_LABEL: Record<string, string> = {
-  topup: "Topup",
+  topup: "Isi Saldo",
   payment: "Pembayaran",
-  refund: "Refund",
+  refund: "Pengembalian Dana",
   withdrawal: "Penarikan",
 }
 
@@ -130,7 +130,7 @@ export default function WalletPage() {
             onClick={() => setShowTopup(true)}
             className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
           >
-            <Plus className="w-4 h-4" /> Topup
+            <Plus className="w-4 h-4" /> Isi Saldo
           </button>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function WalletPage() {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold">Topup Saldo</h3>
+              <h3 className="font-semibold">Isi Saldo</h3>
               <button onClick={() => { setShowTopup(false); setTopupUrl("") }} className="text-muted-foreground hover:text-foreground">
                 <XCircle className="w-5 h-5" />
               </button>
@@ -198,7 +198,7 @@ export default function WalletPage() {
               disabled={topupLoading || topupAmount < 10000}
               className="w-full h-11"
             >
-              {topupLoading ? "Memproses..." : `Topup ${formatRupiah(topupAmount)}`}
+              {topupLoading ? "Memproses..." : `Isi Saldo ${formatRupiah(topupAmount)}`}
             </Button>
           </div>
         </div>

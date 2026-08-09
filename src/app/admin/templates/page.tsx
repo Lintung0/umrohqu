@@ -211,7 +211,7 @@ export default function AdminTemplatesPage() {
             <Sparkles className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-emerald-900">Template Built-in</h3>
+            <h3 className="font-semibold text-sm text-emerald-900">Template Bawaan</h3>
             <p className="text-xs text-emerald-700/70 mt-0.5">
               {TEMPLATE_REGISTRY.length} template siap pakai:{" "}
               {TEMPLATE_REGISTRY.map((t) => t.name).join(", ")}. Template ini sudah memiliki tampilan interaktif.
