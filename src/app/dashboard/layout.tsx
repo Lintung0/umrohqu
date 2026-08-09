@@ -1,14 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar"
 import { createClient } from "@/lib/supabase/client"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [authorized, setAuthorized] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
     async function checkAuth() {
@@ -16,7 +14,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
-        router.push("/login")
+        // No session — middleware should have caught this, but if we're here
+        // (e.g. post-Xendit redirect), let the page handle its own auth.
+        // Don't block with "Akses ditolak" — the page uses API fallback.
+        setAuthorized(true)
+        setLoading(false)
         return
       }
 
@@ -28,11 +30,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       if (profile?.role === "customer") {
         setAuthorized(true)
+      } else {
+        // Wrong role — show access denied
+        setAuthorized(false)
       }
       setLoading(false)
     }
     checkAuth()
-  }, [router])
+  }, [])
 
   if (loading) {
     return (
@@ -45,9 +50,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!authorized) {
     return (
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground">Akses ditolak</p>
-          <a href="/" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Beranda</a>
+        <div className="text-center space-y-3">
+          <p className="text-muted-foreground font-medium">Akses ditolak</p>
+          <p className="text-sm text-muted-foreground">Anda tidak memiliki akses ke halaman ini.</p>
+          <a href="/" className="text-emerald-600 text-sm hover:underline inline-block">Kembali ke Beranda</a>
         </div>
       </div>
     )
