@@ -7,7 +7,7 @@ import { User } from "@supabase/supabase-js"
 import Logo from "./logo"
 import { LanguageSwitcher } from "@/components/shared/language-switcher"
 import CountrySelect from "@/components/shared/country-select"
-import { LayoutDashboard, LogOut, ChevronDown, Menu, X } from "lucide-react"
+import { LayoutDashboard, LogOut, ChevronDown, Menu, X, Clock } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
@@ -33,7 +33,8 @@ const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
   customer: "dashboard_saya",
 }
 
-const NAV_LINKS_KEYS = ["search_packages", "blog", "promo", "faq", "al_quran", "jadwal_sholat"] as const
+// Center nav links (Jadwal Sholat moved to right utility)
+const NAV_LINKS_KEYS = ["search_packages", "blog", "promo", "faq", "al_quran"] as const
 const NAV_HREFS: Record<string, string> = {
   search_packages: "/search",
   blog: "/articles",
@@ -131,15 +132,15 @@ const Navbar = () => {
 
   return (
     <header className="h-20 w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
-      <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 flex items-center">
+      <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 grid grid-cols-3 items-center">
 
-        {/* Logo — always left */}
-        <div className="shrink-0">
+        {/* ── Left: Logo ── */}
+        <div className="flex items-center justify-start">
           <Logo />
         </div>
 
-        {/* Desktop nav links — center, only md+ */}
-        <nav className="hidden lg:flex items-center gap-5 mx-auto text-sm font-medium text-slate-700">
+        {/* ── Center: Navigation links ── */}
+        <nav className="hidden md:flex items-center justify-center gap-6 text-sm font-medium text-slate-700">
           {NAV_LINKS_KEYS.map((key) => (
             <Link
               key={key}
@@ -151,10 +152,19 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* Right actions — always right-aligned */}
-        <div className="flex items-center gap-3 shrink-0">
-          {/* Desktop auth / user menu */}
+        {/* ── Right: Utilities + Auth ── */}
+        <div className="flex items-center justify-end gap-3">
+          {/* Desktop utilities + auth */}
           <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/jadwal-sholat"
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors whitespace-nowrap"
+              title={t.nav.jadwal_sholat}
+            >
+              <Clock className="w-4 h-4" />
+              <span className="hidden lg:inline">{t.nav.jadwal_sholat}</span>
+            </Link>
+            <div className="w-px h-5 bg-slate-200" />
             <CountrySelect value={country} onChange={handleCountryChange} />
             <LanguageSwitcher />
 
@@ -245,6 +255,15 @@ const Navbar = () => {
                 {t.nav[key]}
               </Link>
             ))}
+
+            <Link
+              href="/jadwal-sholat"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+            >
+              <Clock className="w-4 h-4 text-emerald-600" />
+              {t.nav.jadwal_sholat}
+            </Link>
 
             <div className="flex items-center gap-2 px-4 py-2">
               <CountrySelect value={country} onChange={handleCountryChange} />
