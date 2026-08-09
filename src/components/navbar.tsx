@@ -130,7 +130,7 @@ const Navbar = () => {
           </div>
 
           {/* Center: Nav Links (col-span-6, centered) */}
-          <nav className="col-span-6 hidden md:flex items-center justify-center gap-6 text-sm font-medium text-slate-700">
+          <nav className="col-span-6 hidden md:flex items-center justify-center space-x-4 text-sm font-medium text-slate-700">
             <Link href="/search" className="whitespace-nowrap hover:text-emerald-600 transition-colors">
               {t.nav.search_packages}
             </Link>
@@ -152,7 +152,7 @@ const Navbar = () => {
           </nav>
 
           {/* Right: Actions (col-span-3, end-aligned) */}
-          <div className="col-span-9 md:col-span-3 flex items-center justify-end gap-3 shrink-0">
+          <div className="col-span-9 md:col-span-3 flex items-center justify-end gap-3 shrink-0 whitespace-nowrap">
             <CountrySelect value={country} onChange={handleCountryChange} />
             <LanguageSwitcher />
 

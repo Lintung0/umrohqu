@@ -4,6 +4,8 @@
     "blog": "Blog",
     "promo": "Promo",
     "faq": "FAQ",
+    "al_quran": "Al-Quran",
+    "jadwal_sholat": "Prayer Times",
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
