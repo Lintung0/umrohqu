@@ -952,7 +952,7 @@ function StepReview({
               <Button variant="ghost" size="sm" className="text-xs">Batal</Button>
             </Link>
             <Button onClick={handleSubmit} disabled={submitting || (useWallet && amountToPayNow > 0)} className="gap-2 px-6">
-              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : `Bayar Sekarang ${formatRupiah(amountToPayNow)}`}
+              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Bayar"}
             </Button>
           </div>
         </div>
@@ -1035,7 +1035,7 @@ function StepReview({
               {submitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
               ) : (
-                <>Bayar Sekarang <ChevronRight className="w-4 h-4" /></>
+                <>Bayar <ChevronRight className="w-4 h-4" /></>
               )}
             </Button>
 

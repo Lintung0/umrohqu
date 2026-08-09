@@ -532,7 +532,7 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
         {submitting ? (
           <><Loader2 className="w-4 h-4 animate-spin" /> {t("common.loading")}</>
         ) : (
-          <><CreditCard className="w-4 h-4" /> Bayar Sekarang ({formatRupiah(total)})</>
+          <><CreditCard className="w-4 h-4" /> {t("booking.pay_now")}</>
         )}
       </button>
     </div>
