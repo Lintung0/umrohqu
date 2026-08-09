@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/client"
 import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, ArrowRight, Users, DollarSign, Package, Zap } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
-import StatCard from "@/components/shared/stat-card"
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "#C9A24B",
@@ -30,19 +29,31 @@ function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
   const totalRevenue = data.reduce((sum, d) => sum + d.gmv, 0)
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-24" role="img" aria-label={`Tren GMV: total ${formatRupiah(totalRevenue)}`}>
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-28" role="img" aria-label={`Tren GMV: total ${formatRupiah(totalRevenue)}`}>
       <defs>
         <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0E5C4E" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#0E5C4E" stopOpacity="0" />
+          <stop offset="0%" stopColor="#0E5C4E" stopOpacity={0.25} />
+          <stop offset="50%" stopColor="#0E5C4E" stopOpacity={0.08} />
+          <stop offset="100%" stopColor="#0E5C4E" stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#0E5C4E" stopOpacity={0.6} />
+          <stop offset="50%" stopColor="#0E5C4E" stopOpacity={1} />
+          <stop offset="100%" stopColor="#0E5C4E" stopOpacity={0.8} />
         </linearGradient>
       </defs>
       <polygon points={area} fill="url(#chartGrad)" />
-      <polyline points={points.join(" ")} fill="none" stroke="#0E5C4E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={points.join(" ")} fill="none" stroke="url(#lineGrad)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       {data.map((d, i) => {
         const x = (i / (data.length - 1)) * w
         const y = h - (d.gmv / max) * (h - 10)
-        return <circle key={i} cx={x} cy={y} r="4" fill="#0E5C4E" stroke="white" strokeWidth="2" />
+        const isLast = i === data.length - 1
+        return (
+          <g key={i}>
+            {isLast && <circle cx={x} cy={y} r="8" fill="#0E5C4E" opacity={0.12} />}
+            <circle cx={x} cy={y} r={isLast ? 5 : 3.5} fill="#0E5C4E" stroke="white" strokeWidth="2" />
+          </g>
+        )
       })}
     </svg>
   )
@@ -134,15 +145,26 @@ export default function AdminOverviewPage() {
         </Link>
       </div>
 
-      {/* Stat Cards - Gradient */}
+      {/* Stat Cards - Minimalist White */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, gradient: "from-emerald-500 to-emerald-700" },
-          { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, sub: "Sepanjang platform", gradient: "from-blue-500 to-blue-700" },
-          { icon: DollarSign, label: "Revenue Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", gradient: "from-amber-500 to-orange-600" },
-          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu review", gradient: "from-red-500 to-rose-600" },
+          { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, iconBg: "bg-emerald-50 text-emerald-600" },
+          { icon: BookOpen, label: "Total Booking", value: stats.bookingCount, sub: "Sepanjang platform", iconBg: "bg-blue-50 text-blue-600" },
+          { icon: DollarSign, label: "Revenue Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", iconBg: "bg-amber-50 text-amber-600" },
+          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu review", iconBg: "bg-rose-50 text-rose-600" },
         ].map((s) => (
-          <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} subtitle={s.sub} variant="gradient" gradient={s.gradient} />
+          <div key={s.label} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{s.label}</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{s.value}</p>
+                <p className="text-xs text-slate-400 mt-1">{s.sub}</p>
+              </div>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${s.iconBg}`}>
+                <s.icon className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -174,9 +196,12 @@ export default function AdminOverviewPage() {
             <Link href="/admin/verification" className="text-xs text-primary hover:underline">Lihat Semua</Link>
           </div>
           {pendingTravels.length === 0 ? (
-            <div className="text-center py-8 text-sm text-muted-foreground">
-              <CheckCircle className="w-8 h-8 mx-auto mb-2 text-primary/30" />
-              Semua travel sudah diverifikasi
+            <div className="text-center py-10">
+              <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <CheckCircle className="w-8 h-8 text-emerald-500" />
+              </div>
+              <p className="text-sm font-semibold text-slate-700">Semua Travel Terverifikasi</p>
+              <p className="text-xs text-slate-400 mt-1">Tidak ada travel yang perlu diverifikasi saat ini</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -254,14 +279,16 @@ export default function AdminOverviewPage() {
       {/* Quick Links */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Verifikasi Travel", href: "/admin/verification", icon: CheckCircle, gradient: "from-emerald-500 to-emerald-700" },
-          { label: "Promo Platform", href: "/admin/billing-promos", icon: Zap, gradient: "from-amber-500 to-orange-600" },
-          { label: "Konfigurasi Fee", href: "/admin/service-fees", icon: DollarSign, gradient: "from-blue-500 to-blue-700" },
-          { label: "Laporan Keuangan", href: "/admin/billing-reports", icon: TrendingUp, gradient: "from-purple-500 to-purple-700" },
+          { label: "Verifikasi Travel", href: "/admin/verification", icon: CheckCircle, iconBg: "bg-emerald-50 text-emerald-600" },
+          { label: "Promo Platform", href: "/admin/billing-promos", icon: Zap, iconBg: "bg-amber-50 text-amber-600" },
+          { label: "Konfigurasi Fee", href: "/admin/service-fees", icon: DollarSign, iconBg: "bg-blue-50 text-blue-600" },
+          { label: "Laporan Keuangan", href: "/admin/billing-reports", icon: TrendingUp, iconBg: "bg-purple-50 text-purple-600" },
         ].map((l) => (
-          <Link key={l.href} href={l.href} className={`rounded-2xl p-4 text-white text-sm font-semibold hover:shadow-lg hover:opacity-90 transition-all bg-gradient-to-br ${l.gradient} flex items-center gap-3`}>
-            <l.icon className="w-5 h-5 opacity-80" />
-            {l.label}
+          <Link key={l.href} href={l.href} className="bg-white border border-slate-200/80 rounded-2xl p-4 hover:shadow-md transition-all flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${l.iconBg}`}>
+              <l.icon className="w-5 h-5" />
+            </div>
+            <span className="text-sm font-medium text-slate-700">{l.label}</span>
           </Link>
         ))}
       </div>

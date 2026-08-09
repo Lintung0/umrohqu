@@ -8,25 +8,32 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 
 const ADMIN_NAV = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["super_admin", "marketplace_admin", "marketplace_operational", "marketplace_finance"] as AdminRole[] },
-  { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["super_admin", "marketplace_admin"] },
-  { href: "/admin/users", label: "Pengguna", icon: Shield, roles: ["super_admin", "marketplace_admin"] },
-  { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["super_admin", "marketplace_admin"] },
-  { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["super_admin", "marketplace_admin"] },
-  { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["super_admin", "marketplace_admin"] },
-  { href: "/admin/promos", label: "Promo & Diskon", icon: Tag, roles: ["super_admin", "marketplace_admin"] },
-  { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["super_admin", "marketplace_admin"] },
-  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["super_admin", "marketplace_operational"] },
-  { href: "/admin/verification", label: "Verifikasi Travel", icon: Shield, roles: ["super_admin", "marketplace_operational"] },
-  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["super_admin", "marketplace_operational"] },
-  { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["super_admin", "marketplace_operational"] },
-  { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["super_admin", "marketplace_finance"] },
-  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["super_admin", "marketplace_finance"] },
-  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["super_admin", "marketplace_finance"] },
-  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["super_admin", "marketplace_finance"] },
-  { href: "/admin/billing-promos", label: "Promo & Diskon", icon: Tag, roles: ["super_admin", "marketplace_finance"] },
-  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["super_admin", "marketplace_finance"] },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["super_admin", "marketplace_admin", "marketplace_operational", "marketplace_finance"] as AdminRole[], category: "utama" },
+  { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["super_admin", "marketplace_admin"], category: "utama" },
+  { href: "/admin/verification", label: "Verifikasi Travel", icon: ClipboardCheck, roles: ["super_admin", "marketplace_operational"], category: "utama" },
+  { href: "/admin/users", label: "Pengguna", icon: Shield, roles: ["super_admin", "marketplace_admin"], category: "utama" },
+  { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["super_admin", "marketplace_admin"], category: "transaksi" },
+  { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["super_admin", "marketplace_finance"], category: "transaksi" },
+  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["super_admin", "marketplace_finance"], category: "transaksi" },
+  { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["super_admin", "marketplace_admin"], category: "transaksi" },
+  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["super_admin", "marketplace_finance"], category: "transaksi" },
+  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["super_admin", "marketplace_finance"], category: "transaksi" },
+  { href: "/admin/promos", label: "Promo & Diskon", icon: Tag, roles: ["super_admin", "marketplace_admin"], category: "pemasaran" },
+  { href: "/admin/billing-promos", label: "Promo & Diskon", icon: Tag, roles: ["super_admin", "marketplace_finance"], category: "pemasaran" },
+  { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["super_admin", "marketplace_admin"], category: "pemasaran" },
+  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["super_admin", "marketplace_operational"], category: "pemasaran" },
+  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["super_admin", "marketplace_operational"], category: "bantuan" },
+  { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["super_admin", "marketplace_admin"], category: "bantuan" },
+  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["super_admin", "marketplace_finance"], category: "bantuan" },
+  { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["super_admin", "marketplace_operational"], category: "bantuan" },
 ]
+
+const CATEGORY_LABELS: Record<string, string> = {
+  utama: "Utama",
+  transaksi: "Transaksi & Biaya",
+  pemasaran: "Pemasaran & Promo",
+  bantuan: "Bantuan & Sistem",
+}
 
 const ROLE_LABELS: Record<AdminRole, string> = {
   super_admin: "Super Admin",
@@ -102,22 +109,38 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {visibleNav.map((item) => {
-          const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors ${
-                isActive ? "bg-emerald-50 text-emerald-700 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              <item.icon className="w-4 h-4 shrink-0" />
-              {item.label}
-            </Link>
-          )
-        })}
+        {(() => {
+          const categories = ["utama", "transaksi", "pemasaran", "bantuan"]
+          return categories.map((cat) => {
+            const items = visibleNav.filter((item) => item.category === cat)
+            if (items.length === 0) return null
+            return (
+              <div key={cat} className="mt-4 first:mt-1">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">
+                  {CATEGORY_LABELS[cat]}
+                </p>
+                <div className="space-y-0.5">
+                  {items.map((item) => {
+                    const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href)
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors ${
+                          isActive ? "bg-emerald-50 text-emerald-700 font-medium" : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4 shrink-0" />
+                        {item.label}
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })
+        })()}
       </nav>
 
       {/* Homepage + Logout */}
