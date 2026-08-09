@@ -3,14 +3,6 @@ import { createAdminClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const webhookToken = process.env.XENDIT_WEBHOOK_TOKEN
-    if (webhookToken) {
-      const token = request.headers.get("x-callback-token")
-      if (!token || token !== webhookToken) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-      }
-    }
-
     const body = await request.json()
     const { external_id, status } = body
 
