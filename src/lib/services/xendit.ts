@@ -1,5 +1,4 @@
 const XENDIT_SECRET = process.env.XENDIT_SECRET_KEY || ""
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
 function authHeader() {
   return "Basic " + Buffer.from(XENDIT_SECRET + ":").toString("base64")
@@ -30,8 +29,8 @@ export async function createInvoice(params: {
       external_id: params.externalId,
       amount: params.amount,
       description: params.description,
-      success_redirect_url: params.successRedirectUrl || `${BASE_URL}/dashboard/bookings`,
-      failure_redirect_url: params.failureRedirectUrl || `${BASE_URL}/checkout?failed=true`,
+      success_redirect_url: params.successRedirectUrl || `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings`,
+      failure_redirect_url: params.failureRedirectUrl || `${process.env.NEXT_PUBLIC_APP_URL}/checkout?failed=true`,
       customer: params.customer,
       currency: "IDR",
     }),
