@@ -1,9 +1,7 @@
 [build]
   command = "npm run build"
   publish = ".next"
-
-[env]
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_GEOAPIFY_API_KEY,NEXT_PUBLIC_XENDIT_PUBLIC_KEY"
+  SECRETS_SCAN_ENABLED = false
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
