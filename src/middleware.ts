@@ -42,7 +42,7 @@ function isPublicRoute(pathname: string): boolean {
 function getSubdomain(hostname: string): string | null {
   const parts = hostname.split(".")
 
-  if (hostname.endsWith(".vercel.app")) {
+  if (hostname.endsWith(".vercel.app") || hostname.endsWith(".netlify.app")) {
     if (parts.length === 3) return null
     if (parts.length === 4) {
       const sub = parts[0]
