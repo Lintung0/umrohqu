@@ -33,6 +33,16 @@ const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
   customer: "dashboard_saya",
 }
 
+const NAV_LINKS_KEYS = ["search_packages", "blog", "promo", "faq", "al_quran", "jadwal_sholat"] as const
+const NAV_HREFS: Record<string, string> = {
+  search_packages: "/search",
+  blog: "/articles",
+  promo: "/promotions",
+  faq: "/faq",
+  al_quran: "/al-quran",
+  jadwal_sholat: "/jadwal-sholat",
+}
+
 const Navbar = () => {
   const [user, setUser] = useState<User | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
@@ -121,38 +131,30 @@ const Navbar = () => {
 
   return (
     <header className="h-20 w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
-      <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-12 items-center h-full">
+      <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 flex items-center">
 
-          {/* Left: Logo (col-span-3) */}
-          <div className="col-span-3 flex items-center">
-            <Logo />
-          </div>
+        {/* Logo — always left */}
+        <div className="shrink-0">
+          <Logo />
+        </div>
 
-          {/* Center: Nav Links (col-span-6, centered) */}
-          <nav className="col-span-6 hidden md:flex items-center justify-center space-x-4 text-sm font-medium text-slate-700">
-            <Link href="/search" className="whitespace-nowrap hover:text-emerald-600 transition-colors">
-              {t.nav.search_packages}
+        {/* Desktop nav links — center, only md+ */}
+        <nav className="hidden lg:flex items-center gap-5 mx-auto text-sm font-medium text-slate-700">
+          {NAV_LINKS_KEYS.map((key) => (
+            <Link
+              key={key}
+              href={NAV_HREFS[key]}
+              className="whitespace-nowrap hover:text-emerald-600 transition-colors"
+            >
+              {t.nav[key]}
             </Link>
-            <Link href="/articles" className="whitespace-nowrap hover:text-emerald-600 transition-colors">
-              {t.nav.blog}
-            </Link>
-            <Link href="/promotions" className="whitespace-nowrap hover:text-emerald-600 transition-colors">
-              {t.nav.promo}
-            </Link>
-            <Link href="/faq" className="whitespace-nowrap hover:text-emerald-600 transition-colors">
-              {t.nav.faq}
-            </Link>
-            <Link href="/al-quran" className="whitespace-nowrap hover:text-emerald-600 transition-colors">
-              {t.nav.al_quran}
-            </Link>
-            <Link href="/jadwal-sholat" className="whitespace-nowrap hover:text-emerald-600 transition-colors">
-              {t.nav.jadwal_sholat}
-            </Link>
-          </nav>
+          ))}
+        </nav>
 
-          {/* Right: Actions (col-span-3, end-aligned) */}
-          <div className="col-span-9 md:col-span-3 flex items-center justify-end gap-3 shrink-0 whitespace-nowrap">
+        {/* Right actions — always right-aligned */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Desktop auth / user menu */}
+          <div className="hidden md:flex items-center gap-3">
             <CountrySelect value={country} onChange={handleCountryChange} />
             <LanguageSwitcher />
 
@@ -219,9 +221,9 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile: Hamburger */}
+          {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors col-span-9 justify-self-end"
+            className="md:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="w-5 h-5 text-slate-700" /> : <Menu className="w-5 h-5 text-slate-700" />}
@@ -233,24 +235,16 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 shadow-lg animate-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-4 space-y-1">
-            <Link href="/search" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
-              {t.nav.search_packages}
-            </Link>
-            <Link href="/articles" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
-              {t.nav.blog}
-            </Link>
-            <Link href="/promotions" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
-              {t.nav.promo}
-            </Link>
-            <Link href="/faq" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
-              {t.nav.faq}
-            </Link>
-            <Link href="/al-quran" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
-              {t.nav.al_quran}
-            </Link>
-            <Link href="/jadwal-sholat" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
-              {t.nav.jadwal_sholat}
-            </Link>
+            {NAV_LINKS_KEYS.map((key) => (
+              <Link
+                key={key}
+                href={NAV_HREFS[key]}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+              >
+                {t.nav[key]}
+              </Link>
+            ))}
 
             <div className="flex items-center gap-2 px-4 py-2">
               <CountrySelect value={country} onChange={handleCountryChange} />
