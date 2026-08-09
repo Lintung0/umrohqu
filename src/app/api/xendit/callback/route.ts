@@ -6,11 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { external_id, status } = body
 
-    if (status !== "PAID") {
-      return NextResponse.json({ received: true })
-    }
-
-    if (!external_id || !external_id.startsWith("booking-")) {
+    if (!external_id) {
       return NextResponse.json({ received: true })
     }
 
@@ -19,32 +15,57 @@ export async function POST(request: NextRequest) {
       ? external_id.replace("booking-remaining-", "")
       : external_id.replace("booking-", "")
 
+    if (!bookingId) {
+      return NextResponse.json({ received: true })
+    }
+
     const admin = createAdminClient()
 
     const { data: booking, error } = await admin
       .from("bookings")
-      .select("id, status, payment_type, remaining_amount, total")
+      .select("id, status, payment_status, payment_type, remaining_amount, total")
       .eq("id", bookingId)
       .single()
 
-    if (error || !booking || booking.status === "confirmed") {
+    if (error || !booking) {
       return NextResponse.json({ received: true })
     }
 
-    const newStatus = isRemaining ? "confirmed" : "processing"
-    const updateData: Record<string, any> = {
-      status: newStatus,
-      payment_status: "paid",
-      updated_at: new Date().toISOString(),
-    }
-    if (isRemaining) {
-      updateData.remaining_amount = 0
-      updateData.total = Number(booking.total) + Number(booking.remaining_amount)
+    // ── Idempotency: skip if already paid ──
+    if (status === "PAID" && booking.payment_status === "paid") {
+      return NextResponse.json({ success: true, message: "Already processed" })
     }
 
-    await admin.from("bookings").update(updateData).eq("id", bookingId)
+    const now = new Date().toISOString()
 
-    return NextResponse.json({ success: true })
+    // ── invoice.paid ──
+    if (status === "PAID") {
+      const newStatus = isRemaining ? "confirmed" : "confirmed"
+      const updateData: Record<string, any> = {
+        status: newStatus,
+        payment_status: "paid",
+        paid_at: now,
+        updated_at: now,
+      }
+      if (isRemaining) {
+        updateData.remaining_amount = 0
+        updateData.total = Number(booking.total) + Number(booking.remaining_amount)
+      }
+      await admin.from("bookings").update(updateData).eq("id", bookingId)
+      return NextResponse.json({ success: true })
+    }
+
+    // ── invoice.expired ──
+    if (status === "EXPIRED" || status === "FAILED") {
+      await admin.from("bookings").update({
+        status: "cancelled",
+        payment_status: "expired",
+        updated_at: now,
+      }).eq("id", bookingId)
+      return NextResponse.json({ success: true })
+    }
+
+    return NextResponse.json({ received: true })
   } catch (err) {
     console.error("Xendit callback error:", err)
     return NextResponse.json({ error: "Internal error" }, { status: 500 })

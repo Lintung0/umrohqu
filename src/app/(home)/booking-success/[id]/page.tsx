@@ -15,23 +15,18 @@ export default function BookingSuccessPage() {
     const supabase = createClient()
     const { data } = await supabase
       .from("bookings")
-      .select("id, status")
+      .select("id, status, payment_status")
       .eq("id", params.id)
       .single()
 
-    if (data && (data.status === "confirmed" || data.status === "completed")) {
+    if (data?.payment_status === "paid" || data?.status === "confirmed" || data?.status === "completed") {
       setStatus("success")
       return true
     }
-
-    if (data && data.status === "processing") {
-      setStatus("processing")
-      return true
-    }
-
     return false
   }, [params.id])
 
+  // ── Polling: 2s interval, max 5x (10s) ──
   useEffect(() => {
     let timer: NodeJS.Timeout
     let elapsed = 0
@@ -41,25 +36,18 @@ export default function BookingSuccessPage() {
     async function poll() {
       const done = await checkStatus()
       if (done) return
-
       elapsed += interval
-      if (elapsed >= timeout) {
-        setStatus("timeout")
-        return
-      }
+      if (elapsed >= timeout) { setStatus("timeout"); return }
       timer = setTimeout(poll, interval)
     }
-
     poll()
     return () => clearTimeout(timer)
   }, [checkStatus])
 
-  // Auto-redirect on success after 3s
+  // ── Auto-redirect on success (3s) ──
   useEffect(() => {
     if (status !== "success") return
-    const t = setTimeout(() => {
-      router.push(`/dashboard/bookings/${params.id}`)
-    }, 3000)
+    const t = setTimeout(() => router.push(`/dashboard/bookings/${params.id}`), 3000)
     return () => clearTimeout(t)
   }, [status, params.id, router])
 
@@ -69,43 +57,41 @@ export default function BookingSuccessPage() {
     if (!done) setStatus("timeout")
   }
 
-  // ── Loading: no buttons, just spinner ──
+  // ── Loading ──
   if (status === "loading") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mx-auto" />
-          <p className="text-slate-600 font-medium">Memverifikasi pembayaran...</p>
-          <p className="text-sm text-slate-400">Mohon tunggu sebentar</p>
+          <div className="relative w-16 h-16 mx-auto">
+            <div className="absolute inset-0 rounded-full border-4 border-emerald-100" />
+            <div className="absolute inset-0 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
+            <CheckCircle className="absolute inset-0 m-auto w-7 h-7 text-emerald-600" />
+          </div>
+          <p className="text-slate-700 font-semibold">Memverifikasi pembayaran</p>
+          <p className="text-sm text-slate-400">Tunggu sebentar...</p>
         </div>
       </main>
     )
   }
 
-  // ── Timeout: show retry ──
+  // ── Timeout ──
   if (status === "timeout") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 max-w-md w-full text-center space-y-4">
-          <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto">
-            <Clock className="w-8 h-8 text-amber-600" />
+        <div className="bg-white rounded-3xl border border-slate-200 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
+          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto">
+            <Clock className="w-7 h-7 text-amber-600" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Menunggu Konfirmasi Pembayaran</h1>
-          <p className="text-sm text-slate-500">
-            Pembayaran Anda sedang diproses. Status akan diperbarui oleh sistem secara otomatis.
-          </p>
-          <div className="flex flex-col gap-2 pt-2">
-            <button
-              onClick={handleRetry}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" /> Cek Status Manual
+          <div>
+            <h1 className="text-lg font-bold text-slate-900">Pembayaran Sedang Diverifikasi</h1>
+            <p className="text-sm text-slate-500 mt-1">Tim kami sedang memproses pembayaran Anda.</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <button onClick={handleRetry} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
+              <RefreshCw className="w-4 h-4" /> Cek Status
             </button>
-            <Link
-              href={`/dashboard/bookings/${params.id}`}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              Lihat Detail Booking <ArrowRight className="w-4 h-4" />
+            <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+              Lihat Booking <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
@@ -113,46 +99,45 @@ export default function BookingSuccessPage() {
     )
   }
 
-  // ── Processing: show link (user is logged in, booking exists) ──
+  // ── Processing (webhook belum sampai) ──
   if (status === "processing") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 max-w-md w-full text-center space-y-4">
-          <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto">
-            <Loader2 className="w-8 h-8 text-amber-600 animate-spin" />
+        <div className="bg-white rounded-3xl border border-slate-200 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto">
+            <Loader2 className="w-7 h-7 text-blue-600 animate-spin" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Pembayaran Diproses</h1>
-          <p className="text-sm text-slate-500">
-            Pembayaran Anda sedang diverifikasi oleh travel partner.
-          </p>
-          <Link
-            href={`/dashboard/bookings/${params.id}`}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
-          >
-            Lihat Detail Booking <ArrowRight className="w-4 h-4" />
+          <div>
+            <h1 className="text-lg font-bold text-slate-900">Pembayaran Diproses</h1>
+            <p className="text-sm text-slate-500 mt-1">Menunggu konfirmasi dari sistem pembayaran.</p>
+          </div>
+          <Link href={`/dashboard/bookings/${params.id}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
+            Lihat Booking <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </main>
     )
   }
 
-  // ── Success: green check, auto-redirect in 3s ──
+  // ── Success ──
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 max-w-md w-full text-center space-y-4">
-        <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto">
-          <CheckCircle className="w-8 h-8 text-emerald-600" />
+      <div className="bg-white rounded-3xl border border-slate-200 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
+        <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto">
+          <CheckCircle className="w-7 h-7 text-emerald-600" />
         </div>
-        <h1 className="text-xl font-bold text-slate-900">Pembayaran Berhasil!</h1>
-        <p className="text-sm text-slate-500">
-          Alhamdulillah, pembayaran Anda telah diterima. Mengalihkan ke detail booking...
-        </p>
-        <Link
-          href={`/dashboard/bookings/${params.id}`}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
-        >
-          Lihat Detail Booking <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">Pembayaran & Pemesanan Berhasil!</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Pembayaran terverifikasi. Travel partner sedang menyiapkan dokumen umrah Anda.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
+            Lihat Detail <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <p className="text-xs text-slate-400">Redirect otomatis dalam 3 detik</p>
+        </div>
       </div>
     </main>
   )

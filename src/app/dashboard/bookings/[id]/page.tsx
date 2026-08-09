@@ -359,38 +359,39 @@ function PaymentStatusSection({
   const effectivePaid = paidAmount > 0 ? paidAmount : (total - effectiveRemaining)
 
   // ── KONDISI 1: Lunas & Dikonfirmasi ──
-  // status === 'confirmed' | 'completed'
   if (status === "confirmed" || status === "completed") {
     return (
       <div className="bg-white rounded-2xl border border-emerald-200 p-6 space-y-4">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-center">
-          <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <CheckCircle className="w-7 h-7 text-emerald-600" />
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+            <CheckCircle className="w-6 h-6 text-emerald-600" />
           </div>
-          <h3 className="text-lg font-bold text-emerald-800">Pembayaran Lunas & Dikonfirmasi</h3>
-          <p className="text-sm text-emerald-600 mt-1">Terima kasih, pembayaran Anda telah dikonfirmasi oleh sistem dan travel agent.</p>
+          <div>
+            <h3 className="font-bold text-emerald-800">Lunas & Dikonfirmasi</h3>
+            <p className="text-sm text-emerald-600">Dalam persiapan dokumen travel</p>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="bg-slate-50 rounded-xl p-3">
-            <p className="text-xs text-muted-foreground mb-1">Total Dibayar</p>
-            <p className="font-bold text-emerald-700">{formatRupiah(effectivePaid)}</p>
+            <p className="text-xs text-slate-400 mb-1">Dibayar</p>
+            <p className="font-bold text-slate-900">{formatRupiah(effectivePaid)}</p>
           </div>
           <div className="bg-slate-50 rounded-xl p-3">
-            <p className="text-xs text-muted-foreground mb-1">Sisa Tagihan</p>
-            <p className="font-bold text-emerald-700">Rp 0</p>
+            <p className="text-xs text-slate-400 mb-1">Sisa</p>
+            <p className="font-bold text-emerald-600">Rp 0</p>
           </div>
           {paidAt && (
             <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-xs text-muted-foreground mb-1">Tanggal Pelunasan</p>
-              <p className="font-medium">
-                {new Date(paidAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+              <p className="text-xs text-slate-400 mb-1">Dibayar pada</p>
+              <p className="font-medium text-slate-700">
+                {new Date(paidAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
               </p>
             </div>
           )}
           {paymentMethod && (
             <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-xs text-muted-foreground mb-1">Metode Pembayaran</p>
-              <p className="font-medium">{paymentMethod}</p>
+              <p className="text-xs text-slate-400 mb-1">Metode</p>
+              <p className="font-medium text-slate-700">{paymentMethod}</p>
             </div>
           )}
         </div>
@@ -406,16 +407,13 @@ function PaymentStatusSection({
 
     return (
       <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
-        {/* Processing Banner */}
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 flex items-start gap-3">
-          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
-            <Loader2 className="w-5 h-5 text-purple-600 animate-spin" />
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center shrink-0">
+            <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
           </div>
           <div>
-            <p className="font-semibold text-purple-800">Pembayaran Diterima - Menunggu Konfirmasi Travel Agent</p>
-            <p className="text-sm text-purple-600 mt-0.5">
-              Pembayaran Anda telah berhasil diproses oleh Xendit dan sedang diverifikasi oleh pihak travel agent.
-            </p>
+            <h3 className="font-bold text-purple-800">Menunggu Konfirmasi</h3>
+            <p className="text-sm text-purple-600">Travel partner sedang memverifikasi</p>
           </div>
         </div>
 
@@ -447,15 +445,13 @@ function PaymentStatusSection({
   if (effectiveRemaining > 0 && status !== "pending_payment") {
     return (
       <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
-            <Clock className="w-5 h-5 text-amber-600" />
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center shrink-0">
+            <Clock className="w-6 h-6 text-amber-600" />
           </div>
           <div>
-            <p className="font-semibold text-amber-800">Menunggu Pelunasan</p>
-            <p className="text-sm text-amber-600 mt-0.5">
-              Sisa tagihan Rp {formatRupiah(effectiveRemaining)} perlu dilunasi.
-            </p>
+            <h3 className="font-bold text-amber-800">Belum Lunas</h3>
+            <p className="text-sm text-amber-600">Sisa {formatRupiah(effectiveRemaining)} perlu dilunasi</p>
           </div>
         </div>
         <PayRemainingSection bookingId={bookingId} remainingAmount={effectiveRemaining} />
@@ -463,17 +459,16 @@ function PaymentStatusSection({
     )
   }
 
-  // ── KONDISI 4: Belum Bayar Sama Sekali ──
-  // status === 'pending_payment'
+  // ── KONDISI 4: Belum Bayar ──
   if (status === "pending_payment") {
     return (
       <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
-            <Clock className="w-5 h-5 text-amber-600" />
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center shrink-0">
+            <Clock className="w-6 h-6 text-amber-600" />
           </div>
           <div>
-            <p className="font-semibold text-amber-800">Menunggu Pembayaran</p>
+            <h3 className="font-bold text-amber-800">Menunggu Pembayaran</h3>
             <p className="text-sm text-amber-600 mt-0.5">
               Silakan selesaikan pembayaran untuk mengkonfirmasi booking Anda.
             </p>
