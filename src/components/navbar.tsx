@@ -33,11 +33,10 @@ const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
   customer: "dashboard_saya",
 }
 
-// Center nav links (Jadwal Sholat moved to right utility)
-const NAV_LINKS_KEYS = ["search_packages", "blog", "promo", "faq", "al_quran"] as const
+// Only 4 core nav links in center
+const NAV_LINKS_KEYS = ["search_packages", "promo", "faq", "al_quran"] as const
 const NAV_HREFS: Record<string, string> = {
   search_packages: "/search",
-  blog: "/articles",
   promo: "/promotions",
   faq: "/faq",
   al_quran: "/al-quran",
@@ -131,15 +130,15 @@ const Navbar = () => {
     : t.nav.dashboard
 
   return (
-    <header className="h-20 w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
-      <div className="mx-auto max-w-7xl h-full px-4 sm:px-6 lg:px-8 grid grid-cols-3 items-center">
+    <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
 
         {/* ── Left: Logo ── */}
-        <div className="flex items-center justify-start">
+        <div className="flex items-center justify-start shrink-0">
           <Logo />
         </div>
 
-        {/* ── Center: Navigation links ── */}
+        {/* ── Center: Nav links ── */}
         <nav className="hidden md:flex items-center justify-center gap-6 text-sm font-medium text-slate-700">
           {NAV_LINKS_KEYS.map((key) => (
             <Link
@@ -153,7 +152,7 @@ const Navbar = () => {
         </nav>
 
         {/* ── Right: Utilities + Auth ── */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-3 shrink-0">
           {/* Desktop utilities + auth */}
           <div className="hidden md:flex items-center gap-3">
             <Link
