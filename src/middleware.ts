@@ -188,9 +188,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!user) {
-    // Allow unauthenticated access to booking detail pages (post-Xendit redirect / guest checkout)
+    // Allow unauthenticated access to booking detail and success pages (post-Xendit redirect / guest checkout)
     const bookingDetailMatch = pathname.match(/^\/dashboard\/bookings\/[0-9a-f-]{36}$/)
-    if (bookingDetailMatch) {
+    const bookingSuccessMatch = pathname.match(/^\/booking-success\/[0-9a-f-]{36}$/)
+    if (bookingDetailMatch || bookingSuccessMatch) {
       return supabaseResponse
     }
 

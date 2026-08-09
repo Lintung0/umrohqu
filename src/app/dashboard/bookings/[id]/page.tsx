@@ -50,18 +50,52 @@ export default function BookingDetailPage() {
   ]
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [authChecked, setAuthChecked] = useState(false)
+  const [user, setUser] = useState<any>(null)
 
+  // Track auth state with onAuthStateChange — handles hydration delay after Xendit redirect
   useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      setAuthChecked(true)
+    })
+    // Also get current session immediately
+    supabase.auth.getUser().then(({ data: { user: u } }) => {
+      setUser(u)
+      setAuthChecked(true)
+    })
+    return () => subscription.unsubscribe()
+  }, [supabase])
 
-      // Build the full select query
+  // Load booking data — ALWAYS tries API first (bypasses RLS), falls back to client query
+  useEffect(() => {
+    if (!authChecked) return // Wait for auth state to be determined
+
+    let cancelled = false
+
+    async function load() {
       const selectFields = "*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)"
 
       let bookingData: any = null
 
-      // Step 1: If logged in, try Supabase client-side query (user-scoped)
-      if (user) {
+      // Step 1: ALWAYS try API first (uses admin client, bypasses RLS)
+      // This works for: logged-in users, guest checkout, post-Xendit redirect
+      try {
+        const res = await fetch("/api/booking/detail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId: params.id }),
+        })
+        if (res.ok) {
+          const result = await res.json()
+          bookingData = result.data
+        }
+      } catch {
+        // API unavailable — try client-side fallback
+      }
+
+      // Step 2: If API failed and user is logged in, try client-side Supabase query
+      if (!bookingData && user) {
         const { data } = await supabase
           .from("bookings")
           .select(selectFields)
@@ -71,26 +105,18 @@ export default function BookingDetailPage() {
         bookingData = data
       }
 
-      // Step 2: If not found, try API fallback (bypasses RLS — works for guest checkout / post-Xendit)
-      if (!bookingData) {
-        try {
-          const res = await fetch("/api/booking/detail", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ bookingId: params.id }),
-          })
-          if (res.ok) {
-            const result = await res.json()
-            bookingData = result.data
-          }
-        } catch {
-          // API call failed — will be handled below
-        }
-      }
+      if (cancelled) return
 
-      // Step 3: If still no booking, redirect to login (only if not logged in)
-      if (!bookingData && !user) {
-        router.push(`/login?redirect_to=/dashboard/bookings/${params.id}`)
+      // Step 3: If still no booking found
+      if (!bookingData) {
+        if (!user) {
+          // No auth and no data — redirect to login with return URL
+          router.push(`/login?redirect_to=/dashboard/bookings/${params.id}`)
+          return
+        }
+        // Authenticated but booking not found — show not found state
+        setBooking(null)
+        setLoading(false)
         return
       }
 
@@ -98,7 +124,7 @@ export default function BookingDetailPage() {
       setLoading(false)
 
       // Step 4: Verify Xendit payment status if applicable
-      if (bookingData && bookingData.xendit_invoice_id) {
+      if (bookingData.xendit_invoice_id) {
         const shouldVerify = bookingData.status === "pending_payment" ||
           (bookingData.status === "processing" && bookingData.payment_type === "dp" && (bookingData.remaining_amount || 0) > 0 && bookingData.xendit_invoice_id?.startsWith("booking-remaining-"))
         if (shouldVerify) {
@@ -109,7 +135,7 @@ export default function BookingDetailPage() {
               body: JSON.stringify({ bookingId: params.id }),
             })
             const result = await res.json()
-            if (result.status && result.status !== bookingData.status) {
+            if (!cancelled && result.status && result.status !== bookingData.status) {
               setBooking((prev) => prev ? { ...prev, status: result.status, remaining_amount: result.status === "confirmed" ? 0 : prev.remaining_amount } : prev)
             }
           } catch (e) {
@@ -119,9 +145,11 @@ export default function BookingDetailPage() {
       }
     }
     load()
-  }, [params.id])
+    return () => { cancelled = true }
+  }, [params.id, authChecked, user, supabase, router])
 
-  if (loading) {
+  // Show skeleton while auth is being checked or data is loading
+  if (loading || !authChecked) {
     return (
       <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-6 w-32 bg-muted rounded animate-pulse" />
@@ -137,11 +165,21 @@ export default function BookingDetailPage() {
   if (!booking) {
     return (
       <div className="p-6 lg:p-8 max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
-          <p className="text-muted-foreground">{t("booking.not_found")}</p>
-          <Link href="/dashboard/bookings" className="text-emerald-600 hover:underline text-sm mt-2 inline-block">
-            {t("booking.back_to_list")}
-          </Link>
+        <div className="bg-white rounded-2xl border border-border p-12 text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto">
+            <FileText className="w-8 h-8 text-gray-300" />
+          </div>
+          <p className="text-muted-foreground font-medium">{t("booking.not_found")}</p>
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/dashboard/bookings" className="text-emerald-600 hover:underline text-sm">
+              {t("booking.back_to_list")}
+            </Link>
+            {!user && (
+              <Link href={`/login?redirect_to=/dashboard/bookings/${params.id}`} className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">
+                Login untuk Melihat Pesanan
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     )
