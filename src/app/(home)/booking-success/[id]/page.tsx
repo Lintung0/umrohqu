@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { CheckCircle, ArrowRight, Loader2, RefreshCw, Clock } from "lucide-react"
@@ -8,10 +8,8 @@ import Link from "next/link"
 
 export default function BookingSuccessPage() {
   const params = useParams()
+  const router = useRouter()
   const [status, setStatus] = useState<"loading" | "success" | "processing" | "timeout">("loading")
-  const [attempts, setAttempts] = useState(0)
-  const maxAttempts = 5
-  const timeoutMs = 10000
 
   const checkStatus = useCallback(async () => {
     const supabase = createClient()
@@ -38,19 +36,17 @@ export default function BookingSuccessPage() {
     let timer: NodeJS.Timeout
     let elapsed = 0
     const interval = 2000
+    const timeout = 10000
 
     async function poll() {
       const done = await checkStatus()
       if (done) return
 
       elapsed += interval
-      setAttempts((a) => a + 1)
-
-      if (elapsed >= timeoutMs) {
+      if (elapsed >= timeout) {
         setStatus("timeout")
         return
       }
-
       timer = setTimeout(poll, interval)
     }
 
@@ -58,15 +54,22 @@ export default function BookingSuccessPage() {
     return () => clearTimeout(timer)
   }, [checkStatus])
 
+  // Auto-redirect on success after 3s
+  useEffect(() => {
+    if (status !== "success") return
+    const t = setTimeout(() => {
+      router.push(`/dashboard/bookings/${params.id}`)
+    }, 3000)
+    return () => clearTimeout(t)
+  }, [status, params.id, router])
+
   const handleRetry = async () => {
     setStatus("loading")
-    setAttempts(0)
     const done = await checkStatus()
-    if (!done) {
-      setStatus("timeout")
-    }
+    if (!done) setStatus("timeout")
   }
 
+  // ── Loading: no buttons, just spinner ──
   if (status === "loading") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -79,6 +82,7 @@ export default function BookingSuccessPage() {
     )
   }
 
+  // ── Timeout: show retry ──
   if (status === "timeout") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -88,14 +92,14 @@ export default function BookingSuccessPage() {
           </div>
           <h1 className="text-xl font-bold text-slate-900">Menunggu Konfirmasi Pembayaran</h1>
           <p className="text-sm text-slate-500">
-            Pembayaran Anda sedang diproses. Status akan diperbarui secara otomatis oleh sistem.
+            Pembayaran Anda sedang diproses. Status akan diperbarui oleh sistem secara otomatis.
           </p>
           <div className="flex flex-col gap-2 pt-2">
             <button
               onClick={handleRetry}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
             >
-              <RefreshCw className="w-4 h-4" /> Cek Ulang Status
+              <RefreshCw className="w-4 h-4" /> Cek Status Manual
             </button>
             <Link
               href={`/dashboard/bookings/${params.id}`}
@@ -109,6 +113,7 @@ export default function BookingSuccessPage() {
     )
   }
 
+  // ── Processing: show link (user is logged in, booking exists) ──
   if (status === "processing") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -131,6 +136,7 @@ export default function BookingSuccessPage() {
     )
   }
 
+  // ── Success: green check, auto-redirect in 3s ──
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl border border-slate-200 p-8 max-w-md w-full text-center space-y-4">
@@ -139,22 +145,14 @@ export default function BookingSuccessPage() {
         </div>
         <h1 className="text-xl font-bold text-slate-900">Pembayaran Berhasil!</h1>
         <p className="text-sm text-slate-500">
-          Alhamdulillah, pembayaran Anda telah diterima. Booking Anda akan segera dikonfirmasi oleh travel partner.
+          Alhamdulillah, pembayaran Anda telah diterima. Mengalihkan ke detail booking...
         </p>
-        <div className="flex flex-col gap-2 pt-2">
-          <Link
-            href={`/dashboard/bookings/${params.id}`}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
-          >
-            Lihat Detail Booking <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            href="/dashboard/bookings"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            Lihat Semua Booking
-          </Link>
-        </div>
+        <Link
+          href={`/dashboard/bookings/${params.id}`}
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
+        >
+          Lihat Detail Booking <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
     </main>
   )
