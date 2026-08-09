@@ -20,6 +20,7 @@ const PUBLIC_ROUTES = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  "/booking-success",
   "/api/auth",
   "/api/xendit",
   "/api/wallet",

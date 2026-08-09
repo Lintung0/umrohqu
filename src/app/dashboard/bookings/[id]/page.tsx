@@ -53,10 +53,17 @@ export default function BookingDetailPage() {
 
   useEffect(() => {
     async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push(`/login?redirect_to=/dashboard/bookings/${params.id}`)
+        return
+      }
+
       const { data } = await supabase
         .from("bookings")
         .select("*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
         .eq("id", params.id)
+        .eq("customer_id", user.id)
         .single()
       const b = data as any
       setBooking(b)
