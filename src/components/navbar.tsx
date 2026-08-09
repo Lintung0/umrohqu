@@ -6,8 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Logo from "./logo"
 import { LanguageSwitcher } from "@/components/shared/language-switcher"
-import CountrySelect from "@/components/shared/country-select"
-import { LayoutDashboard, LogOut, ChevronDown, Menu, X, Clock } from "lucide-react"
+import { LayoutDashboard, LogOut, ChevronDown, Menu, X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
@@ -33,14 +32,12 @@ const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
   customer: "dashboard_saya",
 }
 
-// Only 4 core nav links in center
 const NAV_LINKS_KEYS = ["search_packages", "promo", "faq", "al_quran"] as const
 const NAV_HREFS: Record<string, string> = {
   search_packages: "/search",
   promo: "/promotions",
   faq: "/faq",
   al_quran: "/al-quran",
-  jadwal_sholat: "/jadwal-sholat",
 }
 
 const Navbar = () => {
@@ -49,7 +46,6 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [country, setCountry] = useState("id")
   const router = useRouter()
   const { t } = useTranslation()
 
@@ -88,31 +84,11 @@ const Navbar = () => {
       }
     })
 
-    const fetchCountry = async () => {
-      try {
-        const res = await fetch("/api/user/country")
-        const data = await res.json()
-        if (data.country) setCountry(data.country)
-      } catch {}
-    }
-    fetchCountry()
-
     return () => {
       mounted = false
       subscription.unsubscribe()
     }
   }, [])
-
-  const handleCountryChange = async (code: string) => {
-    setCountry(code)
-    try {
-      await fetch("/api/user/country", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ country: code }),
-      })
-    } catch {}
-  }
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -151,20 +127,9 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* ── Right: Utilities + Auth ── */}
+        {/* ── Right: Language + Auth ── */}
         <div className="flex items-center justify-end gap-3 shrink-0">
-          {/* Desktop utilities + auth */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/jadwal-sholat"
-              className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors whitespace-nowrap"
-              title={t.nav.jadwal_sholat}
-            >
-              <Clock className="w-4 h-4" />
-              <span className="hidden lg:inline">{t.nav.jadwal_sholat}</span>
-            </Link>
-            <div className="w-px h-5 bg-slate-200" />
-            <CountrySelect value={country} onChange={handleCountryChange} />
+          <div className="hidden md:flex items-center gap-4">
             <LanguageSwitcher />
 
             {loading ? (
@@ -213,7 +178,7 @@ const Navbar = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Link
                   href="/login"
                   className="px-4 py-2 text-sm font-semibold rounded-xl border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
@@ -255,17 +220,7 @@ const Navbar = () => {
               </Link>
             ))}
 
-            <Link
-              href="/jadwal-sholat"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
-            >
-              <Clock className="w-4 h-4 text-emerald-600" />
-              {t.nav.jadwal_sholat}
-            </Link>
-
-            <div className="flex items-center gap-2 px-4 py-2">
-              <CountrySelect value={country} onChange={handleCountryChange} />
+            <div className="px-4 py-2">
               <LanguageSwitcher />
             </div>
 
@@ -282,7 +237,7 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1 py-2.5 text-center text-sm font-semibold rounded-xl border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors">
                     {t.nav.login}
                   </Link>

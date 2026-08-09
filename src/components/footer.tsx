@@ -6,6 +6,9 @@ import Image from "next/image"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import { useTranslation } from "@/lib/i18n"
 import dynamic from "next/dynamic"
+import { useState } from "react"
+import CountrySelect from "@/components/shared/country-select"
+import { LanguageSwitcher } from "@/components/shared/language-switcher"
 
 const Kaaba3D = dynamic(() => import("@/components/ui/home/kaaba-3d"), { ssr: false })
 
@@ -23,6 +26,18 @@ interface FooterSection {
 
 const Footer = () => {
   const { t } = useTranslation()
+  const [country, setCountry] = useState("id")
+
+  const handleCountryChange = async (code: string) => {
+    setCountry(code)
+    try {
+      await fetch("/api/user/country", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ country: code }),
+      })
+    } catch {}
+  }
 
   const footerLinks: FooterSection[] = [
     {
@@ -170,16 +185,20 @@ const Footer = () => {
           ))}
         </div>
 
-        {/* Copyright */}
+        {/* Copyright + Utilities */}
         <div className="border-t border-white/10 mt-10 pt-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-white/30">
               &copy; 2026 PT. Universal Big Data - UmrohQu. All rights reserved.
             </p>
-            <div className="flex items-center gap-1 text-xs text-white/30">
-              Made with
-              <span className="text-gold/60">&hearts;</span>
-              for Indonesian Umrah
+            <div className="flex items-center gap-3">
+              <CountrySelect value={country} onChange={handleCountryChange} variant="dark" />
+              <LanguageSwitcher />
+              <div className="flex items-center gap-1 text-xs text-white/30">
+                Made with
+                <span className="text-gold/60">&hearts;</span>
+                for Indonesian Umrah
+              </div>
             </div>
           </div>
         </div>
