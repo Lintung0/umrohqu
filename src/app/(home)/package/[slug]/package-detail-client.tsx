@@ -196,7 +196,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* LEFT: Image Gallery */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm">
+            <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm relative">
               {initialImages && initialImages.length > 1 ? (
                 <ImageGallery images={initialImages} title={pkg.name} />
               ) : (
@@ -226,17 +226,17 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                       </span>
                     )}
                   </div>
-                  {/* Actions */}
-                  <div className="absolute top-3 right-3 flex gap-1.5">
-                    <button onClick={handleShare} className="w-8 h-8 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-gray-600 hover:bg-white hover:text-primary transition-all shadow-sm">
-                      <Share2 className="w-4 h-4" />
-                    </button>
-                    <button onClick={toggleWishlist} className={`w-8 h-8 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center transition-all shadow-sm ${isWishlisted ? "text-rose-500" : "text-gray-600 hover:bg-white hover:text-rose-500"}`}>
-                      {togglingWishlist ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`} />}
-                    </button>
-                  </div>
                 </div>
               )}
+              {/* Floating Actions — always visible on top of image */}
+              <div className="absolute top-3 right-3 z-20 flex gap-1.5">
+                <button onClick={handleShare} className="w-8 h-8 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-gray-600 hover:bg-white hover:text-primary transition-all shadow-sm">
+                  <Share2 className="w-4 h-4" />
+                </button>
+                <button onClick={toggleWishlist} className={`w-8 h-8 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center transition-all shadow-sm ${isWishlisted ? "text-rose-500" : "text-gray-600 hover:bg-white hover:text-rose-500"}`}>
+                  {togglingWishlist ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`} />}
+                </button>
+              </div>
             </div>
 
             {/* Tabs */}
