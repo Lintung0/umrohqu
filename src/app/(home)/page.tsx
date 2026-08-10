@@ -17,7 +17,7 @@ export default function Home() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('/images/hero-kaabah.jpg')",
+            backgroundImage: "url('https://upload.wikimedia.org/wikipedia/commons/e/e7/Kaaba_Masjid_haraam.jpg')",
           }}
         />
         {/* Dark Luxury Gradient Overlay */}
