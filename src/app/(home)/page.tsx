@@ -17,11 +17,11 @@ export default function Home() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('https://upload.wikimedia.org/wikipedia/commons/e/e7/Kaaba_Masjid_haraam.jpg')",
+            backgroundImage: "url('/images/hero-kaabah.jpg')",
           }}
         />
-        {/* Dark Luxury Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-emerald-950/75 to-slate-900/70" />
+        {/* Dark Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-emerald-950/40 to-slate-950/60" />
 
         <div className="relative z-10 w-full pb-16 pt-10 px-6 md:px-12">
           <div className="max-w-7xl mx-auto">
