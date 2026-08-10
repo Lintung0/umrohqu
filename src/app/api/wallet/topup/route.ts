@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const invoice = await createInvoice({
       externalId,
       amount,
-      description: `Topup dompet UmrohQ Rp ${amount.toLocaleString("id-ID")}`,
+      description: `Topup dompet UmrahQu Rp ${amount.toLocaleString("id-ID")}`,
       customer: {
         email: profile?.email || undefined,
         phone: profile?.phone || undefined,

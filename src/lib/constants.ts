@@ -1,4 +1,4 @@
-// Shared constants for UmrohQ
+// Shared constants for UmrahQu
 
 export { formatRupiah } from "@/lib/utils"
 

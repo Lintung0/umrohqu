@@ -82,7 +82,7 @@ export default function TravelListPage() {
     <main className="min-h-screen bg-zinc-50/50">
       <div className="bg-white border-b border-border px-6 py-8">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold">Travel Partner UmrohQ</h1>
+          <h1 className="text-2xl font-bold">Travel Partner UmrahQu</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {filteredTravels.length} travel terpercaya • Semua terverifikasi Kementerian Agama
           </p>

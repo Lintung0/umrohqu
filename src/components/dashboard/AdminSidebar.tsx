@@ -85,7 +85,7 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
             <span className="text-white font-bold text-sm">U</span>
           </div>
           <div>
-            <p className="font-bold text-sm">UmrohQ</p>
+            <p className="font-bold text-sm">UmrahQu</p>
             <p className="text-[10px] text-muted-foreground">Admin Panel</p>
           </div>
         </Link>
@@ -170,7 +170,7 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
           <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">U</span>
           </div>
-          <p className="font-bold text-sm">UmrohQ Admin</p>
+          <p className="font-bold text-sm">UmrahQu Admin</p>
         </Link>
         <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-xl hover:bg-muted">
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

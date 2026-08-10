@@ -76,7 +76,7 @@ export async function POST() {
     const invoice = await createInvoice({
       externalId,
       amount: feeAmount,
-      description: `Setup Fee ${tenant.name} - UmrohQu Platform`,
+      description: `Setup Fee ${tenant.name} - UmrahQuu Platform`,
       customer: { email: profile.email || undefined },
     })
 

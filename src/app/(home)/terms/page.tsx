@@ -14,7 +14,7 @@ export default function TermsPage() {
         <div className="bg-white rounded-2xl border border-border p-8 space-y-6 text-sm text-muted-foreground leading-relaxed">
           <section>
             <h2 className="font-semibold text-foreground mb-2">1. Penerimaan Syarat</h2>
-            <p>Dengan mengakses dan menggunakan platform UmrohQ, Anda menyetujui syarat dan ketentuan yang berlaku. Jika Anda tidak setuju dengan syarat ini, mohon untuk tidak menggunakan layanan kami.</p>
+            <p>Dengan mengakses dan menggunakan platform UmrahQu, Anda menyetujui syarat dan ketentuan yang berlaku. Jika Anda tidak setuju dengan syarat ini, mohon untuk tidak menggunakan layanan kami.</p>
           </section>
 
           <section>
@@ -34,17 +34,17 @@ export default function TermsPage() {
 
           <section>
             <h2 className="font-semibold text-foreground mb-2">5. Tanggung Jawab Travel</h2>
-            <p>UmrohQ bertindak sebagai marketplace yang menghubungkan jamaah dengan travel. Travel penyelenggara bertanggung jawab penuh atas pelaksanaan perjalanan umroh.</p>
+            <p>UmrahQu bertindak sebagai marketplace yang menghubungkan jamaah dengan travel. Travel penyelenggara bertanggung jawab penuh atas pelaksanaan perjalanan umroh.</p>
           </section>
 
           <section>
             <h2 className="font-semibold text-foreground mb-2">6. Ulasan &amp; Konten</h2>
-            <p>Ulasan yang Anda berikan harus jujur dan tidak melanggar hukum. UmrohQ berhak menghapus ulasan yang mengandung konten tidak pantas atau palsu.</p>
+            <p>Ulasan yang Anda berikan harus jujur dan tidak melanggar hukum. UmrahQu berhak menghapus ulasan yang mengandung konten tidak pantas atau palsu.</p>
           </section>
 
           <section>
             <h2 className="font-semibold text-foreground mb-2">7. Perubahan Ketentuan</h2>
-            <p>UmrohQ berhak mengubah syarat dan ketentuan ini sewaktu-waktu. Perubahan akan diberitahukan melalui platform atau email.</p>
+            <p>UmrahQu berhak mengubah syarat dan ketentuan ini sewaktu-waktu. Perubahan akan diberitahukan melalui platform atau email.</p>
           </section>
         </div>
       </div>

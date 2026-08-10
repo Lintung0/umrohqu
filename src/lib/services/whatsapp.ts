@@ -37,7 +37,7 @@ async function sendViaTwilio({ phone, code }: SendOtpParams): Promise<void> {
   }
 
   const to = `whatsapp:${formatPhone(phone)}`
-  const msg = `Kode OTP UmrohQ Anda: ${code}\n\nKode berlaku 5 menit. Jangan bagikan kode ini kepada siapapun.`
+  const msg = `Kode OTP UmrahQu Anda: ${code}\n\nKode berlaku 5 menit. Jangan bagikan kode ini kepada siapapun.`
 
   const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
     method: "POST",

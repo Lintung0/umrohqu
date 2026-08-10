@@ -69,7 +69,7 @@ export default function CompleteProfilePage() {
           Lengkapi Profil Anda
         </h1>
         <p className="m-0 mt-2.5 text-[16px] leading-relaxed text-auth-muted-foreground">
-          Akun Google Anda telah berhasil diverifikasi. Untuk melanjutkan menggunakan UmrohQ, mohon masukkan nomor telepon aktif Anda agar agen perjalanan dapat menghubungi Anda.
+          Akun Google Anda telah berhasil diverifikasi. Untuk melanjutkan menggunakan UmrahQu, mohon masukkan nomor telepon aktif Anda agar agen perjalanan dapat menghubungi Anda.
         </p>
       </div>
 

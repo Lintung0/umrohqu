@@ -139,7 +139,7 @@ export default function ArticlesPage() {
                   </h2>
                   {article.published_at && (
                     <p className="text-xs text-muted-foreground pt-1">
-                      {article.author || "Redaksi UmrohQ"} · {new Date(article.published_at).toLocaleDateString("id-ID")}
+                      {article.author || "Redaksi UmrahQu"} · {new Date(article.published_at).toLocaleDateString("id-ID")}
                     </p>
                   )}
                 </div>

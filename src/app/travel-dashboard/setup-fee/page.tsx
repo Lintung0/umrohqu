@@ -93,7 +93,7 @@ export default function SetupFeePage() {
       <div>
         <h1 className="text-2xl font-bold">Aktivasi Travel</h1>
         <p className="text-muted-foreground mt-1">
-          Bayar setup fee untuk mengaktifkan travel Anda di platform UmrohQu
+          Bayar setup fee untuk mengaktifkan travel Anda di platform UmrahQuu
         </p>
       </div>
 

@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UmrohQ - Teman Perjalanan Terbaikmu",
+  title: "UmrahQu - Teman Perjalanan Terbaikmu",
   description: "Teman Perjalanan Terbaikmu",
   icons: {
     icon: "/favicon.png",

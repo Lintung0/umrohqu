@@ -91,7 +91,7 @@ export default function ArticleDetailPage() {
             </div>
             <h1 className="text-2xl font-bold">{article.title}</h1>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {article.author || "Redaksi UmrohQ"}</span>
+              <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {article.author || "Redaksi UmrahQu"}</span>
             </div>
             <div className="border-t border-border pt-4 text-muted-foreground leading-relaxed whitespace-pre-line">
               {article.content || ""}

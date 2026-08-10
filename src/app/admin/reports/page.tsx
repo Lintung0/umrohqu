@@ -90,7 +90,7 @@ export default function AdminReportsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Laporan Sistem</h1>
-          <p className="text-muted-foreground mt-1">Analitik seluruh platform UmrohQ</p>
+          <p className="text-muted-foreground mt-1">Analitik seluruh platform UmrahQu</p>
         </div>
         <button className="inline-flex items-center gap-2 px-4 py-2.5 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
           <Download className="w-4 h-4" />

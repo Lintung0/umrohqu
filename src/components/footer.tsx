@@ -188,7 +188,7 @@ const Footer = () => {
         <div className="border-t border-white/10 mt-10 pt-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-white/30">
-              &copy; 2026 PT. Universal Big Data - UmrohQu. All rights reserved.
+              &copy; 2026 PT. Universal Big Data - UmrahQuu. All rights reserved.
             </p>
             <div className="flex items-center gap-3">
               <CountrySelect value={country} onChange={handleCountryChange} variant="dark" />

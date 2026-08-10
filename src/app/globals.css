@@ -74,6 +74,24 @@
   --color-emerald-dark: #0D3D2B;
   --color-emerald-glow: #1BA784;
 
+  /* Design Tokens - Brand */
+  --color-brand-50: #ecfdf5;
+  --color-brand-500: #059669;
+  --color-brand-600: #047857;
+  --color-brand-900: #064e3b;
+  --color-gold-400: #d4a017;
+  --color-gold-200: #fde68a;
+
+  /* Spacing Tokens */
+  --spacing-section: 80px;
+  --spacing-card: 24px;
+
+  /* Radius Tokens */
+  --radius-card: 12px;
+  --radius-badge: 9999px;
+  --radius-input: 8px;
+  --radius-modal: 20px;
+
   --color-auth-bg: #F3FAF6;
   --color-auth-foreground: #0F1A12;
   --color-auth-card: #FFFFFF;

@@ -28,7 +28,7 @@ export function AuthLayout({
             <span className="text-gradient-gold">Sempurna</span>
           </h1>
           <p className="text-white/60 text-base leading-relaxed">
-            Bergabung dengan ribuan jamaah yang telah mempercayakan perjalanan ibadah mereka bersama UmrohQ.
+            Bergabung dengan ribuan jamaah yang telah mempercayakan perjalanan ibadah mereka bersama UmrahQu.
           </p>
           <div className="flex items-center gap-8 pt-4">
             <div>
@@ -49,7 +49,7 @@ export function AuthLayout({
         </div>
 
         <div className="relative z-10 text-sm text-white/30">
-          &copy; 2026 UmrohQ. All rights reserved.
+          &copy; 2026 UmrahQu. All rights reserved.
         </div>
       </div>
 

@@ -6,7 +6,7 @@ export default function AboutPage() {
       {/* Hero */}
       <div className="bg-emerald-600 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-4">
-          <h1 className="text-3xl font-bold">Tentang UmrohQ</h1>
+          <h1 className="text-3xl font-bold">Tentang UmrahQu</h1>
           <p className="text-emerald-100 max-w-2xl mx-auto">
             Platform marketplace Haji &amp; Umroh yang menghubungkan travel terpercaya dengan jamaah di seluruh Indonesia
           </p>
@@ -73,7 +73,7 @@ export default function AboutPage() {
             <h2 className="text-xl font-bold">Perusahaan</h2>
           </div>
           <div className="text-sm text-muted-foreground space-y-2">
-            <p>UmrohQ adalah produk dari <strong>PT. Universal Big Data</strong>.</p>
+            <p>UmrahQu adalah produk dari <strong>PT. Universal Big Data</strong>.</p>
             <p>Platform ini dibangun dengan visi menjadi ekosistem digital terpadu untuk industri haji dan umroh di Indonesia.</p>
             <p className="pt-2">Email: <strong>info@umrohq.com</strong></p>
             <p>WhatsApp: <strong>{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</strong></p>

@@ -9,7 +9,7 @@ export function Logo() {
         </svg>
       </div>
       <span className="text-[22px] font-bold tracking-tight text-auth-primary">
-        UmrohQ
+        UmrahQu
       </span>
     </div>
   )

@@ -281,7 +281,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                   <BadgeCheck className="w-5 h-5 text-primary shrink-0" />
                   <div>
                     <p className="text-[10px] text-muted-foreground">Status Platform</p>
-                    <p className="text-xs font-bold text-primary">{tenantData.is_verified ? "Terverifikasi UmrohQ" : "Dalam Proses"}</p>
+                    <p className="text-xs font-bold text-primary">{tenantData.is_verified ? "Terverifikasi UmrahQu" : "Dalam Proses"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 bg-white border border-border rounded-xl p-3">
