@@ -13,8 +13,8 @@ export default function HeroSection() {
     <section className="relative min-h-[92vh] flex flex-col justify-center overflow-hidden">
       {/* Background layers */}
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary -z-30" />
-      <div className="absolute inset-0 bg-[url('/images/hero.webp')] bg-cover bg-center opacity-40 -z-20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-emerald-deep via-transparent to-emerald-deep/60 -z-10" />
+      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center opacity-50 -z-20" />
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/80 via-emerald-900/60 to-transparent -z-10" />
 
       {/* Decorative corners */}
       <div className="absolute top-0 left-0 text-white/15">

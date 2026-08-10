@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Logo from "./logo"
 import { CompactLanguageSwitcher } from "@/components/shared/compact-language-switcher"
-import { LayoutDashboard, LogOut, ChevronDown, Menu, X, Clock } from "lucide-react"
+import { LayoutDashboard, LogOut, ChevronDown, Menu, X, Scale } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
@@ -130,13 +130,14 @@ const Navbar = () => {
         {/* ── Right: Utilities + Auth ── */}
         <div className="flex items-center justify-end shrink-0">
           <div className="hidden md:flex items-center gap-2">
-            {/* Compare — icon only */}
+            {/* Compare */}
             <Link
               href="/compare"
-              className="flex items-center justify-center w-9 h-9 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
               title={t.nav.compare || "Bandingkan"}
             >
-              <LayoutDashboard className="w-[18px] h-[18px]" />
+              <Scale className="w-4 h-4" />
+              <span className="hidden lg:inline">{t.nav.compare || "Bandingkan"}</span>
             </Link>
 
             <div className="w-px h-5 bg-slate-200 mx-0.5" />
@@ -240,7 +241,7 @@ const Navbar = () => {
               onClick={() => setMobileOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
             >
-              <LayoutDashboard className="w-4 h-4 text-emerald-600" />
+              <Scale className="w-4 h-4 text-emerald-600" />
               {t.nav.compare || "Bandingkan"}
             </Link>
 
