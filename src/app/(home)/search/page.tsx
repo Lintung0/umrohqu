@@ -51,6 +51,7 @@ function SearchContent() {
           .from("packages")
           .select("*")
           .eq("status", "published")
+          .eq("is_active", true)
           .is("deleted_at", null)
 
         if (searchQueryParam) {

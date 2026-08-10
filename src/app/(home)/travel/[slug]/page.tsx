@@ -264,6 +264,15 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               </div>
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
+                  <Users className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase">Kuota Tersedia</p>
+                  <p className="text-xs font-semibold">{pkgList.reduce((sum, p) => sum + (p.available || 0), 0)} jamaah</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
                   <Globe className="w-4 h-4 text-primary" />
                 </div>
                 <div>
@@ -286,9 +295,9 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               .filter(Boolean) as string[]
             if (allGalleryImages.length === 0) {
               return (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="aspect-[4/3] rounded-xl bg-gradient-to-br from-primary/5 to-primary/0 border border-dashed border-primary/20 flex items-center justify-center">
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="min-w-[180px] sm:min-w-[220px] aspect-[4/3] rounded-xl bg-gradient-to-br from-primary/5 to-primary/0 border border-dashed border-primary/20 flex items-center justify-center shrink-0">
                       <div className="text-center">
                         <Camera className="w-6 h-6 text-primary/30 mx-auto mb-1" />
                         <p className="text-[10px] text-muted-foreground">Foto {i}</p>
@@ -299,16 +308,16 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               )
             }
             return (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {allGalleryImages.slice(0, 8).map((img, i) => (
-                  <div key={i} className="aspect-[4/3] rounded-xl overflow-hidden relative group">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {allGalleryImages.map((img, i) => (
+                  <div key={i} className="min-w-[180px] sm:min-w-[220px] aspect-[4/3] rounded-xl overflow-hidden relative group shrink-0">
                     <Image src={img} alt={`Galeri ${i + 1}`} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                 ))}
               </div>
             )
           })()}
-          <p className="text-[10px] text-muted-foreground mt-3 text-center">Galeri dokumentasi perjalanan jemaah</p>
+          <p className="text-[10px] text-muted-foreground mt-3 text-center">Galeri dokumentasi perjalanan jemaah — scroll untuk lihat semua →</p>
         </div>
 
         {/* Packages */}
