@@ -7,13 +7,15 @@ import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "#C9A24B",
-  verified: "#0E5C4E",
+  pending: "var(--color-gold)",
+  verified: "var(--color-brand-900, #0E5C4E)",
   rejected: "#e53e3e",
   open: "#3b82f6",
-  in_progress: "#C9A24B",
-  resolved: "#0E5C4E",
+  in_progress: "var(--color-gold)",
+  resolved: "var(--color-brand-900, #0E5C4E)",
 }
+
+const BRAND_PRIMARY = "#0E5C4E"
 
 function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
   const max = Math.max(...data.map((d) => d.gmv), 1)
@@ -32,14 +34,14 @@ function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-28" role="img" aria-label={`Tren GMV: total ${formatRupiah(totalRevenue)}`}>
       <defs>
         <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0E5C4E" stopOpacity={0.25} />
-          <stop offset="50%" stopColor="#0E5C4E" stopOpacity={0.08} />
-          <stop offset="100%" stopColor="#0E5C4E" stopOpacity={0} />
+          <stop offset="0%" stopColor={BRAND_PRIMARY} stopOpacity={0.25} />
+          <stop offset="50%" stopColor={BRAND_PRIMARY} stopOpacity={0.08} />
+          <stop offset="100%" stopColor={BRAND_PRIMARY} stopOpacity={0} />
         </linearGradient>
         <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#0E5C4E" stopOpacity={0.6} />
-          <stop offset="50%" stopColor="#0E5C4E" stopOpacity={1} />
-          <stop offset="100%" stopColor="#0E5C4E" stopOpacity={0.8} />
+          <stop offset="0%" stopColor={BRAND_PRIMARY} stopOpacity={0.6} />
+          <stop offset="50%" stopColor={BRAND_PRIMARY} stopOpacity={1} />
+          <stop offset="100%" stopColor={BRAND_PRIMARY} stopOpacity={0.8} />
         </linearGradient>
       </defs>
       <polygon points={area} fill="url(#chartGrad)" />
@@ -50,8 +52,8 @@ function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
         const isLast = i === data.length - 1
         return (
           <g key={i}>
-            {isLast && <circle cx={x} cy={y} r="8" fill="#0E5C4E" opacity={0.12} />}
-            <circle cx={x} cy={y} r={isLast ? 5 : 3.5} fill="#0E5C4E" stroke="white" strokeWidth="2" />
+            {isLast && <circle cx={x} cy={y} r="8" fill={BRAND_PRIMARY} opacity={0.12} />}
+            <circle cx={x} cy={y} r={isLast ? 5 : 3.5} fill={BRAND_PRIMARY} stroke="white" strokeWidth="2" />
           </g>
         )
       })}
