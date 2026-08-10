@@ -81,8 +81,9 @@ export default function AdminOverviewPage() {
 
         const tenants = travelRes.data || []
         const allBookings = allBookingsRes.data || []
+        const REVENUE_STATUSES = ["processing", "confirmed", "completed"]
         const totalRevenue = allBookings
-          .filter((b: any) => b.status === "confirmed" || b.status === "completed")
+          .filter((b: any) => REVENUE_STATUSES.includes(b.status))
           .reduce((s: number, b: any) => s + (b.total || 0), 0)
 
         setStats({
@@ -98,7 +99,7 @@ export default function AdminOverviewPage() {
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
         const revenueByMonth = new Map<string, number>()
         allBookings
-          .filter((b: any) => (b.status === "confirmed" || b.status === "completed") && b.created_at)
+          .filter((b: any) => REVENUE_STATUSES.includes(b.status) && b.created_at)
           .forEach((b: any) => {
             const d = new Date(b.created_at)
             const key = monthNames[d.getMonth()]

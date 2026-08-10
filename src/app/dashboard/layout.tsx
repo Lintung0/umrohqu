@@ -11,27 +11,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     async function checkAuth() {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error } = await supabase.auth.getUser()
+
+      console.log("[DEBUG DASHBOARD LAYOUT] getUser result:", { userId: user?.id, email: user?.email, error: error?.message })
 
       if (!user) {
-        // No session — middleware should have caught this, but if we're here
-        // (e.g. post-Xendit redirect), let the page handle its own auth.
-        // Don't block with "Akses ditolak" — the page uses API fallback.
+        console.log("[DEBUG DASHBOARD LAYOUT] No user session — allowing page to handle own auth via API fallback")
         setAuthorized(true)
         setLoading(false)
         return
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileErr } = await supabase
         .from("users")
         .select("role")
         .eq("id", user.id)
         .single()
 
+      console.log("[DEBUG DASHBOARD LAYOUT] Profile query:", { role: profile?.role, error: profileErr?.message })
+
       if (profile?.role === "customer") {
         setAuthorized(true)
       } else {
-        // Wrong role — show access denied
+        console.log("[DEBUG DASHBOARD LAYOUT] Role mismatch — expected customer, got:", profile?.role)
         setAuthorized(false)
       }
       setLoading(false)
@@ -42,7 +44,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
-        <div className="h-8 w-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        <div className="text-center space-y-3">
+          <div className="h-8 w-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-muted-foreground">Memuat sesi autentikasi...</p>
+        </div>
       </div>
     )
   }

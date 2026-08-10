@@ -34,9 +34,12 @@ const EMPTY_FORM = {
   is_active: true,
 }
 
+type TabKey = "platform" | "agency"
+
 export default function AdminPromosPage() {
   const [promos, setPromos] = useState<PromotionRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<TabKey>("platform")
   const [showModal, setShowModal] = useState(false)
   const [editingPromo, setEditingPromo] = useState<PromotionRow | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -92,7 +95,7 @@ export default function AdminPromosPage() {
     }
     setSaving(true)
     const supabase = createClient()
-    const payload = {
+    const payload: Record<string, any> = {
       title: form.title,
       description: form.description || null,
       code: form.code.toUpperCase(),
@@ -102,6 +105,10 @@ export default function AdminPromosPage() {
       max_usage: form.max_usage || null,
       valid_until: form.valid_until || null,
       is_active: form.is_active,
+    }
+    // When creating on platform tab, ensure tenant_id is null (global promo)
+    if (!editingPromo && activeTab === "platform") {
+      payload.tenant_id = null
     }
     if (editingPromo) {
       const { error } = await supabase.from("promotions").update(payload).eq("id", editingPromo.id)
@@ -142,6 +149,9 @@ export default function AdminPromosPage() {
 
   const globalPromos = promos.filter((p) => !p.tenant_id)
   const travelPromos = promos.filter((p) => !!p.tenant_id)
+  const activePromos = activeTab === "platform" ? globalPromos : travelPromos
+  const activeCount = activeTab === "platform" ? globalPromos.length : travelPromos.length
+  const activeActiveCount = activePromos.filter((p) => p.is_active).length
 
   if (loading) {
     return (
@@ -165,10 +175,11 @@ export default function AdminPromosPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Promo & Diskon</h1>
-          <p className="text-muted-foreground mt-1">Kelola promo dan diskon global untuk seluruh platform</p>
+          <h1 className="text-2xl font-bold">Promo & Voucher</h1>
+          <p className="text-muted-foreground mt-1">Kelola promo dan voucher untuk platform dan travel partner</p>
         </div>
         <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">
           <Plus className="w-4 h-4" />
@@ -176,15 +187,82 @@ export default function AdminPromosPage() {
         </button>
       </div>
 
+      {/* Tab Switcher */}
       <div className="bg-white rounded-2xl border border-border">
-        <div className="p-5 border-b border-border">
-          <h2 className="font-semibold">Promo Global (UmrohQ)</h2>
+        <div className="flex border-b border-border">
+          <button
+            onClick={() => setActiveTab("platform")}
+            className={`flex-1 px-6 py-4 text-sm font-medium transition-colors relative ${
+              activeTab === "platform"
+                ? "text-emerald-700 bg-emerald-50/50"
+                : "text-muted-foreground hover:text-foreground hover:bg-gray-50"
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Tag className="w-4 h-4" />
+              Promo Platform
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                activeTab === "platform" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"
+              }`}>
+                {globalPromos.length}
+              </span>
+            </div>
+            {activeTab === "platform" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600" />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("agency")}
+            className={`flex-1 px-6 py-4 text-sm font-medium transition-colors relative ${
+              activeTab === "agency"
+                ? "text-emerald-700 bg-emerald-50/50"
+                : "text-muted-foreground hover:text-foreground hover:bg-gray-50"
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Tag className="w-4 h-4" />
+              Promo Agensi Travel
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                activeTab === "agency" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"
+              }`}>
+                {travelPromos.length}
+              </span>
+            </div>
+            {activeTab === "agency" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600" />
+            )}
+          </button>
         </div>
+
+        {/* Summary Bar */}
+        <div className="px-6 py-3 bg-gray-50/50 flex items-center gap-6 text-sm">
+          <span className="text-muted-foreground">
+            Total: <strong className="text-foreground">{activeCount}</strong> promo
+          </span>
+          <span className="text-muted-foreground">
+            Aktif: <strong className="text-emerald-600">{activeActiveCount}</strong>
+          </span>
+          <span className="text-muted-foreground">
+            Nonaktif: <strong className="text-gray-500">{activeCount - activeActiveCount}</strong>
+          </span>
+        </div>
+
+        {/* Promo List */}
         <div className="divide-y divide-border">
-          {globalPromos.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground text-sm">Belum ada promo global</div>
+          {activePromos.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <Tag className="w-8 h-8 text-gray-300" />
+              </div>
+              <p className="text-muted-foreground font-medium">
+                {activeTab === "platform" ? "Belum ada promo platform" : "Belum ada promo agensi travel"}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Klik &quot;Tambah Promo&quot; untuk membuat promo baru
+              </p>
+            </div>
           ) : (
-            globalPromos.map((promo) => (
+            activePromos.map((promo) => (
               <div key={promo.id} className="flex items-center gap-4 p-5 hover:bg-gray-50/50 transition-colors">
                 <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                   <Tag className="w-5 h-5" />
@@ -196,12 +274,20 @@ export default function AdminPromosPage() {
                       {promo.is_active ? "Aktif" : "Nonaktif"}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{promo.description}</p>
+                  {promo.description && (
+                    <p className="text-xs text-muted-foreground mt-0.5">{promo.description}</p>
+                  )}
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                     <span className="font-mono bg-gray-100 px-2 py-0.5 rounded">{promo.code}</span>
                     <span>Diskon: <strong>{promo.discount_type === "discount_percent" ? `${promo.discount_value}%` : formatRupiah(promo.discount_value)}</strong></span>
-                    {promo.min_booking && <span>Min booking: {formatRupiah(promo.min_booking)}</span>}
-                    {promo.valid_until && <span>Berlaku hingga: {new Date(promo.valid_until).toLocaleDateString("id-ID")}</span>}
+                    {promo.min_booking && <span>Min: {formatRupiah(promo.min_booking)}</span>}
+                    {promo.valid_until && <span>Hingga: {new Date(promo.valid_until).toLocaleDateString("id-ID")}</span>}
+                    {activeTab === "agency" && promo.tenants?.name && (
+                      <span className="text-emerald-600">{promo.tenants.name}</span>
+                    )}
+                    {activeTab === "agency" && (
+                      <span>Terpakai: {promo.usage_count || 0}/{promo.max_usage || "∞"}</span>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -214,33 +300,12 @@ export default function AdminPromosPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-border">
-        <div className="p-5 border-b border-border">
-          <h2 className="font-semibold">Promo Travel (per Agency)</h2>
-        </div>
-        <div className="p-5">
-          <p className="text-sm text-muted-foreground mb-3">Travel dapat membuat promo khusus untuk paket mereka. Total: {travelPromos.length} promo</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {travelPromos.map((promo) => (
-              <div key={promo.id} className="border border-border rounded-xl p-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{promo.title}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${promo.is_active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
-                    {promo.is_active ? "Aktif" : "Off"}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Kode: {promo.code} · Terpakai: {promo.usage_count || 0}/{promo.max_usage || "∞"}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
+      {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="text-lg font-bold">{editingPromo ? "Edit Promo" : "Tambah Promo Baru"}</h2>
+              <h2 className="text-lg font-bold">{editingPromo ? "Edit Promo" : `Tambah Promo ${activeTab === "platform" ? "Platform" : "Agensi"}`}</h2>
               <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-4">
@@ -304,6 +369,7 @@ export default function AdminPromosPage() {
         </div>
       )}
 
+      {/* Delete Confirmation */}
       {deleteId && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setDeleteId(null)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4" onClick={(e) => e.stopPropagation()}>

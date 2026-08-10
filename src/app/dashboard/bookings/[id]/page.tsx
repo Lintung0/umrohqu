@@ -56,11 +56,13 @@ export default function BookingDetailPage() {
   // Track auth state with onAuthStateChange — handles hydration delay after Xendit redirect
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("[DEBUG BOOKING PAGE] onAuthStateChange:", { event: _event, userId: session?.user?.id, email: session?.user?.email })
       setUser(session?.user ?? null)
       setAuthChecked(true)
     })
     // Also get current session immediately
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
+    supabase.auth.getUser().then(({ data: { user: u }, error }) => {
+      console.log("[DEBUG BOOKING PAGE] getUser result:", { userId: u?.id, email: u?.email, error: error?.message })
       setUser(u)
       setAuthChecked(true)
     })
@@ -74,34 +76,38 @@ export default function BookingDetailPage() {
     let cancelled = false
 
     async function load() {
+      console.log("[DEBUG BOOKING LOAD] Starting load for booking:", params.id, "authChecked:", authChecked, "user:", user?.id)
+
       const selectFields = "*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)"
 
       let bookingData: any = null
 
       // Step 1: ALWAYS try API first (uses admin client, bypasses RLS)
-      // This works for: logged-in users, guest checkout, post-Xendit redirect
       try {
         const res = await fetch("/api/booking/detail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bookingId: params.id }),
         })
+        const result = await res.json()
+        console.log("[DEBUG BOOKING LOAD] API response:", { ok: res.ok, status: res.status, hasData: !!result.data, error: result.error })
         if (res.ok) {
-          const result = await res.json()
           bookingData = result.data
         }
-      } catch {
-        // API unavailable — try client-side fallback
+      } catch (e: any) {
+        console.log("[DEBUG BOOKING LOAD] API fetch failed:", e?.message)
       }
 
       // Step 2: If API failed and user is logged in, try client-side Supabase query
       if (!bookingData && user) {
-        const { data } = await supabase
+        console.log("[DEBUG BOOKING LOAD] Trying client-side Supabase query for user:", user.id)
+        const { data, error } = await supabase
           .from("bookings")
           .select(selectFields)
           .eq("id", params.id)
           .eq("customer_id", user.id)
           .single()
+        console.log("[DEBUG BOOKING LOAD] Client query result:", { hasData: !!data, error: error?.message, code: error?.code })
         bookingData = data
       }
 
@@ -109,17 +115,17 @@ export default function BookingDetailPage() {
 
       // Step 3: If still no booking found
       if (!bookingData) {
+        console.log("[DEBUG BOOKING LOAD] No booking data found. user:", user?.id, "redirecting to login")
         if (!user) {
-          // No auth and no data — redirect to login with return URL
           router.push(`/login?redirect_to=/dashboard/bookings/${params.id}`)
           return
         }
-        // Authenticated but booking not found — show not found state
         setBooking(null)
         setLoading(false)
         return
       }
 
+      console.log("[DEBUG BOOKING LOAD] Booking loaded successfully:", { id: bookingData.id, status: bookingData.status, customer_id: bookingData.customer_id })
       setBooking(bookingData)
       setLoading(false)
 
