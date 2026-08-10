@@ -98,11 +98,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <div>
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
-                  <Shield className="w-2.5 h-2.5" /> PPIU Kemenag RI
+                  <Shield className="w-2.5 h-2.5" /> {t("card.ppiu")}
                 </span>
                 {travel?.status === "verified" && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
-                    <BadgeCheck className="w-2.5 h-2.5" /> Terverifikasi
+                    <BadgeCheck className="w-2.5 h-2.5" /> {t("card.verified")}
                   </span>
                 )}
               </div>
@@ -117,7 +117,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 {pkg.duration_days && (
                   <div className="flex items-center gap-1 text-xs text-slate-500">
                     <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
-                    {pkg.duration_days} Hari
+                    {pkg.duration_days} {t("card.days")}
                   </div>
                 )}
                 {pkg.airline && (
@@ -191,7 +191,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="absolute bottom-3 left-3 pointer-events-none">
           <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
             <Clock className="w-3 h-3" />
-            {pkg.duration_days} Hari
+            {pkg.duration_days} {t("card.days")}
           </div>
         </div>
       </div>
@@ -201,11 +201,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         {/* Trust Badges */}
         <div className="flex items-center gap-1.5 mb-2">
           <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
-            <Shield className="w-2.5 h-2.5" /> PPIU Kemenag RI
+            <Shield className="w-2.5 h-2.5" /> {t("card.ppiu")}
           </span>
           {travel?.status === "verified" && (
             <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
-              <BadgeCheck className="w-2.5 h-2.5" /> Terverifikasi
+              <BadgeCheck className="w-2.5 h-2.5" /> {t("card.verified")}
             </span>
           )}
         </div>

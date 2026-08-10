@@ -52,20 +52,20 @@ const Footer = () => {
       ],
     },
     {
-      title: "Produk",
+      title: t.footer.products,
       colSpan: "md:col-span-2",
       items: [
         { href: "/search", label: t.footer.packages },
         { href: "/promotions", label: t.nav.promo },
-        { href: "/travel", label: "Travel" },
-        { href: "/compare", label: "Bandingkan" },
+        { href: "/travel", label: t.footer.travel_agencies },
+        { href: "/compare", label: t.footer.compare },
       ],
     },
     {
-      title: "Ibadah",
+      title: t.footer.ibadah,
       colSpan: "md:col-span-2",
       items: [
-        { href: "/al-quran", label: "Al-Qur'an" },
+        { href: "/al-quran", label: t.footer.al_quran },
       ],
     },
     {
@@ -92,13 +92,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-14 pb-14 border-b border-white/10">
           <div className="space-y-4 text-center lg:text-left">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 text-gold text-xs font-semibold">
-              Perjalanan Suci Berkualitas
+              {t.footer.tagline}
             </span>
             <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-              Wujudkan Niat Suci Bersama UmrohQu
+              {t.footer.headline}
             </h2>
             <p className="text-sm text-white/70 leading-relaxed max-w-lg">
-              Platform marketplace umroh terpercaya yang menghubungkan Anda dengan travel agency resmi berizin Kemenag dari berbagai belahan dunia dengan transparansi harga dan pembayaran aman.
+              {t.footer.hero_desc}
             </p>
           </div>
           <div className="w-full h-[300px]">
@@ -194,9 +194,9 @@ const Footer = () => {
               <CountrySelect value={country} onChange={handleCountryChange} variant="dark" />
               <CompactLanguageSwitcher />
               <div className="flex items-center gap-1 text-xs text-white/30">
-                Made with
+                {t.footer.made_with}
                 <span className="text-gold/60">&hearts;</span>
-                for Indonesian Umrah
+                {t.footer.for_umrah}
               </div>
             </div>
           </div>

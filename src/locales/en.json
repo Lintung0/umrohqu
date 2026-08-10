@@ -178,7 +178,17 @@
     "blog": "Blog",
     "faq": "FAQ",
     "terms": "Terms & Conditions",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "products": "Products",
+    "travel_agencies": "Travel Agencies",
+    "compare": "Compare",
+    "ibadah": "Worship",
+    "al_quran": "Al-Qur'an",
+    "tagline": "Quality Sacred Journey",
+    "headline": "Fulfill Your Sacred Intent with UmrahQu",
+    "hero_desc": "Trusted umrah marketplace platform connecting you with officially licensed travel agencies from across the world with price transparency and secure payments.",
+    "made_with": "Made with",
+    "for_umrah": "for Indonesian Umrah"
   },
   "package": {
     "title": "Umrah Package",
@@ -217,9 +227,18 @@
     "compared": "Compared",
     "detail": "Detail",
     "seats_left": "Seats left",
+    "seats_of": "of",
+    "seats_unit": "seats",
+    "days": "Days",
     "promo": "Promo",
     "premium": "Premium",
-    "price_per_person": "Price per person"
+    "price_per_person": "Price per person",
+    "per_person": "/pax",
+    "status_active": "Active",
+    "status_inactive": "Inactive",
+    "status_completed": "Completed",
+    "ppiu": "PPIU Kemenag RI",
+    "verified": "Verified"
   },
   "detail": {
     "overview": "Overview",

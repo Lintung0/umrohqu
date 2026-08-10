@@ -178,7 +178,17 @@
     "blog": "Blog",
     "faq": "FAQ",
     "terms": "Syarat & Ketentuan",
-    "privacy": "Kebijakan Privasi"
+    "privacy": "Kebijakan Privasi",
+    "products": "Produk",
+    "travel_agencies": "Travel",
+    "compare": "Bandingkan",
+    "ibadah": "Ibadah",
+    "al_quran": "Al-Qur'an",
+    "tagline": "Perjalanan Suci Berkualitas",
+    "headline": "Wujudkan Niat Suci Bersama UmrohQu",
+    "hero_desc": "Platform marketplace umroh terpercaya yang menghubungkan Anda dengan travel agency resmi berizin Kemenag dari berbagai belahan dunia dengan transparansi harga dan pembayaran aman.",
+    "made_with": "Dibuat dengan",
+    "for_umrah": "untuk Umroh Indonesia"
   },
   "package": {
     "title": "Paket Umroh",
@@ -216,10 +226,19 @@
     "compare": "Bandingkan",
     "compared": "Dibandingkan",
     "detail": "Detail",
-    "seats_left": "Sisa Seat",
+    "seats_left": "Sisa Kursi",
+    "seats_of": "dari",
+    "seats_unit": "kursi",
+    "days": "Hari",
     "promo": "Promo",
     "premium": "Premium",
-    "price_per_person": "Harga per orang"
+    "price_per_person": "Harga per orang",
+    "per_person": "/org",
+    "status_active": "Aktif",
+    "status_inactive": "Nonaktif",
+    "status_completed": "Selesai",
+    "ppiu": "PPIU Kemenag RI",
+    "verified": "Terverifikasi"
   },
   "detail": {
     "overview": "Overview",
