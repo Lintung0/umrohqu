@@ -1,7 +1,6 @@
 import PackageSection from "@/components/ui/home/package-section"
 import SearchWidget from "@/components/ui/home/search-widget"
 import { IslamicWidgets } from "@/components/ui/islamic-widgets"
-import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import {
   WhyUsSection,
   TravelAgenciesSection,
@@ -13,20 +12,16 @@ export default function Home() {
   return (
     <main className="flex-1">
       {/* Hero Section with Background Image */}
-      <section className="relative min-h-[380px] md:min-h-[420px] flex items-end overflow-visible">
+      <section className="relative min-h-[380px] md:min-h-[520px] flex items-end overflow-visible">
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80&fm=webp&auto=format')",
+            backgroundImage: "url('/images/hero-kaabah.jpg')",
           }}
         />
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep/85 via-emerald-dark/80 to-primary/75" />
-        {/* Islamic Pattern */}
-        <div className="absolute inset-0 text-white">
-          <IslamicPattern opacity={0.06} />
-        </div>
+        {/* Dark Luxury Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-emerald-950/75 to-slate-900/70" />
 
         <div className="relative z-10 w-full pb-16 pt-10 px-6 md:px-12">
           <div className="max-w-7xl mx-auto">
