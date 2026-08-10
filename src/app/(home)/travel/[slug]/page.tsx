@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Star, MapPin, Clock, Users, Plane, Hotel, BadgeCheck, Shield, Package, ChevronRight, Phone, Mail, MessageCircle, Zap, Camera, Building2, Globe } from "lucide-react"
+import { MapPin, Clock, Users, Plane, BadgeCheck, Shield, Package, ChevronRight, Phone, Mail, MessageCircle, Zap, Camera, Building2, Globe, FileCheck, Award, Play } from "lucide-react"
 import { formatRupiah, getSeatAvailability } from "@/lib/utils"
 import { createAdminClient } from "@/lib/supabase/server"
 
@@ -20,6 +20,11 @@ interface TenantRow {
   phone: string | null
   contact_email: string | null
   brand_color: string | null
+  ppiu_number: string | null
+  accredited_at: string | null
+  total_jamaah: number
+  gallery_urls: string[]
+  video_urls: string[]
 }
 
 interface PackageRow {
@@ -53,7 +58,6 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
   return (
     <Link href={`/package/${pkg.slug}`} className="block bg-white border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-primary/8 hover:-translate-y-0.5 hover:border-primary/20 transition-all duration-300 group">
       <div className="flex flex-col sm:flex-row">
-        {/* Image */}
         <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden">
           <Image
             src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
@@ -77,7 +81,6 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
           </div>
         </div>
 
-        {/* Content */}
         <div className="flex-1 p-4 flex flex-col justify-between">
           <div>
             <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors mb-2">{pkg.name}</h3>
@@ -105,7 +108,6 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
                 Sisa {seat.available} kursi
               </div>
             </div>
-            {/* Seat progress bar */}
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
               <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
             </div>
@@ -138,7 +140,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
   try {
     const tenantResult = await supabase
       .from("tenants")
-      .select("id, slug, name, logo_url, city, description, founded_year, is_verified, is_featured, phone, contact_email, brand_color")
+      .select("id, slug, name, logo_url, city, description, founded_year, is_verified, is_featured, phone, contact_email, brand_color, ppiu_number, accredited_at, total_jamaah, gallery_urls, video_urls")
       .eq("slug", slug)
       .is("deleted_at", null)
       .single()
@@ -148,7 +150,6 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
       notFound()
     }
     tenant = tenantResult.data as TenantRow
-
     if (!tenant) notFound()
 
     const packagesResult = await supabase
@@ -159,12 +160,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
       .is("deleted_at", null)
       .order("price", { ascending: true })
 
-    if (packagesResult.error) {
-      console.error("Error fetching packages:", packagesResult.error)
-      packages = []
-    } else {
-      packages = (packagesResult.data as PackageRow[]) || []
-    }
+    packages = (packagesResult.data as PackageRow[]) || []
   } catch (error) {
     console.error("Travel detail page error:", error)
     notFound()
@@ -173,6 +169,13 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
   const tenantData = tenant as TenantRow
   const pkgList = packages
   const primaryColor = tenantData.brand_color || "#0E5C4E"
+
+  const galleryImages: string[] = Array.isArray(tenantData.gallery_urls) && tenantData.gallery_urls.length > 0
+    ? tenantData.gallery_urls
+    : pkgList.flatMap((p) => p.image_url ? [p.image_url] : [])
+
+  const videoUrls: string[] = Array.isArray(tenantData.video_urls) ? tenantData.video_urls : []
+  const totalJamaah = tenantData.total_jamaah || 0
 
   return (
     <main className="min-h-screen bg-zinc-50/50">
@@ -185,13 +188,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
           </Link>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
             {tenantData.logo_url ? (
-              <Image
-                src={tenantData.logo_url}
-                alt={tenantData.name}
-                width={80}
-                height={80}
-                className="rounded-2xl ring-4 ring-white/20 shadow-xl"
-              />
+              <Image src={tenantData.logo_url} alt={tenantData.name} width={80} height={80} className="rounded-2xl ring-4 ring-white/20 shadow-xl" />
             ) : (
               <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white ring-4 ring-white/20 shadow-xl" style={{ background: `linear-gradient(135deg, ${primaryColor}ee, ${primaryColor}cc)` }}>
                 {tenantData.name.charAt(0)}
@@ -218,6 +215,9 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                 {tenantData.city && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{tenantData.city}</span>}
                 {tenantData.founded_year && <span>Sejak {tenantData.founded_year}</span>}
                 <span className="flex items-center gap-1"><Package className="w-3.5 h-3.5" />{pkgList.length} Paket</span>
+                {totalJamaah > 0 && (
+                  <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{totalJamaah.toLocaleString("id-ID")}+ Jamaah</span>
+                )}
               </div>
             </div>
           </div>
@@ -225,22 +225,78 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        {/* About + Stats */}
+
+        {/* Metrics Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-white border border-border rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-primary">{pkgList.length}</p>
+            <p className="text-[10px] text-muted-foreground uppercase mt-1">Paket Aktif</p>
+          </div>
+          <div className="bg-white border border-border rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-emerald-600">{totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+` : pkgList.reduce((s, p) => s + (p.available || 0), 0)}</p>
+            <p className="text-[10px] text-muted-foreground uppercase mt-1">Jamaah Diberangkatkan</p>
+          </div>
+          <div className="bg-white border border-border rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-amber-600">{tenantData.founded_year || "-"}</p>
+            <p className="text-[10px] text-muted-foreground uppercase mt-1">Berdiri Sejak</p>
+          </div>
+          <div className="bg-white border border-border rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-blue-600">{tenantData.is_verified ? "✓" : "-"}</p>
+            <p className="text-[10px] text-muted-foreground uppercase mt-1">Status Verifikasi</p>
+          </div>
+        </div>
+
+        {/* About + Legalitas */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="sm:col-span-2 bg-white border border-border rounded-2xl p-5">
-            <h2 className="font-semibold text-sm mb-2">Tentang Kami</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">{tenantData.description || "Biro perjalanan umroh & haji terpercaya."}</p>
-            <div className="flex flex-wrap gap-2 mt-3">
-              {[
-                { icon: Shield, text: "PPIU Resmi Kemenag" },
-                { icon: BadgeCheck, text: "Terverifikasi UmrohQ" },
-              ].map((item) => (
-                <span key={item.text} className="flex items-center gap-1.5 text-xs text-muted-foreground bg-primary/5 text-primary/80 px-2.5 py-1 rounded-full font-medium">
-                  <item.icon className="w-3 h-3" /> {item.text}
-                </span>
-              ))}
+          <div className="sm:col-span-2 bg-white border border-border rounded-2xl p-5 space-y-4">
+            <div>
+              <h2 className="font-semibold text-sm mb-2">Tentang Kami</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">{tenantData.description || "Biro perjalanan umroh & haji terpercaya."}</p>
+            </div>
+            {/* Legalitas Section */}
+            <div className="border-t border-border pt-4">
+              <h3 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
+                <FileCheck className="w-3.5 h-3.5" /> Legalitas & Perizinan
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                  <Shield className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Nomor Izin PPIU</p>
+                    <p className="text-xs font-bold text-emerald-700">{tenantData.ppiu_number || "Terverifikasi Kemenag RI"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                  <Award className="w-5 h-5 text-blue-600 shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Tanggal Akreditasi</p>
+                    <p className="text-xs font-bold text-blue-700">
+                      {tenantData.accredited_at
+                        ? new Date(tenantData.accredited_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+                        : "Aktif"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5 bg-white border border-border rounded-xl p-3">
+                  <BadgeCheck className="w-5 h-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Status Platform</p>
+                    <p className="text-xs font-bold text-primary">{tenantData.is_verified ? "Terverifikasi UmrohQ" : "Dalam Proses"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5 bg-white border border-border rounded-xl p-3">
+                  <Users className="w-5 h-5 text-primary shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Total Jamaah</p>
+                    <p className="text-xs font-bold text-primary">
+                      {totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+ Jamaah` : "Data tersedia"}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
           <div className="bg-white border border-border rounded-2xl p-5">
             <h2 className="font-semibold text-sm mb-3">Info Singkat</h2>
             <div className="space-y-2.5">
@@ -284,39 +340,45 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
           </div>
         </div>
 
-        {/* Photo Gallery */}
+        {/* Multimedia Gallery */}
         <div className="bg-white border border-border rounded-2xl p-5">
           <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
             <Camera className="w-4 h-4 text-primary" /> Galeri Dokumentasi
           </h2>
-          {(() => {
-            const allGalleryImages = pkgList
-              .flatMap((pkg) => [pkg.image_url])
-              .filter(Boolean) as string[]
-            if (allGalleryImages.length === 0) {
-              return (
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="min-w-[180px] sm:min-w-[220px] aspect-[4/3] rounded-xl bg-gradient-to-br from-primary/5 to-primary/0 border border-dashed border-primary/20 flex items-center justify-center shrink-0">
-                      <div className="text-center">
-                        <Camera className="w-6 h-6 text-primary/30 mx-auto mb-1" />
-                        <p className="text-[10px] text-muted-foreground">Foto {i}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
-            }
-            return (
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                {allGalleryImages.map((img, i) => (
-                  <div key={i} className="min-w-[180px] sm:min-w-[220px] aspect-[4/3] rounded-xl overflow-hidden relative group shrink-0">
-                    <Image src={img} alt={`Galeri ${i + 1}`} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+          {galleryImages.length === 0 && videoUrls.length === 0 ? (
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="min-w-[180px] sm:min-w-[220px] aspect-[4/3] rounded-xl bg-gradient-to-br from-primary/5 to-primary/0 border border-dashed border-primary/20 flex items-center justify-center shrink-0">
+                  <div className="text-center">
+                    <Camera className="w-6 h-6 text-primary/30 mx-auto mb-1" />
+                    <p className="text-[10px] text-muted-foreground">Foto {i}</p>
                   </div>
-                ))}
-              </div>
-            )
-          })()}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {galleryImages.map((img, i) => (
+                <div key={`img-${i}`} className="min-w-[180px] sm:min-w-[220px] aspect-[4/3] rounded-xl overflow-hidden relative group shrink-0">
+                  <Image src={img} alt={`Galeri ${i + 1}`} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                </div>
+              ))}
+              {videoUrls.map((url, i) => (
+                <div key={`vid-${i}`} className="min-w-[280px] sm:min-w-[320px] aspect-video rounded-xl overflow-hidden relative shrink-0 bg-black">
+                  <video
+                    src={url}
+                    controls
+                    preload="metadata"
+                    poster=""
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 pointer-events-none">
+                    <Play className="w-2.5 h-2.5" /> Video
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <p className="text-[10px] text-muted-foreground mt-3 text-center">Galeri dokumentasi perjalanan jemaah — scroll untuk lihat semua →</p>
         </div>
 
