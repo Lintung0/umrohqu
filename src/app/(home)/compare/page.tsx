@@ -267,20 +267,20 @@ function CompareContent() {
 
   return (
     <main className="min-h-screen bg-zinc-50/50">
-      <div className="bg-white border-b border-border px-6 py-5">
+      <div className="bg-white border-b border-border px-4 sm:px-6 py-4 sm:py-5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
               <GitCompare className="w-5 h-5 text-primary" />
               Bandingkan Paket
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Pilih hingga {MAX_COMPARE} paket untuk dibandingkan</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Pilih hingga {MAX_COMPARE} paket untuk dibandingkan</p>
           </div>
           <Button variant="outline" size="sm" className="text-xs" onClick={() => router.back()}>← Kembali</Button>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 overflow-x-auto">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 overflow-x-auto pb-24 sm:pb-8">
         <div className="min-w-[640px]">
           {/* Smart Insights */}
           {insightLines.length > 0 && (

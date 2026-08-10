@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BarChart3, TrendingUp, DollarSign, Package, Users } from "lucide-react"
-import { formatRupiah } from "@/lib/constants"
+import { formatRupiah } from "@/lib/utils"
 
 interface BookingRow {
   status: string

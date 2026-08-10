@@ -11,7 +11,7 @@ import {
   Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
   Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package,
 } from "lucide-react"
-import { formatRupiah } from "@/lib/constants"
+import { formatRupiah } from "@/lib/utils"
 import { decodeUnicodeEscapes } from "@/lib/utils"
 import ImageGallery from "@/components/shared/image-gallery"
 import { Button } from "@/components/ui/button"
@@ -108,7 +108,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
     { id: "facilities", label: "Fasilitas", icon: CheckCircle },
     { id: "reviews", label: `Ulasan (${initialReviews.length})`, icon: Star },
   ]
-
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistId, setWishlistId] = useState<string | null>(null)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
@@ -375,9 +374,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         <div className="flex items-center gap-4 p-4 bg-amber-50 rounded-xl border border-amber-200/50">
                           <div className="text-center">
                             <div className="text-4xl font-bold text-amber-600">{avgRating.toFixed(1)}</div>
-                            <div className="flex gap-0.5 justify-center mt-1">
+                            <div className="flex gap-0.5 justify-center mt-1" role="img" aria-label={`Rating ${avgRating.toFixed(1)} dari 5 bintang`}>
                               {[1,2,3,4,5].map((s) => (
-                                <Star key={s} className={`w-4 h-4 ${s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+                                <Star key={s} className={`w-4 h-4 ${s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} aria-hidden="true" />
                               ))}
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">{initialReviews.length} ulasan</div>
@@ -400,9 +399,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                 <div>
                                   <p className="text-sm font-medium">{reviewerName}</p>
                                   <div className="flex items-center gap-1.5">
-                                    <div className="flex gap-0.5">
+                                    <div className="flex gap-0.5" role="img" aria-label={`Rating ${r.rating} dari 5 bintang`}>
                                       {[1,2,3,4,5].map((s) => (
-                                        <Star key={s} className={`w-2.5 h-2.5 ${s <= r.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+                                        <Star key={s} className={`w-2.5 h-2.5 ${s <= r.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} aria-hidden="true" />
                                       ))}
                                     </div>
                                     <span className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("id-ID")}</span>

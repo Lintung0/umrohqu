@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DollarSign, Save, Info, Loader2 } from "lucide-react"
-import { formatRupiah } from "@/lib/constants"
+import { formatRupiah } from "@/lib/utils"
 import { toast } from "sonner"
 
 interface FeeConfig {

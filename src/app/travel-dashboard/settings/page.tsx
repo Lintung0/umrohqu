@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { User as UserIcon, Lock, Bell, CreditCard, Save, Upload, Loader2 } from "lucide-react"
-import { formatRupiah } from "@/lib/constants"
+import { formatRupiah } from "@/lib/utils"
 import { toast } from "sonner"
 import { useTranslation } from "@/lib/i18n"
 

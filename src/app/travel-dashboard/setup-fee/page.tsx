@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, CheckCircle, AlertCircle, CreditCard, ExternalLink } from "lucide-react"
-import { formatRupiah } from "@/lib/constants"
+import { formatRupiah } from "@/lib/utils"
 import { DEFAULT_FEE_CONFIG } from "@/lib/business-logic/fees"
 
 export default function SetupFeePage() {

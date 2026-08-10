@@ -6,7 +6,7 @@ import { User } from "@supabase/supabase-js"
 import { Plus, Search, Edit, Trash2, Eye, EyeOff, MoreHorizontal, Calendar, Hotel, Loader2, Package } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { formatRupiah } from "@/lib/constants"
+import { formatRupiah } from "@/lib/utils"
 import { toast } from "sonner"
 import { getTravelTenantId } from "@/lib/get-travel-tenant"
 
