@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense, useMemo } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { X, Plus, Check, Minus, GitCompare, Award, Leaf, Sparkles, TrendingDown, Star, Shield, BadgeCheck, Zap } from "lucide-react"
@@ -138,6 +138,8 @@ function compareRows(pkgs: Package[], key: string, scores: ReturnType<typeof cal
 
 function CompareContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const initialPkgSlug = searchParams.get("packages")
   const initialPkgId = searchParams.get("pkg")
 
   const [allPackages, setAllPackages] = useState<Package[]>([])
@@ -170,11 +172,15 @@ function CompareContent() {
 
   const [selected, setSelected] = useState<Package[]>([])
   useEffect(() => {
-    if (initialPkgId && allPackages.length > 0) {
-      const init = allPackages.find((p) => p.id === initialPkgId)
+    if (allPackages.length > 0) {
+      const init = initialPkgSlug
+        ? allPackages.find((p) => p.slug === initialPkgSlug)
+        : initialPkgId
+          ? allPackages.find((p) => p.id === initialPkgId)
+          : null
       if (init) setSelected([init])
     }
-  }, [initialPkgId, allPackages])
+  }, [initialPkgSlug, initialPkgId, allPackages])
 
   const scores = useMemo(() => selected.map(calcScore), [selected])
 
@@ -270,9 +276,7 @@ function CompareContent() {
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">Pilih hingga {MAX_COMPARE} paket untuk dibandingkan</p>
           </div>
-          <Link href="/search">
-            <Button variant="outline" size="sm" className="text-xs">← Kembali</Button>
-          </Link>
+          <Button variant="outline" size="sm" className="text-xs" onClick={() => router.back()}>← Kembali</Button>
         </div>
       </div>
 

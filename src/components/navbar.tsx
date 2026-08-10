@@ -130,13 +130,13 @@ const Navbar = () => {
         {/* ── Right: Utilities + Auth ── */}
         <div className="flex items-center justify-end shrink-0">
           <div className="hidden md:flex items-center gap-2">
-            {/* Prayer Times — icon only */}
+            {/* Compare — icon only */}
             <Link
-              href="/jadwal-sholat"
+              href="/compare"
               className="flex items-center justify-center w-9 h-9 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-slate-50 transition-colors"
-              title={t.nav.jadwal_sholat}
+              title={t.nav.compare || "Bandingkan"}
             >
-              <Clock className="w-[18px] h-[18px]" />
+              <LayoutDashboard className="w-[18px] h-[18px]" />
             </Link>
 
             <div className="w-px h-5 bg-slate-200 mx-0.5" />
@@ -236,12 +236,12 @@ const Navbar = () => {
             ))}
 
             <Link
-              href="/jadwal-sholat"
+              href="/compare"
               onClick={() => setMobileOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
             >
-              <Clock className="w-4 h-4 text-emerald-600" />
-              {t.nav.jadwal_sholat}
+              <LayoutDashboard className="w-4 h-4 text-emerald-600" />
+              {t.nav.compare || "Bandingkan"}
             </Link>
 
             <div className="px-4 py-2">

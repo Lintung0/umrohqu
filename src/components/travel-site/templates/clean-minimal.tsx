@@ -130,7 +130,7 @@ function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
     : 0
 
   return (
-    <div className="group bg-white border border-border/60 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+    <Link href={`/package/${pkg.slug}`} className="group block bg-white border border-border/60 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
       <div className="relative h-44 overflow-hidden">
         <Image
           src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
@@ -176,11 +176,11 @@ function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
             {pkg.original_price && <p className="text-[11px] text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>}
             <p className="text-lg font-bold text-gray-900">{formatRupiah(pkg.price)}</p>
           </div>
-          <Link href={`/package/${pkg.slug}`} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-border/60 text-gray-700 hover:bg-gray-50 transition-colors group/btn">
+          <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-border/60 text-gray-700 hover:bg-gray-50 transition-colors group/btn">
             Detail <ArrowRight className="w-3 h-3 transition-transform group-hover/btn:translate-x-0.5" />
-          </Link>
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

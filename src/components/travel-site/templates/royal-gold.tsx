@@ -125,7 +125,7 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
     : 0
 
   return (
-    <div className="group rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1" style={{ background: `${primary}cc`, border: `1px solid ${gold}22` }}>
+    <Link href={`/package/${pkg.slug}`} className="group block rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1" style={{ background: `${primary}cc`, border: `1px solid ${gold}22` }}>
       <div className="relative h-48 overflow-hidden">
         <Image
           src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
@@ -181,11 +181,11 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
               <p className="text-[10px]" style={{ color: `${gold}55` }}>/org</p>
             </div>
           </div>
-          <Link href={`/package/${pkg.slug}`} className="inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:shadow-lg" style={{ background: gold, color: primary }}>
+          <span className="inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:shadow-lg" style={{ background: gold, color: primary }}>
             Lihat <ArrowRight className="w-3 h-3" />
-          </Link>
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }

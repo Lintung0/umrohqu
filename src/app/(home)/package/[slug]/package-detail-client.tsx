@@ -500,15 +500,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   Booking Sekarang
                 </Button>
               </Link>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className={`h-9 text-xs gap-1.5 ${isWishlisted ? "border-emerald-500 text-emerald-600 bg-emerald-50" : ""}`} onClick={toggleWishlist} disabled={togglingWishlist}>
-                  {togglingWishlist ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : isWishlisted ? <BookmarkCheck className="w-3.5 h-3.5" /> : <BookmarkPlus className="w-3.5 h-3.5" />}
-                  {isWishlisted ? "Tersimpan" : "Simpan"}
-                </Button>
-                <Button variant="outline" size="sm" className="h-9 text-xs gap-1.5" onClick={handleShare}>
-                  <Share2 className="w-3.5 h-3.5" /> Bagikan
-                </Button>
-              </div>
               <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5" onClick={() => router.push(`/compare?packages=${pkg.slug}`)}>
                 <Package className="w-3.5 h-3.5" /> Bandingkan
               </Button>

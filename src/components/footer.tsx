@@ -66,7 +66,6 @@ const Footer = () => {
       colSpan: "md:col-span-2",
       items: [
         { href: "/al-quran", label: "Al-Qur'an" },
-        { href: "/jadwal-sholat", label: "Jadwal Sholat" },
       ],
     },
     {
