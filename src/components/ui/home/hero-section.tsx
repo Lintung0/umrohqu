@@ -68,7 +68,7 @@ export default function HeroSection() {
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?q=80&w=2000&auto=format&fit=crop')" }}
+        style={{ backgroundImage: "url('/images/hero-kaabah.jpg')" }}
         aria-hidden="true"
       />
 
