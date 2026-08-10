@@ -66,12 +66,12 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     return (
       <div onClick={handleClick} className="flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg hover:shadow-emerald-500/8 hover:-translate-y-0.5 hover:border-emerald-300/40 transition-all duration-300 group cursor-pointer">
         <div className="flex flex-col sm:flex-row h-full">
-          <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden pointer-events-none">
+          <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden">
             <Image
               src={imgSrc}
               alt={pkg.name}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
               onError={handleError}
               unoptimized
             />
@@ -91,7 +91,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             </div>
             <button
               onClick={handleFavorite}
-              className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition shadow-sm"
+              className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition shadow-sm pointer-events-auto"
             >
               <Heart className={`w-4 h-4 ${isFavorite ? "fill-red-500 text-red-500" : "text-slate-400"}`} />
             </button>
@@ -152,12 +152,12 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   return (
     <div onClick={handleClick} className="flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-emerald-500/8 hover:-translate-y-0.5 hover:border-emerald-300/40 transition-all duration-300 group cursor-pointer">
       {/* Image */}
-      <div className="relative h-48 w-full overflow-hidden pointer-events-none">
+      <div className="relative h-48 w-full overflow-hidden">
         <Image
           src={imgSrc}
           alt={pkg.name}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          className="object-cover transition-transform duration-500 group-hover:scale-110 pointer-events-none"
           onError={handleError}
           unoptimized
         />
@@ -181,7 +181,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
         <button
           onClick={handleFavorite}
-          className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition shadow-sm"
+          className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition shadow-sm pointer-events-auto"
         >
           <Heart className={`w-4 h-4 ${isFavorite ? "fill-red-500 text-red-500" : "text-slate-400"}`} />
         </button>
