@@ -137,7 +137,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 {pkg.original_price && (
                   <p className="text-[11px] text-slate-400 line-through">{formatRupiah(pkg.original_price)}</p>
                 )}
-                <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}<span className="text-[10px] text-slate-400 font-normal">{t("checkout.per_person")}</span></p>
+                <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}<span className="text-[10px] text-slate-400 font-normal">{t("card.per_person")}</span></p>
               </div>
             </div>
           </div>
@@ -264,14 +264,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
 
         {pkg.facilities && pkg.facilities.length > 0 && (
-          <div className="flex flex-wrap h-12 overflow-hidden gap-1.5 mt-3">
+          <div className="flex flex-wrap h-7 overflow-hidden gap-1.5 mt-2">
             {pkg.facilities.slice(0, 3).map((f) => (
-              <span key={f} className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
+              <span key={f} className="px-2.5 py-0.5 text-[11px] font-medium rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100/60 whitespace-nowrap">
                 {f}
               </span>
             ))}
             {pkg.facilities.length > 3 && (
-              <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
+              <span className="px-2.5 py-0.5 text-[11px] font-medium rounded-md bg-slate-100 text-slate-500 whitespace-nowrap">
                 +{pkg.facilities.length - 3}
               </span>
             )}
@@ -287,7 +287,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             )}
             <div className="flex items-baseline gap-1">
               <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
-              <p className="text-[10px] text-slate-400">{t("checkout.per_person")}</p>
+              <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
             </div>
           </div>
         </div>
