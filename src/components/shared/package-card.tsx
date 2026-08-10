@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { Clock, MapPin, Plane, Hotel, BadgeCheck, Shield, Heart } from "lucide-react"
@@ -10,7 +10,6 @@ import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
 const KAABAH_IMAGE = "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=80&fm=webp&auto=format"
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"
 
 function getSafeImage(url: string | null | undefined): string {
   if (!url) return KAABAH_IMAGE
@@ -28,7 +27,6 @@ interface PackageCardProps {
 }
 
 export default function PackageCard({ pkg, travel, showTravel = true, variant = "vertical" }: PackageCardProps) {
-  const router = useRouter()
   const { t } = useTranslation()
   const [imgSrc, setImgSrc] = useState(getSafeImage(pkg.image_url))
   const [imgError, setImgError] = useState(false)
@@ -45,11 +43,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
   }
 
-  function handleClick(e: React.MouseEvent) {
-    e.preventDefault()
-    router.push(`/package/${pkg.slug}`)
-  }
-
   function handleFavorite(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
@@ -59,12 +52,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   function handleTravelClick(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    router.push(`/travel/${travel!.slug}`)
   }
 
   if (variant === "horizontal") {
     return (
-      <div onClick={handleClick} className="flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg hover:shadow-emerald-500/8 hover:-translate-y-0.5 hover:border-emerald-300/40 transition-all duration-300 group cursor-pointer">
+      <Link
+        href={`/package/${pkg.slug}`}
+        className="flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg hover:shadow-emerald-500/8 hover:-translate-y-0.5 hover:border-emerald-300/40 transition-all duration-300 group cursor-pointer block"
+      >
         <div className="flex flex-col sm:flex-row h-full">
           <div className="relative w-full sm:w-40 h-36 sm:h-auto shrink-0 overflow-hidden">
             <Image
@@ -92,6 +87,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <button
               onClick={handleFavorite}
               className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition shadow-sm pointer-events-auto"
+              type="button"
+              aria-label="Wishlist"
             >
               <Heart className={`w-4 h-4 ${isFavorite ? "fill-red-500 text-red-500" : "text-slate-400"}`} />
             </button>
@@ -145,12 +142,15 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             </div>
           </div>
         </div>
-      </div>
+      </Link>
     )
   }
 
   return (
-    <div onClick={handleClick} className="flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-emerald-500/8 hover:-translate-y-0.5 hover:border-emerald-300/40 transition-all duration-300 group cursor-pointer">
+    <Link
+      href={`/package/${pkg.slug}`}
+      className="flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-emerald-500/8 hover:-translate-y-0.5 hover:border-emerald-300/40 transition-all duration-300 group cursor-pointer block"
+    >
       {/* Image */}
       <div className="relative h-48 w-full overflow-hidden">
         <Image
@@ -161,9 +161,9 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           onError={handleError}
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
 
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 pointer-events-none">
           {pkg.is_promo && (
             <span className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg">
               PROMO {discount}%
@@ -182,11 +182,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <button
           onClick={handleFavorite}
           className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition shadow-sm pointer-events-auto"
+          type="button"
+          aria-label="Wishlist"
         >
           <Heart className={`w-4 h-4 ${isFavorite ? "fill-red-500 text-red-500" : "text-slate-400"}`} />
         </button>
 
-        <div className="absolute bottom-3 left-3">
+        <div className="absolute bottom-3 left-3 pointer-events-none">
           <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
             <Clock className="w-3 h-3" />
             {pkg.duration_days} Hari
@@ -209,9 +211,10 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
 
         {showTravel && travel && (
-          <span
+          <Link
+            href={`/travel/${travel.slug}`}
             onClick={handleTravelClick}
-            className="inline-flex items-center gap-2 cursor-pointer group/travel mb-2"
+            className="inline-flex items-center gap-2 cursor-pointer group/travel mb-2 pointer-events-auto"
           >
             {travel.logo_url ? (
               <Image
@@ -230,7 +233,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <span className="text-xs text-slate-500 font-medium group-hover/travel:text-emerald-600 transition-colors">
               {travel.name}
             </span>
-          </span>
+          </Link>
         )}
 
         <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2">
@@ -289,6 +292,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
