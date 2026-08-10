@@ -17,6 +17,7 @@ interface TravelPackage {
   price: number
   quota: number
   status: string
+  is_active: boolean
   departure_city: string | null
   departure_date: string | null
   duration_days: number | null
@@ -31,7 +32,7 @@ export default function TravelPackagesPage() {
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [packages, setPackages] = useState<TravelPackage[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "archived">("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "archived" | "inactive">("all")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function TravelPackagesPage() {
 
       const { data } = await supabase
         .from("packages")
-        .select("id, name, slug, price, quota, status, departure_city, departure_date, duration_days, airline, hotel_info, image_url")
+        .select("id, name, slug, price, quota, status, is_active, departure_city, departure_date, duration_days, airline, hotel_info, image_url")
         .eq("tenant_id", tId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
@@ -81,7 +82,11 @@ export default function TravelPackagesPage() {
 
   const filtered = packages.filter((pkg) => {
     const matchSearch = pkg.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchStatus = statusFilter === "all" || pkg.status === statusFilter
+    const matchStatus = statusFilter === "all"
+      ? true
+      : statusFilter === "inactive"
+        ? pkg.is_active === false
+        : pkg.status === statusFilter
     return matchSearch && matchStatus
   })
 
@@ -123,8 +128,8 @@ export default function TravelPackagesPage() {
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
         </div>
-        <div className="flex gap-2">
-          {(["all", "published", "draft", "archived"] as const).map((s) => (
+        <div className="flex gap-2 flex-wrap">
+          {(["all", "published", "draft", "archived", "inactive"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
@@ -132,7 +137,7 @@ export default function TravelPackagesPage() {
                 statusFilter === s ? "bg-emerald-600 text-white" : "bg-white border border-border text-muted-foreground hover:bg-gray-50"
               }`}
             >
-              {s === "all" ? "Semua" : s === "published" ? "Aktif" : s === "draft" ? "Draf" : "Arsip"}
+              {s === "all" ? "Semua" : s === "published" ? "Aktif" : s === "draft" ? "Draf" : s === "archived" ? "Arsip" : "Nonaktif"}
             </button>
           ))}
         </div>

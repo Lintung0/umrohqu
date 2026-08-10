@@ -150,7 +150,7 @@ export default function PackageSection() {
               {t.package.title}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Harga terbaik, fasilitas premium
+              {packages.length > 0 ? `${packages.length} paket tersedia` : "Harga terbaik, fasilitas premium"}
             </p>
           </div>
           <Link
