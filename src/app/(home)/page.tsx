@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/home/extra-sections"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Search, MapPin, Calendar, Building2, Sparkles, ChevronDown } from "lucide-react"
+import { Search, MapPin, Calendar, Building2, ChevronDown } from "lucide-react"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
 
 const MONTHS = [
@@ -49,68 +49,68 @@ function HeroSearch() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-2xl border border-white/20 text-gray-800">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+    <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-xl border border-white/20 text-gray-800 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
         {/* Nama Paket */}
-        <div className="md:col-span-4">
-          <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 px-1">
+        <div className="sm:col-span-4">
+          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">
             Nama Paket / Travel
           </label>
-          <div className="relative flex items-center">
-            <Building2 className="w-4 h-4 absolute left-3 text-emerald-600 shrink-0" />
+          <div className="relative">
+            <Building2 className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Cari paket atau travel..."
-              className="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+              className="w-full pl-8 pr-2.5 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
             />
           </div>
         </div>
 
         {/* Keberangkatan */}
-        <div className="md:col-span-3">
-          <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 px-1">
-            Kota Keberangkatan
+        <div className="sm:col-span-3">
+          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">
+            Keberangkatan
           </label>
           <CityAutocomplete
             value={departureCity}
             onChange={setDepartureCity}
             placeholder="Kota asal..."
             countryFilter={country}
-            className="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+            className="w-full pl-8 pr-2.5 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
           />
         </div>
 
-        {/* Bulan */}
-        <div className="md:col-span-3">
-          <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5 px-1">
+        {/* Waktu */}
+        <div className="sm:col-span-3">
+          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 px-1">
             Waktu Keberangkatan
           </label>
           <div className="relative">
-            <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 pointer-events-none" />
+            <Calendar className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 pointer-events-none" />
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-full pl-9 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+              className="w-full pl-8 pr-7 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all appearance-none cursor-pointer"
             >
-              <option value="">Pilih Bulan</option>
+              <option value="">Bulan Keberangkatan</option>
               {MONTHS.map((m) => (
                 <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>
-            <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
         </div>
 
         {/* Submit */}
-        <div className="md:col-span-2">
+        <div className="sm:col-span-2">
           <button
             type="submit"
-            className="w-full h-[42px] bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+            className="w-full h-[34px] bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold rounded-lg shadow transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
             aria-label="Cari paket umroh"
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-3.5 h-3.5" />
             <span>Cari</span>
           </button>
         </div>
@@ -122,37 +122,19 @@ function HeroSearch() {
 export default function Home() {
   return (
     <main className="flex-1">
-      {/* Hero Section */}
-      <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden py-20">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
-          style={{ backgroundImage: "url('/images/hero-kaabah.jpg')" }}
-        />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/85 via-slate-950/75 to-emerald-950/80 z-10" />
+      {/* Compact Hero */}
+      <section className="relative py-8 sm:py-12 bg-gradient-to-r from-emerald-950 via-emerald-900 to-slate-950 text-white overflow-hidden border-b border-emerald-800/40">
+        {/* Subtle Islamic dot pattern */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" aria-hidden="true" />
 
-        {/* Content */}
-        <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 text-center text-white w-full">
-          {/* Trust Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs sm:text-sm font-medium mb-6 backdrop-blur-sm">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Platform Bandingkan Paket Umrah Resmi Kemenag</span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4 drop-shadow-lg leading-tight">
-            Temukan Paket Umroh <span className="text-amber-400">Impian Anda</span>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
+            Cari & Bandingkan <span className="text-amber-400">Paket Umroh Resmi</span>
           </h1>
-
-          <p className="text-base sm:text-lg text-emerald-100/90 max-w-2xl mx-auto mb-10 drop-shadow leading-relaxed">
-            Bandingkan ratusan paket umroh resmi dari berbagai travel partner terpercaya di seluruh Indonesia
+          <p className="text-xs sm:text-sm text-emerald-100/80 max-w-xl mx-auto mb-6">
+            Pilihan paket terpercaya dari berbagai PPIU resmi Kemenag RI
           </p>
-
-          {/* Glassmorphism Search */}
-          <div className="-mb-16 sm:-mb-20">
-            <HeroSearch />
-          </div>
+          <HeroSearch />
         </div>
       </section>
 
