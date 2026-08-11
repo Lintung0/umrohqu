@@ -12,18 +12,6 @@ import { CompactLanguageSwitcher } from "@/components/shared/compact-language-sw
 
 const Kaaba3D = dynamic(() => import("@/components/ui/home/kaaba-3d"), { ssr: false })
 
-interface FooterItem {
-  href: string
-  label: string
-  icon?: string
-}
-
-interface FooterSection {
-  title: string
-  colSpan: string
-  items: FooterItem[]
-}
-
 const Footer = () => {
   const { t } = useTranslation()
   const [country, setCountry] = useState("id")
@@ -39,10 +27,9 @@ const Footer = () => {
     } catch {}
   }
 
-  const footerLinks: FooterSection[] = [
+  const footerLinks = [
     {
       title: t.footer.about,
-      colSpan: "md:col-span-3",
       items: [
         { href: "/about", label: t.footer.about },
         { href: "/faq", label: t.footer.faq },
@@ -53,7 +40,6 @@ const Footer = () => {
     },
     {
       title: t.footer.products,
-      colSpan: "md:col-span-2",
       items: [
         { href: "/search", label: t.footer.packages },
         { href: "/promotions", label: t.nav.promo },
@@ -63,41 +49,36 @@ const Footer = () => {
     },
     {
       title: t.footer.ibadah,
-      colSpan: "md:col-span-2",
       items: [
         { href: "/al-quran", label: t.footer.al_quran },
       ],
     },
-    {
-      title: t.footer.follow_us,
-      colSpan: "md:col-span-3",
-      items: [
-        { href: "https://facebook.com", label: "Facebook", icon: "/icons/facebook.svg" },
-        { href: "https://instagram.com", label: "Instagram", icon: "/icons/instagram.svg" },
-        { href: "https://twitter.com", label: "Twitter", icon: "/icons/twitter.svg" },
-      ],
-    },
   ]
+
+  const socialLinks = [
+    { href: "https://www.facebook.com", label: "Facebook", icon: "/icons/facebook.svg" },
+    { href: "https://www.instagram.com", label: "Instagram", icon: "/icons/instagram.svg" },
+    { href: "https://x.com", label: "X / Twitter", icon: "/icons/twitter.svg" },
+  ]
+
   return (
     <footer className="relative mt-auto overflow-hidden">
-      {/* Smooth gradient transition from background to deep navy footer */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-deep to-emerald-deep -z-20" />
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-deep via-emerald-dark to-primary -z-30" />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-900 -z-10" />
       <div className="absolute inset-0 text-white -z-10">
         <IslamicPattern opacity={0.02} />
       </div>
 
       <div className="relative max-w-7xl mx-auto pt-16 pb-6 px-6 md:px-12">
-        {/* 3D Kaaba Interactive Showcase combined inside Footer */}
+        {/* Kaaba3D showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-14 pb-14 border-b border-white/10">
           <div className="space-y-4 text-center lg:text-left">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 text-gold text-xs font-semibold">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 text-amber-300 text-xs font-semibold">
               {t.footer.tagline}
             </span>
             <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
               {t.footer.headline}
             </h2>
-            <p className="text-sm text-white/70 leading-relaxed max-w-lg">
+            <p className="text-sm text-white/60 leading-relaxed max-w-lg">
               {t.footer.hero_desc}
             </p>
           </div>
@@ -106,37 +87,41 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Main columns */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-6">
           {/* Brand + Contact */}
-          <div className="col-span-1 md:col-span-4 space-y-6">
+          <div className="col-span-1 md:col-span-5 space-y-5">
             <div className="[&>a>img]:brightness-0 [&>a>img]:invert">
               <Logo />
             </div>
-            <div className="space-y-3">
+            <p className="text-sm text-white/50 leading-relaxed max-w-sm">
+              Platform marketplace umroh & haji terpercaya — bandingkan paket dari travel resmi PPIU Kemenag RI.
+            </p>
+            <div className="space-y-2.5">
               <Link
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "6281234567890"}?text=Assalamualaikum,%20saya%20mau%20tanya%20paket%20umroh%20terbaik%20untuk%20keluarga%20saya`}
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "6281234567890"}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors"
+                className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group"
               >
-                <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/15 transition-colors">
-                  <Image src="/icons/whatsapp.svg" alt="Whatsapp" width={20} height={20} className="w-5 h-5 brightness-0 invert" />
+                <div className="p-2 rounded-lg bg-white/8 group-hover:bg-white/12 transition-colors">
+                  <Image src="/icons/whatsapp.svg" alt="WhatsApp" width={18} height={18} className="brightness-0 invert" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">WhatsApp</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30">WhatsApp</p>
                   <p className="text-sm font-medium">{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</p>
                 </div>
               </Link>
               <Link
-                href="mailto:info@umrohq.com"
-                className="group flex items-center gap-3 text-white/60 hover:text-white transition-colors"
+                href="mailto:info@umrahqu.com"
+                className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group"
               >
-                <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/15 transition-colors">
-                  <Image src="/icons/gmail.svg" alt="Email" width={20} height={20} className="w-5 h-5 brightness-0 invert" />
+                <div className="p-2 rounded-lg bg-white/8 group-hover:bg-white/12 transition-colors">
+                  <Image src="/icons/gmail.svg" alt="Email" width={18} height={18} className="brightness-0 invert" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Email</p>
-                  <p className="text-sm font-medium">info@umrohq.com</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30">Email</p>
+                  <p className="text-sm font-medium">info@umrahqu.com</p>
                 </div>
               </Link>
             </div>
@@ -144,38 +129,18 @@ const Footer = () => {
 
           {/* Link columns */}
           {footerLinks.map((section) => (
-            <div
-              key={section.title}
-              className={`col-span-1 ${section.colSpan} space-y-4`}
-            >
-              <h3 className="font-semibold text-xs uppercase tracking-wider text-white/40">
+            <div key={section.title} className="col-span-1 md:col-span-2 space-y-4">
+              <h3 className="font-semibold text-xs uppercase tracking-wider text-white/30">
                 {section.title}
               </h3>
-              <ul className="flex flex-col gap-2.5">
+              <ul className="flex flex-col gap-2">
                 {section.items.map((item) => (
                   <li key={item.href}>
                     <Link
-                      href={
-                        item.href.startsWith("http") || item.href.includes(".com")
-                          ? item.href.startsWith("http")
-                            ? item.href
-                            : `https://${item.href}`
-                          : item.href
-                      }
-                      target={item.icon ? "_blank" : undefined}
-                      rel={item.icon ? "noopener noreferrer" : undefined}
-                      className="w-fit flex items-center gap-2.5 text-white/50 hover:text-white transition-colors text-sm"
+                      href={item.href}
+                      className="text-sm text-white/50 hover:text-white transition-colors"
                     >
-                      {item.icon && (
-                        <Image
-                          src={item.icon}
-                          alt={item.label}
-                          width={16}
-                          height={16}
-                          className="w-4 h-4 brightness-0 invert opacity-50 group-hover:opacity-100"
-                        />
-                      )}
-                      <span>{item.label}</span>
+                      {item.label}
                     </Link>
                   </li>
                 ))}
@@ -184,21 +149,37 @@ const Footer = () => {
           ))}
         </div>
 
-        {/* Copyright + Utilities */}
-        <div className="border-t border-white/10 mt-10 pt-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-white/30">
-              &copy; 2026 PT. Universal Big Data - UmrahQuu. All rights reserved.
+        {/* Bottom bar */}
+        <div className="border-t border-white/10 mt-10 pt-6 space-y-4">
+          {/* Utilities row */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-white/25">
+              &copy; 2026 UmrahQu — PT. Universal Big Data. All rights reserved.
             </p>
             <div className="flex items-center gap-3">
               <CountrySelect value={country} onChange={handleCountryChange} variant="dark" />
               <CompactLanguageSwitcher />
-              <div className="flex items-center gap-1 text-xs text-white/30">
-                {t.footer.made_with}
-                <span className="text-gold/60">&hearts;</span>
-                {t.footer.for_umrah}
-              </div>
+              <span className="text-xs text-white/25">
+                {t.footer.made_with} <span className="text-amber-400/50">&hearts;</span> {t.footer.for_umrah}
+              </span>
             </div>
+          </div>
+
+          {/* Social media — paling bawah */}
+          <div className="flex items-center justify-center gap-5 pt-3 border-t border-white/5">
+            {socialLinks.map((s) => (
+              <Link
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className="flex items-center gap-2 text-white/30 hover:text-white/70 transition-colors text-xs"
+              >
+                <Image src={s.icon} alt={s.label} width={16} height={16} className="brightness-0 invert opacity-40" />
+                <span className="hidden sm:inline">{s.label}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </div>

@@ -47,8 +47,8 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     .single()
 
   const { data: pkgImages } = await supabase
-    .from("package_images")
-    .select("url")
+    .from("package_gallery")
+    .select("image_url")
     .eq("package_id", pkg?.id)
     .order("sort_order", { ascending: true })
 
@@ -88,7 +88,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
 
   const images = [
     pkg.image_url,
-    ...(pkgImages || []).map((i: any) => i.url),
+    ...(pkgImages || []).map((i: any) => i.image_url),
   ].filter(Boolean) as string[]
 
   return (
