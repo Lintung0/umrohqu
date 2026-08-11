@@ -122,7 +122,7 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
-        <div className={`absolute left-3 top-1/2 -translate-y-1/2 ${hasCustomStyle ? "text-white/40" : "text-muted-foreground"} ${iconClassName || ""}`}>
+        <div className={`absolute left-3 top-1/2 -translate-y-1/2 ${iconClassName || (hasCustomStyle ? "text-white/40" : "text-muted-foreground")}`}>
           <MapPin size={15} />
         </div>
         <input
