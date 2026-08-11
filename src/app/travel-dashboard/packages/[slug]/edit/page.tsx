@@ -184,9 +184,14 @@ export default function EditPackagePage() {
       setIsActive(pkg.is_active ?? pkg.status === "published")
 
       if (pkg.itinerary && Array.isArray(pkg.itinerary)) {
-        const lines = pkg.itinerary.map((item: any) =>
-          typeof item === "string" ? item : item.text || item.day || JSON.stringify(item)
-        )
+        const lines = pkg.itinerary.map((item: any) => {
+          if (typeof item === "string") return item
+          if (item && typeof item === "object") {
+            const title = item.title ? `Hari ke-${item.day ?? ""}: ${item.title}`.replace(":  ", ": ") : `Hari ${item.day ?? ""}`
+            return item.description ? `${title} - ${item.description}` : title
+          }
+          return item.text || item.day || JSON.stringify(item)
+        })
         setItinerary(lines.join("\n"))
       }
 

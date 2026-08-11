@@ -136,7 +136,19 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const facilitiesList: string[] = Array.isArray(pkg.facilities) ? pkg.facilities : []
   const includesList: string[] = Array.isArray(pkg.includes) ? pkg.includes : (typeof pkg.facilities === "object" && pkg.facilities?.includes ? pkg.facilities.includes : [])
   const excludesList: string[] = Array.isArray(pkg.excludes) ? pkg.excludes : (typeof pkg.facilities === "object" && pkg.facilities?.excludes ? pkg.facilities.excludes : [])
-  const itineraryList: string[] = Array.isArray(pkg.itinerary) ? pkg.itinerary.map((item: any) => typeof item === "string" ? item : item.text || item.day || JSON.stringify(item)) : []
+  const itineraryList: { day: number; title: string; description: string }[] = Array.isArray(pkg.itinerary)
+    ? pkg.itinerary.map((item: any, idx: number) => {
+        if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
+        if (item && typeof item === "object") {
+          return {
+            day: Number(item.day) || idx + 1,
+            title: item.title ? String(item.title) : `Hari ke-${idx + 1}`,
+            description: item.description || item.text || "",
+          }
+        }
+        return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: "" }
+      })
+    : []
 
   useEffect(() => {
     const handleScroll = () => {
@@ -288,14 +300,15 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                             {/* Day marker */}
                             <div className="relative z-10 shrink-0">
                               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shadow-md shadow-primary/20">
-                                <span className="text-[10px] font-bold text-white">{idx + 1}</span>
+                                <span className="text-[10px] font-bold text-white">{item.day}</span>
                               </div>
                             </div>
                             {/* Content */}
                             <div className="flex-1 pt-1">
                               <div className="bg-gray-50 rounded-xl p-4 border border-border/40 hover:border-primary/20 hover:bg-primary/[0.02] transition-all">
-                                <p className="text-xs font-semibold text-primary mb-1">Hari ke-{idx + 1}</p>
-                                <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
+                                <p className="text-xs font-semibold text-primary mb-1">Hari ke-{item.day}</p>
+                                {item.title && <p className="text-sm font-semibold text-foreground mb-1">{item.title}</p>}
+                                <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
                                </div>
                              </div>
                             </div>

@@ -49,23 +49,25 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
 
   return (
     <>
-      <div className="relative">
+      {/* WRAPPER CONTAINER ULTIMATE — lokal overflow agar foto/titik tidak bocor keluar garis */}
+      <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-900 shadow-sm">
         {/* Main carousel */}
-        <div ref={emblaRef} className="overflow-hidden rounded-2xl">
+        <div ref={emblaRef} className="overflow-hidden">
           <div className="flex">
             {images.map((img, i) => (
-              <div key={i} className="flex-[0_0_100%] min-w-0 relative aspect-[16/10]">
+              <div key={i} className="flex-[0_0_100%] min-w-0 relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden">
                 <Image
                   src={img}
                   alt={`${alt} ${i + 1}`}
                   fill
-                  className="object-cover"
+                  className="object-cover w-full h-full"
                   sizes="100vw"
                   unoptimized
                 />
                 <button
                   onClick={() => setLightbox(i)}
                   className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors"
+                  aria-label="Perbesar foto"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
                 </button>
@@ -79,37 +81,42 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
           <>
             <button
               onClick={scrollPrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-20"
+              aria-label="Foto sebelumnya"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={scrollNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-20"
+              aria-label="Foto berikutnya"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </>
         )}
 
-        {/* Dots */}
+        {/* Pagination dots — DI DALAM area gambar, tengah bawah */}
         {images.length > 1 && images.length <= 25 && (
-          <div className="flex items-center justify-center gap-1.5 mt-3">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 z-20 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md">
             {images.map((_, i) => (
               <button
                 key={i}
                 onClick={() => emblaApi?.scrollTo(i)}
+                aria-label={`Ke foto ${i + 1}`}
                 className={cn(
-                  "w-2 h-2 rounded-full transition-all",
-                  selectedIndex === i ? "bg-primary w-5" : "bg-gray-300 hover:bg-gray-400"
+                  "rounded-full transition-all",
+                  selectedIndex === i
+                    ? "w-2.5 h-2.5 bg-emerald-500"
+                    : "w-2 h-2 bg-white/50 hover:bg-white/80"
                 )}
               />
             ))}
           </div>
         )}
 
-        {/* Counter */}
-        <div className="absolute bottom-3 left-3 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+        {/* BADGE COUNTER — pojok kiri bawah di dalam gambar */}
+        <div className="absolute bottom-4 left-4 z-20 px-2.5 py-1 text-xs font-medium text-white bg-black/50 backdrop-blur-md rounded-md">
           {selectedIndex + 1} / {images.length}
         </div>
       </div>
@@ -123,6 +130,7 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
           <button
             onClick={() => setLightbox(null)}
             className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
+            aria-label="Tutup"
           >
             <X className="w-5 h-5" />
           </button>
@@ -133,6 +141,7 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
               setLightbox((lightbox - 1 + images.length) % images.length)
             }}
             className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
+            aria-label="Foto sebelumnya"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -152,6 +161,7 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
               setLightbox((lightbox + 1) % images.length)
             }}
             className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
+            aria-label="Foto berikutnya"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
