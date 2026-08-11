@@ -95,7 +95,7 @@ const Footer = () => {
               <Logo />
             </div>
             <p className="text-sm text-white/50 leading-relaxed max-w-sm">
-              Platform marketplace umroh & haji terpercaya — bandingkan paket dari travel resmi PPIU Kemenag RI.
+              Platform marketplace umroh & haji terpercaya — bandingkan paket dari travel resmi PPIU Kemenhaj RI.
             </p>
             <div className="space-y-2.5">
               <Link

@@ -92,7 +92,7 @@ export default function TravelListPage() {
           <h1 className="text-2xl font-bold">Travel Partner UmrahQu</h1>
           <p className="text-gray-500 text-sm mt-1">
             {filtered.length} travel ditemukan
-            {verifiedOnly ? " · Terverifikasi Kemenag RI" : ""}
+            {verifiedOnly ? " · Terverifikasi Kemenhaj" : ""}
           </p>
 
           {/* Search + Filters */}

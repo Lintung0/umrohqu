@@ -71,6 +71,7 @@ function HeroSearch() {
             onChange={setDepartureCity}
             placeholder="Kota asal..."
             countryFilter={country}
+            iconClassName="text-emerald-600"
             className="w-full pl-8 pr-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all"
           />
         </div>
@@ -133,24 +134,24 @@ export default function Home() {
         <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 text-center text-white">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/25 text-emerald-300 text-xs font-medium mb-4 backdrop-blur-sm">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Travel Partner Resmi PPIU Kemenag RI</span>
+            <span>Marketplace Umrah Resmi · PPIU Kemenhaj</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 leading-tight drop-shadow-lg">
-            Bandingkan Paket Umroh{" "}
+            Bandingkan, pilih, dan pesan{" "}
             <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-300 bg-clip-text text-transparent">
-              Resmi & Transparan
+              paket umrah
             </span>
           </h1>
 
           <p className="text-sm sm:text-base text-emerald-100/80 max-w-xl mx-auto mb-8 leading-relaxed">
-            Temukan penawaran terbaik dari puluhan travel partner resmi PPIU Kemenag RI dalam satu platform mudah.
+            Temukan, bandingkan, dan pesan paket umrah dari banyak PPIU resmi dalam satu platform marketplace.
           </p>
 
           <HeroSearch />
 
           <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-xs text-emerald-200/60">
-            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />200+ Travel Partner</span>
+            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />200+ PPIU Resmi</span>
             <span className="w-px h-3 bg-emerald-700" />
             <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />500+ Paket Umroh</span>
             <span className="w-px h-3 bg-emerald-700" />

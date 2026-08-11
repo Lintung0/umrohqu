@@ -46,7 +46,7 @@ const STATIC_FAQS: FAQItem[] = [
     id: "6",
     category: "Jamaah",
     question: "Bagaimana cara memesan paket umroh?",
-    answer: 'Cukup cari paket umroh di halaman <a href="/search" class="text-emerald-600 hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Booking". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Xendit.'
+    answer: 'Cukup cari paket umroh di halaman <a href="/search" class="text-emerald-600 hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Xendit.'
   },
   {
     id: "7",

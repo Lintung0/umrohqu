@@ -107,7 +107,7 @@ export default function BookingSuccessPage() {
               <RefreshCw className="w-4 h-4" /> Cek Status
             </button>
             <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
-              Lihat Booking <ArrowRight className="w-3.5 h-3.5" />
+              Lihat Pesan <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function BookingSuccessPage() {
             <p className="text-sm text-slate-500 mt-1">Menunggu konfirmasi dari sistem pembayaran.</p>
           </div>
           <Link href={`/dashboard/bookings/${params.id}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
-            Lihat Booking <ArrowRight className="w-3.5 h-3.5" />
+            Lihat Pesan <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </main>

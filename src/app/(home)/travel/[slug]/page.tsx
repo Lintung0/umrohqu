@@ -205,7 +205,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                   </span>
                 )}
                 <span className="flex items-center gap-1 text-xs font-medium bg-emerald-400/80 text-emerald-900 px-2 py-0.5 rounded-full">
-                  <Shield className="w-3 h-3" /> PPIU Kemenag RI
+                   <Shield className="w-3 h-3" /> PPIU Kemenhaj
                 </span>
                 {tenantData.is_featured && (
                   <span className="flex items-center gap-1 text-xs font-medium bg-amber-400/80 text-amber-900 px-2 py-0.5 rounded-full">
@@ -257,7 +257,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                   <Shield className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
                     <p className="text-[10px] text-gray-400">Nomor Izin PPIU</p>
-                    <p className="text-xs font-semibold text-emerald-700">{tenantData.ppiu_number || "Terverifikasi Kemenag RI"}</p>
+                    <p className="text-xs font-semibold text-emerald-700">{tenantData.ppiu_number || "Terverifikasi Kemenhaj"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 bg-blue-50 border border-blue-100 rounded-lg p-3">

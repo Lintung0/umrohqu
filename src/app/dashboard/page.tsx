@@ -67,7 +67,7 @@ export default function DashboardOverview() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard icon={BookOpen} label="Booking Aktif" value={stats.bookings} color="bg-emerald-100 text-emerald-600" href="/dashboard/bookings" />
+        <StatCard icon={BookOpen} label="Pesan Aktif" value={stats.bookings} color="bg-emerald-100 text-emerald-600" href="/dashboard/bookings" />
         <StatCard icon={Heart} label="Wishlist" value={stats.wishlist} color="bg-rose-100 text-rose-600" href="/dashboard/wishlist" />
         <StatCard icon={Package} label="Selesai" value={stats.completed} color="bg-blue-100 text-blue-600" />
       </div>
@@ -96,7 +96,7 @@ export default function DashboardOverview() {
       {/* Recent Bookings */}
       <div className="bg-white rounded-2xl border border-border p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold">Booking Terakhir</h2>
+          <h2 className="font-semibold">Pesan Terakhir</h2>
           <Link href="/dashboard/bookings" className="text-xs text-primary hover:underline">Lihat Semua</Link>
         </div>
         {recentBookings.length === 0 ? (

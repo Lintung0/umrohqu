@@ -509,7 +509,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3 space-y-2.5">
               <Link href={`/checkout?slug=${pkg.slug}`} className="block">
                 <Button className="w-full h-11 font-semibold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all">
-                  Booking Sekarang
+                  Pesan
                 </Button>
               </Link>
               <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5" onClick={() => router.push(`/compare?packages=${pkg.slug}`)}>
@@ -576,7 +576,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               <p className="text-[10px] text-muted-foreground">per orang</p>
             </div>
             <Link href={`/checkout?slug=${pkg.slug}`}>
-              <Button className="h-10 px-5 font-semibold text-sm bg-primary shadow-lg shadow-primary/20">Booking</Button>
+              <Button className="h-10 px-5 font-semibold text-sm bg-primary shadow-lg shadow-primary/20">Pesan</Button>
             </Link>
           </div>
         </div>

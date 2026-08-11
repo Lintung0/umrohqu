@@ -246,7 +246,7 @@ function CheckoutContent() {
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
-            <h2 className="text-xl font-bold">Booking Berhasil!</h2>
+            <h2 className="text-xl font-bold">Pesan Berhasil!</h2>
             <p className="text-sm text-slate-500">Anda akan diarahkan ke halaman booking...</p>
             <Loader2 className="w-5 h-5 animate-spin text-emerald-600 mx-auto" />
           </div>
@@ -1067,7 +1067,7 @@ function SecurityBadges() {
       <ul className="space-y-1.5 text-[11px] text-slate-500">
         <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> Terenkripsi SSL 256-bit</li>
         <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> Dana disimpan di rekening berjalan</li>
-        <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> PPIU Kemenag RI Terverifikasi</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> PPIU Kemenhaj Terverifikasi</li>
       </ul>
     </div>
   )

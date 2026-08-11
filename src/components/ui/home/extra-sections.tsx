@@ -282,7 +282,7 @@ export function TrustSection() {
 
   const items = [
     { icon: Lock, title: "Pembayaran Aman", desc: "Dana tersimpan hingga perjalanan terkonfirmasi" },
-    { icon: Shield, title: "Travel Terverifikasi", desc: "Semua mitra terdaftar & berizin resmi Kemenag RI" },
+    { icon: Shield, title: "Travel Terverifikasi", desc: "Semua mitra terdaftar & berizin resmi Kemenhaj RI" },
     { icon: TrendingUp, title: "Harga Transparan", desc: "Tidak ada biaya tersembunyi" },
     { icon: Users, title: `${stats.travels} Travel Mitra`, desc: `${stats.packages} paket tersedia saat ini` },
   ]

@@ -148,7 +148,7 @@ export default function AdminServiceFeesPage() {
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="bg-gray-50 rounded-xl p-4">
             <p className="text-2xl font-bold">{paidBookings.length}</p>
-            <p className="text-xs text-muted-foreground">Booking Terbayar</p>
+            <p className="text-xs text-muted-foreground">Pesan Terbayar</p>
           </div>
           <div className="bg-gray-50 rounded-xl p-4">
             <p className="text-2xl font-bold text-emerald-600">{formatRupiah(totalServiceFee)}</p>
@@ -156,7 +156,7 @@ export default function AdminServiceFeesPage() {
           </div>
           <div className="bg-gray-50 rounded-xl p-4">
             <p className="text-2xl font-bold">{formatRupiah(paidBookings.length > 0 ? Math.round(totalServiceFee / paidBookings.length) : 0)}</p>
-            <p className="text-xs text-muted-foreground">Rata-rata per Booking</p>
+            <p className="text-xs text-muted-foreground">Rata-rata per Pesan</p>
           </div>
         </div>
       </div>

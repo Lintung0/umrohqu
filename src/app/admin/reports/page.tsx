@@ -101,7 +101,7 @@ export default function AdminReportsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
           { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
-          { icon: Package, label: "Total Booking", value: totalBookings, color: "bg-blue-100 text-blue-700" },
+          { icon: Package, label: "Total Pesan", value: totalBookings, color: "bg-blue-100 text-blue-700" },
           { icon: Building2, label: "Total Travel", value: tenants.length, color: "bg-purple-100 text-purple-700" },
           { icon: Users, label: "Travel Aktif", value: verifiedTravels.length, color: "bg-amber-100 text-amber-700" },
           { icon: TrendingUp, label: "Rata-rata/Travel", value: formatRupiah(verifiedTravels.length > 0 ? Math.round(totalRevenue / verifiedTravels.length) : 0), color: "bg-pink-100 text-pink-700" },
