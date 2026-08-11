@@ -44,6 +44,7 @@ export default function LogoMarquee({ items, speed = "normal", className, pauseO
                 width={28}
                 height={28}
                 className="rounded-full object-contain"
+                unoptimized
               />
             ) : (
               <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
