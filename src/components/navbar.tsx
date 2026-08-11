@@ -11,6 +11,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { useCompare } from "@/lib/compare-context"
 
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
   super_admin: "/admin",
@@ -48,6 +49,7 @@ const Navbar = () => {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const { t } = useTranslation()
+  const { count } = useCompare()
 
   useEffect(() => {
     const supabase = createClient()
@@ -133,11 +135,16 @@ const Navbar = () => {
             {/* Compare */}
             <Link
               href="/compare"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+              className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
               title={t.nav.compare || "Bandingkan"}
             >
               <Scale className="w-4 h-4" />
               <span className="hidden lg:inline">{t.nav.compare || "Bandingkan"}</span>
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-bold leading-none">
+                  {count}
+                </span>
+              )}
             </Link>
 
             <div className="w-px h-5 bg-slate-200 mx-0.5" />
@@ -239,10 +246,15 @@ const Navbar = () => {
             <Link
               href="/compare"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+              className="relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
             >
               <Scale className="w-4 h-4 text-emerald-600" />
               {t.nav.compare || "Bandingkan"}
+              {count > 0 && (
+                <span className="ml-auto w-5 h-5 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-bold leading-none">
+                  {count}
+                </span>
+              )}
             </Link>
 
             <div className="px-4 py-2">

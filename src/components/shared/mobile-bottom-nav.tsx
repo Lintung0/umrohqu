@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Home, Search, GitCompare, ClipboardList, User } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useCompare } from "@/lib/compare-context"
 
 const NAV_ITEMS = [
   { href: "/", label: "Beranda", icon: Home },
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
 export default function MobileBottomNav() {
   const pathname = usePathname()
   const isMobile = useIsMobile()
+  const { count } = useCompare()
 
   if (!isMobile) return null
   if (pathname.startsWith("/admin") || pathname.startsWith("/travel-dashboard") || pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/checkout")) return null
@@ -31,11 +33,16 @@ export default function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
+              className={`relative flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
                 isActive ? "text-emerald-600" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <item.icon className="w-5 h-5" />
+              {item.href === "/compare" && count > 0 && (
+                <span className="absolute top-0 right-1 w-4 h-4 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[8px] font-bold leading-none">
+                  {count}
+                </span>
+              )}
               <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           )

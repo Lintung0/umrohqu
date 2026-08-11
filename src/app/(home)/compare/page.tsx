@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
+import { useCompare } from "@/lib/compare-context"
 import type { Package, Tenant } from "@/lib/types"
 
 const MAX_COMPARE = 3
@@ -141,6 +142,7 @@ function CompareContent() {
   const router = useRouter()
   const initialPkgSlug = searchParams.get("packages")
   const initialPkgId = searchParams.get("pkg")
+  const { packages: ctxPackages, addPackage: ctxAdd, removePackage: ctxRemove, clearPackages } = useCompare()
 
   const [allPackages, setAllPackages] = useState<Package[]>([])
   const [tenantsMap, setTenantsMap] = useState<Map<string, Tenant>>(new Map())
@@ -171,16 +173,30 @@ function CompareContent() {
   }, [])
 
   const [selected, setSelected] = useState<Package[]>([])
+
+  // Hydrate from context (primary) or URL params (legacy fallback)
   useEffect(() => {
-    if (allPackages.length > 0) {
+    if (ctxPackages.length > 0) {
+      setSelected(ctxPackages)
+    } else if (allPackages.length > 0) {
       const init = initialPkgSlug
         ? allPackages.find((p) => p.slug === initialPkgSlug)
         : initialPkgId
           ? allPackages.find((p) => p.id === initialPkgId)
           : null
-      if (init) setSelected([init])
+      if (init) {
+        setSelected([init])
+        ctxAdd(init)
+      }
     }
-  }, [initialPkgSlug, initialPkgId, allPackages])
+  }, [ctxPackages, initialPkgSlug, initialPkgId, allPackages, ctxAdd])
+
+  // Sync local selected back to context
+  useEffect(() => {
+    if (selected.length === 0 && ctxPackages.length > 0) {
+      // Don't clear context if user just removed all from this page
+    }
+  }, [selected, ctxPackages])
 
   const scores = useMemo(() => selected.map(calcScore), [selected])
 
@@ -241,12 +257,14 @@ function CompareContent() {
     if (selected.length >= MAX_COMPARE) return
     if (selected.find((p) => p.id === pkg.id)) return
     setSelected([...selected, pkg])
+    ctxAdd(pkg)
     setShowPicker(false)
     setSearch("")
   }
 
   const removePackage = (id: string) => {
     setSelected(selected.filter((p) => p.id !== id))
+    ctxRemove(id)
   }
 
   const filteredPkgs = allPackages.filter(

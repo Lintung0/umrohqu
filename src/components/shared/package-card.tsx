@@ -3,9 +3,11 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { Clock, MapPin, Plane, Hotel, Heart } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, Heart, Bookmark, BookmarkCheck } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
+import { useCompare } from "@/lib/compare-context"
+import { toast } from "sonner"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
@@ -45,6 +47,7 @@ interface PackageCardProps {
 
 export default function PackageCard({ pkg, travel, showTravel = true, variant = "vertical" }: PackageCardProps) {
   const { t } = useTranslation()
+  const { addPackage, removePackage, isSelected, isFull } = useCompare()
   const [imgSrc, setImgSrc] = useState(getSafeImage(pkg.image_url))
   const [imgError, setImgError] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
@@ -56,6 +59,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const typeKey = (pkg.type || "reguler").toLowerCase()
   const typeLabel = TYPE_LABEL[typeKey] || pkg.type
   const typeColor = TYPE_COLOR[typeKey] || "bg-gray-100 text-gray-700"
+  const compared = isSelected(pkg.id)
 
   function handleError() {
     if (!imgError) {
@@ -68,6 +72,22 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     e.preventDefault()
     e.stopPropagation()
     setIsFavorite(!isFavorite)
+  }
+
+  function handleCompare(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (compared) {
+      removePackage(pkg.id)
+      toast.info("Dihapus dari perbandingan")
+    } else {
+      if (isFull) {
+        toast.warning("Bandingkan maksimal 3 paket. Hapus salah satu terlebih dulu.")
+        return
+      }
+      addPackage(pkg)
+      toast.success("Ditambahkan ke perbandingan")
+    }
   }
 
   function handleTravelClick(e: React.MouseEvent) {
@@ -100,6 +120,18 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 </span>
               )}
             </div>
+            <button
+              onClick={handleCompare}
+              className="absolute top-2 right-2 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+              type="button"
+              aria-label={compared ? "Hapus dari perbandingan" : "Tambah ke perbandingan"}
+            >
+              {compared ? (
+                <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" />
+              ) : (
+                <Bookmark className="w-3.5 h-3.5 text-gray-400" />
+              )}
+            </button>
           </div>
 
           <div className="flex-1 p-4 flex flex-col justify-between">
@@ -179,6 +211,19 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           aria-label="Simpan ke wishlist"
         >
           <Heart className={`w-3.5 h-3.5 ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
+        </button>
+
+        <button
+          onClick={handleCompare}
+          className="absolute top-2.5 right-10 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+          type="button"
+          aria-label={compared ? "Hapus dari perbandingan" : "Tambah ke perbandingan"}
+        >
+          {compared ? (
+            <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" />
+          ) : (
+            <Bookmark className="w-3.5 h-3.5 text-gray-400" />
+          )}
         </button>
 
         <div className="absolute bottom-2.5 left-2.5 pointer-events-none">

@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button"
 import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
 import { getSeatAvailability } from "@/lib/utils"
 import { toast } from "sonner"
+import { useCompare } from "@/lib/compare-context"
+import type { Package as PackageType } from "@/lib/types"
 
 interface PackageDetail {
   id: string
@@ -102,6 +104,7 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
 
 export default function PackageDetailClient({ pkg, reviews: initialReviews, reviewerMap = {}, images: initialImages }: Props) {
   const router = useRouter()
+  const { addPackage, isSelected, isFull } = useCompare()
   const TAB_ITEMS = [
     { id: "overview", label: "Ringkasan", icon: Info },
     { id: "itinerary", label: "Itinerary", icon: Calendar },
@@ -512,8 +515,28 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   Pesan
                 </Button>
               </Link>
-              <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5" onClick={() => router.push(`/compare?packages=${pkg.slug}`)}>
-                <Package className="w-3.5 h-3.5" /> Bandingkan
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full h-9 text-xs gap-1.5"
+                onClick={() => {
+                  if (isSelected(pkg.id)) {
+                    toast.info("Sudah ada di perbandingan")
+                    return
+                  }
+                  if (isFull) {
+                    toast.warning("Bandingkan maksimal 3 paket. Hapus salah satu terlebih dulu.")
+                    return
+                  }
+                  addPackage(pkg as unknown as PackageType)
+                  toast.success("Ditambahkan ke perbandingan")
+                }}
+              >
+                {isSelected(pkg.id) ? (
+                  <><BookmarkCheck className="w-3.5 h-3.5" /> Sudah dibandingkan</>
+                ) : (
+                  <><BookmarkPlus className="w-3.5 h-3.5" /> Bandingkan</>
+                )}
               </Button>
             </div>
 
