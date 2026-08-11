@@ -3,7 +3,7 @@
 import { useTranslation } from "@/lib/i18n"
 import Image from "next/image"
 import Link from "next/link"
-import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight, TrendingUp, BadgeCheck, Lock, MapPin } from "lucide-react"
+import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight, TrendingUp, Lock } from "lucide-react"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase/client"
 import type { Tenant } from "@/lib/types"
@@ -147,32 +147,7 @@ export function TravelAgenciesSection() {
           pauseOnHover
         />
 
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {agencies.slice(0, 4).map((agency) => (
-            <Link
-              key={agency.id}
-              href={`/travel/${agency.slug}`}
-              className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white hover:border-emerald-300 transition-colors group"
-            >
-              <Image
-                src={agency.logo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(agency.name)}&background=2A7D4F&color=fff&size=80&bold=true`}
-                alt={agency.name}
-                width={36}
-                height={36}
-                className="rounded-lg object-cover shrink-0"
-                unoptimized
-              />
-              <div className="min-w-0">
-                <p className="font-medium text-xs truncate group-hover:text-emerald-700 transition-colors">{agency.name}</p>
-                <div className="flex items-center gap-1 mt-0.5 text-[10px] text-gray-400">
-                  <MapPin className="w-2.5 h-2.5" />
-                  <span>{agency.city}</span>
-                  {agency.is_verified && <BadgeCheck className="w-2.5 h-2.5 text-emerald-600 ml-0.5" />}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+
       </div>
     </section>
   )
