@@ -104,7 +104,7 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
 
 export default function PackageDetailClient({ pkg, reviews: initialReviews, reviewerMap = {}, images: initialImages }: Props) {
   const router = useRouter()
-  const { addPackage, isSelected, isFull } = useCompare()
+  const { toggleSave, isSaved } = useCompare()
   const TAB_ITEMS = [
     { id: "overview", label: "Ringkasan", icon: Info },
     { id: "itinerary", label: "Itinerary", icon: Calendar },
@@ -520,20 +520,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 size="sm"
                 className="w-full h-9 text-xs gap-1.5"
                 onClick={() => {
-                  if (isSelected(pkg.id)) {
-                    toast.info("Sudah ada di perbandingan")
-                    return
-                  }
-                  if (isFull) {
-                    toast.warning("Bandingkan maksimal 3 paket. Hapus salah satu terlebih dulu.")
-                    return
-                  }
-                  addPackage(pkg as unknown as PackageType)
-                  toast.success("Ditambahkan ke perbandingan")
+                  toggleSave(pkg as unknown as PackageType)
+                  toast.success(isSaved(pkg.id) ? "Dihapus dari tersimpan" : "Disimpan ke bookmark")
+                  router.push("/compare")
                 }}
               >
-                {isSelected(pkg.id) ? (
-                  <><BookmarkCheck className="w-3.5 h-3.5" /> Sudah dibandingkan</>
+                {isSaved(pkg.id) ? (
+                  <><BookmarkCheck className="w-3.5 h-3.5" /> Tersimpan</>
                 ) : (
                   <><BookmarkPlus className="w-3.5 h-3.5" /> Bandingkan</>
                 )}

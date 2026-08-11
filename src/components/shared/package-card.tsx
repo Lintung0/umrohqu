@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { Clock, MapPin, Plane, Hotel, Heart, Bookmark, BookmarkCheck } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, Bookmark, BookmarkCheck } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -47,10 +47,9 @@ interface PackageCardProps {
 
 export default function PackageCard({ pkg, travel, showTravel = true, variant = "vertical" }: PackageCardProps) {
   const { t } = useTranslation()
-  const { addPackage, removePackage, isSelected, isFull } = useCompare()
+  const { toggleSave, isSaved } = useCompare()
   const [imgSrc, setImgSrc] = useState(getSafeImage(pkg.image_url))
   const [imgError, setImgError] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(false)
 
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
@@ -59,7 +58,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const typeKey = (pkg.type || "reguler").toLowerCase()
   const typeLabel = TYPE_LABEL[typeKey] || pkg.type
   const typeColor = TYPE_COLOR[typeKey] || "bg-gray-100 text-gray-700"
-  const compared = isSelected(pkg.id)
+  const saved = isSaved(pkg.id)
 
   function handleError() {
     if (!imgError) {
@@ -68,26 +67,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
   }
 
-  function handleFavorite(e: React.MouseEvent) {
+  function handleToggleSave(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    setIsFavorite(!isFavorite)
-  }
-
-  function handleCompare(e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    if (compared) {
-      removePackage(pkg.id)
-      toast.info("Dihapus dari perbandingan")
-    } else {
-      if (isFull) {
-        toast.warning("Bandingkan maksimal 3 paket. Hapus salah satu terlebih dulu.")
-        return
-      }
-      addPackage(pkg)
-      toast.success("Ditambahkan ke perbandingan")
-    }
+    toggleSave(pkg)
+    toast.success(saved ? "Dihapus dari tersimpan" : "Disimpan ke bookmark")
   }
 
   function handleTravelClick(e: React.MouseEvent) {
@@ -121,12 +105,12 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               )}
             </div>
             <button
-              onClick={handleCompare}
+              onClick={handleToggleSave}
               className="absolute top-2 right-2 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
               type="button"
-              aria-label={compared ? "Hapus dari perbandingan" : "Tambah ke perbandingan"}
+              aria-label={saved ? "Hapus dari tersimpan" : "Simpan ke bookmark"}
             >
-              {compared ? (
+              {saved ? (
                 <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" />
               ) : (
                 <Bookmark className="w-3.5 h-3.5 text-gray-400" />
@@ -205,21 +189,12 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
 
         <button
-          onClick={handleFavorite}
+          onClick={handleToggleSave}
           className="absolute top-2.5 right-2.5 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
           type="button"
-          aria-label="Simpan ke wishlist"
+          aria-label={saved ? "Hapus dari tersimpan" : "Simpan ke bookmark"}
         >
-          <Heart className={`w-3.5 h-3.5 ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
-        </button>
-
-        <button
-          onClick={handleCompare}
-          className="absolute top-2.5 right-10 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
-          type="button"
-          aria-label={compared ? "Hapus dari perbandingan" : "Tambah ke perbandingan"}
-        >
-          {compared ? (
+          {saved ? (
             <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" />
           ) : (
             <Bookmark className="w-3.5 h-3.5 text-gray-400" />
