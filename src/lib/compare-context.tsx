@@ -86,9 +86,19 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function useCompare() {
+export function useCompare(): CompareContextValue {
   const ctx = useContext(CompareContext)
-  if (!ctx) throw new Error("useCompare must be used within CompareProvider")
+  if (!ctx) {
+    return {
+      packages: [],
+      count: 0,
+      addPackage: () => {},
+      removePackage: () => {},
+      clearPackages: () => {},
+      isSelected: () => false,
+      isFull: false,
+    }
+  }
   return ctx
 }
 
