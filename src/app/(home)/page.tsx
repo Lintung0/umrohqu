@@ -109,41 +109,33 @@ function HeroSearch() {
 export default function Home() {
   return (
     <main className="flex-1">
-      {/* Hero — Islamic Modern */}
-      <section className="relative py-10 sm:py-14 overflow-hidden border-b border-emerald-900/30" style={{ background: "linear-gradient(135deg, #022c22 0%, #064e3b 40%, #0f172a 100%)" }}>
-        {/* Radial glow top-center */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] rounded-full bg-emerald-500/20 blur-[80px] pointer-events-none" aria-hidden="true" />
-        {/* Gold accent glow right */}
-        <div className="absolute top-1/2 right-0 w-[300px] h-[300px] rounded-full bg-amber-500/10 blur-[100px] pointer-events-none" aria-hidden="true" />
+      {/* Hero — Makkah Background */}
+      <section className="relative py-12 sm:py-16 flex items-center justify-center overflow-hidden border-b border-emerald-900/30">
+        {/* Makkah background image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+          style={{ backgroundImage: "url('/images/hero-makkah.jpg')" }}
+          aria-hidden="true"
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-emerald-950/75 to-slate-950/80 z-10" aria-hidden="true" />
 
-        {/* Geometric star/arabesque pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.04] pointer-events-none" aria-hidden="true">
+        {/* Islamic star pattern */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none z-10" aria-hidden="true">
           <defs>
             <pattern id="islamic-star" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
               <polygon points="30,2 35,22 55,22 40,34 46,54 30,42 14,54 20,34 5,22 25,22" fill="none" stroke="#d4a017" strokeWidth="0.8" />
-              <circle cx="30" cy="30" r="10" fill="none" stroke="#10b981" strokeWidth="0.5" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#islamic-star)" />
         </svg>
 
-        {/* Mosque silhouette bottom */}
-        <svg className="absolute bottom-0 left-0 right-0 w-full h-24 opacity-[0.06] pointer-events-none" viewBox="0 0 1440 96" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0,96 L0,60 Q120,20 240,60 Q360,96 480,60 Q540,30 600,20 Q660,10 720,20 Q780,30 840,60 Q960,96 1080,60 Q1200,20 1320,60 L1440,60 L1440,96 Z" fill="#10b981" />
-          <rect x="680" y="0" width="8" height="30" fill="#d4a017" />
-          <ellipse cx="684" cy="0" rx="6" ry="8" fill="#d4a017" />
-          <rect x="700" y="10" width="5" height="20" fill="#d4a017" />
-          <rect x="675" y="10" width="5" height="20" fill="#d4a017" />
-        </svg>
-
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center text-white">
-          {/* Trust Badge */}
+        <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 text-center text-white">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/25 text-emerald-300 text-xs font-medium mb-4 backdrop-blur-sm">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>Platform Marketplace Umrah & Haji Terpercaya #1</span>
           </div>
 
-          {/* Headline */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 leading-tight drop-shadow-lg">
             Bandingkan Paket Umroh{" "}
             <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-300 bg-clip-text text-transparent">
@@ -151,13 +143,12 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="text-sm sm:text-base text-emerald-100/75 max-w-xl mx-auto mb-8 leading-relaxed">
+          <p className="text-sm sm:text-base text-emerald-100/80 max-w-xl mx-auto mb-8 leading-relaxed">
             Temukan penawaran terbaik dari puluhan travel partner resmi PPIU Kemenag RI dalam satu platform mudah.
           </p>
 
           <HeroSearch />
 
-          {/* Stats row */}
           <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-xs text-emerald-200/60">
             <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />200+ Travel Partner</span>
             <span className="w-px h-3 bg-emerald-700" />
