@@ -48,7 +48,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
 
   const { data: pkgImages } = await supabase
     .from("package_gallery")
-    .select("image_url")
+    .select("image_url, media_type")
     .eq("package_id", pkg?.id)
     .order("sort_order", { ascending: true })
 
@@ -91,12 +91,21 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     ...(pkgImages || []).map((i: any) => i.image_url),
   ].filter(Boolean) as string[]
 
+  const galleryItems = [
+    ...(pkg.image_url ? [{ url: pkg.image_url, type: "image" as const }] : []),
+    ...(pkgImages || []).map((i: any) => ({
+      url: i.image_url,
+      type: (i.media_type || "image") as "image" | "video",
+    })),
+  ].filter((item) => item.url) as { url: string; type: "image" | "video" }[]
+
   return (
     <PackageDetailClient
       pkg={pkg}
       reviews={(reviews as any) || []}
       reviewerMap={reviewerMap}
       images={images}
+      galleryItems={galleryItems}
     />
   )
 }

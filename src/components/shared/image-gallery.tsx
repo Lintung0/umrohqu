@@ -3,19 +3,27 @@
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import useEmblaCarousel from "embla-carousel-react"
-import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Maximize2, Play, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+interface GalleryItem {
+  url: string
+  type?: "image" | "video"
+}
 
 interface ImageGalleryProps {
   images: string[]
+  items?: GalleryItem[]
   alt?: string
   title?: string
 }
 
-export default function ImageGallery({ images, alt = "Gallery", title }: ImageGalleryProps) {
+export default function ImageGallery({ images, items, alt = "Gallery", title }: ImageGalleryProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [lightbox, setLightbox] = useState<number | null>(null)
+
+  const galleryItems: GalleryItem[] = items || images.map((url) => ({ url, type: "image" as const }))
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -54,23 +62,53 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
         {/* Main carousel */}
         <div ref={emblaRef} className="overflow-hidden">
           <div className="flex">
-            {images.map((img, i) => (
-              <div key={i} className="flex-[0_0_100%] min-w-0 relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden">
-                <Image
-                  src={img}
-                  alt={`${alt} ${i + 1}`}
-                  fill
-                  className="object-cover w-full h-full"
-                  sizes="100vw"
-                  unoptimized
-                />
-                <button
-                  onClick={() => setLightbox(i)}
-                  className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors"
-                  aria-label="Perbesar foto"
-                >
-                  <Maximize2 className="w-3.5 h-3.5" />
-                </button>
+            {galleryItems.map((item, i) => (
+              <div
+                key={i}
+                className={`flex-[0_0_100%] min-w-0 relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden ${item.type !== "video" ? "cursor-pointer" : ""}`}
+                onClick={() => item.type !== "video" && setLightbox(i)}
+              >
+                {item.type === "video" ? (
+                  <div className="relative w-full h-full bg-black flex items-center justify-center">
+                    <video
+                      src={item.url}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-contain"
+                      poster={images[0] || undefined}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-16 h-16 bg-black/50 rounded-full flex items-center justify-center">
+                        <Play className="w-8 h-8 text-white ml-1" fill="white" />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Image
+                    src={item.url}
+                    alt={`${alt} ${i + 1}`}
+                    fill
+                    className="object-cover w-full h-full"
+                    sizes="100vw"
+                    unoptimized
+                  />
+                )}
+                {item.type !== "video" && (
+                  <button
+                    onClick={() => setLightbox(i)}
+                    className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors"
+                    aria-label="Perbesar foto"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {item.type === "video" && (
+                  <div className="absolute top-3 right-3 px-2 py-1 bg-black/50 rounded text-xs text-white font-medium flex items-center gap-1">
+                    <Play className="w-3 h-3" fill="white" />
+                    Video
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -97,13 +135,13 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
         )}
 
         {/* Pagination dots — DI DALAM area gambar, tengah bawah */}
-        {images.length > 1 && images.length <= 25 && (
+        {galleryItems.length > 1 && galleryItems.length <= 25 && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 z-20 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md">
-            {images.map((_, i) => (
+            {galleryItems.map((item, i) => (
               <button
                 key={i}
                 onClick={() => emblaApi?.scrollTo(i)}
-                aria-label={`Ke foto ${i + 1}`}
+                aria-label={`Ke ${item.type === "video" ? "video" : "foto"} ${i + 1}`}
                 className={cn(
                   "rounded-full transition-all",
                   selectedIndex === i
@@ -117,7 +155,7 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
 
         {/* BADGE COUNTER — pojok kiri bawah di dalam gambar */}
         <div className="absolute bottom-4 left-4 z-20 px-2.5 py-1 text-xs font-medium text-white bg-black/50 backdrop-blur-md rounded-md">
-          {selectedIndex + 1} / {images.length}
+          {selectedIndex + 1} / {galleryItems.length}
         </div>
       </div>
 
@@ -129,7 +167,7 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
         >
           <button
             onClick={() => setLightbox(null)}
-            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
+            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white z-10"
             aria-label="Tutup"
           >
             <X className="w-5 h-5" />
@@ -138,36 +176,46 @@ export default function ImageGallery({ images, alt = "Gallery", title }: ImageGa
           <button
             onClick={(e) => {
               e.stopPropagation()
-              setLightbox((lightbox - 1 + images.length) % images.length)
+              setLightbox((lightbox - 1 + galleryItems.length) % galleryItems.length)
             }}
-            className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
-            aria-label="Foto sebelumnya"
+            className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white z-10"
+            aria-label="Sebelumnya"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <Image
-            src={images[lightbox]}
-            alt={`${alt} ${lightbox + 1}`}
-            width={1200}
-            height={800}
-            className="max-h-[85vh] max-w-full object-contain rounded-lg"
-            unoptimized
-          />
+          {galleryItems[lightbox]?.type === "video" ? (
+            <video
+              src={galleryItems[lightbox].url}
+              controls
+              playsInline
+              autoPlay
+              className="max-h-[85vh] max-w-full object-contain rounded-lg"
+            />
+          ) : (
+            <Image
+              src={galleryItems[lightbox]?.url || ""}
+              alt={`${alt} ${lightbox + 1}`}
+              width={1200}
+              height={800}
+              className="max-h-[85vh] max-w-full object-contain rounded-lg"
+              unoptimized
+            />
+          )}
 
           <button
             onClick={(e) => {
               e.stopPropagation()
-              setLightbox((lightbox + 1) % images.length)
+              setLightbox((lightbox + 1) % galleryItems.length)
             }}
-            className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white"
-            aria-label="Foto berikutnya"
+            className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white z-10"
+            aria-label="Berikutnya"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          <div className="absolute bottom-4 text-white text-sm">
-            {lightbox + 1} / {images.length}
+          <div className="absolute bottom-4 text-white text-sm z-10">
+            {lightbox + 1} / {galleryItems.length}
           </div>
         </div>
       )}

@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
   Star, MapPin, Clock, Users, Plane, Hotel, Shield, CheckCircle,
-  XCircle, BadgeCheck, Zap, Calendar, BookmarkPlus, BookmarkCheck, Loader2, ChevronRight,
+  XCircle, BadgeCheck, Zap, Calendar, BookmarkPlus, BookmarkCheck, Loader2, ChevronLeft, ChevronRight,
   Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
-  Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package,
+  Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package, Maximize2, X,
 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { decodeUnicodeEscapes } from "@/lib/utils"
@@ -61,11 +61,17 @@ interface ReviewRow {
   customer_id: string | null
 }
 
+interface GalleryItem {
+  url: string
+  type: "image" | "video"
+}
+
 interface Props {
   pkg: PackageDetail
   reviews: ReviewRow[]
   reviewerMap?: Record<string, string>
   images?: string[]
+  galleryItems?: GalleryItem[]
 }
 
 function RatingBar({ star, count, total }: { star: number; count: number; total: number }) {
@@ -102,7 +108,7 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
   )
 }
 
-export default function PackageDetailClient({ pkg, reviews: initialReviews, reviewerMap = {}, images: initialImages }: Props) {
+export default function PackageDetailClient({ pkg, reviews: initialReviews, reviewerMap = {}, images: initialImages, galleryItems }: Props) {
   const router = useRouter()
   const { toggleSave, isSaved } = useCompare()
   const TAB_ITEMS = [
@@ -118,6 +124,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [showStickyCta, setShowStickyCta] = useState(false)
   const [expandedItinerary, setExpandedItinerary] = useState<number | null>(null)
+  const [singleImageLightbox, setSingleImageLightbox] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
   const supabase = createClient()
@@ -212,15 +219,27 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm relative">
               {initialImages && initialImages.length > 1 ? (
-                <ImageGallery images={initialImages} title={pkg.name} />
+                <ImageGallery images={initialImages} items={galleryItems} title={pkg.name} />
               ) : (
-                <div className="relative aspect-[16/9]">
+                <div
+                  className="relative aspect-[16/9] cursor-pointer"
+                  onClick={() => pkg.image_url && setSingleImageLightbox(true)}
+                >
                   {pkg.image_url ? (
                     <Image src={pkg.image_url} alt={pkg.name} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-primary/10 to-emerald-50 flex items-center justify-center">
                       <Package className="w-16 h-16 text-primary/30" />
                     </div>
+                  )}
+                  {/* Maximize button for single image */}
+                  {pkg.image_url && (
+                    <button
+                      className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors z-10"
+                      aria-label="Perbesar foto"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
                   )}
                   {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
@@ -606,6 +625,30 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         >
           <ArrowUp className="w-4 h-4" />
         </button>
+      )}
+
+      {/* Single Image Lightbox */}
+      {singleImageLightbox && pkg.image_url && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setSingleImageLightbox(false)}
+        >
+          <button
+            onClick={() => setSingleImageLightbox(false)}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white z-10"
+            aria-label="Tutup"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <Image
+            src={pkg.image_url}
+            alt={pkg.name}
+            width={1200}
+            height={800}
+            className="max-h-[85vh] max-w-full object-contain rounded-lg"
+            unoptimized
+          />
+        </div>
       )}
     </main>
   )
