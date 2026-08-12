@@ -8,6 +8,7 @@ import { Clock, MapPin, Plane, Hotel, GitCompare } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
+import { toast } from "sonner"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
@@ -70,8 +71,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   function handleCompare(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    if (isFull && !comparePackages.some((p) => p.id === pkg.id)) return
+    if (comparePackages.some((p) => p.id === pkg.id)) return
+    if (isFull) {
+      toast.warning("Maksimal 3 paket untuk dibandingkan")
+      return
+    }
     addToCompare(pkg)
+    toast.success("Paket berhasil ditambahkan ke perbandingan")
     router.push("/compare")
   }
 

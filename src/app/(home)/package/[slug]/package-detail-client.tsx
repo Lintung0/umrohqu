@@ -110,7 +110,7 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
 
 export default function PackageDetailClient({ pkg, reviews: initialReviews, reviewerMap = {}, images: initialImages, galleryItems }: Props) {
   const router = useRouter()
-  const { addToCompare } = useCompare()
+  const { addToCompare, isFull, comparePackages } = useCompare()
   const TAB_ITEMS = [
     { id: "overview", label: "Ringkasan", icon: Info },
     { id: "itinerary", label: "Itinerary", icon: Calendar },
@@ -539,7 +539,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 size="sm"
                 className="w-full h-9 text-xs gap-1.5"
                 onClick={() => {
+                  if (comparePackages.some((p) => p.id === pkg.id)) return
+                  if (isFull) {
+                    toast.warning("Maksimal 3 paket untuk dibandingkan")
+                    return
+                  }
                   addToCompare(pkg as unknown as PackageType)
+                  toast.success("Paket berhasil ditambahkan ke perbandingan")
                   router.push("/compare")
                 }}
               >

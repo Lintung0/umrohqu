@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/sonner";
 import MobileBottomNav from "@/components/shared/mobile-bottom-nav";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -41,6 +42,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
+        <Toaster />
         <MobileBottomNav />
       </body>
     </html>
