@@ -12,7 +12,7 @@ function isYouTubeUrl(url: string): boolean {
 
 function getYouTubeEmbedUrl(url: string): string {
   const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?]+)/)
-  return match ? `https://www.youtube.com/embed/${match[1]}` : url
+  return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : url
 }
 
 interface GalleryItem {
@@ -92,6 +92,7 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
                       src={item.url}
                       controls
                       playsInline
+                      autoPlay
                       preload="metadata"
                       className="w-full h-full object-contain"
                       poster={images[0] || undefined}
