@@ -6,6 +6,15 @@ import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeft, ChevronRight, Maximize2, Play, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+function isYouTubeUrl(url: string): boolean {
+  return url.includes("youtube.com") || url.includes("youtu.be")
+}
+
+function getYouTubeEmbedUrl(url: string): string {
+  const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([^&?]+)/)
+  return match ? `https://www.youtube.com/embed/${match[1]}` : url
+}
+
 interface GalleryItem {
   url: string
   type?: "image" | "video"
@@ -68,7 +77,16 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
                 className={`flex-[0_0_100%] min-w-0 relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden ${item.type !== "video" ? "cursor-pointer" : ""}`}
                 onClick={() => item.type !== "video" && setLightbox(i)}
               >
-                {item.type === "video" ? (
+                {item.type === "video" && isYouTubeUrl(item.url) ? (
+                  <div className="relative w-full h-full bg-black flex items-center justify-center">
+                    <iframe
+                      src={getYouTubeEmbedUrl(item.url)}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : item.type === "video" ? (
                   <div className="relative w-full h-full bg-black flex items-center justify-center">
                     <video
                       src={item.url}
@@ -78,11 +96,6 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
                       className="w-full h-full object-contain"
                       poster={images[0] || undefined}
                     />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-16 h-16 bg-black/50 rounded-full flex items-center justify-center">
-                        <Play className="w-8 h-8 text-white ml-1" fill="white" />
-                      </div>
-                    </div>
                   </div>
                 ) : (
                   <Image
@@ -96,7 +109,7 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
                 )}
                 {item.type !== "video" && (
                   <button
-                    onClick={() => setLightbox(i)}
+                    onClick={(e) => { e.stopPropagation(); setLightbox(i) }}
                     className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors"
                     aria-label="Perbesar foto"
                   >
@@ -104,7 +117,7 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
                   </button>
                 )}
                 {item.type === "video" && (
-                  <div className="absolute top-3 right-3 px-2 py-1 bg-black/50 rounded text-xs text-white font-medium flex items-center gap-1">
+                  <div className="absolute top-3 right-3 px-2 py-1 bg-black/50 rounded text-xs text-white font-medium flex items-center gap-1 pointer-events-none">
                     <Play className="w-3 h-3" fill="white" />
                     Video
                   </div>
@@ -184,7 +197,14 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          {galleryItems[lightbox]?.type === "video" ? (
+          {galleryItems[lightbox]?.type === "video" && isYouTubeUrl(galleryItems[lightbox]?.url || "") ? (
+            <iframe
+              src={getYouTubeEmbedUrl(galleryItems[lightbox].url)}
+              className="w-[90vw] max-w-[1200px] aspect-video rounded-lg"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : galleryItems[lightbox]?.type === "video" ? (
             <video
               src={galleryItems[lightbox].url}
               controls
