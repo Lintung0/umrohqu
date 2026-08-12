@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 export default function MobileBottomNav() {
   const pathname = usePathname()
   const isMobile = useIsMobile()
-  const { savedCount } = useCompare()
+  const { compareCount } = useCompare()
 
   if (!isMobile) return null
   if (pathname.startsWith("/admin") || pathname.startsWith("/travel-dashboard") || pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/checkout")) return null
@@ -38,9 +38,9 @@ export default function MobileBottomNav() {
               }`}
             >
               <item.icon className="w-5 h-5" />
-              {item.href === "/compare" && savedCount > 0 && (
+              {item.href === "/compare" && compareCount > 0 && (
                 <span className="absolute top-0 right-1 w-4 h-4 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[8px] font-bold leading-none">
-                  {savedCount}
+                  {compareCount}
                 </span>
               )}
               <span className="text-[10px] font-medium">{item.label}</span>

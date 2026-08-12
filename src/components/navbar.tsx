@@ -49,7 +49,7 @@ const Navbar = () => {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const { t } = useTranslation()
-  const { savedCount } = useCompare()
+  const { compareCount } = useCompare()
 
   useEffect(() => {
     const supabase = createClient()
@@ -140,9 +140,9 @@ const Navbar = () => {
             >
               <Scale className="w-4 h-4" />
               <span className="hidden lg:inline">{t.nav.compare || "Bandingkan"}</span>
-              {savedCount > 0 && (
+              {compareCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-bold leading-none">
-                  {savedCount}
+                  {compareCount}
                 </span>
               )}
             </Link>
@@ -250,9 +250,9 @@ const Navbar = () => {
             >
               <Scale className="w-4 h-4 text-emerald-600" />
               {t.nav.compare || "Bandingkan"}
-              {savedCount > 0 && (
+              {compareCount > 0 && (
                 <span className="ml-auto w-5 h-5 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-bold leading-none">
-                  {savedCount}
+                  {compareCount}
                 </span>
               )}
             </Link>

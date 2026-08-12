@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
   Star, MapPin, Clock, Users, Plane, Hotel, Shield, CheckCircle,
-  XCircle, BadgeCheck, Zap, Calendar, BookmarkPlus, BookmarkCheck, Loader2, ChevronLeft, ChevronRight,
+  XCircle, BadgeCheck, Zap, Calendar, GitCompare, Loader2, ChevronLeft, ChevronRight,
   Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
   Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package, Maximize2, X,
 } from "lucide-react"
@@ -110,7 +110,7 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
 
 export default function PackageDetailClient({ pkg, reviews: initialReviews, reviewerMap = {}, images: initialImages, galleryItems }: Props) {
   const router = useRouter()
-  const { toggleSave, isSaved } = useCompare()
+  const { addToCompare } = useCompare()
   const TAB_ITEMS = [
     { id: "overview", label: "Ringkasan", icon: Info },
     { id: "itinerary", label: "Itinerary", icon: Calendar },
@@ -539,16 +539,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 size="sm"
                 className="w-full h-9 text-xs gap-1.5"
                 onClick={() => {
-                  toggleSave(pkg as unknown as PackageType)
-                  toast.success(isSaved(pkg.id) ? "Dihapus dari tersimpan" : "Disimpan ke bookmark")
+                  addToCompare(pkg as unknown as PackageType)
                   router.push("/compare")
                 }}
               >
-                {isSaved(pkg.id) ? (
-                  <><BookmarkCheck className="w-3.5 h-3.5" /> Tersimpan</>
-                ) : (
-                  <><BookmarkPlus className="w-3.5 h-3.5" /> Bandingkan</>
-                )}
+                <><GitCompare className="w-3.5 h-3.5" /> Bandingkan Paket</>
               </Button>
             </div>
 

@@ -4,13 +4,13 @@ import { useState, useEffect, Suspense, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { X, Check, Minus, GitCompare, Award, Sparkles, TrendingDown, Star, Bookmark, Trash2 } from "lucide-react"
+import { X, Check, Minus, GitCompare, Award, Sparkles, TrendingDown, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
 import { useCompare, MAX_COMPARE } from "@/lib/compare-context"
-import type { Package, Tenant } from "@/lib/types"
+import type { Package } from "@/lib/types"
 
 const AIRLINE_QUALITY: Record<string, number> = {
   "Garuda Indonesia": 5, "Saudi Airlines": 4, "Turkish Airlines": 4,
@@ -173,95 +173,7 @@ function compareRows(pkgs: Package[], key: string, _scores: ReturnType<typeof ca
   })
 }
 
-function SavedTab({ tenantsMap }: { tenantsMap: Map<string, Tenant> }) {
-  const { savedPackages, toggleSave, addToCompare, comparePackages, isFull } = useCompare()
-  const [search, setSearch] = useState("")
-
-  const filtered = savedPackages.filter((p) =>
-    (p.name || "").toLowerCase().includes(search.toLowerCase())
-  )
-
-  return (
-    <div>
-      {savedPackages.length === 0 ? (
-        <div className="text-center py-16">
-          <Bookmark className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-semibold text-lg mb-2">Belum ada paket tersimpan</h3>
-          <p className="text-sm text-muted-foreground mb-6">Klik icon bookmark di kartu paket untuk menyimpan</p>
-          <Link href="/search">
-            <Button>Cari Paket</Button>
-          </Link>
-        </div>
-      ) : (
-        <>
-          <div className="flex items-center gap-3 mb-4">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari paket tersimpan..."
-              className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            <span className="text-xs text-muted-foreground whitespace-nowrap">{savedPackages.length} paket</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filtered.map((pkg) => {
-              const travel = tenantsMap.get(pkg.tenant_id)
-              const inCompare = comparePackages.some((p) => p.id === pkg.id)
-              return (
-                <div key={pkg.id} className="bg-white border border-border rounded-xl overflow-hidden flex flex-col">
-                  <div className="relative h-28">
-                    <Image
-                      src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
-                      alt={pkg.name || "Paket Umrah"}
-                      fill
-                      className="object-cover"
-                    />
-                    <button
-                      onClick={() => toggleSave(pkg)}
-                      className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  <div className="p-3 flex flex-col flex-1">
-                    {travel && (
-                      <p className="text-[10px] text-muted-foreground mb-1">{travel.name}</p>
-                    )}
-                    <Link href={`/package/${pkg.slug}`} className="text-xs font-semibold leading-snug line-clamp-2 mb-2 hover:text-primary transition-colors">{pkg.name}</Link>
-                    <div className="mt-auto">
-                      <p className="text-sm font-bold text-primary mb-2">{formatRupiah(Number(pkg.price) || 0)}</p>
-                      <Button
-                        size="sm"
-                        variant={inCompare ? "default" : "outline"}
-                        className="w-full text-xs h-8"
-                        disabled={!inCompare && isFull}
-                        onClick={() => {
-                          if (inCompare) return
-                          addToCompare(pkg)
-                        }}
-                      >
-                        {inCompare ? (
-                          <><Check className="w-3 h-3 mr-1" /> Sedang dibandingkan</>
-                        ) : isFull ? (
-                          "Bandingkan penuh"
-                        ) : (
-                          <><GitCompare className="w-3 h-3 mr-1" /> Bandingkan</>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
-
-function CompareTab() {
+function CompareView() {
   const { comparePackages, removeFromCompare } = useCompare()
 
   const scores = useMemo(() => comparePackages.map(calcScore), [comparePackages])
@@ -321,8 +233,11 @@ function CompareTab() {
     return (
       <div className="text-center py-16">
         <GitCompare className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-        <h3 className="font-semibold text-lg mb-2">Belum ada paket dipilih</h3>
-        <p className="text-sm text-muted-foreground mb-6">Buka tab &quot;Tersimpan&quot; lalu klik &quot;Bandingkan&quot; di paket yang diinginkan</p>
+        <h3 className="font-semibold text-lg mb-2">Belum ada paket dibandingkan</h3>
+        <p className="text-sm text-muted-foreground mb-6">Klik icon bandingkan di kartu paket untuk membandingkan hingga {MAX_COMPARE} paket</p>
+        <Link href="/search">
+          <Button>Cari Paket</Button>
+        </Link>
       </div>
     )
   }
@@ -432,24 +347,11 @@ function CompareTab() {
 
 function CompareContent() {
   const searchParams = useSearchParams()
-  const { savedCount, compareCount, comparePackages, addToCompare } = useCompare()
+  const { compareCount, comparePackages, addToCompare, clearCompare } = useCompare()
 
-  const tabParam = searchParams.get("tab")
   const packagesParam = useMemo(() => searchParams.getAll("packages"), [searchParams])
 
-  const [activeTab, setActiveTab] = useState<"saved" | "compare">(() => {
-    if (tabParam === "compare" || packagesParam.length > 0) return "compare"
-    return "saved"
-  })
-
-  const [tenantsMap, setTenantsMap] = useState<Map<string, Tenant>>(new Map())
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (tabParam === "compare" || packagesParam.length > 0) {
-      setActiveTab("compare")
-    }
-  }, [tabParam, packagesParam])
 
   useEffect(() => {
     if (packagesParam.length === 0) return
@@ -471,19 +373,11 @@ function CompareContent() {
 
   useEffect(() => {
     const supabase = createClient()
-    const fetchData = async () => {
-      const { data: tnts } = await supabase
-        .from("tenants")
-        .select("*")
-        .is("deleted_at", null)
-      if (tnts) {
-        const m = new Map<string, Tenant>()
-        tnts.forEach((t) => m.set(t.id, t as Tenant))
-        setTenantsMap(m)
-      }
+    const fetchTenants = async () => {
+      await supabase.from("tenants").select("id").limit(0)
       setLoading(false)
     }
-    fetchData()
+    fetchTenants()
   }, [])
 
   if (loading) {
@@ -499,50 +393,26 @@ function CompareContent() {
       <div className="bg-white border-b border-border px-4 sm:px-6 py-4 sm:py-5">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <Bookmark className="w-5 h-5 text-primary" />
-            Tersimpan & Bandingkan
+            <GitCompare className="w-5 h-5 text-primary" />
+            Bandingkan Paket
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Simpan paket sebanyak mungkin, bandingkan maksimal {MAX_COMPARE}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        <div className="flex gap-1 bg-muted p-1 rounded-xl w-fit mb-6">
-          <button
-            onClick={() => setActiveTab("saved")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === "saved" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Bookmark className="w-4 h-4" />
-            Tersimpan
-            {savedCount > 0 && (
-              <span className="ml-1 w-5 h-5 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">
-                {savedCount}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("compare")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === "compare" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <GitCompare className="w-4 h-4" />
-            Bandingkan
-            {compareCount > 0 && (
-              <span className="ml-1 w-5 h-5 flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold">
-                {compareCount}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {activeTab === "saved" ? (
-          <SavedTab tenantsMap={tenantsMap} />
-        ) : (
-          <CompareTab />
+        {compareCount > 0 && (
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-sm text-muted-foreground">{compareCount}/{MAX_COMPARE} paket dipilih</span>
+            <button
+              onClick={clearCompare}
+              className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
+            >
+              Reset
+            </button>
+          </div>
         )}
+        <CompareView />
       </div>
 
       <AiChatPanel packages={comparePackages} />

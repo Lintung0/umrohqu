@@ -3,11 +3,11 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { Clock, MapPin, Plane, Hotel, Bookmark, BookmarkCheck } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Clock, MapPin, Plane, Hotel, GitCompare } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
-import { toast } from "sonner"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
@@ -47,7 +47,8 @@ interface PackageCardProps {
 
 export default function PackageCard({ pkg, travel, showTravel = true, variant = "vertical" }: PackageCardProps) {
   const { t } = useTranslation()
-  const { toggleSave, isSaved } = useCompare()
+  const { addToCompare, isFull, comparePackages } = useCompare()
+  const router = useRouter()
   const [imgSrc, setImgSrc] = useState(getSafeImage(pkg.image_url))
   const [imgError, setImgError] = useState(false)
 
@@ -58,7 +59,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const typeKey = (pkg.type || "reguler").toLowerCase()
   const typeLabel = TYPE_LABEL[typeKey] || pkg.type
   const typeColor = TYPE_COLOR[typeKey] || "bg-gray-100 text-gray-700"
-  const saved = isSaved(pkg.id)
 
   function handleError() {
     if (!imgError) {
@@ -67,11 +67,12 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
   }
 
-  function handleToggleSave(e: React.MouseEvent) {
+  function handleCompare(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    toggleSave(pkg)
-    toast.success(saved ? "Dihapus dari tersimpan" : "Disimpan ke bookmark")
+    if (isFull && !comparePackages.some((p) => p.id === pkg.id)) return
+    addToCompare(pkg)
+    router.push("/compare")
   }
 
   function handleTravelClick(e: React.MouseEvent) {
@@ -105,16 +106,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               )}
             </div>
             <button
-              onClick={handleToggleSave}
+              onClick={handleCompare}
               className="absolute top-2 right-2 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
               type="button"
-              aria-label={saved ? "Hapus dari tersimpan" : "Simpan ke bookmark"}
+              aria-label="Bandingkan paket"
+              title="Bandingkan paket"
             >
-              {saved ? (
-                <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" />
-              ) : (
-                <Bookmark className="w-3.5 h-3.5 text-gray-400" />
-              )}
+              <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
             </button>
           </div>
 
@@ -189,16 +187,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
 
         <button
-          onClick={handleToggleSave}
+          onClick={handleCompare}
           className="absolute top-2.5 right-2.5 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
           type="button"
-          aria-label={saved ? "Hapus dari tersimpan" : "Simpan ke bookmark"}
+          aria-label="Bandingkan paket"
+          title="Bandingkan paket"
         >
-          {saved ? (
-            <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" />
-          ) : (
-            <Bookmark className="w-3.5 h-3.5 text-gray-400" />
-          )}
+          <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
         </button>
 
         <div className="absolute bottom-2.5 left-2.5 pointer-events-none">
