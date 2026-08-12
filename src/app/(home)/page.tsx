@@ -138,9 +138,9 @@ export default function Home() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 leading-tight drop-shadow-lg">
-            Bandingkan, pilih, dan pesan{" "}
+            Cari, bandingkan &{" "}
             <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-300 bg-clip-text text-transparent">
-              paket umrah
+              pesan paket Umrah
             </span>
           </h1>
 
