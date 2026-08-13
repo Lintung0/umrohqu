@@ -131,7 +131,7 @@ export default function AiChatPanel({ packages }: AiChatPanelProps) {
       {!isOpen && packages.length > 0 && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+          className="fixed bottom-24 right-4 z-50 flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white min-h-11 px-5 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
         >
           <Sparkles className="w-5 h-5" />
           <span className="text-sm font-semibold">Tanya AI</span>
