@@ -251,13 +251,9 @@ function SearchContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
-          <div className="h-6 bg-slate-200 rounded animate-pulse w-48 mb-2" />
-          <div className="h-4 bg-slate-200 rounded animate-pulse w-28" />
-        </div>
         <div className="sticky top-16 z-40 bg-white border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="h-11 bg-slate-100 rounded-full animate-pulse max-w-2xl" />
+            <div className="h-11 bg-slate-100 rounded-full animate-pulse max-w-2xl mx-auto" />
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -299,41 +295,11 @@ function SearchContent() {
   return (
     <main className="min-h-screen bg-slate-50">
 
-      {/* ── Page header: compact ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900">Hasil Pencarian Paket Umroh</h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Menampilkan <span className="font-semibold text-emerald-700">{filtered.length} paket</span> ditemukan
-            </p>
-          </div>
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="text-sm text-slate-500">Urutkan:</span>
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
-              <SelectTrigger
-                aria-label="Urutkan hasil pencarian"
-                className="h-10 w-44 text-sm bg-white border-slate-200 text-slate-700 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="relevance">Relevansi</SelectItem>
-                <SelectItem value="price-asc">Harga Terendah</SelectItem>
-                <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
-                <SelectItem value="duration">Durasi Terpendek</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
       {/* ── Sticky search toolbar ── */}
       <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/70 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex-1 max-w-2xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="flex items-center gap-2.5 max-w-2xl mx-auto">
+            <div className="relative flex-1">
               <input
                 type="text"
                 placeholder="Cari nama paket, travel, atau kota..."
@@ -341,7 +307,7 @@ function SearchContent() {
                 onChange={(e) => handleSearchInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
                 aria-label="Cari paket umroh"
-                className="w-full pl-11 pr-4 h-11 bg-slate-100 border border-transparent rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                className="w-full pl-5 pr-4 h-11 bg-slate-100 border border-transparent rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
             </div>
             <button
@@ -351,6 +317,22 @@ function SearchContent() {
             >
               <Search className="w-5 h-5" />
             </button>
+            <div className="hidden sm:block shrink-0">
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
+                <SelectTrigger
+                  aria-label="Urutkan hasil pencarian"
+                  className="h-11 w-40 text-sm bg-slate-100 border-transparent text-slate-700 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="relevance">Relevansi</SelectItem>
+                  <SelectItem value="price-asc">Harga Terendah</SelectItem>
+                  <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
+                  <SelectItem value="duration">Durasi Terpendek</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </div>

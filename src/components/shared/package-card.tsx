@@ -185,7 +185,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             {pkg.hotel_makkah_stars ? (
               <>
                 <span className="text-slate-300">·</span>
-                <span className="text-amber-500">{"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}</span>
+                <span className="inline-flex items-center gap-0.5">
+                  <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span>Hotel</span>
+                  <span className="text-amber-500">{"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}</span>
+                </span>
               </>
             ) : null}
           </div>
