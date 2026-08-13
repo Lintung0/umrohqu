@@ -68,7 +68,7 @@ const Footer = () => {
         <IslamicPattern opacity={0.02} />
       </div>
 
-      <div className="relative max-w-7xl mx-auto pt-16 pb-6 px-6 md:px-12">
+      <div className="relative max-w-7xl mx-auto pt-16 pb-20 lg:pb-6 px-6 md:px-12">
         {/* Kaaba3D showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-14 pb-14 border-b border-white/10">
           <div className="space-y-4 text-center lg:text-left">
@@ -108,7 +108,7 @@ const Footer = () => {
                   <Image src="/icons/whatsapp.svg" alt="WhatsApp" width={18} height={18} className="brightness-0 invert" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30">WhatsApp</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/30">WhatsApp</p>
                   <p className="text-sm font-medium">{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</p>
                 </div>
               </Link>
@@ -120,7 +120,7 @@ const Footer = () => {
                   <Image src="/icons/gmail.svg" alt="Email" width={18} height={18} className="brightness-0 invert" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30">Email</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/30">Email</p>
                   <p className="text-sm font-medium">info@umrahqu.com</p>
                 </div>
               </Link>
@@ -156,7 +156,7 @@ const Footer = () => {
             <p className="text-xs text-white/25">
               &copy; 2026 UmrahQu — PT. Universal Big Data. All rights reserved.
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
               <CountrySelect value={country} onChange={handleCountryChange} variant="dark" />
               <CompactLanguageSwitcher />
               <span className="text-xs text-white/25">

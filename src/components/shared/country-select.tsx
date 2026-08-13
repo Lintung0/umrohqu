@@ -77,7 +77,7 @@ export default function CountrySelect({ value, onChange, className = "", variant
       </button>
 
       {open && (
-        <div className={`absolute left-0 right-0 top-full z-[100] mt-1 rounded-xl border shadow-xl ${isDark ? "border-white/10 bg-slate-800" : "border-slate-200 bg-white"}`}>
+        <div className={`absolute left-0 top-full z-[100] mt-1 w-max min-w-[220px] rounded-xl border shadow-xl ${isDark ? "border-white/10 bg-slate-800" : "border-slate-200 bg-white"}`}>
           <div className={`flex items-center gap-2 border-b px-3 py-2 ${isDark ? "border-white/10" : "border-slate-100"}`}>
             <Search size={14} className={`shrink-0 ${isDark ? "text-white/40" : "text-slate-400"}`} />
             <input

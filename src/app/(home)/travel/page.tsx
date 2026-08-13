@@ -104,7 +104,7 @@ export default function TravelListPage() {
                 placeholder="Cari nama atau kota..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-64"
+                className="pl-8 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 w-full sm:w-64"
               />
               {searchQuery && (
                 <button
@@ -122,7 +122,7 @@ export default function TravelListPage() {
                 <button
                   key={city}
                   onClick={() => setCityFilter(city)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize ${
+                  className={`px-3 py-2 min-h-10 rounded-lg text-xs font-medium transition-colors capitalize ${
                     cityFilter === city
                       ? "bg-emerald-600 text-white"
                       : "bg-white border border-gray-200 text-gray-600 hover:border-emerald-300"
@@ -179,7 +179,7 @@ export default function TravelListPage() {
                       unoptimized
                     />
                     {travel.is_featured && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center text-[8px] font-bold text-amber-900">★</span>
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center text-[10px] font-bold text-amber-900">★</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -210,9 +210,9 @@ export default function TravelListPage() {
                     {travel.packages_count || 0} paket
                   </div>
                   {travel.is_verified ? (
-                    <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Terverifikasi</span>
+                    <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Terverifikasi</span>
                   ) : (
-                    <span className="text-[10px] text-gray-400">Belum verifikasi</span>
+                    <span className="text-[11px] text-gray-400">Belum verifikasi</span>
                   )}
                 </div>
               </Link>

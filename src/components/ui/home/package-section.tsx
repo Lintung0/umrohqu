@@ -155,14 +155,14 @@ export default function PackageSection() {
           </div>
           <Link
             href="/search"
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
           >
             {t.common.view_all}
           </Link>
         </div>
 
         {compared.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-4 rounded-2xl z-40 flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/40">
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-4 rounded-2xl z-40 flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/40">
             <span className="text-sm font-medium">{compared.length} paket dipilih untuk dibandingkan</span>
             <Link href={`/compare?ids=${compared.join(",")}`} className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-gold to-gold-light text-emerald-deep">
               Bandingkan

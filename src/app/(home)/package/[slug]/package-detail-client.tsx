@@ -102,7 +102,7 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
       </div>
       <div className="min-w-0">
         <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{label}</p>
-        <p className="text-sm font-semibold truncate mt-0.5">{value}</p>
+        <p className="text-sm font-semibold line-clamp-2 [overflow-wrap:anywhere] mt-0.5">{value}</p>
       </div>
     </div>
   )
@@ -165,7 +165,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       setShowScrollTop(window.scrollY > 400)
       if (sidebarRef.current) {
         const rect = sidebarRef.current.getBoundingClientRect()
-        setShowStickyCta(rect.bottom < 0)
+        setShowStickyCta(rect.top < 0)
       }
     }
     window.addEventListener("scroll", handleScroll)
@@ -204,7 +204,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-12 sm:pb-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-24 sm:pb-16">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
           <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
@@ -235,7 +235,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   {/* Maximize button for single image */}
                   {pkg.image_url && (
                     <button
-                      className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors z-10"
+                      className="absolute top-3 right-3 w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors z-10"
                       aria-label="Perbesar foto"
                     >
                       <Maximize2 className="w-3.5 h-3.5" />
@@ -263,10 +263,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               )}
               {/* Floating Actions — always visible on top of image */}
               <div className="absolute top-3 right-3 z-20 flex gap-1.5">
-                <button onClick={handleShare} className="w-8 h-8 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-gray-600 hover:bg-white hover:text-primary transition-all shadow-sm">
+                <button onClick={handleShare} className="w-10 h-10 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-gray-600 hover:bg-white hover:text-primary transition-all shadow-sm">
                   <Share2 className="w-4 h-4" />
                 </button>
-                <button onClick={toggleWishlist} className={`w-8 h-8 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center transition-all shadow-sm ${isWishlisted ? "text-rose-500" : "text-gray-600 hover:bg-white hover:text-rose-500"}`}>
+                <button onClick={toggleWishlist} className={`w-10 h-10 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center transition-all shadow-sm ${isWishlisted ? "text-rose-500" : "text-gray-600 hover:bg-white hover:text-rose-500"}`}>
                   {togglingWishlist ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`} />}
                 </button>
               </div>
@@ -297,7 +297,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     {pkg.description && (
                       <p className="text-sm text-muted-foreground leading-relaxed">{pkg.description}</p>
                     )}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {pkg.airline && <InfoCard icon={Plane} label="Maskapai" value={decodeUnicodeEscapes(pkg.airline)} color="blue" />}
                       {pkg.duration_days && <InfoCard icon={Clock} label="Durasi" value={`${pkg.duration_days} Hari`} />}
                       {pkg.hotel_makkah && <InfoCard icon={Hotel} label="Hotel Makkah" value={pkg.hotel_makkah} color="amber" />}
@@ -536,8 +536,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               </Link>
               <Button
                 variant="outline"
-                size="sm"
-                className="w-full h-9 text-xs gap-1.5"
+                className="w-full h-10 text-xs gap-1.5"
                 onClick={() => {
                   if (comparePackages.some((p) => p.id === pkg.id)) return
                   if (isFull) {
@@ -575,7 +574,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 </Link>
                 {pkg.travel.phone && (
                   <a href={`https://wa.me/${pkg.travel.phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="mt-3 block">
-                    <Button variant="outline" size="sm" className="w-full h-9 text-xs gap-1.5 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all">
+                    <Button variant="outline" className="w-full h-10 text-xs gap-1.5 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all">
                       <MessageCircle className="w-3.5 h-3.5" /> Hubungi via WhatsApp
                     </Button>
                   </a>
@@ -605,7 +604,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
       {/* Sticky Mobile CTA */}
       {showStickyCta && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 p-3 z-50 lg:hidden">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 px-3 pt-3 pb-safe z-50 lg:hidden">
           <div className="max-w-lg mx-auto flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-lg font-bold text-primary truncate">{formatRupiah(pkg.price)}</p>
@@ -622,7 +621,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-20 right-4 w-9 h-9 rounded-full bg-white border border-border shadow flex items-center justify-center text-muted-foreground hover:text-primary transition-all z-40"
+          className="fixed bottom-24 right-4 w-10 h-10 rounded-full bg-white border border-border shadow flex items-center justify-center text-muted-foreground hover:text-primary transition-all z-40"
         >
           <ArrowUp className="w-4 h-4" />
         </button>

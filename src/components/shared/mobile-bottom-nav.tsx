@@ -20,7 +20,7 @@ export default function MobileBottomNav() {
   const { compareCount } = useCompare()
 
   if (!isMobile) return null
-  if (pathname.startsWith("/admin") || pathname.startsWith("/travel-dashboard") || pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/checkout")) return null
+  if (pathname.startsWith("/admin") || pathname.startsWith("/travel-dashboard") || pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/checkout") || pathname.startsWith("/search") || pathname.startsWith("/package") || pathname.startsWith("/travel-site")) return null
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border safe-area-bottom pb-safe lg:hidden">

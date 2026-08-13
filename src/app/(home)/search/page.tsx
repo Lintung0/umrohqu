@@ -391,7 +391,7 @@ function SearchContent() {
             {activeFilterChips.map((chip, i) => (
               <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
                 {chip.label}
-                <button onClick={chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="hover:text-emerald-900">
+                <button onClick={chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="-m-1.5 p-1.5 flex items-center justify-center min-w-8 min-h-8 hover:text-emerald-900 cursor-pointer">
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -481,8 +481,8 @@ function SearchContent() {
       </div>
 
       {/* ── Mobile sticky bottom bar (Filter + Urutkan) ── */}
-      <div className="lg:hidden sticky bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div className="lg:hidden sticky bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur-md safe-area-bottom">
+        <div className="max-w-7xl mx-auto px-4 pt-3 pb-safe flex items-center gap-3">
           <button
             onClick={() => setShowMobileFilter(true)}
             aria-label="Buka filter pencarian"

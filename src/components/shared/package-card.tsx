@@ -121,7 +121,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
           <button
             onClick={handleCompare}
-            className="absolute top-2.5 right-2.5 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+            className="absolute top-2.5 right-2.5 z-10 bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
             type="button"
             aria-label="Bandingkan paket"
             title="Bandingkan paket"

@@ -220,7 +220,7 @@ const Navbar = () => {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            className="md:hidden p-2.5 rounded-xl hover:bg-slate-100 transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="w-5 h-5 text-slate-700" /> : <Menu className="w-5 h-5 text-slate-700" />}

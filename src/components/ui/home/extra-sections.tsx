@@ -265,7 +265,7 @@ export function TrustSection() {
   return (
     <section className="py-10 px-6 md:px-12 bg-gray-50 border-t border-gray-100">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           {items.map((item) => (
             <div key={item.title} className="flex items-center gap-3 p-4 rounded-xl bg-white border border-gray-200">
               <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">

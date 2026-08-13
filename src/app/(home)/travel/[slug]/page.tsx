@@ -234,9 +234,9 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
             { value: tenantData.founded_year || "-", label: "Berdiri Sejak", color: "text-amber-700" },
             { value: tenantData.is_verified ? "Aktif" : "Proses", label: "Status Verifikasi", color: "text-emerald-700" },
           ].map((m) => (
-            <div key={m.label} className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-              <p className={`text-2xl font-bold ${m.color}`}>{m.value}</p>
-              <p className="text-[10px] text-gray-400 uppercase tracking-wide mt-1">{m.label}</p>
+            <div key={m.label} className="bg-white border border-gray-200 rounded-xl p-4 text-center min-w-0">
+              <p className={`text-xl sm:text-2xl font-bold tabular-nums ${m.color}`}>{m.value}</p>
+              <p className="text-[11px] text-gray-400 uppercase tracking-wide mt-1">{m.label}</p>
             </div>
           ))}
         </div>
@@ -256,14 +256,14 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                 <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-100 rounded-lg p-3">
                   <Shield className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
-                    <p className="text-[10px] text-gray-400">Nomor Izin PPIU</p>
+                    <p className="text-[11px] text-gray-400">Nomor Izin PPIU</p>
                     <p className="text-xs font-semibold text-emerald-700">{tenantData.ppiu_number || "Terverifikasi Kemenhaj"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 bg-blue-50 border border-blue-100 rounded-lg p-3">
                   <Award className="w-4 h-4 text-blue-600 shrink-0" />
                   <div>
-                    <p className="text-[10px] text-gray-400">Tanggal Akreditasi</p>
+                    <p className="text-[11px] text-gray-400">Tanggal Akreditasi</p>
                     <p className="text-xs font-semibold text-blue-700">
                       {tenantData.accredited_at
                         ? new Date(tenantData.accredited_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
@@ -274,14 +274,14 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                 <div className="flex items-center gap-2.5 bg-gray-50 border border-gray-100 rounded-lg p-3">
                   <BadgeCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
-                    <p className="text-[10px] text-gray-400">Status Platform</p>
+                    <p className="text-[11px] text-gray-400">Status Platform</p>
                     <p className="text-xs font-semibold text-emerald-700">{tenantData.is_verified ? "Terverifikasi UmrahQu" : "Dalam Proses"}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 bg-gray-50 border border-gray-100 rounded-lg p-3">
                   <Users className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
-                    <p className="text-[10px] text-gray-400">Total Jamaah</p>
+                    <p className="text-[11px] text-gray-400">Total Jamaah</p>
                     <p className="text-xs font-semibold text-emerald-700">
                       {totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+ Jamaah` : "Data tersedia"}
                     </p>
@@ -300,13 +300,13 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                 { icon: Users, label: "Kuota Tersedia", value: `${activePackages.reduce((sum, p) => sum + (p.available || 0), 0)} kursi` },
                 { icon: Globe, label: "Website", value: `${tenantData.slug}.umrahqu.com` },
               ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2.5">
+                <div key={item.label} className="flex items-center gap-2.5 min-w-0">
                   <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                     <item.icon className="w-3.5 h-3.5 text-emerald-600" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-[10px] text-gray-400 uppercase tracking-wide">{item.label}</p>
-                    <p className="text-xs font-semibold">{item.value}</p>
+                    <p className="text-xs font-semibold break-all">{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -405,9 +405,9 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
             )}
             <a href={`mailto:${tenantData.contact_email || `info@${tenantData.slug}.com`}`} className="flex items-center gap-3 p-3.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
               <Mail className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold">Email</p>
-                <p className="text-xs text-gray-400">{tenantData.contact_email || `info@${tenantData.slug}.com`}</p>
+                <p className="text-xs text-gray-400 break-all">{tenantData.contact_email || `info@${tenantData.slug}.com`}</p>
               </div>
             </a>
           </div>

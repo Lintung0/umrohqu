@@ -79,17 +79,17 @@ function SmartBadges({ scores, index }: { scores: ReturnType<typeof calcScore>[]
   return (
     <div className="flex flex-wrap gap-1 mt-1.5">
       {index === bestValue && (
-        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-1.5 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-1.5 py-0.5 rounded-full">
           <Award className="w-2.5 h-2.5" /> Best Value
         </span>
       )}
       {index === cheapest && (
-        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full">
           <TrendingDown className="w-2.5 h-2.5" /> Termurah
         </span>
       )}
       {index === bestHotel && (
-        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full">
           <Star className="w-2.5 h-2.5" /> Hotel Terbaik
         </span>
       )}
@@ -107,7 +107,7 @@ function renderValue(key: string, pkg: Package, highlight?: "best" | "worst") {
             <p className="text-xs text-muted-foreground line-through">{formatRupiah(Number(pkg.original_price) || 0)}</p>
           ) : null}
           <p className="font-bold text-primary">{formatRupiah(Number(pkg.price) || 0)}</p>
-          <p className="text-[10px] text-muted-foreground">/ orang</p>
+          <p className="text-[11px] text-muted-foreground">/ orang</p>
         </div>
       )
     case "hotel_makkah_stars":
@@ -280,14 +280,14 @@ function CompareView() {
                     <X className="w-3.5 h-3.5" />
                   </button>
                   {isBest && (
-                    <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                    <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
                       <Award className="w-3 h-3" /> Pilihan Terbaik
                     </div>
                   )}
                 </div>
                 <div className="p-3">
                   <p className="text-xs font-semibold leading-snug line-clamp-2">{pkg.name}</p>
-                  <div className="text-[10px] text-muted-foreground mt-1">
+                  <div className="text-[11px] text-muted-foreground mt-1">
                     Rp {Math.round(scores[i].pricePerDay / 1000)}rb / hari
                   </div>
                   <SmartBadges scores={scores} index={i} />

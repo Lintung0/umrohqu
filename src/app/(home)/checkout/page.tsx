@@ -519,7 +519,7 @@ function StepDataSingkat({
         ))}
 
         <div className="lg:hidden flex justify-end">
-          <Button onClick={() => setStep(1)} disabled={!allPilgrimsFilled} className="gap-2 px-6 w-full sm:w-auto">
+          <Button onClick={() => setStep(1)} disabled={!allPilgrimsFilled} className="gap-2 px-6 h-12 w-full sm:w-auto">
             Lanjut ke Pembayaran <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -527,7 +527,7 @@ function StepDataSingkat({
 
       {/* RIGHT COLUMN — Sticky Summary */}
       <div className="lg:col-span-1">
-        <div className="sticky top-24 space-y-4">
+        <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-sm text-slate-900 mb-4">Ringkasan Pemesanan</h3>
 
@@ -562,7 +562,7 @@ function StepDataSingkat({
             <Button
               onClick={() => setStep(1)}
               disabled={!allPilgrimsFilled}
-              className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
+              className="w-full h-12 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
             >
             Lanjut <ChevronRight className="w-4 h-4" />
             </Button>
@@ -649,7 +649,7 @@ function StepPayment({
                       }`}
                     >
                       <span>{pct}%</span>
-                      <span className="block text-[10px] font-normal text-slate-400 mt-0.5">{formatRupiah(dpNominal)}</span>
+                      <span className="block text-[11px] font-normal text-slate-400 mt-0.5 whitespace-nowrap text-center overflow-hidden">{formatRupiah(dpNominal)}</span>
                     </button>
                   )
                 })}
@@ -706,7 +706,7 @@ function StepPayment({
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold">Transfer Bank / Virtual Account</p>
                   <p className="text-xs text-slate-500 mb-2">Bayar melalui bank pilihan Anda</p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {["BCA", "Mandiri", "BNI", "BRI", "Permata"].map((bank) => (
                       <span key={bank} className="px-2 py-1 bg-slate-100 border border-slate-200 rounded-md text-[10px] font-semibold text-slate-600">
                         {bank}
@@ -734,13 +734,13 @@ function StepPayment({
 
         <div className="lg:hidden flex justify-between">
           <Button variant="outline" onClick={() => setStep(0)}>← Kembali</Button>
-          <Button onClick={() => setStep(2)} className="gap-2 px-6">Review <ChevronRight className="w-4 h-4" /></Button>
+          <Button onClick={() => setStep(2)} className="gap-2 px-6 h-12">Review <ChevronRight className="w-4 h-4" /></Button>
         </div>
       </div>
 
       {/* RIGHT — Sticky Summary */}
       <div className="lg:col-span-1">
-        <div className="sticky top-24 space-y-4">
+        <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-sm text-slate-900 mb-4">Ringkasan Pemesanan</h3>
 
@@ -809,7 +809,7 @@ function StepPayment({
 
             <Button
               onClick={() => setStep(2)}
-              className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
+              className="w-full h-12 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
             >
               Proses Pembayaran <ChevronRight className="w-4 h-4" />
             </Button>
@@ -948,7 +948,7 @@ function StepReview({
             <Link href={`/package/${pkg.slug}`}>
               <Button variant="ghost" size="sm" className="text-xs">Batal</Button>
             </Link>
-            <Button onClick={handleSubmit} disabled={submitting || (useWallet && amountToPayNow > 0)} className="gap-2 px-6">
+            <Button onClick={handleSubmit} disabled={submitting || (useWallet && amountToPayNow > 0)} className="gap-2 px-6 h-12">
               {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Bayar"}
             </Button>
           </div>
@@ -957,7 +957,7 @@ function StepReview({
 
       {/* RIGHT — Sticky Summary */}
       <div className="lg:col-span-1">
-        <div className="sticky top-24 space-y-4">
+        <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-sm text-slate-900 mb-4">Ringkasan Pemesanan</h3>
 
@@ -1027,7 +1027,7 @@ function StepReview({
             <Button
               onClick={handleSubmit}
               disabled={submitting}
-              className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
+              className="w-full h-12 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
             >
               {submitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>

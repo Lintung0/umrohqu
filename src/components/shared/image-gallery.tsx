@@ -133,14 +133,14 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
           <>
             <button
               onClick={scrollPrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-20"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-20"
               aria-label="Foto sebelumnya"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={scrollNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-20"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all z-20"
               aria-label="Foto berikutnya"
             >
               <ChevronRight className="w-4 h-4" />

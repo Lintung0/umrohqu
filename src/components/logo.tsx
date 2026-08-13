@@ -22,7 +22,7 @@ const Logo = ({ type = "full" }: { type?: "full" | "icon" }) => {
         alt="Logo"
         src="/logo.png"
         loading="eager"
-        style={{ width: "160px", height: "auto" }}
+        style={{ width: "clamp(124px, 38vw, 160px)", height: "auto" }}
       />
     </Link>
   );

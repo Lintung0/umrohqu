@@ -56,6 +56,7 @@
   --display-family: var(--font-jakarta);
   --font-jakarta: var(--font-jakarta);
   --font-geist-mono: var(--font-geist-mono);
+  --font-arabic: "Amiri Quran", "Scheherazade New", "Noto Naskh Arabic", "Traditional Arabic", serif;
   --color-code-border: var(--code-border);
   --color-code-selection: var(--code-selection);
   --color-code-number: var(--code-number);
@@ -158,7 +159,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground font-body antialiased overflow-x-clip;
   }
   html {
     @apply font-sans scroll-smooth;
@@ -352,4 +353,20 @@
 
 @utility animate-marquee {
   animation: marquee 25s linear infinite;
+}
+
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
