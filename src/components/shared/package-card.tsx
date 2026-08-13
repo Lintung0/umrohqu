@@ -53,9 +53,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [imgSrc, setImgSrc] = useState(getSafeImage(pkg.image_url))
   const [imgError, setImgError] = useState(false)
 
-  const discount = pkg.original_price
+  const discount = pkg.original_price && pkg.original_price > pkg.price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
+
+  const soldOut = (pkg.available ?? 0) <= 0
 
   const typeKey = (pkg.type || "reguler").toLowerCase()
   const typeLabel = TYPE_LABEL[typeKey] || pkg.type
@@ -171,25 +173,30 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       href={`/package/${pkg.slug}`}
       className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 transition-colors group cursor-pointer"
     >
-      <div className="relative h-44 w-full overflow-hidden">
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
         <Image
           src={imgSrc}
           alt={pkg.name}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+          className={`object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none ${soldOut ? "grayscale opacity-60" : ""}`}
           onError={handleError}
           unoptimized
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
         <div className="absolute top-2.5 left-2.5 flex gap-1 pointer-events-none">
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${typeColor}`}>
             {typeLabel}
           </span>
-          {pkg.is_promo && discount > 0 && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-100 text-red-700">
+          {soldOut ? (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900/80 text-white">
+              Habis
+            </span>
+          ) : discount > 0 ? (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-500 text-white">
               -{discount}%
             </span>
-          )}
+          ) : null}
         </div>
 
         <button

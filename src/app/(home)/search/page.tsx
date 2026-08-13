@@ -1,8 +1,8 @@
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
-import { useState, useEffect, Suspense } from "react"
-import { Search, X, SlidersHorizontal, MapPin, Loader2 } from "lucide-react"
+import { useState, useEffect, useRef, useCallback, Suspense } from "react"
+import { Search, SearchX, X, SlidersHorizontal } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getAseanCountryByCode } from "@/lib/constants"
 import { createClient } from "@/lib/supabase/client"
@@ -24,23 +24,85 @@ function SearchContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const [departure, setDeparture] = useState(searchParams.get("departure") ?? "")
-  const [country, setCountry] = useState(searchParams.get("country") ?? "")
-  const [month, setMonth] = useState(searchParams.get("month") ?? "")
-  const [cost, setCost] = useState(searchParams.get("cost") ?? "")
-  const [type, setType] = useState("semua")
-  const [airline, setAirline] = useState("")
-  const [hotelStars, setHotelStars] = useState("")
-  const [sortBy, setSortBy] = useState("relevance")
   const [showMobileFilter, setShowMobileFilter] = useState(false)
-  const [priceRange, setPriceRange] = useState<[number, number]>([10000000, 500000000])
-  const [duration, setDuration] = useState("")
+
+  const departure = searchParams.get("departure") ?? ""
+  const country = searchParams.get("country") ?? ""
+  const month = searchParams.get("month") ?? ""
+  const cost = searchParams.get("cost") ?? ""
+  const type = searchParams.get("type") ?? "semua"
+  const airlines = (searchParams.get("airlines") ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  const hotelStars = searchParams.get("hotelStars") ?? ""
+  const duration = searchParams.get("duration") ?? ""
+  const sortBy = searchParams.get("sort") ?? "relevance"
+  const searchQuery = searchParams.get("search") ?? ""
+  const parsedMin = parseInt(searchParams.get("priceMin") ?? "", 10)
+  const parsedMax = parseInt(searchParams.get("priceMax") ?? "", 10)
+  const priceRange: [number, number] = [
+    Number.isFinite(parsedMin) ? parsedMin : 10000000,
+    Number.isFinite(parsedMax) ? parsedMax : 500000000,
+  ]
+  const searchQueryParam = searchQuery
+
+  const [searchInput, setSearchInput] = useState(searchQuery)
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => {
+    setSearchInput(searchParams.get("search") ?? "")
+  }, [searchParams.get("search")])
+
+  const setUrl = useCallback(
+    (patch: Record<string, string | null | undefined>) => {
+      const next = new URLSearchParams(searchParams.toString())
+      for (const [key, value] of Object.entries(patch)) {
+        if (value === null || value === "" || value === undefined) next.delete(key)
+        else next.set(key, value)
+      }
+      const qs = next.toString()
+      router.replace(qs ? `/search?${qs}` : "/search", { scroll: false })
+    },
+    [searchParams, router]
+  )
+
+  const setDeparture = useCallback((v: string) => setUrl({ departure: v }), [setUrl])
+  const setCountry = useCallback((v: string) => setUrl({ country: v }), [setUrl])
+  const setMonth = useCallback((v: string) => setUrl({ month: v }), [setUrl])
+  const setCost = useCallback((v: string) => setUrl({ cost: v === "Semua Biaya" ? null : v }), [setUrl])
+  const setType = useCallback((v: string) => setUrl({ type: v === "semua" ? null : v }), [setUrl])
+  const setAirlines = useCallback((v: string[]) => setUrl({ airlines: v.length ? v.join(",") : null }), [setUrl])
+  const setHotelStars = useCallback((v: string) => setUrl({ hotelStars: v }), [setUrl])
+  const setDuration = useCallback((v: string) => setUrl({ duration: v }), [setUrl])
+  const setPriceRange = useCallback(
+    (range: [number, number]) => {
+      setUrl({
+        priceMin: range[0] === 10000000 ? null : String(range[0]),
+        priceMax: range[1] === 500000000 ? null : String(range[1]),
+      })
+    },
+    [setUrl]
+  )
+  const setSortBy = useCallback((v: string) => setUrl({ sort: v === "relevance" ? null : v }), [setUrl])
+
+  const handleSearchInput = (v: string) => {
+    setSearchInput(v)
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    searchTimerRef.current = setTimeout(() => {
+      setUrl({ search: v.trim() || null })
+    }, 500)
+  }
+
+  const handleSearchSubmit = () => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    setUrl({ search: searchInput.trim() || null })
+  }
 
   const [packages, setPackages] = useState<Package[]>([])
   const [tenants, setTenants] = useState<Map<string, Tenant>>(new Map())
   const [rankingScores, setRankingScores] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(true)
-  const searchQueryParam = searchParams.get("search")
 
   useEffect(() => {
     const supabase = createClient()
@@ -114,15 +176,6 @@ function SearchContent() {
     fetchData()
   }, [searchQueryParam])
 
-  const [searchQuery, setSearchQuery] = useState("")
-
-  useEffect(() => {
-    const paramQuery = searchParams.get("search")
-    if (paramQuery !== searchQuery) {
-      setSearchQuery(paramQuery || "")
-    }
-  }, [searchParams.get("search")])
-
   const filtered = packages
     .filter((pkg) => {
       if (country) {
@@ -149,8 +202,8 @@ function SearchContent() {
       if (type && type !== "semua") {
         if (pkg.type !== type) return false
       }
-      if (airline) {
-        if (!pkg.airline?.toLowerCase().includes(airline.toLowerCase())) return false
+      if (airlines.length > 0) {
+        if (!airlines.some((a) => pkg.airline?.toLowerCase().includes(a.toLowerCase()))) return false
       }
       if (hotelStars) {
         const minStars = parseInt(hotelStars)
@@ -173,43 +226,13 @@ function SearchContent() {
       return scoreB - scoreA
     })
 
-  const filteredWithSearch = filtered.filter((pkg) => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    return (
-      pkg.name.toLowerCase().includes(query) ||
-      pkg.departure_city?.toLowerCase().includes(query) ||
-      pkg.description?.toLowerCase().includes(query)
-    )
-  })
-
-  const handleSearch = () => {
-    const params = new URLSearchParams()
-    if (departure) params.set("departure", departure)
-    if (country) params.set("country", country)
-    if (month) params.set("month", month)
-    if (cost && cost !== "Semua Biaya") params.set("cost", cost)
-    if (type && type !== "semua") params.set("type", type)
-    if (airline) params.set("airline", airline)
-    if (hotelStars) params.set("hotelStars", hotelStars)
-    if (searchQuery) params.set("search", searchQuery)
-    router.push(`/search?${params.toString()}`)
-  }
-
   const clearFilters = () => {
-    setDeparture("")
-    setCountry("")
-    setMonth("")
-    setCost("")
-    setType("semua")
-    setAirline("")
-    setHotelStars("")
-    setSearchQuery("")
-    setPriceRange([10000000, 500000000])
-    setDuration("")
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    setSearchInput("")
+    router.replace("/search", { scroll: false })
   }
 
-  const hasActiveFilters = departure || country || month || cost || type !== "semua" || airline || hotelStars || searchQuery || duration || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
+  const hasActiveFilters = Boolean(departure || country || month || cost || airlines.length > 0 || hotelStars || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
 
   const activeFilterChips: { label: string; onRemove: () => void }[] = []
   if (departure) activeFilterChips.push({ label: departure, onRemove: () => setDeparture("") })
@@ -217,12 +240,10 @@ function SearchContent() {
   if (month) activeFilterChips.push({ label: month, onRemove: () => setMonth("") })
   if (cost && cost !== "Semua Biaya") activeFilterChips.push({ label: cost, onRemove: () => setCost("") })
   if (type !== "semua") activeFilterChips.push({ label: type, onRemove: () => setType("semua") })
-  if (airline) activeFilterChips.push({ label: airline, onRemove: () => setAirline("") })
+  airlines.forEach((a) => activeFilterChips.push({ label: a, onRemove: () => setAirlines(airlines.filter((x) => x !== a)) }))
   if (hotelStars) activeFilterChips.push({ label: `Bintang ${hotelStars}+`, onRemove: () => setHotelStars("") })
   if (duration) activeFilterChips.push({ label: duration, onRemove: () => setDuration("") })
-  if (searchQuery) activeFilterChips.push({ label: `"${searchQuery}"`, onRemove: () => setSearchQuery("") })
-
-  const countryCode = country || undefined
+  if (searchQuery) activeFilterChips.push({ label: `"${searchQuery}"`, onRemove: () => handleSearchInput("") })
 
   if (loading) {
     return (
@@ -258,12 +279,12 @@ function SearchContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
         {/* Hero Header Banner */}
-        <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white p-6 rounded-2xl mb-6 shadow-md">
+        <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white p-5 sm:p-6 rounded-2xl mb-4 shadow-md">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold">Hasil Pencarian Paket Umroh</h1>
               <p className="text-emerald-100 text-sm mt-1">
-                Menampilkan <span className="font-bold text-white">{filteredWithSearch.length} paket</span> ditemukan
+                Menampilkan <span className="font-bold text-white">{filtered.length} paket</span> ditemukan
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -284,24 +305,24 @@ function SearchContent() {
         </div>
 
         {/* Main Search Input */}
-        <div className="mb-5">
+        <div className="mb-4">
           <div className="flex gap-2 max-w-3xl">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Cari nama paket, travel, atau kota..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleSearch() }}
+                value={searchInput}
+                onChange={(e) => handleSearchInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
                 aria-label="Cari paket umroh"
                 className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
               />
             </div>
             <button
-              onClick={handleSearch}
+              onClick={handleSearchSubmit}
               aria-label="Cari paket umroh"
-              className="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold rounded-xl shadow-md shadow-amber-400/20 hover:shadow-lg hover:shadow-amber-400/30 transition-all active:scale-95 flex items-center gap-2"
+              className="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold rounded-xl shadow-md shadow-amber-400/20 hover:shadow-lg hover:shadow-amber-400/30 transition-all active:scale-95 flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70"
             >
               <Search className="w-4 h-4" />
               <span className="hidden sm:inline">Cari</span>
@@ -310,7 +331,7 @@ function SearchContent() {
         </div>
 
         {/* Quick Category Pills */}
-        <div className="flex flex-wrap gap-2 mb-5">
+        <div className="flex flex-wrap gap-2 mb-4">
           {QUICK_CATEGORIES.map((q) => {
             const isActive = Object.entries(q.preset).every(([k, v]) => {
               if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())
@@ -333,7 +354,7 @@ function SearchContent() {
                     if (k === "type") setType(isActive ? "semua" : (v as string))
                   })
                 }}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
                   isActive
                     ? "bg-emerald-600 text-white shadow-sm"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -347,7 +368,7 @@ function SearchContent() {
 
         {/* Active Filter Chips */}
         {activeFilterChips.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-5">
+          <div className="flex flex-wrap gap-2 mb-4">
             {activeFilterChips.map((chip, i) => (
               <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
                 {chip.label}
@@ -375,8 +396,8 @@ function SearchContent() {
               setPriceRange={setPriceRange}
               duration={duration}
               setDuration={setDuration}
-              airline={airline}
-              setAirline={setAirline}
+              airlines={airlines}
+              setAirlines={setAirlines}
               hotelStars={hotelStars}
               setHotelStars={setHotelStars}
               hasActiveFilters={!!hasActiveFilters}
@@ -385,10 +406,11 @@ function SearchContent() {
           </aside>
 
           {/* Mobile Filter Button */}
-          <div className="lg:hidden fixed bottom-6 right-6 z-40">
+          <div className="lg:hidden fixed bottom-24 right-4 z-50">
             <button
               onClick={() => setShowMobileFilter(!showMobileFilter)}
-              className="flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-600/30 font-semibold text-sm hover:bg-emerald-700 transition-all active:scale-95"
+              aria-label="Buka filter pencarian"
+              className="flex items-center gap-2 min-h-11 px-5 bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-600/30 font-semibold text-sm hover:bg-emerald-700 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
             >
               <SlidersHorizontal className="w-4 h-4" />
               Filter
@@ -403,7 +425,7 @@ function SearchContent() {
               <div className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-slate-900">Filter</h3>
-                  <button onClick={() => setShowMobileFilter(false)} className="p-2 hover:bg-slate-100 rounded-lg">
+                  <button onClick={() => setShowMobileFilter(false)} aria-label="Tutup filter" className="min-h-11 min-w-11 flex items-center justify-center hover:bg-slate-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -416,8 +438,8 @@ function SearchContent() {
                   setPriceRange={setPriceRange}
                   duration={duration}
                   setDuration={setDuration}
-                  airline={airline}
-                  setAirline={setAirline}
+                  airlines={airlines}
+                  setAirlines={setAirlines}
                   hotelStars={hotelStars}
                   setHotelStars={setHotelStars}
                   hasActiveFilters={!!hasActiveFilters}
@@ -429,18 +451,18 @@ function SearchContent() {
 
           {/* Package Grid */}
           <div className="lg:col-span-3 min-w-0">
-            {filteredWithSearch.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
-                <div className="text-5xl mb-4" role="img" aria-label="Pencarian">🔍</div>
+            {filtered.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
+                <SearchX className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                 <h3 className="font-semibold text-lg mb-2 text-slate-900">Paket tidak ditemukan</h3>
-                <p className="text-sm text-slate-500 mb-5">Coba ubah filter pencarian Anda</p>
-                <button onClick={clearFilters} className="px-5 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
-                  Reset Filter
+                <p className="text-sm text-slate-500 mb-6">Coba ubah kata kunci atau filter pencarian Anda</p>
+                <button onClick={clearFilters} className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer">
+                  Lihat Semua Paket
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredWithSearch.map((pkg) => (
+                {filtered.map((pkg) => (
                   <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} />
                 ))}
               </div>

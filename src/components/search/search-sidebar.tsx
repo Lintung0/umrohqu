@@ -14,8 +14,8 @@ interface SearchSidebarProps {
   setPriceRange: (v: [number, number]) => void
   duration: string
   setDuration: (v: string) => void
-  airline: string
-  setAirline: (v: string) => void
+  airlines: string[]
+  setAirlines: (v: string[]) => void
   hotelStars: string
   setHotelStars: (v: string) => void
   hasActiveFilters: boolean
@@ -147,7 +147,11 @@ function CityAutocompleteFilter({
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => { if (suggestions.length > 0) setOpen(true) }}
           placeholder="Ketik nama kota..."
-          className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+          aria-label="Kota keberangkatan"
+          aria-expanded={open}
+          role="combobox"
+          autoComplete="off"
+          className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
         />
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -157,10 +161,12 @@ function CityAutocompleteFilter({
       </div>
 
       {open && suggestions.length > 0 && (
-        <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl">
+        <ul role="listbox" className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl">
           {suggestions.map((s, i) => (
             <li
               key={i}
+              role="option"
+              aria-selected={false}
               onClick={() => selectSuggestion(s)}
               className="flex cursor-pointer items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-emerald-50"
             >
@@ -202,7 +208,10 @@ function CountrySelectFilter({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full h-10 flex items-center justify-between gap-2 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 hover:border-emerald-300 transition-all cursor-pointer"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={selected ? `Negara: ${selected.name}` : "Semua Negara"}
+        className="w-full h-11 flex items-center justify-between gap-2 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 hover:border-emerald-300 transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
       >
         <div className="flex items-center gap-2">
           <span className="text-base">{selected?.emoji || "🌏"}</span>
@@ -247,12 +256,13 @@ export default function SearchSidebar({
   country, setCountry,
   priceRange, setPriceRange,
   duration, setDuration,
-  airline, setAirline,
+  airlines, setAirlines,
   hotelStars, setHotelStars,
   hasActiveFilters, clearFilters,
 }: SearchSidebarProps) {
   const toggleDuration = (d: string) => setDuration(duration === d ? "" : d)
-  const toggleAirline = (a: string) => setAirline(airline === a ? "" : a)
+  const toggleAirline = (a: string) =>
+    setAirlines(airlines.includes(a) ? airlines.filter((x) => x !== a) : [...airlines, a])
   const toggleStars = (s: string) => setHotelStars(hotelStars === s ? "" : s)
 
   const isPriceQuickActive = (range: [number, number]) =>
@@ -310,7 +320,9 @@ export default function SearchSidebar({
             step={5000000}
             value={priceRange[1]}
             onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-            className="w-full h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-emerald-600"
+            aria-label="Estimasi harga maksimum"
+            aria-valuetext={`Rp ${formatPriceShort(priceRange[1])}`}
+            className="w-full h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
           />
           <div className="flex justify-between text-[10px] text-slate-400 mt-1">
             <span>Rp 10jt</span>
@@ -327,7 +339,7 @@ export default function SearchSidebar({
               key={pr.label}
               onClick={() => handlePriceQuick(pr.range)}
               className={cn(
-                "px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-all cursor-pointer",
+                "min-h-11 px-3 rounded-md text-[11px] font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
                 isPriceQuickActive(pr.range)
                   ? "bg-emerald-600 border-emerald-600 text-white"
                   : "bg-slate-50 border-slate-200 text-slate-500 hover:border-emerald-300"
@@ -350,7 +362,7 @@ export default function SearchSidebar({
               key={d}
               onClick={() => toggleDuration(d)}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer",
+                "min-h-11 px-3 rounded-lg text-xs font-medium border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
                 duration === d
                   ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
                   : "bg-slate-50 border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700"
@@ -372,18 +384,19 @@ export default function SearchSidebar({
             <label
               key={a}
               className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium cursor-pointer transition-all",
-                airline === a
+                "flex items-center gap-2.5 min-h-11 px-3 rounded-lg text-xs font-medium cursor-pointer transition-all focus-within:ring-2 focus-within:ring-emerald-500/50 focus-within:outline-none",
+                airlines.includes(a)
                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                   : "text-slate-600 hover:bg-slate-50 border border-transparent"
               )}
             >
               <input
-                type="radio"
-                name="airline"
-                checked={airline === a}
+                type="checkbox"
+                name="airlines"
+                checked={airlines.includes(a)}
                 onChange={() => toggleAirline(a)}
-                className="w-3.5 h-3.5 text-emerald-600 accent-emerald-600"
+                aria-label={a}
+                className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded"
               />
               {a}
             </label>
@@ -402,7 +415,7 @@ export default function SearchSidebar({
               key={h.value}
               onClick={() => toggleStars(h.value)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer",
+                "flex-1 flex items-center justify-center gap-1 min-h-11 rounded-lg text-xs font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60",
                 hotelStars === h.value
                   ? "bg-amber-400 border-amber-400 text-amber-900 shadow-sm"
                   : "bg-slate-50 border-slate-200 text-slate-500 hover:border-amber-300"
