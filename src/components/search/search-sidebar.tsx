@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { X, RotateCcw, MapPin, Plane, Star, Clock, Banknote, ChevronDown } from "lucide-react"
+import { X, RotateCcw, MapPin, Plane, Star, Clock, Banknote, ChevronDown, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ASEAN_COUNTRIES } from "@/lib/constants"
 
@@ -277,8 +277,10 @@ export default function SearchSidebar({
     <div className="sticky top-36 max-h-[calc(100vh-9.5rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar space-y-5">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold text-sm text-slate-900">Filter Pencarian</h3>
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+          <SlidersHorizontal className="w-3.5 h-3.5" /> Filter Pencarian
+        </span>
         {hasActiveFilters && (
           <button onClick={clearFilters} className="text-xs text-emerald-600 hover:underline flex items-center gap-1 cursor-pointer">
             <RotateCcw className="w-3 h-3" /> Reset All

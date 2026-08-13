@@ -251,16 +251,21 @@ function SearchContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-50">
-        <div className="sticky top-16 z-40 bg-white border-b border-slate-200">
+        <div className="sticky top-16 z-40 bg-slate-50/80">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="h-11 bg-slate-100 rounded-full animate-pulse max-w-2xl mx-auto" />
+            <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
+              <div className="w-11 shrink-0" />
+              <div className="h-11 flex-1 bg-white border border-slate-200 rounded-full animate-pulse" />
+              <div className="w-11 h-11 bg-slate-200 rounded-full animate-pulse" />
+            </div>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-2 mb-6 overflow-hidden">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-8 w-20 bg-slate-100 rounded-full animate-pulse" />
+              <div key={i} className="h-8 w-20 bg-slate-100 rounded-full animate-pulse shrink-0" />
             ))}
+            <div className="hidden lg:block h-10 w-40 ml-auto bg-slate-100 rounded-full animate-pulse" />
           </div>
           <div className="flex gap-8">
             <div className="hidden lg:block w-64 shrink-0">
@@ -296,9 +301,10 @@ function SearchContent() {
     <main className="min-h-screen bg-slate-50">
 
       {/* ── Sticky search toolbar ── */}
-      <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/70 shadow-sm">
+      <div className="sticky top-16 z-40 bg-slate-50/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-2.5 max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
+            <div className="w-11 shrink-0" aria-hidden />
             <div className="relative flex-1">
               <input
                 type="text"
@@ -307,7 +313,7 @@ function SearchContent() {
                 onChange={(e) => handleSearchInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
                 aria-label="Cari paket umroh"
-                className="w-full pl-5 pr-4 h-11 bg-slate-100 border border-transparent rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                className="w-full pl-5 pr-4 h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
             </div>
             <button
@@ -317,22 +323,6 @@ function SearchContent() {
             >
               <Search className="w-5 h-5" />
             </button>
-            <div className="hidden sm:block shrink-0">
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
-                <SelectTrigger
-                  aria-label="Urutkan hasil pencarian"
-                  className="h-11 w-40 text-sm bg-slate-100 border-transparent text-slate-700 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="relevance">Relevansi</SelectItem>
-                  <SelectItem value="price-asc">Harga Terendah</SelectItem>
-                  <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
-                  <SelectItem value="duration">Durasi Terpendek</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </div>
       </div>
@@ -340,41 +330,59 @@ function SearchContent() {
       {/* ── Content ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-10">
 
-        {/* Quick Category Pills */}
-        <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 sm:mx-0 sm:px-0 mb-5">
-          {QUICK_CATEGORIES.map((q) => {
-            const isActive = Object.entries(q.preset).every(([k, v]) => {
-              if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())
-              if (k === "cost") return cost === v
-              if (k === "type") return type === v
-              return true
-            }) && (Object.keys(q.preset).length > 0 ? true : type === "semua" && !month && !cost)
+        {/* Quick Category Pills + Sort */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex gap-2 overflow-x-auto flex-1 min-w-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+            {QUICK_CATEGORIES.map((q) => {
+              const isActive = Object.entries(q.preset).every(([k, v]) => {
+                if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())
+                if (k === "cost") return cost === v
+                if (k === "type") return type === v
+                return true
+              }) && (Object.keys(q.preset).length > 0 ? true : type === "semua" && !month && !cost)
 
-            return (
-              <button
-                key={q.label}
-                onClick={() => {
-                  if (Object.keys(q.preset).length === 0) {
-                    clearFilters()
-                    return
-                  }
-                  Object.entries(q.preset).forEach(([k, v]) => {
-                    if (k === "month") setMonth(isActive ? "" : (v as string))
-                    if (k === "cost") setCost(isActive ? "" : (v as string))
-                    if (k === "type") setType(isActive ? "semua" : (v as string))
-                  })
-                }}
-                aria-pressed={isActive}
-                className={`shrink-0 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
-                  isActive
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-transparent text-slate-600 hover:bg-slate-100"
-                }`}
+              return (
+                <button
+                  key={q.label}
+                  onClick={() => {
+                    if (Object.keys(q.preset).length === 0) {
+                      clearFilters()
+                      return
+                    }
+                    Object.entries(q.preset).forEach(([k, v]) => {
+                      if (k === "month") setMonth(isActive ? "" : (v as string))
+                      if (k === "cost") setCost(isActive ? "" : (v as string))
+                      if (k === "type") setType(isActive ? "semua" : (v as string))
+                    })
+                  }}
+                  aria-pressed={isActive}
+                  className={`shrink-0 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
+                    isActive
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "bg-transparent text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {q.label}
+                </button>
+              )
+            })}
+          </div>
+          <div className="hidden lg:block shrink-0">
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
+              <SelectTrigger
+                aria-label="Urutkan hasil pencarian"
+                className="h-10 w-40 text-sm bg-white border-slate-200 text-slate-700 shadow-sm rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
               >
-                {q.label}
-              </button>
-            )
-          })}
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="relevance">Relevansi</SelectItem>
+                <SelectItem value="price-asc">Harga Terendah</SelectItem>
+                <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
+                <SelectItem value="duration">Durasi Terpendek</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Active Filter Chips */}
@@ -422,7 +430,9 @@ function SearchContent() {
               <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileFilter(false)} />
               <div className="absolute right-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl overflow-y-auto p-4 pb-28">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-slate-900">Filter</h3>
+                  <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+                    <SlidersHorizontal className="w-3.5 h-3.5" /> Filter Pencarian
+                  </span>
                   <button onClick={() => setShowMobileFilter(false)} aria-label="Tutup filter" className="min-h-11 min-w-11 flex items-center justify-center hover:bg-slate-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50">
                     <X className="w-5 h-5" />
                   </button>
