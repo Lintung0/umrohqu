@@ -338,6 +338,7 @@ export default function SearchSidebar({
             <button
               key={pr.label}
               onClick={() => handlePriceQuick(pr.range)}
+              aria-pressed={isPriceQuickActive(pr.range)}
               className={cn(
                 "min-h-11 px-3 rounded-md text-[11px] font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
                 isPriceQuickActive(pr.range)
@@ -361,6 +362,7 @@ export default function SearchSidebar({
             <button
               key={d}
               onClick={() => toggleDuration(d)}
+              aria-pressed={duration === d}
               className={cn(
                 "min-h-11 px-3 rounded-lg text-xs font-medium border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
                 duration === d
@@ -414,6 +416,7 @@ export default function SearchSidebar({
             <button
               key={h.value}
               onClick={() => toggleStars(h.value)}
+              aria-pressed={hotelStars === h.value}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1 min-h-11 rounded-lg text-xs font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60",
                 hotelStars === h.value

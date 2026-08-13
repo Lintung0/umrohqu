@@ -290,7 +290,7 @@ function SearchContent() {
             <div className="flex items-center gap-2">
               <span className="text-sm text-emerald-200 hidden sm:block">Urutkan:</span>
               <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
-                <SelectTrigger className="h-10 w-48 text-sm bg-white/15 border-white/20 text-white placeholder:text-white/60">
+                <SelectTrigger className="h-11 w-48 text-sm bg-white/15 border-white/20 text-white placeholder:text-white/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/50">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -354,6 +354,7 @@ function SearchContent() {
                     if (k === "type") setType(isActive ? "semua" : (v as string))
                   })
                 }}
+                aria-pressed={isActive}
                 className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
                   isActive
                     ? "bg-emerald-600 text-white shadow-sm"
@@ -422,7 +423,7 @@ function SearchContent() {
           {showMobileFilter && (
             <div className="lg:hidden fixed inset-0 z-50">
               <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileFilter(false)} />
-              <div className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto p-4">
+              <div className="absolute right-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl overflow-y-auto p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-slate-900">Filter</h3>
                   <button onClick={() => setShowMobileFilter(false)} aria-label="Tutup filter" className="min-h-11 min-w-11 flex items-center justify-center hover:bg-slate-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50">
