@@ -65,6 +65,21 @@ export async function POST(request: NextRequest) {
 
     await admin.from("bookings").update(updateData).eq("id", bookingId)
 
+    // Sinkronkan record transaksi ke paid (jika webhook Xendit terlewat)
+    const now = new Date().toISOString()
+    await admin
+      .from("payments")
+      .update({ status: "paid", paid_at: now, updated_at: now })
+      .eq("booking_id", bookingId)
+      .eq("gateway", "xendit")
+      .eq("status", "pending")
+
+    await admin
+      .from("invoices")
+      .update({ status: "paid", paid_at: now, updated_at: now })
+      .eq("booking_id", bookingId)
+      .eq("status", "issued")
+
     return NextResponse.json({ status: newStatus, just_verified: true })
   } catch (err) {
     console.error("Verify payment error:", err)

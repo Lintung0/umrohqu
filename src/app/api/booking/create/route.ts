@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
+import { calculateTotalFee } from "@/lib/business-logic/fees"
+import { getFeeConfig } from "@/lib/business-logic/fee-config"
 import { z } from "zod"
 
 const pilgrimSchema = z.object({
@@ -18,10 +20,7 @@ const schema = z.object({
   paymentType: z.enum(["full", "dp"]),
   dpPercentage: z.number().min(10).max(90).optional(),
   useWallet: z.boolean().default(false),
-  platformFee: z.number().default(0),
-  serviceFee: z.number().default(0),
-  taxAmount: z.number().default(0),
-  feeChannel: z.string().default("portal"),
+  feeChannel: z.enum(["portal", "subdomain", "custom_domain"]).default("portal"),
   notes: z.string().optional(),
 })
 
@@ -39,13 +38,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Data tidak valid" }, { status: 400 })
     }
 
-    const { packageId, pilgrimCount, pilgrims, paymentType, dpPercentage, useWallet, platformFee, serviceFee, taxAmount, feeChannel, notes } = parsed.data
+    const { packageId, pilgrimCount, pilgrims, paymentType, dpPercentage, useWallet, feeChannel, notes } = parsed.data
     const admin = createAdminClient()
 
-    // 1. Get package
+    // 1. Get package (harga & fee SELALU dari database, bukan dari client)
     const { data: pkg, error: pkgErr } = await admin
       .from("packages")
-      .select("id, tenant_id, price, quota, available, slug")
+      .select("id, tenant_id, name, price, quota, available, slug")
       .eq("id", packageId)
       .eq("status", "published")
       .is("deleted_at", null)
@@ -55,8 +54,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Paket tidak ditemukan" }, { status: 404 })
     }
 
+    // 2. Hitung biaya server-side dari fee_config di database
+    const feeConfig = await getFeeConfig(admin)
+    const feeBreakdown = calculateTotalFee(Number(pkg.price), pilgrimCount, feeChannel, feeConfig)
+
     const totalPrice = Number(pkg.price) * pilgrimCount
-    const totalFee = platformFee + serviceFee + taxAmount
+    const totalFee = feeBreakdown.total
+
     let dpAmount: number
     let remainingAmount: number
     let remainingDueDate: string | null = null
@@ -75,8 +79,8 @@ export async function POST(request: NextRequest) {
 
     const payNow = dpAmount
 
-    // 2. Wallet payment
-    let paymentStatus = "pending"
+    // 3. Wallet payment
+    let paymentStatus: "pending" | "paid" = "pending"
     let bookingStatus = "pending_payment"
 
     if (useWallet) {
@@ -125,7 +129,7 @@ export async function POST(request: NextRequest) {
       bookingStatus = "confirmed"
     }
 
-    // 3. Insert booking
+    // 4. Insert booking
     const { data: booking, error: insertErr } = await admin
       .from("bookings")
       .insert({
@@ -143,9 +147,9 @@ export async function POST(request: NextRequest) {
         dp_amount: paymentType === "dp" ? dpAmount : 0,
         remaining_amount: remainingAmount,
         remaining_due_date: remainingDueDate,
-        platform_fee: platformFee,
-        service_fee: serviceFee,
-        tax_amount: taxAmount,
+        platform_fee: feeBreakdown.totalPlatformFee,
+        service_fee: feeBreakdown.serviceFee,
+        tax_amount: feeBreakdown.tax,
         fee_channel: feeChannel,
         notes: notes || null,
       })
@@ -156,7 +160,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Gagal membuat booking: " + insertErr.message }, { status: 500 })
     }
 
-    // 3b. Insert booking_participants
+    // 4b. Insert booking_participants
     if (pilgrims && pilgrims.length > 0) {
       const participantRecords = pilgrims.map((p) => ({
         booking_id: booking.id,
@@ -170,7 +174,7 @@ export async function POST(request: NextRequest) {
       await admin.from("booking_participants").insert(participantRecords)
     }
 
-    // 4. Update package quota
+    // 4c. Update package quota
     await admin
       .from("packages")
       .update({
@@ -179,7 +183,42 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", packageId)
 
-    // 5. If not wallet, create Xendit invoice
+    // 5. Catat transaksi (payments + invoices) — wajib ada di database
+    const now = new Date().toISOString()
+    const { data: payment, error: payErr } = await admin
+      .from("payments")
+      .insert({
+        booking_id: booking.id,
+        tenant_id: pkg.tenant_id,
+        status: paymentStatus,
+        gateway: useWallet ? "wallet" : "xendit",
+        amount: payNow,
+        paid_at: useWallet ? now : null,
+      })
+      .select("id")
+      .single()
+
+    if (payErr) {
+      console.error("Payment insert error:", payErr)
+    }
+
+    const { error: invErr } = await admin.from("invoices").insert({
+      invoice_no: `INV-B-${booking.id.slice(0, 8).toUpperCase()}`,
+      booking_id: booking.id,
+      tenant_id: pkg.tenant_id,
+      total: totalPrice + totalFee,
+      status: useWallet ? "paid" : "issued",
+      amount: payNow,
+      type: "booking",
+      description: `${pkg.name} (${pilgrimCount} jemaah) - ${paymentType === "dp" ? `DP ${dpPercentage}%` : "Pembayaran lunas"}`,
+      paid_at: useWallet ? now : null,
+    })
+
+    if (invErr) {
+      console.error("Invoice insert error:", invErr)
+    }
+
+    // 6. If not wallet, create Xendit invoice
     let xenditInvoice: { id: string; invoice_url: string } | null = null
     if (!useWallet) {
       try {
@@ -202,6 +241,13 @@ export async function POST(request: NextRequest) {
           .from("bookings")
           .update({ xendit_invoice_id: inv.id })
           .eq("id", booking.id)
+
+        if (payment) {
+          await admin
+            .from("payments")
+            .update({ gateway_reference: inv.id })
+            .eq("id", payment.id)
+        }
       } catch (xerr: any) {
         console.error("Xendit invoice error:", xerr.message)
       }

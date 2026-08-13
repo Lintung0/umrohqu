@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error: bErr } = await admin
       .from("bookings")
-      .select("id, status, payment_type, remaining_amount, total, customer_id")
+      .select("id, status, payment_type, remaining_amount, total, customer_id, tenant_id")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -63,7 +63,8 @@ export async function POST(request: NextRequest) {
       }
 
       const balanceAfter = Number(wallet.balance) - remaining
-      await admin.from("wallets").update({ balance: balanceAfter, updated_at: new Date().toISOString() }).eq("id", wallet.id)
+      const now = new Date().toISOString()
+      await admin.from("wallets").update({ balance: balanceAfter, updated_at: now }).eq("id", wallet.id)
       await admin.from("wallet_transactions").insert({
         user_id: user.id,
         type: "payment",
@@ -74,16 +75,61 @@ export async function POST(request: NextRequest) {
         description: "Pelunasan sisa booking #" + bookingId.slice(0, 8).toUpperCase(),
       })
 
+      await admin.from("payments").insert({
+        booking_id: bookingId,
+        tenant_id: booking.tenant_id,
+        status: "paid",
+        gateway: "wallet",
+        amount: remaining,
+        paid_at: now,
+      })
+
+      await admin.from("invoices").insert({
+        invoice_no: `INV-B-${bookingId.slice(0, 8).toUpperCase()}`,
+        booking_id: bookingId,
+        tenant_id: booking.tenant_id,
+        total: remaining,
+        status: "paid",
+        amount: remaining,
+        type: "booking",
+        description: "Pelunasan sisa booking #" + bookingId.slice(0, 8).toUpperCase(),
+        paid_at: now,
+      })
+
       await admin.from("bookings").update({
         status: "confirmed",
         payment_status: "paid",
         remaining_amount: 0,
         total: Number(booking.total) + remaining,
-        updated_at: new Date().toISOString(),
+        updated_at: now,
       }).eq("id", bookingId)
     } else {
       // Xendit invoice
       try {
+        // Pastikan record transaksi ada untuk pelunasan ini
+        const { data: payment } = await admin
+          .from("payments")
+          .insert({
+            booking_id: bookingId,
+            tenant_id: booking.tenant_id,
+            status: "pending",
+            gateway: "xendit",
+            amount: remaining,
+          })
+          .select("id")
+          .single()
+
+        await admin.from("invoices").insert({
+          invoice_no: `INV-B-${bookingId.slice(0, 8).toUpperCase()}`,
+          booking_id: bookingId,
+          tenant_id: booking.tenant_id,
+          total: remaining,
+          status: "issued",
+          amount: remaining,
+          type: "booking",
+          description: "Pelunasan sisa booking #" + bookingId.slice(0, 8).toUpperCase(),
+        })
+
         const { createInvoice } = await import("@/lib/services/xendit")
         const host = request.headers.get("host") || ""
         const protocol = host.includes("localhost") ? "http" : "https"
@@ -98,6 +144,9 @@ export async function POST(request: NextRequest) {
         })
         xenditInvoice = { id: inv.id, invoice_url: inv.invoice_url }
         await admin.from("bookings").update({ xendit_invoice_id: inv.id }).eq("id", bookingId)
+        if (payment) {
+          await admin.from("payments").update({ gateway_reference: inv.id }).eq("id", payment.id)
+        }
       } catch (xerr: any) {
         console.error("Xendit invoice error:", xerr.message)
       }

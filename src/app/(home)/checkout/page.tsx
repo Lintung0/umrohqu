@@ -118,7 +118,7 @@ function CheckoutContent() {
   const feeBreakdown = useMemo(() => pkg ? calculateTotalFee(pkg.price, pilgrimCount, "portal") : null, [pkg, pilgrimCount])
   const amountToPayNow = useMemo(() => {
     if (!feeBreakdown) return 0
-    return paymentType === "dp" ? dpAmount + feeBreakdown.serviceFee : totalPrice + feeBreakdown.total
+    return paymentType === "dp" ? dpAmount : totalPrice + feeBreakdown.total
   }, [paymentType, dpAmount, totalPrice, feeBreakdown])
   const walletSufficient = useMemo(() => walletBalance !== null && walletBalance >= amountToPayNow, [walletBalance, amountToPayNow])
 
@@ -166,9 +166,6 @@ function CheckoutContent() {
           dpPercentage: paymentType === "dp" ? dpPercentage : undefined,
           useWallet,
           notes,
-          platformFee: feeBreakdown.totalPlatformFee,
-          serviceFee: feeBreakdown.serviceFee,
-          taxAmount: feeBreakdown.tax,
           feeChannel: "portal",
         }),
       })

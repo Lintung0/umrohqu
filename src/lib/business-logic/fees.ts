@@ -1,9 +1,9 @@
 // ─── Fee Configuration ───────────────────────────────────────────────────────
 
 export interface FeeConfig {
-  portalFeePerPerson: number      // Default: Rp300.000
-  subdomainFeePerPerson: number   // Default: Rp100.000
-  customDomainFeePerPerson: number // Same as subdomain
+  portalFeePerPerson: number      // Default: Rp500.000
+  subdomainFeePerPerson: number   // Default: Rp250.000
+  customDomainFeePerPerson: number // Same as portal
   serviceFeePercent: number       // % of package price (default 3%)
   serviceFeeFlat: number          // Minimum flat fee (default Rp300.000)
   setupFee: number                // One-time registration fee
@@ -11,9 +11,9 @@ export interface FeeConfig {
 }
 
 export const DEFAULT_FEE_CONFIG: FeeConfig = {
-  portalFeePerPerson: 300000,
-  subdomainFeePerPerson: 100000,
-  customDomainFeePerPerson: 100000,
+  portalFeePerPerson: 500000,
+  subdomainFeePerPerson: 250000,
+  customDomainFeePerPerson: 500000,
   serviceFeePercent: 3,
   serviceFeeFlat: 300000,
   setupFee: 5000000,
