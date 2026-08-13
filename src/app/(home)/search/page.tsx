@@ -218,6 +218,9 @@ function SearchContent() {
       return true
     })
     .sort((a, b) => {
+      const aSoldOut = (a.available ?? 0) <= 0
+      const bSoldOut = (b.available ?? 0) <= 0
+      if (aSoldOut !== bSoldOut) return aSoldOut ? 1 : -1
       if (sortBy === "price-asc") return a.price - b.price
       if (sortBy === "price-desc") return b.price - a.price
       if (sortBy === "duration") return (a.duration_days ?? 0) - (b.duration_days ?? 0)
@@ -248,21 +251,40 @@ function SearchContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="h-32 bg-gradient-to-r from-emerald-900 to-emerald-800 rounded-2xl animate-pulse mb-6" />
-          <div className="flex gap-7">
-            <div className="hidden lg:block w-72 shrink-0">
-              <div className="h-96 bg-white border border-slate-200 rounded-2xl animate-pulse" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+          <div className="h-6 bg-slate-200 rounded animate-pulse w-48 mb-2" />
+          <div className="h-4 bg-slate-200 rounded animate-pulse w-28" />
+        </div>
+        <div className="sticky top-16 z-40 bg-white border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="h-11 bg-slate-100 rounded-full animate-pulse max-w-2xl" />
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex gap-2 mb-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-8 w-20 bg-slate-100 rounded-full animate-pulse" />
+            ))}
+          </div>
+          <div className="flex gap-8">
+            <div className="hidden lg:block w-64 shrink-0">
+              <div className="space-y-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="space-y-2.5">
+                    <div className="h-3 w-24 bg-slate-200 rounded animate-pulse" />
+                    <div className="h-10 bg-slate-100 rounded-xl animate-pulse" />
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                    <div className="h-48 bg-slate-100 animate-pulse" />
+                  <div key={i} className="bg-white rounded-xl overflow-hidden border border-slate-200/70 shadow-sm">
+                    <div className="aspect-[4/3] bg-slate-100 animate-pulse" />
                     <div className="p-4 space-y-3">
                       <div className="h-4 bg-slate-100 rounded animate-pulse w-3/4" />
                       <div className="h-3 bg-slate-100 rounded animate-pulse w-1/2" />
-                      <div className="h-3 bg-slate-100 rounded animate-pulse w-2/3" />
                     </div>
                   </div>
                 ))}
@@ -276,38 +298,41 @@ function SearchContent() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
-        {/* Hero Header Banner */}
-        <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white p-5 sm:p-6 rounded-2xl mb-4 shadow-md">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold">Hasil Pencarian Paket Umroh</h1>
-              <p className="text-emerald-100 text-sm mt-1">
-                Menampilkan <span className="font-bold text-white">{filtered.length} paket</span> ditemukan
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-emerald-200 hidden sm:block">Urutkan:</span>
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
-                <SelectTrigger className="h-11 w-48 text-sm bg-white/15 border-white/20 text-white placeholder:text-white/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/50">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="relevance">Relevansi</SelectItem>
-                  <SelectItem value="price-asc">Harga Terendah</SelectItem>
-                  <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
-                  <SelectItem value="duration">Durasi Terpendek</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      {/* ── Page header: compact ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900">Hasil Pencarian Paket Umroh</h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Menampilkan <span className="font-semibold text-emerald-700">{filtered.length} paket</span> ditemukan
+            </p>
+          </div>
+          <div className="hidden sm:flex items-center gap-2">
+            <span className="text-sm text-slate-500">Urutkan:</span>
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
+              <SelectTrigger
+                aria-label="Urutkan hasil pencarian"
+                className="h-10 w-44 text-sm bg-white border-slate-200 text-slate-700 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="relevance">Relevansi</SelectItem>
+                <SelectItem value="price-asc">Harga Terendah</SelectItem>
+                <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
+                <SelectItem value="duration">Durasi Terpendek</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
+      </div>
 
-        {/* Main Search Input */}
-        <div className="mb-4">
-          <div className="flex gap-2 max-w-3xl">
-            <div className="relative flex-1">
+      {/* ── Sticky search toolbar ── */}
+      <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/70 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="relative flex-1 max-w-2xl">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
@@ -316,22 +341,25 @@ function SearchContent() {
                 onChange={(e) => handleSearchInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
                 aria-label="Cari paket umroh"
-                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                className="w-full pl-11 pr-4 h-11 bg-slate-100 border border-transparent rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
             </div>
             <button
               onClick={handleSearchSubmit}
               aria-label="Cari paket umroh"
-              className="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-emerald-950 font-bold rounded-xl shadow-md shadow-amber-400/20 hover:shadow-lg hover:shadow-amber-400/30 transition-all active:scale-95 flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70"
+              className="w-11 h-11 shrink-0 flex items-center justify-center bg-amber-400 hover:bg-amber-500 text-emerald-950 rounded-full shadow-md shadow-amber-400/20 hover:shadow-lg hover:shadow-amber-400/30 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70"
             >
-              <Search className="w-4 h-4" />
-              <span className="hidden sm:inline">Cari</span>
+              <Search className="w-5 h-5" />
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── Content ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-10">
 
         {/* Quick Category Pills */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 sm:mx-0 sm:px-0 mb-5">
           {QUICK_CATEGORIES.map((q) => {
             const isActive = Object.entries(q.preset).every(([k, v]) => {
               if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())
@@ -355,10 +383,10 @@ function SearchContent() {
                   })
                 }}
                 aria-pressed={isActive}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
+                className={`shrink-0 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
                   isActive
                     ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    : "bg-transparent text-slate-600 hover:bg-slate-100"
                 }`}
               >
                 {q.label}
@@ -369,7 +397,7 @@ function SearchContent() {
 
         {/* Active Filter Chips */}
         {activeFilterChips.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-5">
             {activeFilterChips.map((chip, i) => (
               <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
                 {chip.label}
@@ -406,24 +434,11 @@ function SearchContent() {
             />
           </aside>
 
-          {/* Mobile Filter Button */}
-          <div className="lg:hidden fixed bottom-24 right-4 z-50">
-            <button
-              onClick={() => setShowMobileFilter(!showMobileFilter)}
-              aria-label="Buka filter pencarian"
-              className="flex items-center gap-2 min-h-11 px-5 bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-600/30 font-semibold text-sm hover:bg-emerald-700 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Filter
-              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-amber-400" />}
-            </button>
-          </div>
-
           {/* Mobile Filter Drawer */}
           {showMobileFilter && (
             <div className="lg:hidden fixed inset-0 z-50">
               <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileFilter(false)} />
-              <div className="absolute right-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl overflow-y-auto p-4">
+              <div className="absolute right-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl overflow-y-auto p-4 pb-28">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-slate-900">Filter</h3>
                   <button onClick={() => setShowMobileFilter(false)} aria-label="Tutup filter" className="min-h-11 min-w-11 flex items-center justify-center hover:bg-slate-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50">
@@ -453,18 +468,18 @@ function SearchContent() {
           {/* Package Grid */}
           <div className="lg:col-span-3 min-w-0">
             {filtered.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
+              <div className="text-center py-16 bg-white rounded-xl border border-slate-200/70 shadow-sm">
                 <SearchX className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                 <h3 className="font-semibold text-lg mb-2 text-slate-900">Paket tidak ditemukan</h3>
                 <p className="text-sm text-slate-500 mb-6">Coba ubah kata kunci atau filter pencarian Anda</p>
-                <button onClick={clearFilters} className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer">
+                <button onClick={clearFilters} className="px-5 py-2.5 text-sm font-semibold rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer">
                   Lihat Semua Paket
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filtered.map((pkg) => (
-                  <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} />
+                  <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} variant="clean" />
                 ))}
               </div>
             )}
@@ -472,6 +487,38 @@ function SearchContent() {
 
         </div>
       </div>
+
+      {/* ── Mobile sticky bottom bar (Filter + Urutkan) ── */}
+      <div className="lg:hidden sticky bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+          <button
+            onClick={() => setShowMobileFilter(true)}
+            aria-label="Buka filter pencarian"
+            className="flex-1 flex items-center justify-center gap-2 h-11 bg-emerald-600 text-white rounded-full shadow-sm font-semibold text-sm hover:bg-emerald-700 transition-all active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Filter
+            {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-amber-400" />}
+          </button>
+          <div className="flex-1">
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
+              <SelectTrigger
+                aria-label="Urutkan hasil pencarian"
+                className="w-full h-11 text-sm bg-white border-slate-200 text-slate-700 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="relevance">Relevansi</SelectItem>
+                <SelectItem value="price-asc">Harga Terendah</SelectItem>
+                <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
+                <SelectItem value="duration">Durasi Terpendek</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
     </main>
   )
 }

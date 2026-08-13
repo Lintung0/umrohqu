@@ -274,7 +274,7 @@ export default function SearchSidebar({
   }
 
   return (
-    <div className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar bg-white border border-slate-200 rounded-2xl p-5 space-y-6">
+    <div className="sticky top-36 max-h-[calc(100vh-9.5rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar space-y-7">
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -288,16 +288,16 @@ export default function SearchSidebar({
 
       {/* Negara */}
       <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <MapPin className="w-3 h-3" /> Negara
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+          <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Negara
         </label>
         <CountrySelectFilter value={country} onChange={setCountry} />
       </div>
 
       {/* Kota Keberangkatan — Geoapify Autocomplete */}
       <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <MapPin className="w-3 h-3" /> Kota Keberangkatan
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+          <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Kota Keberangkatan
         </label>
         <CityAutocompleteFilter
           value={departure}
@@ -308,8 +308,8 @@ export default function SearchSidebar({
 
       {/* Price Range */}
       <div className="space-y-3">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <Banknote className="w-3 h-3" /> Estimasi Harga
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+          <Banknote className="w-3.5 h-3.5 text-emerald-600" /> Estimasi Harga
         </label>
 
         <div className="px-1">
@@ -354,8 +354,8 @@ export default function SearchSidebar({
 
       {/* Durasi Hari */}
       <div className="space-y-3">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <Clock className="w-3 h-3" /> Durasi Perjalanan
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+          <Clock className="w-3.5 h-3.5 text-emerald-600" /> Durasi Perjalanan
         </label>
         <div className="flex flex-wrap gap-2">
           {DURATION_OPTIONS.map((d) => (
@@ -378,8 +378,8 @@ export default function SearchSidebar({
 
       {/* Maskapai */}
       <div className="space-y-3">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <Plane className="w-3 h-3" /> Maskapai
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+          <Plane className="w-3.5 h-3.5 text-emerald-600" /> Maskapai
         </label>
         <div className="space-y-1.5">
           {AIRLINES.map((a) => (
@@ -408,8 +408,8 @@ export default function SearchSidebar({
 
       {/* Bintang Hotel */}
       <div className="space-y-3">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          <Star className="w-3 h-3" /> Bintang Hotel
+        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+          <Star className="w-3.5 h-3.5 text-emerald-600" /> Bintang Hotel
         </label>
         <div className="flex gap-2">
           {HOTEL_STARS.map((h) => (

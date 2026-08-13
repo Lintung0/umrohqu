@@ -43,7 +43,7 @@ interface PackageCardProps {
   pkg: Package
   travel?: Tenant | null
   showTravel?: boolean
-  variant?: "vertical" | "horizontal"
+  variant?: "vertical" | "horizontal" | "clean"
 }
 
 export default function PackageCard({ pkg, travel, showTravel = true, variant = "vertical" }: PackageCardProps) {
@@ -85,6 +85,133 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
   function handleTravelClick(e: React.MouseEvent) {
     e.stopPropagation()
+  }
+
+  if (variant === "clean") {
+    return (
+      <Link
+        href={`/package/${pkg.slug}`}
+        className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group cursor-pointer"
+      >
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
+          <Image
+            src={imgSrc}
+            alt={pkg.name}
+            fill
+            className={`object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none ${soldOut ? "grayscale opacity-60" : ""}`}
+            onError={handleError}
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+
+          <div className="absolute top-2.5 left-2.5 flex gap-1.5 pointer-events-none">
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${typeColor}`}>
+              {typeLabel}
+            </span>
+            {soldOut ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-900/80 text-white">
+                Habis
+              </span>
+            ) : discount > 0 ? (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-red-500 text-white">
+                -{discount}%
+              </span>
+            ) : null}
+          </div>
+
+          <button
+            onClick={handleCompare}
+            className="absolute top-2.5 right-2.5 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+            type="button"
+            aria-label="Bandingkan paket"
+            title="Bandingkan paket"
+          >
+            <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+          </button>
+        </div>
+
+        <div className="flex flex-col flex-1 p-3.5">
+          {showTravel && travel && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                router.push(`/travel/${travel.slug}`)
+              }}
+              className="inline-flex items-center gap-1.5 mb-1.5 w-fit pointer-events-auto cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-md"
+            >
+              {travel.logo_url ? (
+                <Image
+                  src={travel.logo_url}
+                  alt={travel.name}
+                  width={16}
+                  height={16}
+                  unoptimized
+                  className="rounded-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+                />
+              ) : (
+                <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
+                </div>
+              )}
+              <span className="text-[11px] text-slate-500 hover:text-emerald-600 transition-colors truncate max-w-[160px]">
+                {travel.name}
+              </span>
+            </button>
+          )}
+
+          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2">
+            {pkg.name}
+          </h3>
+
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-slate-500 mb-3">
+            <span className="inline-flex items-center gap-0.5 max-w-full">
+              <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ")}</span>
+            </span>
+            {pkg.duration_days && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span>{pkg.duration_days} {t("card.days")}</span>
+              </>
+            )}
+            {pkg.airline && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
+              </>
+            )}
+            {pkg.hotel_makkah_stars ? (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="text-amber-500">{"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}</span>
+              </>
+            ) : null}
+          </div>
+
+          {!soldOut && (pkg.available ?? 0) > 0 && (pkg.available ?? 0) <= 5 && (
+            <div className="mb-3">
+              <span className="inline-flex items-center px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-semibold rounded-md border border-amber-200">
+                {pkg.available} kursi tersisa
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-end justify-between pt-2.5 border-t border-slate-100 mt-auto">
+            <div>
+              {pkg.original_price && (
+                <p className="text-[11px] text-slate-400 line-through">{formatRupiah(pkg.original_price)}</p>
+              )}
+              <div className="flex items-baseline gap-1">
+                <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
+                <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Link>
+    )
   }
 
   if (variant === "horizontal") {
@@ -230,6 +357,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 alt={travel.name}
                 width={16}
                 height={16}
+                unoptimized
                 className="rounded-full object-cover"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
               />
