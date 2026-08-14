@@ -322,7 +322,14 @@ function SearchContent() {
       <div className="sticky top-16 z-40 bg-slate-50/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
-            <div className="w-11 shrink-0" aria-hidden />
+            <button
+              onClick={() => setShowMobileFilter(true)}
+              aria-label="Buka filter pencarian"
+              className="lg:hidden relative w-11 h-11 shrink-0 flex items-center justify-center bg-white border border-slate-200 text-slate-700 rounded-full shadow-sm hover:border-emerald-300 hover:text-emerald-700 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+              {hasActiveFilters && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400" />}
+            </button>
             <div className="relative flex-1">
               <input
                 type="text"
@@ -346,7 +353,7 @@ function SearchContent() {
       </div>
 
       {/* ── Content ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-10">
 
         {/* Quick Category Pills + Sort */}
         <div className="flex items-center gap-3 mb-5">
@@ -385,11 +392,11 @@ function SearchContent() {
               )
             })}
           </div>
-          <div className="hidden lg:block shrink-0">
+          <div className="shrink-0">
             <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
               <SelectTrigger
                 aria-label="Urutkan hasil pencarian"
-                className="h-10 w-40 text-sm bg-white border-slate-200 text-slate-700 shadow-sm rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                className="h-10 w-36 sm:w-40 text-sm bg-white border-slate-200 text-slate-700 shadow-sm rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
               >
                 <SelectValue />
               </SelectTrigger>
@@ -506,37 +513,6 @@ function SearchContent() {
             )}
           </div>
 
-        </div>
-      </div>
-
-      {/* ── Mobile sticky bottom bar (Filter + Urutkan) ── */}
-      <div className="lg:hidden sticky bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur-md safe-area-bottom">
-        <div className="max-w-7xl mx-auto px-4 pt-3 pb-safe flex items-center gap-3">
-          <button
-            onClick={() => setShowMobileFilter(true)}
-            aria-label="Buka filter pencarian"
-            className="flex-1 flex items-center justify-center gap-2 h-11 bg-emerald-600 text-white rounded-full shadow-sm font-semibold text-sm hover:bg-emerald-700 transition-all active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filter
-            {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-amber-400" />}
-          </button>
-          <div className="flex-1">
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
-              <SelectTrigger
-                aria-label="Urutkan hasil pencarian"
-                className="w-full h-11 text-sm bg-white border-slate-200 text-slate-700 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="relevance">Relevansi</SelectItem>
-                <SelectItem value="price-asc">Harga Terendah</SelectItem>
-                <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
-                <SelectItem value="duration">Durasi Terpendek</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
       </div>
 
