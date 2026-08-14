@@ -12,6 +12,8 @@ import { CompactLanguageSwitcher } from "@/components/shared/compact-language-sw
 
 const Kaaba3D = dynamic(() => import("@/components/ui/home/kaaba-3d"), { ssr: false })
 
+const columnHeadingClass = "font-bold text-xs uppercase tracking-wider text-white/50"
+
 const Footer = () => {
   const { t } = useTranslation()
   const [country, setCountry] = useState("id")
@@ -29,7 +31,7 @@ const Footer = () => {
 
   const footerLinks = [
     {
-      title: t.footer.about,
+      title: t.footer.quick_links,
       items: [
         { href: "/about", label: t.footer.about },
         { href: "/faq", label: t.footer.faq },
@@ -51,6 +53,7 @@ const Footer = () => {
       title: t.footer.ibadah,
       items: [
         { href: "/al-quran", label: t.footer.al_quran },
+        { href: "/jadwal-sholat", label: t.footer.jadwal_sholat },
       ],
     },
   ]
@@ -68,7 +71,7 @@ const Footer = () => {
         <IslamicPattern opacity={0.02} />
       </div>
 
-      <div className="relative max-w-7xl mx-auto pt-16 pb-20 lg:pb-6 px-6 md:px-12">
+      <div className="relative max-w-7xl mx-auto pt-16 pb-20 lg:pb-8 px-4 sm:px-6 lg:px-8">
         {/* Kaaba3D showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-14 pb-14 border-b border-white/10">
           <div className="space-y-4 text-center lg:text-left">
@@ -88,16 +91,17 @@ const Footer = () => {
         </div>
 
         {/* Main columns */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-10 py-6">
           {/* Brand + Contact */}
-          <div className="col-span-1 md:col-span-5 space-y-5">
+          <div className="col-span-1 md:col-span-4 space-y-5">
             <div className="[&>a>img]:brightness-0 [&>a>img]:invert">
               <Logo />
             </div>
             <p className="text-sm text-white/50 leading-relaxed max-w-sm">
-              Platform marketplace umroh & haji terpercaya — bandingkan paket dari travel resmi PPIU Kemenhaj RI.
+              {t.footer.description}
             </p>
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 pt-2">
+              <h3 className={columnHeadingClass}>{t.footer.contact_us}</h3>
               <Link
                 href={`https://wa.me/${process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "6281234567890"}`}
                 target="_blank"
@@ -130,9 +134,7 @@ const Footer = () => {
           {/* Link columns */}
           {footerLinks.map((section) => (
             <div key={section.title} className="col-span-1 md:col-span-2 space-y-4">
-              <h3 className="font-semibold text-xs uppercase tracking-wider text-white/30">
-                {section.title}
-              </h3>
+              <h3 className={columnHeadingClass}>{section.title}</h3>
               <ul className="flex flex-col gap-2">
                 {section.items.map((item) => (
                   <li key={item.href}>
@@ -147,14 +149,34 @@ const Footer = () => {
               </ul>
             </div>
           ))}
+
+          {/* Follow Us */}
+          <div className="col-span-1 md:col-span-2 space-y-4">
+            <h3 className={columnHeadingClass}>{t.footer.follow_us}</h3>
+            <ul className="flex flex-col gap-2">
+              {socialLinks.map((s) => (
+                <li key={s.label}>
+                  <Link
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="flex items-center gap-2.5 text-white/50 hover:text-white transition-colors text-sm"
+                  >
+                    <Image src={s.icon} alt={s.label} width={16} height={16} className="brightness-0 invert opacity-50" />
+                    {s.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-white/10 mt-10 pt-6 space-y-4">
-          {/* Utilities row */}
+        <div className="border-t border-white/10 mt-6 pt-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-white/25">
-              &copy; 2026 UmrahQu — PT. Universal Big Data. All rights reserved.
+              &copy; 2026 UmrahQu — PT. Universal Big Data. {t.footer.rights}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
               <CountrySelect value={country} onChange={handleCountryChange} variant="dark" />
@@ -163,23 +185,6 @@ const Footer = () => {
                 {t.footer.made_with} <span className="text-amber-400/50">&hearts;</span> {t.footer.for_umrah}
               </span>
             </div>
-          </div>
-
-          {/* Social media — paling bawah */}
-          <div className="flex items-center justify-center gap-5 pt-3 border-t border-white/5">
-            {socialLinks.map((s) => (
-              <Link
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label}
-                className="flex items-center gap-2 text-white/30 hover:text-white/70 transition-colors text-xs"
-              >
-                <Image src={s.icon} alt={s.label} width={16} height={16} className="brightness-0 invert opacity-40" />
-                <span className="hidden sm:inline">{s.label}</span>
-              </Link>
-            ))}
           </div>
         </div>
       </div>
