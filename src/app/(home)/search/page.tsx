@@ -488,27 +488,19 @@ function SearchContent() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div key={currentPage} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
                   {paginated.map((pkg) => (
                     <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} variant="clean" />
                   ))}
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="mt-10 flex flex-col items-center gap-3">
-                    <p className="text-sm text-slate-500">
-                      Menampilkan{" "}
-                      <span className="font-semibold text-slate-700">
-                        {(currentPage - 1) * PAGE_SIZE + 1}
-                      </span>
-                      –
-                      <span className="font-semibold text-slate-700">
-                        {Math.min(currentPage * PAGE_SIZE, filtered.length)}
-                      </span>{" "}
-                      dari <span className="font-semibold text-slate-700">{filtered.length}</span> paket
-                    </p>
-                    <Pagination page={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-                  </div>
+                  <Pagination
+                    className="mt-8 sm:mt-10"
+                    page={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
                 )}
               </>
             )}
