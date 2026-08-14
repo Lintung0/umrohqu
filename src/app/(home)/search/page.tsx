@@ -9,7 +9,10 @@ import { createClient } from "@/lib/supabase/client"
 import type { Package, Tenant } from "@/lib/types"
 import SharedPackageCard from "@/components/shared/package-card"
 import SearchSidebar from "@/components/search/search-sidebar"
+import { Pagination } from "@/components/ui/pagination"
 import { rankTravels, RankingFactors, DEFAULT_RANKING_CONFIG } from "@/lib/business-logic/bidding"
+
+const PAGE_SIZE = 9
 
 const QUICK_CATEGORIES = [
   { label: "Semua", preset: {} },
@@ -25,6 +28,8 @@ function SearchContent() {
   const router = useRouter()
 
   const [showMobileFilter, setShowMobileFilter] = useState(false)
+  const [page, setPage] = useState(1)
+  const resultsRef = useRef<HTMLDivElement>(null)
 
   const departure = searchParams.get("departure") ?? ""
   const country = searchParams.get("country") ?? ""
@@ -53,6 +58,15 @@ function SearchContent() {
   useEffect(() => {
     setSearchInput(searchParams.get("search") ?? "")
   }, [searchParams.get("search")])
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchParams.toString()])
+
+  const handlePageChange = (next: number) => {
+    setPage(next)
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   const setUrl = useCallback(
     (patch: Record<string, string | null | undefined>) => {
@@ -228,6 +242,10 @@ function SearchContent() {
       const scoreB = rankingScores.get(b.tenant_id) ?? 0
       return scoreB - scoreA
     })
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   const clearFilters = () => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
@@ -458,7 +476,7 @@ function SearchContent() {
           )}
 
           {/* Package Grid */}
-          <div className="lg:col-span-3 min-w-0">
+          <div ref={resultsRef} className="lg:col-span-3 min-w-0 scroll-mt-28">
             {filtered.length === 0 ? (
               <div className="text-center py-16 bg-white rounded-xl border border-slate-200/70 shadow-sm">
                 <SearchX className="w-12 h-12 mx-auto mb-4 text-slate-300" />
@@ -469,11 +487,30 @@ function SearchContent() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((pkg) => (
-                  <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} variant="clean" />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginated.map((pkg) => (
+                    <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} variant="clean" />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="mt-10 flex flex-col items-center gap-3">
+                    <p className="text-sm text-slate-500">
+                      Menampilkan{" "}
+                      <span className="font-semibold text-slate-700">
+                        {(currentPage - 1) * PAGE_SIZE + 1}
+                      </span>
+                      –
+                      <span className="font-semibold text-slate-700">
+                        {Math.min(currentPage * PAGE_SIZE, filtered.length)}
+                      </span>{" "}
+                      dari <span className="font-semibold text-slate-700">{filtered.length}</span> paket
+                    </p>
+                    <Pagination page={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+                  </div>
+                )}
+              </>
             )}
           </div>
 
