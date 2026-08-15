@@ -10,6 +10,7 @@ import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
 import { useCompare, MAX_COMPARE } from "@/lib/compare-context"
+import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Package } from "@/lib/types"
 
 const AIRLINE_QUALITY: Record<string, number> = {
@@ -279,11 +280,14 @@ function CompareView() {
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
-                  {isBest && (
-                    <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
-                      <Award className="w-3 h-3" /> Pilihan Terbaik
-                    </div>
-                  )}
+                  <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                    <PackageStatusBadge status={pkg.status} />
+                    {isBest && (
+                      <div className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                        <Award className="w-3 h-3" /> Pilihan Terbaik
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="p-3">
                   <p className="text-xs font-semibold leading-snug line-clamp-2">{pkg.name}</p>

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { Heart, Clock, Trash2 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
+import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import Link from "next/link"
 import Image from "next/image"
 import { toast } from "sonner"
@@ -19,6 +20,7 @@ interface WishlistItem {
     price: number
     duration_days: number | null
     tenant_id: string
+    status: string | null
   } | null
 }
 
@@ -35,7 +37,7 @@ export default function WishlistPage() {
       if (user) {
         const { data } = await supabase
           .from("wishlists")
-          .select("id, package:packages(id, name, slug, image_url, price, duration_days, tenant_id)")
+          .select("id, package:packages(id, name, slug, image_url, price, duration_days, tenant_id, status)")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
         setItems((data as any) || [])
@@ -92,17 +94,22 @@ export default function WishlistPage() {
                 className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-md transition-shadow"
               >
                 <Link href={`/package/${pkg?.slug || ""}`}>
-                  {pkg?.image_url ? (
-                    <Image
-                      src={pkg.image_url}
-                      alt={pkg.name}
-                      width={400}
-                      height={200}
-                      className="w-full h-40 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-40 bg-muted" />
-                  )}
+                  <div className="relative">
+                    {pkg?.image_url ? (
+                      <Image
+                        src={pkg.image_url}
+                        alt={pkg.name}
+                        width={400}
+                        height={200}
+                        className="w-full h-40 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-40 bg-muted" />
+                    )}
+                    <div className="absolute top-2 left-2">
+                      <PackageStatusBadge status={pkg?.status} />
+                    </div>
+                  </div>
                 </Link>
                 <div className="p-4">
                   <Link href={`/package/${pkg?.slug || ""}`}>

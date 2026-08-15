@@ -14,6 +14,7 @@ import {
 import { formatRupiah } from "@/lib/utils"
 import { decodeUnicodeEscapes } from "@/lib/utils"
 import ImageGallery from "@/components/shared/image-gallery"
+import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import { Button } from "@/components/ui/button"
 import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
 import { getSeatAvailability } from "@/lib/utils"
@@ -259,6 +260,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   )}
                   {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                    <PackageStatusBadge status={pkg.status} />
                     {pkg.type && (
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
                         pkg.type === "vip" ? "bg-amber-400 text-amber-900" :

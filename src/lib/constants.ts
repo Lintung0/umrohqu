@@ -71,6 +71,15 @@ export const INVOICE_STATUSES = [
   { value: "cancelled", label: "Dibatalkan", color: "bg-gray-100 text-gray-500" },
 ] as const
 
+export const PACKAGE_STATUS_BADGES: Record<string, { label: string; className: string }> = {
+  active: { label: "Aktif", className: "bg-emerald-500 text-white" },
+  ongoing: { label: "Berlangsung", className: "bg-amber-500 text-white" },
+  completed: { label: "Selesai", className: "bg-blue-500 text-white" },
+  nonaktif: { label: "Nonaktif", className: "bg-gray-500 text-white" },
+}
+
+export const PACKAGE_STATUS_FALLBACK = { label: "Status", className: "bg-gray-300 text-white" }
+
 export const COUNTRIES = [
   { code: "af", name: "Afghanistan", emoji: "🇦🇫" },
   { code: "al", name: "Albania", emoji: "🇦🇱" },

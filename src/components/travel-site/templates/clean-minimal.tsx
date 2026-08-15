@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { MapPin, Phone, Mail, Clock, Plane, Hotel, Users, ArrowRight } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
+import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Tenant, Package } from "@/lib/types"
 
 interface TemplateProps {
@@ -140,6 +141,7 @@ function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+          <PackageStatusBadge status={pkg.status} />
           {pkg.is_promo && (
             <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
               -{discount}%

@@ -6,6 +6,7 @@ import { formatRupiah, getSeatAvailability } from "@/lib/utils"
 import { createAdminClient } from "@/lib/supabase/server"
 import ImageGallery from "@/components/shared/image-gallery"
 import { PackageDocumentationSection } from "@/components/shared/package-documentation"
+import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 
 export const dynamic = "force-dynamic"
 
@@ -80,6 +81,7 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
             unoptimized
           />
           <div className="absolute top-2 left-2 flex gap-1">
+            <PackageStatusBadge status={pkg.status} />
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${typeColor[pkg.type] || "bg-gray-100 text-gray-700"}`}>
               {pkg.type}
             </span>

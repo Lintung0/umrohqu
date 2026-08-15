@@ -7,6 +7,7 @@ import { Plus, Search, Edit, Trash2, Eye, EyeOff, MoreHorizontal, Calendar, Hote
 import Image from "next/image"
 import Link from "next/link"
 import { formatRupiah } from "@/lib/utils"
+import { PACKAGE_STATUS_BADGES } from "@/lib/constants"
 import { toast } from "sonner"
 import { getTravelTenantId } from "@/lib/get-travel-tenant"
 
@@ -25,13 +26,6 @@ interface TravelPackage {
   hotel_info: any
   image_url: string | null
   doc_drive_link: string | null
-}
-
-const PACKAGE_STATUS_BADGES: Record<string, { label: string; className: string }> = {
-  active: { label: "Aktif", className: "bg-emerald-500 text-white" },
-  nonaktif: { label: "Nonaktif", className: "bg-gray-500 text-white" },
-  completed: { label: "Selesai", className: "bg-blue-500 text-white" },
-  ongoing: { label: "Berlangsung", className: "bg-amber-500 text-white" },
 }
 
 export default function TravelPackagesPage() {

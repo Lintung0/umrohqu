@@ -10,6 +10,7 @@ import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
 import { toast } from "sonner"
 import SeatAvailabilityBar from "./seat-availability-bar"
+import { PackageStatusBadge } from "./package-status-badge"
 import type { Package, Tenant } from "@/lib/types"
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=80&fm=webp&auto=format"
@@ -105,6 +106,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
 
           <div className="absolute top-2.5 left-2.5 flex gap-1.5 pointer-events-none">
+            <PackageStatusBadge status={pkg.status} />
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${typeColor}`}>
               {typeLabel}
             </span>
@@ -235,6 +237,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               unoptimized
             />
             <div className="absolute top-2 left-2 flex gap-1">
+              <PackageStatusBadge status={pkg.status} />
               <span className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${typeColor}`}>
                 {typeLabel}
               </span>
@@ -316,6 +319,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
         <div className="absolute top-2.5 left-2.5 flex gap-1 pointer-events-none">
+          <PackageStatusBadge status={pkg.status} />
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${typeColor}`}>
             {typeLabel}
           </span>

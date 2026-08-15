@@ -5,6 +5,7 @@ import Link from "next/link"
 import { MapPin, Phone, Mail, Clock, Plane, Hotel, Users, ArrowRight, Star } from "lucide-react"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import { formatRupiah } from "@/lib/utils"
+import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Tenant, Package } from "@/lib/types"
 
 interface TemplateProps {
@@ -130,6 +131,7 @@ function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: strin
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+          <PackageStatusBadge status={pkg.status} />
           {pkg.is_promo && (
             <span className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg">
               PROMO {discount}%
