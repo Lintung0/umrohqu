@@ -34,7 +34,7 @@ export default function CountrySelector() {
       const { data } = await supabase
         .from("tenants")
         .select("country")
-        .eq("status", "verified")
+        .eq("status", "active")
         .not("country", "is", null)
 
       if (data) {

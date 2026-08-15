@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .from("packages")
     .select("name, description, price, image_url, travel:tenants(name)")
     .eq("slug", slug)
-    .eq("status", "published")
+    .in("status", ["active", "ongoing"])
     .single()
 
   if (!pkg) {
@@ -43,7 +43,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     .from("packages")
     .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, city, description)")
     .eq("slug", slug)
-    .eq("status", "published")
+    .in("status", ["active", "ongoing"])
     .single()
 
   const { data: pkgImages } = await supabase

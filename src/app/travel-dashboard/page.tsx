@@ -56,7 +56,7 @@ export default function TravelDashboardOverview() {
           const step = Number(config.onboarding_step)
           if (step >= 1 && step <= 5) {
             setOnboardingStep(step)
-          } else if (tenantRes.data.status === "verified") {
+          } else if (tenantRes.data.status === "active") {
             setOnboardingStep(2)
           }
         }

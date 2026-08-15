@@ -163,7 +163,7 @@ export default function AdminBillingReportsPage() {
         <div className="bg-white rounded-2xl border border-border p-5">
           <h2 className="font-semibold mb-3">Travel dengan Pendapatan Tertinggi</h2>
           <div className="space-y-2">
-            {tenants.filter((t) => t.status === "verified").sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0)).slice(0, 5).map((t) => (
+            {tenants.filter((t) => t.status === "active").sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0)).slice(0, 5).map((t) => (
               <div key={t.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 text-sm">
                 <span className="font-medium">{t.name}</span>
                 <span className="text-muted-foreground">{formatRupiah(t.total_revenue || 0)}</span>

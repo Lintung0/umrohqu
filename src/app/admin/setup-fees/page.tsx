@@ -135,11 +135,11 @@ export default function AdminSetupFeesPage() {
                   <td className="px-4 py-3 text-muted-foreground">{new Date(tenant.created_at).toLocaleDateString("id-ID")}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      tenant.status === "verified" ? "bg-green-100 text-green-700" :
+                      tenant.status === "active" ? "bg-green-100 text-green-700" :
                       tenant.status === "pending" ? "bg-yellow-100 text-yellow-700" :
                       "bg-gray-100 text-gray-500"
                     }`}>
-                      {tenant.status === "verified" ? "Lunas" : tenant.status === "pending" ? "Belum Bayar" : "N/A"}
+                      {tenant.status === "active" ? "Lunas" : tenant.status === "pending" ? "Belum Bayar" : "N/A"}
                     </span>
                   </td>
                   <td className="px-4 py-3">

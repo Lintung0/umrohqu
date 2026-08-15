@@ -113,7 +113,7 @@ export default function TravelPromotionsPage() {
         .select("id, name")
         .eq("tenant_id", tId)
         .is("deleted_at", null)
-        .eq("status", "published"),
+        .in("status", ["active", "ongoing"]),
     ])
 
     setPromos((promoRes.data as any) || [])

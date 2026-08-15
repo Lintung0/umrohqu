@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       .from("packages")
       .select("id, tenant_id, name, price, quota, available, slug")
       .eq("id", packageId)
-      .eq("status", "published")
+      .in("status", ["active", "ongoing"])
       .is("deleted_at", null)
       .single()
 

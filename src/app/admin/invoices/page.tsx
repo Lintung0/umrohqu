@@ -316,7 +316,7 @@ function CreateInvoiceModal({ onClose, onCreated }: { onClose: () => void; onCre
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.from("tenants").select("id, name").eq("status", "verified").then(({ data }) => {
+    supabase.from("tenants").select("id, name").eq("status", "active").then(({ data }) => {
       setTenants(data || [])
     })
   }, [])

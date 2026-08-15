@@ -124,6 +124,7 @@ export default function EditPackagePage() {
   const [cancellationPolicy, setCancellationPolicy] = useState("")
   const [imageUrl, setImageUrl] = useState("")
   const [isActive, setIsActive] = useState(true)
+  const [pkgStatus, setPkgStatus] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -181,7 +182,8 @@ export default function EditPackagePage() {
       setTerms(pkg.terms || [])
       setCancellationPolicy(pkg.cancellation_policy || "")
       setImageUrl(pkg.image_url || "")
-      setIsActive(pkg.is_active ?? pkg.status === "published")
+      setIsActive(pkg.is_active ?? pkg.status === "active")
+      setPkgStatus(pkg.status || null)
 
       if (pkg.itinerary && Array.isArray(pkg.itinerary)) {
         const lines = pkg.itinerary.map((item: any) => {
@@ -283,7 +285,7 @@ export default function EditPackagePage() {
         cancellation_policy: cancellationPolicy || null,
         image_url: imageUrl || null,
         is_active: isActive,
-        status: isActive ? "published" : "draft",
+        status: pkgStatus === "ongoing" || pkgStatus === "completed" ? pkgStatus : (isActive ? "active" : "nonaktif"),
         updated_at: new Date().toISOString(),
       })
       .eq("id", packageId)

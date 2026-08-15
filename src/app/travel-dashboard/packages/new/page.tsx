@@ -238,7 +238,7 @@ export default function NewPackagePage() {
       cancellation_policy: cancellationPolicy || null,
       image_url: imageUrl || null,
       is_active: isActive,
-      status: isActive ? "published" : "draft",
+      status: isActive ? "active" : "nonaktif",
       currency: "IDR",
     })
 

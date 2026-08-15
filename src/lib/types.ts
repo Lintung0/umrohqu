@@ -11,7 +11,7 @@ export interface Tenant {
   contact_email: string | null
   contact_phone: string | null
   config: Record<string, unknown>
-  status: "pending" | "verified" | "suspended" | "rejected"
+  status: "pending" | "active" | "grace_period" | "suspended" | "rejected"
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -73,6 +73,7 @@ export interface Package {
   is_promo: boolean
   is_active: boolean
   available: number
+  doc_drive_link: string | null
   hotel_makkah: string | null
   hotel_makkah_stars: number | null
   hotel_madinah: string | null

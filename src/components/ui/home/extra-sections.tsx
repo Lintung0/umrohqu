@@ -96,7 +96,7 @@ export function TravelAgenciesSection() {
     supabase
       .from("tenants")
       .select("id, name, slug, logo_url, city, is_verified, is_featured, packages_count")
-      .eq("status", "verified")
+      .eq("status", "active")
       .order("is_featured", { ascending: false })
       .limit(12)
       .then(({ data }) => {
@@ -163,7 +163,7 @@ export function TestimonialSection() {
         const { data } = await supabase
           .from("reviews")
           .select("id, rating, review, created_at, customer_id, booking_id")
-          .eq("status", "published")
+          .in("status", ["active", "ongoing"])
           .order("created_at", { ascending: false })
           .limit(3)
         if (data && data.length > 0) {
@@ -248,8 +248,8 @@ export function TrustSection() {
 
   useEffect(() => {
     Promise.all([
-      supabase.from("packages").select("id", { count: "exact", head: true }).eq("status", "published"),
-      supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified"),
+      supabase.from("packages").select("id", { count: "exact", head: true }).in("status", ["active", "ongoing"]),
+      supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "active"),
     ]).then(([pkgs, tnts]) => {
       setStats({ packages: pkgs.count || 0, travels: tnts.count || 0 })
     })
@@ -336,8 +336,8 @@ export function StatsSection() {
   useEffect(() => {
     async function load() {
       const [tenantsRes, packagesRes, bookingsRes, reviewsRes] = await Promise.all([
-        supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "verified"),
-        supabase.from("packages").select("id", { count: "exact", head: true }).eq("status", "published"),
+        supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("packages").select("id", { count: "exact", head: true }).in("status", ["active", "ongoing"]),
         supabase.from("bookings").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
         supabase.from("reviews").select("rating").limit(100),
       ])

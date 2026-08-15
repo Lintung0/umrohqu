@@ -85,7 +85,7 @@ export async function GET() {
 
     // Setup Fee = verified tenants * 1,000,000 IDR (constant)
     const verifiedTenantsCount = (tenants || []).filter(
-      (t) => t.status === "verified",
+      (t) => t.status === "active",
     ).length;
     const setupFeeRaw = verifiedTenantsCount * 1000000;
     const setupFee = setupFeeRaw === 0 ? 1 : setupFeeRaw;
@@ -111,7 +111,7 @@ export async function GET() {
       (tenants || []).filter((t) => {
         const d = new Date(t.created_at);
         return (
-          t.status === "verified" &&
+          t.status === "active" &&
           d >= startOfThisMonth &&
           d <= endOfThisMonth
         );
@@ -145,7 +145,7 @@ export async function GET() {
       (tenants || []).filter((t) => {
         const d = new Date(t.created_at);
         return (
-          t.status === "verified" &&
+          t.status === "active" &&
           d >= startOfLastMonth &&
           d <= endOfLastMonth
         );
@@ -199,7 +199,7 @@ export async function GET() {
 
     // --- Jumlah Mitra calculations ---
     const activeMitraRaw = (tenants || []).filter(
-      (t) => t.status === "verified",
+      (t) => t.status === "active",
     ).length;
     const activeMitra = activeMitraRaw === 0 ? 1 : activeMitraRaw;
 
@@ -212,7 +212,7 @@ export async function GET() {
     const startOfLastWeek = subDays(today, 7);
     const newMitraLastWeekRaw = (tenants || []).filter(
       (t) =>
-        t.status === "verified" && new Date(t.created_at) >= startOfLastWeek,
+        t.status === "active" && new Date(t.created_at) >= startOfLastWeek,
     ).length;
     const newMitraLastWeek =
       newMitraLastWeekRaw === 0 ? 1 : newMitraLastWeekRaw;

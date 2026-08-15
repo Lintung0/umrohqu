@@ -43,7 +43,7 @@ export default function AdminVerificationPage() {
   }
 
   const pending = tenants.filter((t) => t.status === "pending")
-  const verifiedCount = tenants.filter((t) => t.status === "verified").length
+  const activeCount = tenants.filter((t) => t.status === "active").length
   const rejectedCount = tenants.filter((t) => t.status === "rejected").length
 
   if (loading) {
@@ -65,7 +65,7 @@ export default function AdminVerificationPage() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Menunggu", value: pending.length, color: "bg-yellow-50 text-yellow-700" },
-          { label: "Terverifikasi", value: verifiedCount, color: "bg-green-50 text-green-700" },
+          { label: "Aktif", value: activeCount, color: "bg-green-50 text-green-700" },
           { label: "Ditolak", value: rejectedCount, color: "bg-red-50 text-red-700" },
         ].map((s) => (
           <div key={s.label} className={`rounded-xl p-4 ${s.color}`}>
@@ -109,7 +109,7 @@ export default function AdminVerificationPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <button onClick={() => updateStatus(travel.id, "verified")} disabled={updatingId === travel.id} className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                  <button onClick={() => updateStatus(travel.id, "active")} disabled={updatingId === travel.id} className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50">
                     {updatingId === travel.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Setujui
                   </button>
                   <button onClick={() => updateStatus(travel.id, "rejected")} disabled={updatingId === travel.id} className="flex items-center gap-1.5 px-4 py-2 border border-red-200 text-red-500 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-50">

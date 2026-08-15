@@ -49,7 +49,7 @@ export const BOOKING_STATUSES = [
 export const TRAVEL_STATUSES = [
   { value: "semua", label: "Semua", color: "bg-gray-100 text-gray-700" },
   { value: "pending", label: "Menunggu", color: "bg-yellow-100 text-yellow-700" },
-  { value: "verified", label: "Terverifikasi", color: "bg-green-100 text-green-700" },
+  { value: "active", label: "Aktif", color: "bg-green-100 text-green-700" },
   { value: "suspended", label: "Ditangguhkan", color: "bg-orange-100 text-orange-700" },
   { value: "rejected", label: "Ditolak", color: "bg-red-100 text-red-700" },
 ] as const

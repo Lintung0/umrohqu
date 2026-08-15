@@ -98,7 +98,7 @@ export default function AdminPaymentsPage() {
     toast.success("Export berhasil")
   }
 
-  const verifiedTravels = tenants.filter((t) => t.status === "verified")
+  const activeTravels = tenants.filter((t) => t.status === "active")
 
   if (loading) {
     return (
@@ -124,7 +124,7 @@ export default function AdminPaymentsPage() {
           <p className="text-muted-foreground mt-1">Kelola pembayaran dan payout ke travel</p>
         </div>
         <button
-          onClick={() => verifiedTravels.length > 0 ? setConfirmPayout(verifiedTravels[0]) : toast.info("Tidak ada travel aktif")}
+          onClick={() => activeTravels.length > 0 ? setConfirmPayout(activeTravels[0]) : toast.info("Tidak ada travel aktif")}
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
         >
           <CreditCard className="w-4 h-4" />
@@ -134,11 +134,11 @@ export default function AdminPaymentsPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="bg-white rounded-xl border border-border p-4 text-center">
-          <p className="text-xl font-bold text-emerald-600">{formatRupiah(verifiedTravels.reduce((s, t) => s + (t.total_revenue || 0), 0))}</p>
+          <p className="text-xl font-bold text-emerald-600">{formatRupiah(activeTravels.reduce((s, t) => s + (t.total_revenue || 0), 0))}</p>
           <p className="text-xs text-muted-foreground mt-0.5">Total Revenue Travel</p>
         </div>
         <div className="bg-white rounded-xl border border-border p-4 text-center">
-          <p className="text-xl font-bold text-blue-600">{verifiedTravels.length}</p>
+          <p className="text-xl font-bold text-blue-600">{activeTravels.length}</p>
           <p className="text-xs text-muted-foreground mt-0.5">Travel Aktif</p>
         </div>
         <div className="bg-white rounded-xl border border-border p-4 text-center">

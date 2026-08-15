@@ -28,7 +28,7 @@ function getOnboardingStep(tenant: TenantRow): number {
   if (tenant.status === "pending") return 1
   const step = Number(tenant.config?.onboarding_step)
   if (step >= 1 && step <= 5) return step
-  if (tenant.status === "verified") return 2
+  if (tenant.status === "active") return 2
   return 1
 }
 
@@ -98,7 +98,7 @@ export default function AdminOnboardingPage() {
   }
 
   const pending = tenants.filter((t) => t.status === "pending")
-  const active = tenants.filter((t) => t.status === "verified")
+  const active = tenants.filter((t) => t.status === "active")
   const allOnboarding = tenants.filter((t) => t.status !== "pending")
 
   if (loading) {

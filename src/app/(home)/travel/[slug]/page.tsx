@@ -5,6 +5,7 @@ import { MapPin, Clock, Users, Plane, BadgeCheck, Shield, Package, ChevronRight,
 import { formatRupiah, getSeatAvailability } from "@/lib/utils"
 import { createAdminClient } from "@/lib/supabase/server"
 import ImageGallery from "@/components/shared/image-gallery"
+import { PackageDocumentationSection } from "@/components/shared/package-documentation"
 
 export const dynamic = "force-dynamic"
 
@@ -49,9 +50,10 @@ interface PackageRow {
   is_promo: boolean
   is_active: boolean
   status: string
+  doc_drive_link: string | null
 }
 
-function PackageCard({ pkg }: { pkg: PackageRow }) {
+function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
@@ -65,8 +67,9 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
     hemat: "bg-sky-100 text-sky-800",
   }
 
-  return (
-    <Link href={`/package/${pkg.slug}`} className="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-emerald-300 transition-colors group">
+  const isDoc = typeof href === "string" && href !== `/package/${pkg.slug}`
+
+  const content = (
       <div className="flex flex-col sm:flex-row">
         <div className="relative w-full sm:w-36 h-32 sm:h-auto shrink-0 overflow-hidden">
           <Image
@@ -127,14 +130,21 @@ function PackageCard({ pkg }: { pkg: PackageRow }) {
               )}
               <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}<span className="text-[10px] text-gray-400 font-normal">/org</span></p>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 group-hover:gap-1.5 transition-all">
-              Lihat <ChevronRight className="w-3.5 h-3.5" />
+            <span className={`inline-flex items-center gap-1 text-xs font-medium group-hover:gap-1.5 transition-all ${isDoc ? "text-blue-600" : "text-emerald-700"}`}>
+              {isDoc ? "Lihat Dokumentasi" : "Lihat"} <ChevronRight className="w-3.5 h-3.5" />
             </span>
           </div>
         </div>
       </div>
-    </Link>
   )
+
+  if (isDoc) {
+    return <a href={href as string} target="_blank" rel="noopener noreferrer" className="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-blue-300 transition-colors group">{content}</a>
+  }
+  if (href) {
+    return <Link href={href} className="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-emerald-300 transition-colors group">{content}</Link>
+  }
+  return <div className="block bg-white border border-gray-200 rounded-xl overflow-hidden opacity-70">{content}</div>
 }
 
 export default async function TravelDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -157,7 +167,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
 
     const packagesResult = await supabase
       .from("packages")
-      .select("id, name, slug, type, departure_cities, duration_days, departure_month, price, original_price, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars, available, quota, image_url, is_promo, is_active, status")
+      .select("id, name, slug, type, departure_cities, duration_days, departure_month, price, original_price, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars, available, quota, image_url, is_promo, is_active, status, doc_drive_link")
       .eq("tenant_id", tenant.id)
       .is("deleted_at", null)
       .order("is_active", { ascending: false })
@@ -176,8 +186,9 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
     ? tenantData.gallery_urls
     : packages.flatMap((p) => p.image_url ? [p.image_url] : []).slice(0, 6)
 
-  const activePackages = packages.filter((p) => p.status === "published" && p.is_active)
-  const inactivePackages = packages.filter((p) => p.status !== "published" || !p.is_active)
+  const salePackages = packages.filter((p) => p.status === "active" || p.status === "ongoing")
+  const otherPackages = packages.filter((p) => p.status !== "active" && p.status !== "ongoing")
+  const docPackages = packages.filter((p) => p.doc_drive_link)
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -216,7 +227,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               <div className="flex flex-wrap items-center gap-3 text-sm text-white/60">
                 {tenantData.city && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{tenantData.city}</span>}
                 {tenantData.founded_year && <span>Sejak {tenantData.founded_year}</span>}
-                <span className="flex items-center gap-1"><Package className="w-3 h-3" />{activePackages.length} Paket Aktif</span>
+                <span className="flex items-center gap-1"><Package className="w-3 h-3" />{salePackages.length} Paket Tersedia</span>
                 {totalJamaah > 0 && <span className="flex items-center gap-1"><Users className="w-3 h-3" />{totalJamaah.toLocaleString("id-ID")}+ Jamaah</span>}
               </div>
             </div>
@@ -229,7 +240,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
         {/* Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { value: activePackages.length, label: "Paket Aktif", color: "text-emerald-700" },
+            { value: salePackages.length, label: "Paket Tersedia", color: "text-emerald-700" },
             { value: totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+` : packages.reduce((s, p) => s + (p.available || 0), 0), label: "Jamaah Diberangkatkan", color: "text-blue-700" },
             { value: tenantData.founded_year || "-", label: "Berdiri Sejak", color: "text-amber-700" },
             { value: tenantData.is_verified ? "Aktif" : "Proses", label: "Status Verifikasi", color: "text-emerald-700" },
@@ -296,8 +307,8 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
             <div className="space-y-3">
               {[
                 { icon: Building2, label: "Berdiri Sejak", value: tenantData.founded_year || "-" },
-                { icon: Package, label: "Total Paket", value: `${activePackages.length} paket aktif` },
-                { icon: Users, label: "Kuota Tersedia", value: `${activePackages.reduce((sum, p) => sum + (p.available || 0), 0)} kursi` },
+                { icon: Package, label: "Total Paket", value: `${salePackages.length} paket` },
+                { icon: Users, label: "Kuota Tersedia", value: `${salePackages.reduce((sum, p) => sum + (p.available || 0), 0)} kursi` },
                 { icon: Globe, label: "Website", value: `${tenantData.slug}.umrahqu.com` },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2.5 min-w-0">
@@ -323,35 +334,35 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
           </div>
         )}
 
-        {/* Packages with filter tabs */}
+        {/* Packages */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold">
               Paket Tersedia
-              <span className="text-gray-400 font-normal text-sm ml-2">({activePackages.length} aktif{inactivePackages.length > 0 ? `, ${inactivePackages.length} nonaktif` : ""})</span>
+              <span className="text-gray-400 font-normal text-sm ml-2">({salePackages.length} aktif{otherPackages.length > 0 ? `, ${otherPackages.length} lainnya` : ""})</span>
             </h2>
           </div>
 
-          {activePackages.length === 0 && inactivePackages.length === 0 ? (
+          {salePackages.length === 0 && otherPackages.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
               <Package className="w-8 h-8 text-gray-300 mx-auto mb-2" />
               <p className="text-gray-400 text-sm">Belum ada paket tersedia</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {activePackages.map((pkg) => (
+              {salePackages.map((pkg) => (
                 <PackageCard key={pkg.id} pkg={pkg} />
               ))}
 
-              {inactivePackages.length > 0 && (
+              {otherPackages.length > 0 && (
                 <details className="group">
                   <summary className="cursor-pointer list-none flex items-center gap-2 py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors select-none">
                     <span className="w-4 h-4 rounded border border-gray-300 flex items-center justify-center text-[10px] group-open:rotate-90 transition-transform">›</span>
-                    {inactivePackages.length} paket tidak aktif / draf
+                    {otherPackages.length} paket lainnya
                   </summary>
-                  <div className="mt-3 space-y-3 opacity-60">
-                    {inactivePackages.map((pkg) => (
-                      <PackageCard key={pkg.id} pkg={pkg} />
+                  <div className="mt-3 space-y-3 opacity-70">
+                    {otherPackages.map((pkg) => (
+                      <PackageCard key={pkg.id} pkg={pkg} href={pkg.doc_drive_link || null} />
                     ))}
                   </div>
                 </details>
@@ -359,6 +370,9 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
             </div>
           )}
         </div>
+
+        {/* Documentation */}
+        <PackageDocumentationSection packages={docPackages} />
 
         {/* Contact */}
         <div className="bg-white border border-gray-200 rounded-xl p-5">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, MoreHorizontal, Calendar, Hotel, Loader2, Package } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, MoreHorizontal, Calendar, Hotel, Loader2, Package, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { formatRupiah } from "@/lib/utils"
@@ -24,6 +24,14 @@ interface TravelPackage {
   airline: string | null
   hotel_info: any
   image_url: string | null
+  doc_drive_link: string | null
+}
+
+const PACKAGE_STATUS_BADGES: Record<string, { label: string; className: string }> = {
+  active: { label: "Aktif", className: "bg-emerald-500 text-white" },
+  nonaktif: { label: "Nonaktif", className: "bg-gray-500 text-white" },
+  completed: { label: "Selesai", className: "bg-blue-500 text-white" },
+  ongoing: { label: "Berlangsung", className: "bg-amber-500 text-white" },
 }
 
 export default function TravelPackagesPage() {
@@ -32,7 +40,7 @@ export default function TravelPackagesPage() {
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [packages, setPackages] = useState<TravelPackage[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "archived" | "inactive">("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "nonaktif" | "completed" | "ongoing">("all")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -47,7 +55,7 @@ export default function TravelPackagesPage() {
 
       const { data } = await supabase
         .from("packages")
-        .select("id, name, slug, price, quota, status, is_active, departure_city, departure_date, duration_days, airline, hotel_info, image_url")
+        .select("id, name, slug, price, quota, status, is_active, departure_city, departure_date, duration_days, airline, hotel_info, image_url, doc_drive_link")
         .eq("tenant_id", tId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
@@ -59,13 +67,24 @@ export default function TravelPackagesPage() {
   }, [])
 
   async function toggleStatus(pkg: TravelPackage) {
-    const newStatus = pkg.status === "published" ? "draft" : "published"
+    if (pkg.status !== "active" && pkg.status !== "nonaktif") return
+    const newStatus = pkg.status === "active" ? "nonaktif" : "active"
     const { error } = await supabase.from("packages").update({ status: newStatus }).eq("id", pkg.id)
     if (error) {
       toast.error("Gagal mengubah status")
     } else {
       setPackages((prev) => prev.map((p) => p.id === pkg.id ? { ...p, status: newStatus } : p))
-      toast.success(`Paket ${newStatus === "published" ? "diaktifkan" : "dinonaktifkan"}`)
+      toast.success(`Paket ${newStatus === "active" ? "diaktifkan" : "dinonaktifkan"}`)
+    }
+  }
+
+  async function saveDocLink(pkg: TravelPackage, link: string) {
+    const { error } = await supabase.from("packages").update({ doc_drive_link: link.trim() || null }).eq("id", pkg.id)
+    if (error) {
+      toast.error("Gagal menyimpan link dokumentasi")
+    } else {
+      setPackages((prev) => prev.map((p) => p.id === pkg.id ? { ...p, doc_drive_link: link.trim() || null } : p))
+      toast.success("Link dokumentasi disimpan")
     }
   }
 
@@ -82,11 +101,7 @@ export default function TravelPackagesPage() {
 
   const filtered = packages.filter((pkg) => {
     const matchSearch = pkg.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchStatus = statusFilter === "all"
-      ? true
-      : statusFilter === "inactive"
-        ? pkg.is_active === false
-        : pkg.status === statusFilter
+    const matchStatus = statusFilter === "all" ? true : pkg.status === statusFilter
     return matchSearch && matchStatus
   })
 
@@ -129,7 +144,7 @@ export default function TravelPackagesPage() {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          {(["all", "published", "draft", "archived", "inactive"] as const).map((s) => (
+          {(["all", "active", "nonaktif", "completed", "ongoing"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
@@ -137,7 +152,7 @@ export default function TravelPackagesPage() {
                 statusFilter === s ? "bg-emerald-600 text-white" : "bg-white border border-border text-muted-foreground hover:bg-gray-50"
               }`}
             >
-              {s === "all" ? "Semua" : s === "published" ? "Aktif" : s === "draft" ? "Draf" : s === "archived" ? "Arsip" : "Nonaktif"}
+              {s === "all" ? "Semua" : s === "active" ? "Aktif" : s === "nonaktif" ? "Nonaktif" : s === "completed" ? "Selesai" : "Berlangsung"}
             </button>
           ))}
         </div>
@@ -164,8 +179,8 @@ export default function TravelPackagesPage() {
                 )}
                 <div className="absolute top-3 left-3 flex gap-2">
                   {pkg.duration_days && <span className="bg-white/90 backdrop-blur text-xs font-medium px-2 py-1 rounded-lg">{pkg.duration_days} Hari</span>}
-                  <span className={`px-2 py-1 rounded-lg text-xs font-medium ${pkg.status === "published" ? "bg-emerald-500 text-white" : "bg-gray-500 text-white"}`}>
-                    {pkg.status === "published" ? "Aktif" : pkg.status === "draft" ? "Draf" : "Arsip"}
+                  <span className={`px-2 py-1 rounded-lg text-xs font-medium ${PACKAGE_STATUS_BADGES[pkg.status]?.className || "bg-gray-500 text-white"}`}>
+                    {PACKAGE_STATUS_BADGES[pkg.status]?.label || pkg.status}
                   </span>
                 </div>
               </div>
@@ -186,26 +201,51 @@ export default function TravelPackagesPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-2">
-                  <Link
-                    href={`/travel-dashboard/packages/${pkg.slug}/edit`}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    <Edit className="w-3.5 h-3.5" />
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => toggleStatus(pkg)}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    {pkg.status === "published" ? <><EyeOff className="w-3.5 h-3.5" /> Nonaktif</> : <><Eye className="w-3.5 h-3.5" /> Aktifkan</>}
-                  </button>
-                  <button
-                    onClick={() => deletePackage(pkg)}
-                    className="px-3 py-2 border border-red-200 text-red-500 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                <div className="flex flex-col gap-2 pt-2">
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/travel-dashboard/packages/${pkg.slug}/edit`}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      Edit
+                    </Link>
+                    {(pkg.status === "active" || pkg.status === "nonaktif") && (
+                      <button
+                        onClick={() => toggleStatus(pkg)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                      >
+                        {pkg.status === "active" ? <><EyeOff className="w-3.5 h-3.5" /> Nonaktif</> : <><Eye className="w-3.5 h-3.5" /> Aktifkan</>}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => deletePackage(pkg)}
+                      className="px-3 py-2 border border-red-200 text-red-500 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  {pkg.status === "completed" && (
+                    <div className="flex flex-col gap-1.5 bg-blue-50/60 border border-blue-100 rounded-xl p-2.5">
+                      <label className="text-[11px] font-medium text-blue-700 flex items-center gap-1">
+                        <ExternalLink className="w-3 h-3" /> Link Dokumentasi (Google Drive) — opsional
+                      </label>
+                      <div className="flex gap-1.5">
+                        <input
+                          type="url"
+                          placeholder="https://drive.google.com/..."
+                          defaultValue={pkg.doc_drive_link || ""}
+                          onBlur={(e) => saveDocLink(pkg, e.target.value)}
+                          className="flex-1 min-w-0 px-2.5 py-1.5 text-xs bg-white border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        />
+                      </div>
+                      {pkg.doc_drive_link && (
+                        <a href={pkg.doc_drive_link} target="_blank" rel="noopener noreferrer" className="text-[11px] text-blue-600 hover:underline">
+                          Link tersimpan — buka ↗
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

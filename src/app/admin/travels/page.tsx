@@ -21,7 +21,7 @@ interface TenantRow {
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending: { label: "Menunggu", color: "bg-yellow-100 text-yellow-700" },
-  verified: { label: "Terverifikasi", color: "bg-green-100 text-green-700" },
+  active: { label: "Aktif", color: "bg-green-100 text-green-700" },
   suspended: { label: "Ditangguhkan", color: "bg-red-100 text-red-700" },
   rejected: { label: "Ditolak", color: "bg-gray-100 text-gray-500" },
 }
@@ -79,7 +79,7 @@ export default function AdminTravelsPage() {
     return matchSearch && matchStatus
   })
 
-  const verifiedCount = tenants.filter((t) => t.status === "verified").length
+  const activeCount = tenants.filter((t) => t.status === "active").length
   const pendingCount = tenants.filter((t) => t.status === "pending").length
   const suspendedCount = tenants.filter((t) => t.status === "suspended" || t.status === "rejected").length
 
@@ -104,7 +104,7 @@ export default function AdminTravelsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Total", value: tenants.length, color: "text-foreground" },
-          { label: "Terverifikasi", value: verifiedCount, color: "text-green-600" },
+          { label: "Aktif", value: activeCount, color: "text-green-600" },
           { label: "Menunggu", value: pendingCount, color: "text-yellow-600" },
           { label: "Ditangguhkan", value: suspendedCount, color: "text-red-500" },
         ].map((s) => (
@@ -127,7 +127,7 @@ export default function AdminTravelsPage() {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          {["all", "pending", "verified", "suspended", "rejected"].map((s) => (
+          {["all", "pending", "active", "suspended", "rejected"].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
@@ -182,7 +182,7 @@ export default function AdminTravelsPage() {
               {tenant.status === "pending" && (
                 <>
                   <button
-                    onClick={() => updateStatus(tenant.id, "verified")}
+                    onClick={() => updateStatus(tenant.id, "active")}
                     disabled={updatingId === tenant.id}
                     className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-emerald-600 text-white rounded-xl text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
                   >
@@ -198,7 +198,7 @@ export default function AdminTravelsPage() {
                   </button>
                 </>
               )}
-              {tenant.status === "verified" && (
+              {tenant.status === "active" && (
                 <button
                   onClick={() => updateStatus(tenant.id, "suspended")}
                   disabled={updatingId === tenant.id}
@@ -209,7 +209,7 @@ export default function AdminTravelsPage() {
               )}
               {(tenant.status === "suspended" || tenant.status === "rejected") && (
                 <button
-                  onClick={() => updateStatus(tenant.id, "verified")}
+                  onClick={() => updateStatus(tenant.id, "active")}
                   disabled={updatingId === tenant.id}
                   className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-emerald-600 text-white rounded-xl text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
                 >

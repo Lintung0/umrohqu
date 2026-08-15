@@ -53,7 +53,7 @@ export default function TravelWebsitePage() {
         supabase.from("tenants").select("*").eq("id", profile.tenant_id).single(),
         supabase.from("tenant_websites").select("template_id").eq("tenant_id", profile.tenant_id).single(),
         supabase.from("website_templates").select("id, name, description, preview_url, is_active, category").eq("is_active", true).order("created_at", { ascending: false }),
-        supabase.from("packages").select("*").eq("tenant_id", profile.tenant_id).eq("status", "active").order("created_at", { ascending: false }),
+        supabase.from("packages").select("*").eq("tenant_id", profile.tenant_id).in("status", ["active", "ongoing"]).order("created_at", { ascending: false }),
       ])
 
       if (tenantRes.data) {

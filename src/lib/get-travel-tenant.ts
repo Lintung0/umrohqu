@@ -30,7 +30,7 @@ export async function getTravelTenantId(supabase: SupabaseClient, userId: string
     .insert({
       name: "Travel Mandiri",
       slug: `travel-${userId.slice(0, 8)}`,
-      status: "verified"
+      status: "active"
     })
     .select("id")
     .single()

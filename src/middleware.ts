@@ -88,7 +88,7 @@ export async function middleware(request: NextRequest) {
       .from("tenants")
       .select("id, slug, name, logo_url, brand_color, custom_domain, description")
       .eq("slug", subdomain)
-      .eq("status", "verified")
+      .eq("status", "active")
       .single()
 
     if (!tenant) {
@@ -132,7 +132,7 @@ export async function middleware(request: NextRequest) {
       .from("tenants")
       .select("id, slug, name, logo_url, brand_color, custom_domain, description")
       .eq("custom_domain", hostname)
-      .eq("status", "verified")
+      .eq("status", "active")
       .single()
 
     if (customTenant) {

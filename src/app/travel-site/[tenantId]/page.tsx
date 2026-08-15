@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Loader2 } from "lucide-react"
 import { TEMPLATE_MAP } from "@/components/travel-site/templates"
+import { PackageDocumentationSection } from "@/components/shared/package-documentation"
 import type { Tenant, Package } from "@/lib/types"
 
 export default function TravelSitePage() {
@@ -14,6 +15,7 @@ export default function TravelSitePage() {
 
   const [tenant, setTenant] = useState<Tenant | null>(null)
   const [packages, setPackages] = useState<Package[]>([])
+  const [docPackages, setDocPackages] = useState<Package[]>([])
   const [templateId, setTemplateId] = useState<string | null>(null)
   const [themeConfig, setThemeConfig] = useState<Record<string, unknown>>({})
   const [loading, setLoading] = useState(true)
@@ -22,12 +24,14 @@ export default function TravelSitePage() {
     const fetchData = async () => {
       const [tenantRes, pkgRes, websiteRes] = await Promise.all([
         supabase.from("tenants").select("*").eq("id", tenantId).single(),
-        supabase.from("packages").select("*").eq("tenant_id", tenantId).eq("status", "active").order("created_at", { ascending: false }),
+        supabase.from("packages").select("*").eq("tenant_id", tenantId).or("status.in.(active,ongoing,completed),doc_drive_link.not.is.null").order("created_at", { ascending: false }),
         supabase.from("tenant_websites").select("template_id, theme_config").eq("tenant_id", tenantId).single(),
       ])
 
       setTenant(tenantRes.data as Tenant | null)
-      setPackages((pkgRes.data as Package[]) || [])
+      const allPackages = (pkgRes.data as Package[]) || []
+      setPackages(allPackages.filter((p) => p.status === "active" || p.status === "ongoing"))
+      setDocPackages(allPackages.filter((p) => p.doc_drive_link))
 
       if (websiteRes.data) {
         setTemplateId(websiteRes.data.template_id)
@@ -61,5 +65,10 @@ export default function TravelSitePage() {
 
   const TemplateComponent = TEMPLATE_MAP[templateId || ""] || TEMPLATE_MAP["c0000000-0000-0000-0000-000000000001"]
 
-  return <TemplateComponent tenant={tenant} packages={packages} themeConfig={themeConfig} />
+  return (
+    <>
+      <TemplateComponent tenant={tenant} packages={packages} themeConfig={themeConfig} />
+      <PackageDocumentationSection packages={docPackages} title="Dokumentasi Perjalanan" />
+    </>
+  )
 }

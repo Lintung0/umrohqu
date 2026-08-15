@@ -33,7 +33,7 @@ export default function PackageSection() {
     const { data, error } = await supabase
       .from("packages")
       .select("*")
-      .eq("status", "published")
+      .in("status", ["active", "ongoing"])
       .eq("is_active", true)
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
