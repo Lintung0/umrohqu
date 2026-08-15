@@ -462,8 +462,8 @@ export default function TravelPromotionsPage() {
                       <th className="text-left px-5 py-3 font-medium text-muted-foreground">Paket</th>
                       <th className="text-left px-5 py-3 font-medium text-muted-foreground">Bid/Hari</th>
                       <th className="text-left px-5 py-3 font-medium text-muted-foreground">Periode</th>
-                      <th className="text-right px-5 py-3 font-medium text-muted-foreground">Impressions</th>
-                      <th className="text-right px-5 py-3 font-medium text-muted-foreground">Clicks</th>
+                      <th className="text-right px-5 py-3 font-medium text-muted-foreground">Tayangan</th>
+                      <th className="text-right px-5 py-3 font-medium text-muted-foreground">Klik</th>
                       <th className="text-right px-5 py-3 font-medium text-muted-foreground">CTR</th>
                       <th className="text-center px-5 py-3 font-medium text-muted-foreground">Status</th>
                       <th className="text-center px-5 py-3 font-medium text-muted-foreground">Aksi</th>

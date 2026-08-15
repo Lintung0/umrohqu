@@ -100,6 +100,7 @@ const Navbar = () => {
     setMenuOpen(false)
     setMobileOpen(false)
     router.push("/")
+    router.refresh()
   }
 
   const dashboardPath = userRole ? (ROLE_DASHBOARD_MAP[userRole] || "/dashboard") : "/dashboard"
@@ -109,7 +110,7 @@ const Navbar = () => {
 
   return (
     <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
-      <div className="grid grid-cols-3 items-center w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16">
+      <div className="grid grid-cols-[auto_1fr_auto] items-center w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16">
 
         {/* ── Left: Logo ── */}
         <div className="flex items-center justify-start shrink-0">

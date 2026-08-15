@@ -35,6 +35,7 @@ export default function TravelDashboardSidebar() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push("/")
+    router.refresh()
   }
 
   const sidebarContent = (

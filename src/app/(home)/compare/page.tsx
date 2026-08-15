@@ -246,12 +246,12 @@ function CompareView() {
 
   return (
     <div className="overflow-x-auto pb-4">
-      <div className="min-w-[640px]">
+      <div className="min-w-[420px] sm:min-w-[640px]">
         {insightLines.length > 0 && (
           <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-2xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-semibold text-emerald-800">Smart Comparison</span>
+              <span className="text-sm font-semibold text-emerald-800">Perbandingan Cerdas</span>
             </div>
             <ul className="space-y-1.5">
               {insightLines.map((line, i) => (
@@ -261,7 +261,7 @@ function CompareView() {
           </div>
         )}
 
-        <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: `200px repeat(${MAX_COMPARE}, 1fr)` }}>
+        <div className="grid gap-2 sm:gap-4 mb-6 grid-cols-[minmax(96px,28%)_repeat(3,minmax(0,1fr))] sm:grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))]">
           <div />
           {comparePackages.map((pkg, i) => {
             const isBest = comparePackages.length > 1 && scores[i].valueScore === maxScore && maxScore > 0
@@ -306,8 +306,7 @@ function CompareView() {
         {comparePackages.length > 0 && ROW_LABELS.map((row, idx) => (
           <div
             key={row.key}
-            className={`grid gap-4 py-3 ${idx % 2 === 0 ? "bg-muted/30" : ""} rounded-xl px-2`}
-            style={{ gridTemplateColumns: `200px repeat(${MAX_COMPARE}, 1fr)` }}
+            className={`grid grid-cols-[minmax(96px,28%)_repeat(3,minmax(0,1fr))] sm:grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))] gap-2 sm:gap-4 py-3 ${idx % 2 === 0 ? "bg-muted/30" : ""} rounded-xl px-2`}
           >
             <div className="text-xs font-semibold text-muted-foreground flex items-center">{row.label}</div>
             {comparePackages.map((pkg, i) => {
@@ -328,8 +327,7 @@ function CompareView() {
 
         {comparePackages.length > 0 && (
           <div
-            className="grid gap-4 mt-4 pt-4 border-t border-border"
-            style={{ gridTemplateColumns: `200px repeat(${MAX_COMPARE}, 1fr)` }}
+            className="grid grid-cols-[minmax(96px,28%)_repeat(3,minmax(0,1fr))] sm:grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))] gap-2 sm:gap-4 mt-4 pt-4 border-t border-border"
           >
             <div />
             {comparePackages.map((pkg) => (

@@ -74,6 +74,7 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push("/")
+    router.refresh()
   }
 
   const sidebarContent = (

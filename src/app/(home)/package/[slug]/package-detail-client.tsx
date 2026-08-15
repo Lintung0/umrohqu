@@ -146,8 +146,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const facilitiesList: string[] = Array.isArray(pkg.facilities) ? pkg.facilities : []
   const includesList: string[] = Array.isArray(pkg.includes) ? pkg.includes : (typeof pkg.facilities === "object" && pkg.facilities?.includes ? pkg.facilities.includes : [])
   const excludesList: string[] = Array.isArray(pkg.excludes) ? pkg.excludes : (typeof pkg.facilities === "object" && pkg.facilities?.excludes ? pkg.facilities.excludes : [])
-  const itineraryList: { day: number; title: string; description: string }[] = Array.isArray(pkg.itinerary)
-    ? pkg.itinerary.map((item: any, idx: number) => {
+  const parseItinerary = (raw: any): { day: number; title: string; description: string }[] => {
+    if (Array.isArray(raw)) {
+      return raw.map((item: any, idx: number) => {
         if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
         if (item && typeof item === "object") {
           return {
@@ -158,7 +159,22 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         }
         return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: "" }
       })
-    : []
+    }
+    if (typeof raw === "string" && raw.trim()) {
+      try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) return parseItinerary(parsed)
+      } catch {}
+      return raw
+        .split(/\n+/)
+        .map((line: string) => line.trim())
+        .filter(Boolean)
+        .map((line: string, idx: number) => ({ day: idx + 1, title: `Hari ke-${idx + 1}`, description: line }))
+    }
+    return []
+  }
+
+  const itineraryList = parseItinerary(pkg.itinerary)
 
   useEffect(() => {
     const handleScroll = () => {

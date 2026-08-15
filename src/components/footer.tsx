@@ -117,7 +117,7 @@ const Footer = () => {
                 </div>
               </Link>
               <Link
-                href="mailto:info@umrahqu.com"
+                href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@umrahqu.com"}`}
                 className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group"
               >
                 <div className="p-2 rounded-lg bg-white/8 group-hover:bg-white/12 transition-colors">
@@ -125,7 +125,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-white/30">Email</p>
-                  <p className="text-sm font-medium">info@umrahqu.com</p>
+                  <p className="text-sm font-medium">{process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@umrahqu.com"}</p>
                 </div>
               </Link>
             </div>

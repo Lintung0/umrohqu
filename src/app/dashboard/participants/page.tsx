@@ -136,15 +136,15 @@ export default function ParticipantsPage() {
           <div className="grid gap-4">
             {participants.map((p) => (
               <div key={p.id} className="bg-white border border-border rounded-2xl p-5">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                       <span className="text-sm font-bold text-emerald-600">{p.full_name.charAt(0)}</span>
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm">{p.full_name}</span>
-                        {p.is_main && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Utama</span>}
+                        <span className="font-semibold text-sm truncate">{p.full_name}</span>
+                        {p.is_main && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium shrink-0">Utama</span>}
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
                         {p.nik && <span>NIK: {p.nik}</span>}
@@ -178,7 +178,7 @@ export default function ParticipantsPage() {
                 <label className="text-xs font-medium text-muted-foreground">Nama Lengkap *</label>
                 <input type="text" value={form.full_name} onChange={(e) => setForm({...form, full_name: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Nama sesuai paspor" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">NIK</label>
                   <input type="text" value={form.nik} onChange={(e) => setForm({...form, nik: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
@@ -192,7 +192,7 @@ export default function ParticipantsPage() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Nomor Paspor</label>
                   <input type="text" value={form.passport_number} onChange={(e) => setForm({...form, passport_number: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
@@ -202,7 +202,7 @@ export default function ParticipantsPage() {
                   <input type="date" value={form.passport_expiry} onChange={(e) => setForm({...form, passport_expiry: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Tanggal Lahir</label>
                   <input type="date" value={form.birth_date} onChange={(e) => setForm({...form, birth_date: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />

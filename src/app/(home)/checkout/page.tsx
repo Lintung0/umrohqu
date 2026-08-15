@@ -1024,17 +1024,19 @@ function StepReview({
               </p>
             )}
 
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="w-full h-12 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
-            >
-              {submitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
-              ) : (
-                <>Bayar <ChevronRight className="w-4 h-4" /></>
-              )}
-            </Button>
+            <div className="hidden lg:block">
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting || (useWallet && amountToPayNow > 0)}
+                className="w-full h-12 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
+              >
+                {submitting ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+                ) : (
+                  <>Bayar <ChevronRight className="w-4 h-4" /></>
+                )}
+              </Button>
+            </div>
 
             <div className="flex items-center justify-center gap-2 mt-3">
               <Link href={`/package/${pkg.slug}`}>
