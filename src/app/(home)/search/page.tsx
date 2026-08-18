@@ -343,7 +343,10 @@ function SearchContent() {
 
   const clearFilters = () => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    if (cityDebounceRef.current) clearTimeout(cityDebounceRef.current)
     setSearchInput("")
+    setShowCitySuggestions(false)
+    setCitySuggestions([])
     router.replace("/search", { scroll: false })
   }
 
@@ -434,8 +437,22 @@ function SearchContent() {
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
                   onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true) }}
                   aria-label="Cari paket umroh"
-                  className="w-full pl-5 pr-4 h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  className={`w-full pl-5 ${searchInput ? "pr-10" : "pr-4"} h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all`}
                 />
+                {searchInput && !loadingCitySuggestions && (
+                  <button
+                    onClick={() => {
+                      setSearchInput("")
+                      setUrl({ search: null })
+                      setShowCitySuggestions(false)
+                      setCitySuggestions([])
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                    aria-label="Hapus pencarian"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
                 {loadingCitySuggestions && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
