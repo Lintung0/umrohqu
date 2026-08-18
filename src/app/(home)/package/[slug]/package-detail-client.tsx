@@ -545,6 +545,24 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="detail" />
             </div>
 
+            {/* Ongoing Banner */}
+            {pkg.status === "ongoing" && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-2xl p-4 mb-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-lg">🚌</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-amber-800">Paket Sedang Berlangsung</p>
+                    <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                      {pkg.quota - (pkg.available ?? 0)} dari {pkg.quota} jamaah sudah berangkat.{" "}
+                      Sisa {pkg.available ?? 0} kursi masih tersedia untuk bergabung.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* CTA */}
             <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3 space-y-2.5">
               <Link href={`/checkout?slug=${pkg.slug}`} className="block">

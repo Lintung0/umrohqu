@@ -98,7 +98,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             src={imgSrc}
             alt={pkg.name}
             fill
-            className={`object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none ${soldOut ? "grayscale opacity-60" : ""}`}
+            className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
             onError={handleError}
             unoptimized
           />
@@ -110,8 +110,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               {typeLabel}
             </span>
             {soldOut ? (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-900/80 text-white">
-                Habis
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-red-500 text-white">
+                Habis Terjual
               </span>
             ) : discount > 0 ? (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-red-500 text-white">
@@ -195,13 +195,9 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             ) : null}
           </div>
 
-          {!soldOut && (pkg.available ?? 0) > 0 && (pkg.available ?? 0) <= 5 && (
-            <div className="mb-3">
-              <span className="inline-flex items-center px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-semibold rounded-md border border-amber-200">
-                {pkg.available} kursi tersisa
-              </span>
-            </div>
-          )}
+          <div className="mb-3">
+            <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
+          </div>
 
           <div className="flex items-end justify-between pt-2.5 border-t border-slate-100 mt-auto">
             <div>
@@ -311,7 +307,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           src={imgSrc}
           alt={pkg.name}
           fill
-          className={`object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none ${soldOut ? "grayscale opacity-60" : ""}`}
+          className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
           onError={handleError}
           unoptimized
         />
@@ -322,10 +318,10 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${typeColor}`}>
             {typeLabel}
           </span>
-          {soldOut ? (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900/80 text-white">
-              Habis
-            </span>
+            {soldOut ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500 text-white">
+                Habis Terjual
+              </span>
           ) : discount > 0 ? (
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-500 text-white">
               -{discount}%
