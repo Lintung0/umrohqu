@@ -6,6 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { X, Check, Minus, GitCompare, Award, Sparkles, TrendingDown, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
@@ -94,6 +95,95 @@ function SmartBadges({ scores, index }: { scores: ReturnType<typeof calcScore>[]
           <Star className="w-2.5 h-2.5" /> Hotel Terbaik
         </span>
       )}
+    </div>
+  )
+}
+
+function MobileCompareSlide({ pkg, index, scores, maxScore, rowHighlights, removeFromCompare }: {
+  pkg: Package; index: number; scores: ReturnType<typeof calcScore>[]; maxScore: number;
+  rowHighlights: Record<string, ("best" | "worst" | undefined)[][]>;
+  removeFromCompare: (id: string) => void;
+}) {
+  const isBest = scores.length > 1 && scores[index].valueScore === maxScore && maxScore > 0
+  const facilities = getFacilitiesList(pkg.facilities)
+
+  return (
+    <div className="bg-white border-2 rounded-2xl overflow-hidden shadow-sm mx-1">
+      <div className="relative h-40">
+        <Image
+          src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
+          alt={pkg.name || "Paket"} fill className="object-cover"
+        />
+        <button
+          onClick={() => removeFromCompare(pkg.id)}
+          className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+        <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+          <PackageStatusBadge status={pkg.status} />
+          {isBest && (
+            <div className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+              <Award className="w-3 h-3" /> Pilihan Terbaik
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="p-4">
+        <p className="text-sm font-semibold leading-snug line-clamp-2">{pkg.name}</p>
+        <div className="text-xs text-muted-foreground mt-1">
+          Rp {Math.round(scores[index].pricePerDay / 1000)}rb / hari
+        </div>
+        <SmartBadges scores={scores} index={index} />
+      </div>
+      <div className="px-4 pb-2">
+        <div className="border-t border-border pt-3 space-y-2.5">
+          {ROW_LABELS.map((row, idx) => {
+            const hl = rowHighlights[row.key]?.[0]?.[index]
+            return (
+              <div key={row.key} className={`grid grid-cols-[88px_1fr] gap-2 py-1.5 ${idx % 2 === 0 ? "bg-muted/30 -mx-2 px-2 rounded-lg" : ""}`}>
+                <span className="text-[11px] font-semibold text-muted-foreground">{row.label}</span>
+                <div className="text-[13px]">
+                  {row.key === "facilities" ? (
+                    facilities.length > 0
+                      ? <div className="flex flex-wrap gap-1">{facilities.map((f, i) => <span key={i} className="inline-flex items-center gap-1 text-[11px]"><Check className="w-2.5 h-2.5 text-primary shrink-0" />{f}</span>)}</div>
+                      : <span className="text-muted-foreground">-</span>
+                  ) : (
+                    renderValue(row.key, pkg, hl)
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      <div className="px-4 pb-4 pt-2 border-t border-border">
+        <Link href={`/package/${pkg.slug}`}>
+          <Button className="w-full text-xs h-9">Pilih Paket Ini</Button>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function MobileDotIndicator({ total, api }: { total: number; api: CarouselApi }) {
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  useEffect(() => {
+    if (!api) return
+    const onSelect = () => setSelectedIndex(api.selectedScrollSnap())
+    api.on("select", onSelect)
+    onSelect()
+    return () => { api.off("select", onSelect) }
+  }, [api])
+  if (total <= 1) return null
+  return (
+    <div className="flex items-center justify-center gap-1.5 mt-3">
+      {Array.from({ length: total }).map((_, i) => (
+        <button
+          key={i} onClick={() => api?.scrollTo(i)}
+          className={`rounded-full transition-all duration-200 ${i === selectedIndex ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-muted-foreground/30"}`}
+        />
+      ))}
     </div>
   )
 }
@@ -229,6 +319,7 @@ function CompareView() {
   }, [comparePackages, scores])
 
   const emptySlots = MAX_COMPARE - comparePackages.length
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>(undefined)
 
   if (comparePackages.length === 0) {
     return (
@@ -246,102 +337,99 @@ function CompareView() {
   const maxScore = Math.max(...scores.map((s) => s.valueScore))
 
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="min-w-[420px] sm:min-w-[640px]">
-        {insightLines.length > 0 && (
-          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-2xl p-4 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-semibold text-emerald-800">Perbandingan Cerdas</span>
-            </div>
-            <ul className="space-y-1.5">
-              {insightLines.map((line, i) => (
-                <li key={i} className="text-xs leading-relaxed text-emerald-700">{line}</li>
-              ))}
-            </ul>
+    <div className="pb-4">
+      {insightLines.length > 0 && (
+        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-2xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <span className="text-sm font-semibold text-emerald-800">Perbandingan Cerdas</span>
           </div>
-        )}
-
-        <div className="grid gap-2 sm:gap-4 mb-6 grid-cols-[minmax(96px,28%)_repeat(3,minmax(0,1fr))] sm:grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))]">
-          <div />
-          {comparePackages.map((pkg, i) => {
-            const isBest = comparePackages.length > 1 && scores[i].valueScore === maxScore && maxScore > 0
-            return (
-              <div key={pkg.id} className={`bg-white border-2 rounded-2xl overflow-hidden ${
-                isBest
-                  ? "border-emerald-400 shadow-md shadow-emerald-100"
-                  : "border-primary/30"
-              }`}>
-                <div className="relative h-28">
-                  <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover" />
-                  <button
-                    onClick={() => removeFromCompare(pkg.id)}
-                    className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                    <PackageStatusBadge status={pkg.status} />
-                    {isBest && (
-                      <div className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
-                        <Award className="w-3 h-3" /> Pilihan Terbaik
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="p-3">
-                  <p className="text-xs font-semibold leading-snug line-clamp-2">{pkg.name}</p>
-                  <div className="text-[11px] text-muted-foreground mt-1">
-                    Rp {Math.round(scores[i].pricePerDay / 1000)}rb / hari
-                  </div>
-                  <SmartBadges scores={scores} index={i} />
-                </div>
-              </div>
-            )
-          })}
-          {Array.from({ length: emptySlots }).map((_, i) => (
-            <div key={i} className="border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground min-h-[160px]">
-              <Minus className="w-6 h-6" />
-              <span className="text-xs font-medium">Slot kosong</span>
-            </div>
-          ))}
+          <ul className="space-y-1.5">
+            {insightLines.map((line, i) => (
+              <li key={i} className="text-xs leading-relaxed text-emerald-700">{line}</li>
+            ))}
+          </ul>
         </div>
+      )}
 
-        {comparePackages.length > 0 && ROW_LABELS.map((row, idx) => (
-          <div
-            key={row.key}
-            className={`grid grid-cols-[minmax(96px,28%)_repeat(3,minmax(0,1fr))] sm:grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))] gap-2 sm:gap-4 py-3 ${idx % 2 === 0 ? "bg-muted/30" : ""} rounded-xl px-2`}
-          >
-            <div className="text-xs font-semibold text-muted-foreground flex items-center">{row.label}</div>
+      {/* MOBILE: Carousel view */}
+      <div className="block sm:hidden">
+        <Carousel opts={{ loop: false, align: "start" }} setApi={setCarouselApi}>
+          <CarouselContent>
+            {comparePackages.map((pkg, i) => (
+              <CarouselItem key={pkg.id}>
+                <MobileCompareSlide
+                  pkg={pkg} index={i} scores={scores} maxScore={maxScore}
+                  rowHighlights={rowHighlights} removeFromCompare={removeFromCompare}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+        <MobileDotIndicator total={comparePackages.length} api={carouselApi} />
+      </div>
+
+      {/* DESKTOP: Grid table view */}
+      <div className="hidden sm:block overflow-x-auto">
+        <div className="min-w-[640px]">
+          <div className="grid gap-4 mb-6 grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))]">
+            <div />
             {comparePackages.map((pkg, i) => {
-              const hl = rowHighlights[row.key]?.[0]?.[i]
+              const isBest = comparePackages.length > 1 && scores[i].valueScore === maxScore && maxScore > 0
               return (
-                <div key={pkg.id} className="text-sm">
-                  {renderValue(row.key, pkg, hl)}
+                <div key={pkg.id} className={`bg-white border-2 rounded-2xl overflow-hidden ${isBest ? "border-emerald-400 shadow-md shadow-emerald-100" : "border-primary/30"}`}>
+                  <div className="relative h-28">
+                    <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover" />
+                    <button onClick={() => removeFromCompare(pkg.id)} className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                      <PackageStatusBadge status={pkg.status} />
+                      {isBest && (
+                        <div className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                          <Award className="w-3 h-3" /> Pilihan Terbaik
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <p className="text-xs font-semibold leading-snug line-clamp-2">{pkg.name}</p>
+                    <div className="text-[11px] text-muted-foreground mt-1">
+                      Rp {Math.round(scores[i].pricePerDay / 1000)}rb / hari
+                    </div>
+                    <SmartBadges scores={scores} index={i} />
+                  </div>
                 </div>
               )
             })}
-            {Array.from({ length: emptySlots }).map((_, i) => (
-              <div key={i} className="flex items-center justify-center">
-                <Minus className="w-4 h-4 text-border" />
-              </div>
-            ))}
           </div>
-        ))}
 
-        {comparePackages.length > 0 && (
-          <div
-            className="grid grid-cols-[minmax(96px,28%)_repeat(3,minmax(0,1fr))] sm:grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))] gap-2 sm:gap-4 mt-4 pt-4 border-t border-border"
-          >
+          {ROW_LABELS.map((row, idx) => (
+            <div
+              key={row.key}
+              className={`grid grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))] gap-4 py-3 ${idx % 2 === 0 ? "bg-muted/30" : ""} rounded-xl px-2`}
+            >
+              <div className="text-xs font-semibold text-muted-foreground flex items-center">{row.label}</div>
+              {comparePackages.map((pkg, i) => {
+                const hl = rowHighlights[row.key]?.[0]?.[i]
+                return (
+                  <div key={pkg.id} className="text-sm">
+                    {renderValue(row.key, pkg, hl)}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+
+          <div className="grid grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))] gap-4 mt-4 pt-4 border-t border-border">
             <div />
             {comparePackages.map((pkg) => (
               <Link key={pkg.id} href={`/package/${pkg.slug}`}>
                 <Button className="w-full text-xs h-9">Pilih Paket Ini</Button>
               </Link>
             ))}
-            {Array.from({ length: emptySlots }).map((_, i) => <div key={i} />)}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
