@@ -110,15 +110,15 @@ const Navbar = () => {
 
   return (
     <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
-      <div className="grid grid-cols-[auto_1fr_auto] items-center w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16">
+      <div className="relative flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16">
 
         {/* ── Left: Logo ── */}
-        <div className="flex items-center justify-start shrink-0">
+        <div className="flex items-center shrink-0">
           <Logo />
         </div>
 
         {/* ── Center: Nav links ── */}
-        <nav className="hidden md:flex items-center justify-center gap-6 text-sm font-medium text-slate-700">
+        <nav className="hidden md:flex items-center justify-center gap-6 text-sm font-medium text-slate-700 absolute left-1/2 -translate-x-1/2">
           {NAV_LINKS_KEYS.map((key) => (
             <Link
               key={key}
@@ -131,7 +131,7 @@ const Navbar = () => {
         </nav>
 
         {/* ── Right: Utilities + Auth ── */}
-        <div className="flex items-center justify-end shrink-0">
+        <div className="flex items-center shrink-0">
           <div className="hidden md:flex items-center gap-2">
             {/* Compare */}
             <Link
