@@ -442,6 +442,8 @@ function SearchContent() {
                 {searchInput && !loadingCitySuggestions && (
                   <button
                     onClick={() => {
+                      if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+                      if (cityDebounceRef.current) clearTimeout(cityDebounceRef.current)
                       setSearchInput("")
                       setUrl({ search: null })
                       setShowCitySuggestions(false)
