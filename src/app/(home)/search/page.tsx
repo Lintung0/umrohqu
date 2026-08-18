@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation"
 import { useState, useEffect, useRef, useCallback, Suspense } from "react"
-import { Search, SearchX, X, SlidersHorizontal } from "lucide-react"
+import { Search, SearchX, X, SlidersHorizontal, MapPin } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getAseanCountryByCode } from "@/lib/constants"
 import { createClient } from "@/lib/supabase/client"
@@ -23,6 +23,13 @@ const QUICK_CATEGORIES = [
   { label: "Haji Furoda", preset: { type: "furoda" } },
 ]
 
+interface GeoapifySuggestion {
+  name: string
+  country: string
+  country_code: string
+  formatted: string
+}
+
 function SearchContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -30,6 +37,12 @@ function SearchContent() {
   const [showMobileFilter, setShowMobileFilter] = useState(false)
   const [page, setPage] = useState(1)
   const resultsRef = useRef<HTMLDivElement>(null)
+  const suggestionsContainerRef = useRef<HTMLDivElement>(null)
+  const cityDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  const [citySuggestions, setCitySuggestions] = useState<GeoapifySuggestion[]>([])
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false)
+  const [loadingCitySuggestions, setLoadingCitySuggestions] = useState(false)
 
   const departure = searchParams.get("departure") ?? ""
   const country = searchParams.get("country") ?? ""
@@ -62,6 +75,67 @@ function SearchContent() {
   useEffect(() => {
     setPage(1)
   }, [searchParams.toString()])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (suggestionsContainerRef.current && !suggestionsContainerRef.current.contains(e.target as Node)) {
+        setShowCitySuggestions(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const fetchCitySuggestions = useCallback(async (query: string) => {
+    if (!query || query.length < 2) {
+      setCitySuggestions([])
+      setShowCitySuggestions(false)
+      return
+    }
+
+    const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY
+    if (!apiKey) {
+      setCitySuggestions([])
+      setShowCitySuggestions(false)
+      return
+    }
+
+    setLoadingCitySuggestions(true)
+    try {
+      const params = new URLSearchParams({
+        text: query,
+        type: "city",
+        lang: "id",
+        limit: "5",
+        apiKey,
+      })
+
+      const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?${params}`)
+      if (!res.ok) {
+        setCitySuggestions([])
+        setShowCitySuggestions(false)
+        setLoadingCitySuggestions(false)
+        return
+      }
+      const data = await res.json()
+
+      const results: GeoapifySuggestion[] = (data.features || [])
+        .map((f: any) => ({
+          name: f.properties.city || f.properties.name || "",
+          country: f.properties.country || "",
+          country_code: f.properties.country_code || "",
+          formatted: f.properties.formatted || f.properties.city || f.properties.name || "",
+        }))
+        .filter((s: GeoapifySuggestion) => s.name)
+
+      setCitySuggestions(results)
+      setShowCitySuggestions(results.length > 0)
+    } catch {
+      setCitySuggestions([])
+    } finally {
+      setLoadingCitySuggestions(false)
+    }
+  }, [])
 
   const handlePageChange = (next: number) => {
     setPage(next)
@@ -106,11 +180,26 @@ function SearchContent() {
     searchTimerRef.current = setTimeout(() => {
       setUrl({ search: v.trim() || null })
     }, 500)
+
+    if (cityDebounceRef.current) clearTimeout(cityDebounceRef.current)
+    cityDebounceRef.current = setTimeout(() => {
+      fetchCitySuggestions(v)
+    }, 300)
   }
 
   const handleSearchSubmit = () => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    if (cityDebounceRef.current) clearTimeout(cityDebounceRef.current)
+    setShowCitySuggestions(false)
     setUrl({ search: searchInput.trim() || null })
+  }
+
+  const handleSelectCitySuggestion = (s: GeoapifySuggestion) => {
+    setSearchInput(s.name)
+    setShowCitySuggestions(false)
+    setCitySuggestions([])
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    setUrl({ search: s.name })
   }
 
   const [packages, setPackages] = useState<Package[]>([])
@@ -330,16 +419,43 @@ function SearchContent() {
               <SlidersHorizontal className="w-5 h-5" />
               {hasActiveFilters && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400" />}
             </button>
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="Cari nama paket, travel, atau kota..."
-                value={searchInput}
-                onChange={(e) => handleSearchInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
-                aria-label="Cari paket umroh"
-                className="w-full pl-5 pr-4 h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-              />
+            <div className="relative flex-1" ref={suggestionsContainerRef}>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Cari nama paket, travel, atau kota..."
+                  value={searchInput}
+                  onChange={(e) => handleSearchInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
+                  onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true) }}
+                  aria-label="Cari paket umroh"
+                  className="w-full pl-5 pr-4 h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                />
+                {loadingCitySuggestions && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
+                  </div>
+                )}
+              </div>
+              {showCitySuggestions && citySuggestions.length > 0 && (
+                <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                  {citySuggestions.map((s, i) => (
+                    <li
+                      key={i}
+                      onClick={() => handleSelectCitySuggestion(s)}
+                      className="flex cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors"
+                    >
+                      <MapPin size={14} className="shrink-0 text-slate-400" />
+                      <div className="min-w-0 flex-1">
+                        <span className="font-medium text-slate-900">{s.name}</span>
+                        {s.country && (
+                          <span className="ml-1.5 text-xs text-slate-500">· {s.country}</span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <button
               onClick={handleSearchSubmit}

@@ -49,13 +49,6 @@ const Footer = () => {
         { href: "/compare", label: t.footer.compare },
       ],
     },
-    {
-      title: t.footer.ibadah,
-      items: [
-        { href: "/travel", label: t.footer.travel_agencies },
-        { href: "/jadwal-sholat", label: t.footer.jadwal_sholat },
-      ],
-    },
   ]
 
   const socialLinks = [

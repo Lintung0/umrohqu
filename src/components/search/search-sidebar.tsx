@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { X, RotateCcw, MapPin, Plane, Star, Clock, Banknote, ChevronDown, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ASEAN_COUNTRIES } from "@/lib/constants"
+import CityAutocomplete from "@/components/shared/city-autocomplete"
 
 interface SearchSidebarProps {
   departure: string
@@ -20,13 +21,6 @@ interface SearchSidebarProps {
   setHotelStars: (v: string) => void
   hasActiveFilters: boolean
   clearFilters: () => void
-}
-
-interface GeoapifySuggestion {
-  name: string
-  country: string
-  country_code: string
-  formatted: string
 }
 
 const PRICE_RANGES: { label: string; range: [number, number] }[] = [
@@ -57,132 +51,6 @@ function formatPriceShort(v: number): string {
   if (v >= 100000000) return `${Math.round(v / 1000000000) * 1}M`
   if (v >= 10000000) return `${Math.round(v / 1000000)}jt`
   return `${Math.round(v / 1000)}rb`
-}
-
-function CityAutocompleteFilter({
-  value,
-  onChange,
-  countryFilter,
-}: {
-  value: string
-  onChange: (v: string) => void
-  countryFilter?: string
-}) {
-  const [input, setInput] = useState(value)
-  const [suggestions, setSuggestions] = useState<GeoapifySuggestion[]>([])
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => { setInput(value) }, [value])
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  const fetchSuggestions = useCallback(async (query: string) => {
-    if (!query || query.length < 2) { setSuggestions([]); setOpen(false); return }
-    const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY
-    if (!apiKey) { setSuggestions([]); setOpen(false); return }
-
-    setLoading(true)
-    try {
-      const params = new URLSearchParams({
-        text: query,
-        type: "city",
-        lang: "id",
-        limit: "7",
-        apiKey,
-      })
-      if (countryFilter) params.set("filter", `countrycode:${countryFilter.toLowerCase()}`)
-
-      const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?${params}`)
-      if (!res.ok) { setSuggestions([]); setOpen(false); setLoading(false); return }
-      const data = await res.json()
-
-      const results: GeoapifySuggestion[] = (data.features || [])
-        .map((f: any) => ({
-          name: f.properties.city || f.properties.name || "",
-          country: f.properties.country || "",
-          country_code: f.properties.country_code || "",
-          formatted: f.properties.formatted || "",
-        }))
-        .filter((s: GeoapifySuggestion) => s.name)
-
-      setSuggestions(results)
-      setOpen(results.length > 0)
-    } catch {
-      setSuggestions([])
-    } finally {
-      setLoading(false)
-    }
-  }, [countryFilter])
-
-  const handleInputChange = (val: string) => {
-    setInput(val)
-    onChange(val)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => fetchSuggestions(val), 300)
-  }
-
-  const selectSuggestion = (s: GeoapifySuggestion) => {
-    setInput(s.name)
-    onChange(s.name)
-    setOpen(false)
-    setSuggestions([])
-  }
-
-  return (
-    <div ref={containerRef} className="relative">
-      <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => handleInputChange(e.target.value)}
-          onFocus={() => { if (suggestions.length > 0) setOpen(true) }}
-          placeholder="Ketik nama kota..."
-          aria-label="Kota keberangkatan"
-          aria-expanded={open}
-          role="combobox"
-          autoComplete="off"
-          className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-        />
-        {loading && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-          </div>
-        )}
-      </div>
-
-      {open && suggestions.length > 0 && (
-        <ul role="listbox" className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl">
-          {suggestions.map((s, i) => (
-            <li
-              key={i}
-              role="option"
-              aria-selected={false}
-              onClick={() => selectSuggestion(s)}
-              className="flex cursor-pointer items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-emerald-50"
-            >
-              <MapPin size={14} className="shrink-0 text-emerald-500" />
-              <div className="min-w-0 flex-1">
-                <span className="font-medium text-slate-900">{s.name}</span>
-                {s.country && (
-                  <span className="ml-1.5 text-xs text-slate-400">· {s.country}</span>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
 }
 
 function CountrySelectFilter({
@@ -301,10 +169,12 @@ export default function SearchSidebar({
         <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
           <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Kota Keberangkatan
         </label>
-        <CityAutocompleteFilter
+        <CityAutocomplete
           value={departure}
           onChange={setDeparture}
           countryFilter={country}
+          placeholder="Ketik nama kota..."
+          className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
         />
       </div>
 
