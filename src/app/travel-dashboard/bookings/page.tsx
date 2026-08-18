@@ -55,11 +55,14 @@ export default function TravelBookingsPage() {
   }, [])
 
   async function updateBookingStatus(bookingId: string, newStatus: string) {
-    const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", bookingId)
+    const updateData: Record<string, any> = { status: newStatus }
+    if (newStatus === "confirmed") updateData.payment_status = "paid"
+    if (newStatus === "cancelled") updateData.payment_status = "cancelled"
+    const { error } = await supabase.from("bookings").update(updateData).eq("id", bookingId)
     if (error) {
       toast.error(t("travel_dashboard.status_update_failed"))
     } else {
-      setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: newStatus } : b))
+      setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: newStatus, ...(updateData.payment_status ? { payment_status: updateData.payment_status } : {}) } : b))
       toast.success(t("travel_dashboard.status_updated"))
     }
   }
@@ -176,34 +179,29 @@ export default function TravelBookingsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      {(booking.status === "pending_payment" || booking.status === "processing") && (
-                        <>
-                          {booking.status === "processing" ? (
-                            <button
-                              onClick={() => updateBookingStatus(booking.id, "confirmed")}
-                              className="px-2 py-1 text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
-                              title={t("travel_dashboard.confirm_title")}
-                            >
-                              <Check className="w-3.5 h-3.5 inline mr-1" />
-                              {t("travel_dashboard.confirm_btn")}
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => updateBookingStatus(booking.id, "confirmed")}
-                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                              title={t("travel_dashboard.confirm_title")}
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => updateBookingStatus(booking.id, "cancelled")}
-                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title={t("travel_dashboard.reject_title")}
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </>
+                      {booking.status === "processing" && (
+                        <button
+                          onClick={() => updateBookingStatus(booking.id, "confirmed")}
+                          className="px-2 py-1 text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
+                          title={t("travel_dashboard.confirm_title")}
+                        >
+                          <Check className="w-3.5 h-3.5 inline mr-1" />
+                          {t("travel_dashboard.confirm_btn")}
+                        </button>
+                      )}
+                      {booking.status === "pending_payment" && (
+                        <span className="px-2 py-1 text-xs font-medium text-amber-600 bg-amber-50 rounded-lg">
+                          Menunggu Pembayaran
+                        </span>
+                      )}
+                      {booking.status === "processing" && (
+                        <button
+                          onClick={() => updateBookingStatus(booking.id, "cancelled")}
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title={t("travel_dashboard.reject_title")}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       )}
                     </div>
                   </td>

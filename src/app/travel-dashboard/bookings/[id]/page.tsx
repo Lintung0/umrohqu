@@ -70,11 +70,14 @@ export default function TravelBookingDetailPage() {
 
   const updateStatus = async (newStatus: string) => {
     setUpdating(true)
-    const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", id)
+    const updateData: Record<string, any> = { status: newStatus }
+    if (newStatus === "confirmed") updateData.payment_status = "paid"
+    if (newStatus === "cancelled") updateData.payment_status = "cancelled"
+    const { error } = await supabase.from("bookings").update(updateData).eq("id", id)
     if (error) {
       toast.error(t("travel_dashboard.status_update_failed"))
     } else {
-      setBooking((prev) => prev ? { ...prev, status: newStatus } : prev)
+      setBooking((prev) => prev ? { ...prev, ...updateData } : prev)
       toast.success(t("travel_dashboard.status_updated"))
     }
     setUpdating(false)
@@ -129,20 +132,38 @@ export default function TravelBookingDetailPage() {
           </span>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {["confirmed", "processing", "completed", "cancelled"].map((s) => (
+          {booking.status === "processing" && (
+            <>
+              <button
+                onClick={() => updateStatus("confirmed")}
+                disabled={updating}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all disabled:opacity-50"
+              >
+                {STATUS_MAP.confirmed?.label}
+              </button>
+              <button
+                onClick={() => updateStatus("cancelled")}
+                disabled={updating}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-all disabled:opacity-50"
+              >
+                {STATUS_MAP.cancelled?.label}
+              </button>
+            </>
+          )}
+          {booking.status === "confirmed" && (
             <button
-              key={s}
-              onClick={() => updateStatus(s)}
-              disabled={updating || booking.status === s}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                booking.status === s
-                  ? "bg-primary text-white border-primary"
-                  : "bg-white text-muted-foreground border-border hover:border-primary/30 hover:text-primary"
-              } disabled:opacity-50`}
+              onClick={() => updateStatus("completed")}
+              disabled={updating}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all disabled:opacity-50"
             >
-              {STATUS_MAP[s]?.label}
+              {STATUS_MAP.completed?.label}
             </button>
-          ))}
+          )}
+          {booking.status === "pending_payment" && (
+            <span className="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200">
+              Menunggu Pembayaran
+            </span>
+          )}
         </div>
       </div>
 
