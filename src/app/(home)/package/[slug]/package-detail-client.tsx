@@ -563,7 +563,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   }
                   addToCompare(pkg as unknown as PackageType)
                   toast.success("Paket berhasil ditambahkan ke perbandingan")
-                  router.push("/compare")
                 }}
               >
                 <><GitCompare className="w-3.5 h-3.5" /> Bandingkan Paket</>

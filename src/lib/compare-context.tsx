@@ -9,7 +9,7 @@ const MAX_COMPARE = 3
 interface CompareContextValue {
   comparePackages: Package[]
   compareCount: number
-  addToCompare: (pkg: Package) => boolean
+  addToCompare: (pkg: Package) => void
   removeFromCompare: (id: string) => void
   clearCompare: () => void
   isSelected: (id: string) => boolean
@@ -43,15 +43,12 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
     if (hydrated) localStorage.setItem(COMPARE_KEY, JSON.stringify(comparePackages))
   }, [comparePackages, hydrated])
 
-  const addToCompare = useCallback((pkg: Package): boolean => {
-    let added = false
+  const addToCompare = useCallback((pkg: Package) => {
     setComparePackages((prev) => {
       if (prev.find((p) => p.id === pkg.id)) return prev
       if (prev.length >= MAX_COMPARE) return prev
-      added = true
       return [...prev, pkg]
     })
-    return added
   }, [])
 
   const removeFromCompare = useCallback((id: string) => {
@@ -89,7 +86,7 @@ export function useCompare(): CompareContextValue {
     return {
       comparePackages: [],
       compareCount: 0,
-      addToCompare: () => false,
+      addToCompare: () => {},
       removeFromCompare: () => {},
       clearCompare: () => {},
       isSelected: () => false,

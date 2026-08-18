@@ -81,7 +81,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
     addToCompare(pkg)
     toast.success("Paket berhasil ditambahkan ke perbandingan")
-    router.push("/compare")
   }
 
   function handleTravelClick(e: React.MouseEvent) {
