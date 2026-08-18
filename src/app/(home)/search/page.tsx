@@ -220,7 +220,12 @@ function SearchContent() {
           .is("deleted_at", null)
 
         if (searchQueryParam) {
-          query = query.or(`name.ilike.%${searchQueryParam}%,description.ilike.%${searchQueryParam}%,departure_city.ilike.%${searchQueryParam}%,slug.ilike.%${searchQueryParam}%`)
+          query = query.or(
+            `name.ilike.*${searchQueryParam}*,` +
+            `description.ilike.*${searchQueryParam}*,` +
+            `departure_city.ilike.*${searchQueryParam}*,` +
+            `slug.ilike.*${searchQueryParam}*`
+          )
         }
 
         const { data: pkgs, error: pkgError } = await query

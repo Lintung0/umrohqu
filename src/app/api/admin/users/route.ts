@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     .select("*, tenant:tenants(name)", { count: "exact" })
 
   if (role && role !== "all") query = query.eq("role", role)
-  if (search) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`)
+  if (search) query = query.or(`full_name.ilike.*${search}*,email.ilike.*${search}*`)
 
   const from = (page - 1) * limit
   const to = from + limit - 1
