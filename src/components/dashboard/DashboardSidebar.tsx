@@ -35,8 +35,8 @@ export default function DashboardSidebar() {
 
   const sidebarContent = (
     <>
-      <div className="p-5 border-b border-border">
-        <div className="flex items-center gap-3">
+      <div className="h-16 px-5 border-b border-border flex items-center">
+        <div className="flex items-center gap-3 min-w-0">
           <Image
             src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || "U")}&background=2A7D4F&color=fff&size=80&bold=true`}
             alt="Avatar"
@@ -92,7 +92,7 @@ export default function DashboardSidebar() {
   return (
     <>
       {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-border px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-border h-16 px-4 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">U</span>
