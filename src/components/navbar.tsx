@@ -33,12 +33,12 @@ const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
   customer: "dashboard_saya",
 }
 
-const NAV_LINKS_KEYS = ["search_packages", "promo", "faq", "al_quran"] as const
+const NAV_LINKS_KEYS = ["search_packages", "promo", "faq", "travel"] as const
 const NAV_HREFS: Record<string, string> = {
   search_packages: "/search",
   promo: "/promotions",
   faq: "/faq",
-  al_quran: "/al-quran",
+  travel: "/travel",
 }
 
 const Navbar = () => {

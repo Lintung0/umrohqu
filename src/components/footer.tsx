@@ -52,7 +52,7 @@ const Footer = () => {
     {
       title: t.footer.ibadah,
       items: [
-        { href: "/al-quran", label: t.footer.al_quran },
+        { href: "/travel", label: t.footer.travel_agencies },
         { href: "/jadwal-sholat", label: t.footer.jadwal_sholat },
       ],
     },
