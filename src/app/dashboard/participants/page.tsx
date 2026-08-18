@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Plus, Pencil, Trash2, User, Phone, Calendar, CheckCircle, X, Loader2, AlertCircle } from "lucide-react"
+import { Plus, Pencil, Trash2, User, X, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet"
 import { useTranslation } from "@/lib/i18n"
 import MobileBottomNav from "@/components/shared/mobile-bottom-nav"
 
@@ -34,6 +37,7 @@ export default function ParticipantsPage() {
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const supabase = createClient()
 
   const fetchParticipants = async () => {
@@ -89,13 +93,14 @@ export default function ParticipantsPage() {
     setSaving(false)
   }
 
-  const remove = async (id: string) => {
-    if (!confirm("Hapus peserta ini?")) return
+  const confirmDelete = async () => {
+    if (!deletingId) return
     await fetch("/api/participants", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id: deletingId }),
     })
+    setDeletingId(null)
     await fetchParticipants()
   }
 
@@ -119,44 +124,41 @@ export default function ParticipantsPage() {
             <p className="text-sm text-muted-foreground mt-0.5">Kelola data jamaah untuk mempercepat pemesanan</p>
           </div>
           <Button onClick={openNew} className="gap-1.5">
-            <Plus className="w-4 h-4" /> {t.common.add}
+            <Plus className="w-4 h-4" /> Tambah Peserta
           </Button>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24">
         {participants.length === 0 ? (
-          <div className="text-center py-20">
-            <User className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="font-semibold mb-2">Belum ada peserta</h3>
-            <p className="text-sm text-muted-foreground mb-6">Tambah data jamaah agar lebih cepat saat booking</p>
-            <Button onClick={openNew}><Plus className="w-4 h-4 mr-1.5" /> {t.common.add}</Button>
+          <div className="bg-white rounded-2xl border border-border p-12 text-center">
+            <User className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+            <h3 className="font-semibold mb-1">Belum ada peserta</h3>
+            <p className="text-sm text-muted-foreground">Tambah data jamaah agar lebih cepat saat booking</p>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="space-y-3">
             {participants.map((p) => (
-              <div key={p.id} className="bg-white border border-border rounded-2xl p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                      <span className="text-sm font-bold text-emerald-600">{p.full_name.charAt(0)}</span>
+              <div key={p.id} className="bg-white border border-border rounded-2xl p-4 sm:p-5 hover:shadow-sm transition-shadow">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                    <span className="text-sm font-bold text-emerald-600">{p.full_name.charAt(0)}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm truncate">{p.full_name}</span>
+                      {p.is_main && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium shrink-0">Utama</span>}
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm truncate">{p.full_name}</span>
-                        {p.is_main && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium shrink-0">Utama</span>}
-                      </div>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
-                        {p.nik && <span>NIK: {p.nik}</span>}
-                        {p.passport_number && <span>Paspor: {p.passport_number}</span>}
-                        {p.phone && <span>Telp: {p.phone}</span>}
-                        {p.gender && <span>{p.gender === "L" ? "Laki-laki" : "Perempuan"}</span>}
-                      </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
+                      {p.nik && <span>NIK: {p.nik}</span>}
+                      {p.passport_number && <span>Paspor: {p.passport_number}</span>}
+                      {p.phone && <span>Telp: {p.phone}</span>}
+                      {p.gender && <span>{p.gender === "L" ? "Laki-laki" : "Perempuan"}</span>}
                     </div>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 shrink-0">
                     <button onClick={() => openEdit(p)} className="p-2 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={() => remove(p.id)} className="p-2 hover:bg-red-50 rounded-lg text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => setDeletingId(p.id)} className="p-2 hover:bg-red-50 rounded-lg text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
               </div>
@@ -165,64 +167,103 @@ export default function ParticipantsPage() {
         )}
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-white">
-              <h3 className="font-semibold">{editingId ? t.common.edit : t.common.add}</h3>
-              <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-muted-foreground" /></button>
+      <Sheet open={showForm} onOpenChange={setShowForm}>
+        <SheetContent side="right" className="sm:max-w-lg w-full">
+          <SheetHeader>
+            <SheetTitle>{editingId ? "Edit Peserta" : "Tambah Peserta"}</SheetTitle>
+            <SheetDescription>
+              {editingId ? "Ubah data peserta yang sudah ada." : "Isi data peserta baru untuk mempercepat booking."}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />{error}
+              </div>
+            )}
+
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Nama Lengkap *</label>
+              <Input type="text" value={form.full_name} onChange={(e) => setForm({...form, full_name: e.target.value})} placeholder="Nama sesuai paspor" className="mt-1" />
             </div>
-            <div className="p-5 space-y-4">
-              {error && <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 flex items-center gap-2"><AlertCircle className="w-4 h-4" />{error}</div>}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Nama Lengkap *</label>
-                <input type="text" value={form.full_name} onChange={(e) => setForm({...form, full_name: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Nama sesuai paspor" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">NIK</label>
-                  <input type="text" value={form.nik} onChange={(e) => setForm({...form, nik: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Jenis Kelamin</label>
-                  <select value={form.gender} onChange={(e) => setForm({...form, gender: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white">
-                    <option value="">Pilih</option>
-                    <option value="L">Laki-laki</option>
-                    <option value="P">Perempuan</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Nomor Paspor</label>
-                  <input type="text" value={form.passport_number} onChange={(e) => setForm({...form, passport_number: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Masa Berlaku Paspor</label>
-                  <input type="date" value={form.passport_expiry} onChange={(e) => setForm({...form, passport_expiry: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Tanggal Lahir</label>
-                  <input type="date" value={form.birth_date} onChange={(e) => setForm({...form, birth_date: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">No. Telepon</label>
-                  <input type="tel" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                </div>
+                <label className="text-xs font-medium text-muted-foreground">NIK</label>
+                <Input type="text" value={form.nik} onChange={(e) => setForm({...form, nik: e.target.value})} className="mt-1" />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Alamat</label>
-                <textarea value={form.address} onChange={(e) => setForm({...form, address: e.target.value})} rows={2} className="w-full border border-border rounded-xl px-4 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                <label className="text-xs font-medium text-muted-foreground">Jenis Kelamin</label>
+                <Select value={form.gender ?? ""} onValueChange={(val) => setForm({...form, gender: val ?? ""})}>
+                  <SelectTrigger className="w-full mt-1">
+                    <SelectValue placeholder="Pilih" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="L">Laki-laki</SelectItem>
+                    <SelectItem value="P">Perempuan</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" checked={form.is_main} onChange={(e) => setForm({...form, is_main: e.target.checked})} className="rounded text-emerald-600 focus:ring-emerald-500" />
-                Jadikan peserta utama
-              </label>
-              <Button onClick={save} disabled={saving} className="w-full">
-                {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> {t.common.saving}</> : t.common.save}
-              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Nomor Paspor</label>
+                <Input type="text" value={form.passport_number} onChange={(e) => setForm({...form, passport_number: e.target.value})} className="mt-1" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Masa Berlaku Paspor</label>
+                <Input type="date" value={form.passport_expiry} onChange={(e) => setForm({...form, passport_expiry: e.target.value})} className="mt-1" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Tanggal Lahir</label>
+                <Input type="date" value={form.birth_date} onChange={(e) => setForm({...form, birth_date: e.target.value})} className="mt-1" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">No. Telepon</label>
+                <Input type="tel" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} className="mt-1" />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Alamat</label>
+              <textarea
+                value={form.address}
+                onChange={(e) => setForm({...form, address: e.target.value})}
+                rows={2}
+                className="w-full border border-input rounded-md px-2.5 py-1.5 text-sm mt-1 focus:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" checked={form.is_main} onChange={(e) => setForm({...form, is_main: e.target.checked})} className="rounded text-emerald-600 focus:ring-emerald-500" />
+              Jadikan peserta utama
+            </label>
+          </div>
+
+          <SheetFooter>
+            <Button onClick={save} disabled={saving} className="w-full">
+              {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Menyimpan...</> : "Simpan"}
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      {deletingId && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setDeletingId(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-5 h-5 text-red-500" />
+            </div>
+            <h3 className="font-semibold text-center mb-1">Hapus Peserta?</h3>
+            <p className="text-sm text-muted-foreground text-center mb-5">Data peserta yang dihapus tidak dapat dikembalikan.</p>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setDeletingId(null)} className="flex-1">Batal</Button>
+              <Button variant="destructive" onClick={confirmDelete} className="flex-1">Hapus</Button>
             </div>
           </div>
         </div>
