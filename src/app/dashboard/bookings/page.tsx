@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { BookOpen, Filter } from "lucide-react"
+import { BookOpen, ChevronRight } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import { BOOKING_STATUSES, formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 
@@ -51,32 +51,37 @@ export default function BookingsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
-        <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+        <div className="space-y-2">
+          <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+        </div>
+        <div className="h-10 bg-muted rounded-lg animate-pulse" />
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="h-24 bg-muted rounded-2xl animate-pulse" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-muted rounded-xl animate-pulse" />)}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">{t("booking.title")}</h1>
-        <p className="text-muted-foreground mt-1">{t("booking.detail_title")}</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("booking.title")}</h1>
+        <p className="text-muted-foreground mt-1">Lacak semua pemesanan paket umroh Anda</p>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
+      {/* Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 -mb-1">
         {BOOKING_STATUSES.map((s) => (
           <button
             key={s.value}
             onClick={() => setFilter(s.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
               filter === s.value
-                ? "bg-emerald-600 text-white"
-                : "bg-white border border-border text-muted-foreground hover:text-foreground"
+                ? "bg-emerald-600 text-white shadow-sm"
+                : "bg-white border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
             }`}
           >
             {s.label}
@@ -84,49 +89,51 @@ export default function BookingsPage() {
         ))}
       </div>
 
+      {/* Bookings List */}
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
-          <BookOpen className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-muted-foreground">{t("booking.no_bookings")}</p>
-          <Link href="/search" className="text-sm text-primary hover:underline mt-2 inline-block">{t("package.search_title")}</Link>
+        <div className="bg-white border border-border rounded-xl p-12 text-center shadow-sm">
+          <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="font-medium text-muted-foreground">{t("booking.no_bookings")}</p>
+          <Link href="/search" className="text-sm text-emerald-600 hover:text-emerald-700 mt-2 inline-flex items-center gap-1">
+            {t("package.search_title")} <ChevronRight className="w-3 h-3" />
+          </Link>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="bg-white border border-border rounded-xl shadow-sm divide-y divide-border">
           {filtered.map((booking) => (
             <Link
               key={booking.id}
               href={`/dashboard/bookings/${booking.id}`}
-              className="flex items-center gap-4 bg-white rounded-2xl border border-border p-4 hover:shadow-md transition-shadow"
+              className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors first:rounded-t-xl last:rounded-b-xl"
             >
               {booking.package?.image_url ? (
                 <Image
                   src={booking.package.image_url}
                   alt={booking.package.name}
-                  width={80}
-                  height={80}
-                  className="rounded-xl object-cover shrink-0"
+                  width={56}
+                  height={56}
+                  className="rounded-lg object-cover shrink-0"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-xl bg-muted shrink-0" />
+                <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-muted-foreground/50" />
+                </div>
               )}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium truncate">{booking.package?.name || t("booking.package")}</p>
-                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status, "booking")}`}>
+                <p className="font-medium truncate text-sm">{booking.package?.name || t("booking.package")}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(booking.status, "booking")}`}>
                     {getStatusLabel(booking.status, "booking")}
                   </span>
+                  <span className="text-xs text-muted-foreground">
+                    {booking.pilgrim_count} {t("booking.participants")} · {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                  </span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {booking.pilgrim_count} {t("booking.participants")} · {booking.booking_channel === "marketplace" ? t("travel_dashboard.all_bookings") : t("travel_dashboard.title")}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-                </p>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-lg font-bold">{formatRupiah(booking.total)}</p>
-                <p className="text-xs text-muted-foreground">+ {formatRupiah(booking.fee)} {t("travel_dashboard.fee")}</p>
+                <p className="text-sm font-bold">{formatRupiah(booking.total)}</p>
               </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
             </Link>
           ))}
         </div>

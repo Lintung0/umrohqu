@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { Heart, Clock, Trash2 } from "lucide-react"
+import { Heart, Clock, Trash2, ChevronRight } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import Link from "next/link"
@@ -29,6 +29,7 @@ export default function WishlistPage() {
   const [user, setUser] = useState<User | null>(null)
   const [items, setItems] = useState<WishlistItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -47,41 +48,47 @@ export default function WishlistPage() {
     load()
   }, [])
 
-  async function removeWishlist(wishlistId: string) {
-    if (!window.confirm("Hapus paket dari wishlist?")) return
-    const { error } = await supabase.from("wishlists").delete().eq("id", wishlistId)
+  async function confirmRemove() {
+    if (!deletingId) return
+    const { error } = await supabase.from("wishlists").delete().eq("id", deletingId)
     if (error) {
       toast.error("Gagal menghapus dari wishlist")
     } else {
-      setItems((prev) => prev.filter((i) => i.id !== wishlistId))
+      setItems((prev) => prev.filter((i) => i.id !== deletingId))
       toast.success("Berhasil dihapus dari wishlist")
     }
+    setDeletingId(null)
   }
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
-        <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+        <div className="space-y-2">
+          <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-64 bg-muted rounded-2xl animate-pulse" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-64 bg-muted rounded-xl animate-pulse" />)}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Wishlist</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Wishlist</h1>
         <p className="text-muted-foreground mt-1">Paket umroh yang Anda simpan</p>
       </div>
 
+      {/* Content */}
       {items.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
-          <Heart className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-muted-foreground">Belum ada paket di wishlist</p>
-          <Link href="/search" className="text-emerald-600 hover:underline text-sm mt-2 inline-block">
-            Cari paket umroh →
+        <div className="bg-white border border-border rounded-xl p-12 text-center shadow-sm">
+          <Heart className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="font-medium text-muted-foreground">Belum ada paket di wishlist</p>
+          <Link href="/search" className="text-sm text-emerald-600 hover:text-emerald-700 mt-2 inline-flex items-center gap-1">
+            Cari paket umroh <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
       ) : (
@@ -91,9 +98,9 @@ export default function WishlistPage() {
             return (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl border border-border overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group"
               >
-                <Link href={`/package/${pkg?.slug || ""}`}>
+                <Link href={`/package/${pkg?.slug || ""}`} className="block">
                   <div className="relative">
                     {pkg?.image_url ? (
                       <Image
@@ -101,7 +108,7 @@ export default function WishlistPage() {
                         alt={pkg.name}
                         width={400}
                         height={200}
-                        className="w-full h-40 object-cover"
+                        className="w-full h-40 object-cover group-hover:scale-[1.02] transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-40 bg-muted" />
@@ -113,7 +120,7 @@ export default function WishlistPage() {
                 </Link>
                 <div className="p-4">
                   <Link href={`/package/${pkg?.slug || ""}`}>
-                    <h3 className="font-semibold hover:text-emerald-600 transition-colors">{pkg?.name}</h3>
+                    <h3 className="font-semibold text-sm hover:text-emerald-600 transition-colors line-clamp-1">{pkg?.name}</h3>
                   </Link>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
                     {pkg?.duration_days && (
@@ -123,11 +130,11 @@ export default function WishlistPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center justify-between mt-3">
-                    <span className="text-lg font-bold text-emerald-600">{formatRupiah(pkg?.price || 0)}</span>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
+                    <span className="text-base font-bold text-emerald-600">{formatRupiah(pkg?.price || 0)}</span>
                     <button
-                      onClick={() => removeWishlist(item.id)}
-                      className="p-2 text-muted-foreground hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                      onClick={() => setDeletingId(item.id)}
+                      className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
                       title="Hapus dari wishlist"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -137,6 +144,23 @@ export default function WishlistPage() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {deletingId && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" onClick={() => setDeletingId(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-5 h-5 text-red-500" />
+            </div>
+            <h3 className="font-semibold text-center mb-1">Hapus dari Wishlist?</h3>
+            <p className="text-sm text-muted-foreground text-center mb-5">Paket ini akan dihapus dari daftar wishlist Anda.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeletingId(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">Batal</button>
+              <button onClick={confirmRemove} className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors">Hapus</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
