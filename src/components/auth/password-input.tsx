@@ -10,6 +10,7 @@ interface PasswordInputProps {
   onChange: (v: string) => void
   error?: string
   autoComplete?: string
+  hideLabel?: boolean
 }
 
 export function PasswordInput({
@@ -18,15 +19,18 @@ export function PasswordInput({
   onChange,
   error,
   autoComplete,
+  hideLabel,
 }: PasswordInputProps) {
   const [show, setShow] = useState(false)
   const [focused, setFocused] = useState(false)
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
-        {label}
-      </label>
+      {!hideLabel && label && (
+        <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
+          {label}
+        </label>
+      )}
       <div
         className={cn(
           "flex min-h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] transition-[border-color,box-shadow] duration-150",

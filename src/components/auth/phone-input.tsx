@@ -8,16 +8,19 @@ interface PhoneInputProps {
   value: string
   onChange: (v: string) => void
   error?: string
+  hideLabel?: boolean
 }
 
-export function PhoneInput({ value, onChange, error }: PhoneInputProps) {
+export function PhoneInput({ value, onChange, error, hideLabel }: PhoneInputProps) {
   const [focused, setFocused] = useState(false)
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
-        Nomor Telepon
-      </label>
+      {!hideLabel && (
+        <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
+          Nomor Telepon
+        </label>
+      )}
       <div
         className={cn(
           "flex min-h-[52px] items-stretch overflow-hidden rounded-[14px] border-[1.5px] transition-[border-color,box-shadow] duration-150",

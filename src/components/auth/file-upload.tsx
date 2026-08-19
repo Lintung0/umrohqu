@@ -14,6 +14,7 @@ interface FileUploadProps {
   error?: string
   required?: boolean
   description?: string
+  hideLabel?: boolean
 }
 
 const ACCEPT_MAP: Record<string, string> = {
@@ -33,6 +34,7 @@ export function FileUpload({
   error,
   required,
   description,
+  hideLabel,
 }: FileUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
@@ -100,9 +102,11 @@ export function FileUpload({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
+      {!hideLabel && (
+        <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+      )}
 
       {hasFile && !uploading ? (
         <div className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-auth-primary/30 bg-auth-primary-light/50 px-4 py-3">
