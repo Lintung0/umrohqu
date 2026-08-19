@@ -292,7 +292,7 @@ function SearchContent() {
       }
       if (departure) {
         const dep = departure.toLowerCase()
-        const cities = (pkg.departure_cities || [pkg.departure_city]).map((c) => c?.toLowerCase() || "")
+        const cities = (pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).map((c) => c?.toLowerCase() || "")
         if (!cities.some((c) => c.includes(dep))) return false
       }
       if (month && month !== "") {
