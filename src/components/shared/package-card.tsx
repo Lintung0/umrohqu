@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, GitCompare } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, GitCompare, Heart, Loader2 } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
-import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
+import { CenterPopup } from "@/components/ui/center-popup"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import { PackageStatusBadge } from "./package-status-badge"
 import type { Package, Tenant } from "@/lib/types"
@@ -51,14 +52,15 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const { t } = useTranslation()
   const { addToCompare, isFull, comparePackages } = useCompare()
   const router = useRouter()
+  const supabase = createClient()
   const [imgSrc, setImgSrc] = useState(getSafeImage(pkg.image_url))
   const [imgError, setImgError] = useState(false)
-
-  const discount = pkg.original_price && pkg.original_price > pkg.price
-    ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
-    : 0
+  const [isWishlisted, setIsWishlisted] = useState(false)
+  const [togglingWishlist, setTogglingWishlist] = useState(false)
+  const [popup, setPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" })
 
   const soldOut = (pkg.available ?? 0) <= 0
+  const hasCashback = (pkg.cashback_amount ?? 0) > 0
 
   const typeKey = (pkg.type || "reguler").toLowerCase()
   const typeLabel = TYPE_LABEL[typeKey] || pkg.type
@@ -71,16 +73,63 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
   }
 
+  const showPopup = useCallback((message: string) => {
+    setPopup({ show: true, message })
+  }, [])
+
   function handleCompare(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
     if (comparePackages.some((p) => p.id === pkg.id)) return
     if (isFull) {
-      toast.warning("Maksimal 3 paket untuk dibandingkan")
+      showPopup("Maksimal 3 paket untuk dibandingkan")
       return
     }
     addToCompare(pkg)
-    toast.success("Paket berhasil ditambahkan ke perbandingan")
+    showPopup("Ditambahkan ke perbandingan")
+  }
+
+  async function handleWishlist(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (togglingWishlist) return
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push("/login")
+      return
+    }
+
+    setTogglingWishlist(true)
+    try {
+      if (isWishlisted) {
+        const { data: existing } = await supabase
+          .from("wishlists")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("package_id", pkg.id)
+          .maybeSingle()
+        if (existing) {
+          await supabase.from("wishlists").delete().eq("id", existing.id)
+        }
+        setIsWishlisted(false)
+        showPopup("Dihapus dari wishlist")
+      } else {
+        const { data } = await supabase
+          .from("wishlists")
+          .insert({ user_id: user.id, package_id: pkg.id })
+          .select("id")
+          .single()
+        if (data) {
+          setIsWishlisted(true)
+          showPopup("Ditambahkan ke wishlist")
+        }
+      }
+    } catch {
+      // silent
+    } finally {
+      setTogglingWishlist(false)
+    }
   }
 
   function handleTravelClick(e: React.MouseEvent) {
@@ -93,7 +142,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         href={`/package/${pkg.slug}`}
         className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group cursor-pointer"
       >
-        <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <div className="relative aspect-video w-full overflow-hidden">
           <Image
             src={imgSrc}
             alt={pkg.name}
@@ -109,26 +158,35 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${typeColor}`}>
               {typeLabel}
             </span>
-            {soldOut ? (
+            {soldOut && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-red-500 text-white">
                 Habis Terjual
               </span>
-            ) : discount > 0 ? (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-red-500 text-white">
-                -{discount}%
-              </span>
-            ) : null}
+            )}
           </div>
 
-          <button
-            onClick={handleCompare}
-            className="absolute top-2.5 right-2.5 z-10 bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
-            type="button"
-            aria-label="Bandingkan paket"
-            title="Bandingkan paket"
-          >
-            <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
-          </button>
+          <div className="absolute top-2.5 right-2.5 z-10 flex gap-1.5">
+            <button
+              onClick={handleWishlist}
+              className="bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+              type="button"
+              aria-label="Tambah ke wishlist"
+            >
+              {togglingWishlist ? (
+                <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />
+              ) : (
+                <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
+              )}
+            </button>
+            <button
+              onClick={handleCompare}
+              className="bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+              type="button"
+              aria-label="Bandingkan paket"
+            >
+              <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col flex-1 p-3.5">
@@ -201,16 +259,20 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
           <div className="flex items-end justify-between pt-2.5 border-t border-slate-100 mt-auto">
             <div>
-              {pkg.original_price && (
-                <p className="text-[11px] text-slate-400 line-through">{formatRupiah(pkg.original_price)}</p>
-              )}
               <div className="flex items-baseline gap-1">
                 <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
                 <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
               </div>
+              {hasCashback && (
+                <p className="text-[11px] font-medium text-amber-600">
+                  Cashback {formatRupiah(pkg.cashback_amount!)}
+                </p>
+              )}
             </div>
           </div>
         </div>
+
+        <CenterPopup show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "" })} />
       </Link>
     )
   }
@@ -222,7 +284,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 transition-colors group cursor-pointer"
       >
         <div className="flex flex-col sm:flex-row h-full">
-          <div className="relative w-full sm:w-36 h-32 sm:h-auto shrink-0 overflow-hidden">
+          <div className="relative w-full aspect-video sm:aspect-auto sm:h-full min-h-[180px] shrink-0 overflow-hidden">
             <Image
               src={imgSrc}
               alt={pkg.name}
@@ -236,21 +298,29 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               <span className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${typeColor}`}>
                 {typeLabel}
               </span>
-              {pkg.is_promo && discount > 0 && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-100 text-red-700">
-                  -{discount}%
-                </span>
-              )}
             </div>
-            <button
-              onClick={handleCompare}
-              className="absolute top-2 right-2 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
-              type="button"
-              aria-label="Bandingkan paket"
-              title="Bandingkan paket"
-            >
-              <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
-            </button>
+            <div className="absolute top-2 right-2 z-10 flex gap-1.5">
+              <button
+                onClick={handleWishlist}
+                className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+                type="button"
+                aria-label="Tambah ke wishlist"
+              >
+                {togglingWishlist ? (
+                  <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />
+                ) : (
+                  <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
+                )}
+              </button>
+              <button
+                onClick={handleCompare}
+                className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+                type="button"
+                aria-label="Bandingkan paket"
+              >
+                <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 p-4 flex flex-col justify-between">
@@ -282,17 +352,21 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             </div>
             <div className="flex items-end justify-between pt-2 border-t border-gray-100">
               <div>
-                {pkg.original_price && (
-                  <p className="text-[11px] text-gray-400 line-through">{formatRupiah(pkg.original_price)}</p>
-                )}
                 <p className="text-base font-bold text-emerald-700">
                   {formatRupiah(pkg.price)}
                   <span className="text-[10px] text-gray-400 font-normal">{t("card.per_person")}</span>
                 </p>
+                {hasCashback && (
+                  <p className="text-[11px] font-medium text-amber-600">
+                    Cashback {formatRupiah(pkg.cashback_amount!)}
+                  </p>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        <CenterPopup show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "" })} />
       </Link>
     )
   }
@@ -302,7 +376,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       href={`/package/${pkg.slug}`}
       className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 transition-colors group cursor-pointer"
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
+      <div className="relative aspect-video w-full overflow-hidden">
         <Image
           src={imgSrc}
           alt={pkg.name}
@@ -318,26 +392,35 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${typeColor}`}>
             {typeLabel}
           </span>
-            {soldOut ? (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500 text-white">
-                Habis Terjual
-              </span>
-          ) : discount > 0 ? (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-500 text-white">
-              -{discount}%
+          {soldOut && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500 text-white">
+              Habis Terjual
             </span>
-          ) : null}
+          )}
         </div>
 
-        <button
-          onClick={handleCompare}
-          className="absolute top-2.5 right-2.5 z-10 bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
-          type="button"
-          aria-label="Bandingkan paket"
-          title="Bandingkan paket"
-        >
-          <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
-        </button>
+        <div className="absolute top-2.5 right-2.5 z-10 flex gap-1.5">
+          <button
+            onClick={handleWishlist}
+            className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+            type="button"
+            aria-label="Tambah ke wishlist"
+          >
+            {togglingWishlist ? (
+              <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />
+            ) : (
+              <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
+            )}
+          </button>
+          <button
+            onClick={handleCompare}
+            className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+            type="button"
+            aria-label="Bandingkan paket"
+          >
+            <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+          </button>
+        </div>
 
         <div className="absolute bottom-2.5 left-2.5 pointer-events-none">
           <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
@@ -415,16 +498,20 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
         <div className="flex items-end justify-between pt-3 border-t border-gray-100 mt-auto">
           <div>
-            {pkg.original_price && (
-              <p className="text-[11px] text-gray-400 line-through">{formatRupiah(pkg.original_price)}</p>
-            )}
             <div className="flex items-baseline gap-1">
               <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
             </div>
+            {hasCashback && (
+              <p className="text-[11px] font-medium text-amber-600">
+                Cashback {formatRupiah(pkg.cashback_amount!)}
+              </p>
+            )}
           </div>
         </div>
       </div>
+
+      <CenterPopup show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "" })} />
     </Link>
   )
 }

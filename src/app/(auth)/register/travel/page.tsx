@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { z } from "zod"
 import {
   Building2, Mail, User, Phone, MapPin, FileText, Shield,
   AlertCircle, CheckCircle, ArrowLeft, ArrowRight, Loader2, Globe
@@ -56,6 +57,33 @@ const STEPS: { label: string; icon: typeof Building2 }[] = [
   { label: "Alamat", icon: MapPin },
 ]
 
+const STEP1_SCHEMA = z.object({
+  travel_name: z.string().min(3, "Nama travel minimal 3 karakter"),
+})
+
+const STEP2_SCHEMA = z.object({
+  ppiu_number: z.string().min(1, "Nomor Izin PPIU wajib diisi"),
+  sk_ppiu_doc_url: z.string().url("File SK PPIU wajib diupload").or(z.literal("")).refine((v) => v !== "", "File SK PPIU wajib diupload"),
+  nib: z.string().min(1, "NIB wajib diisi"),
+  nib_doc_url: z.string().url("File Dokumen NIB wajib diupload").or(z.literal("")).refine((v) => v !== "", "File Dokumen NIB wajib diupload"),
+})
+
+const STEP3_SCHEMA = z.object({
+  name: z.string().min(3, "Nama minimal 3 karakter"),
+  email: z.string().email("Email tidak valid"),
+  admin_phone: z.string().min(10, "Nomor telepon minimal 10 digit"),
+  password: z.string().min(8, "Kata sandi minimal 8 karakter"),
+  confirm_password: z.string(),
+}).refine((data) => data.password === data.confirm_password, {
+  message: "Kata sandi tidak cocok",
+  path: ["confirm_password"],
+})
+
+const STEP4_SCHEMA = z.object({
+  full_address: z.string().min(10, "Alamat lengkap wajib diisi"),
+  province: z.string().min(1, "Provinsi wajib diisi"),
+})
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -101,7 +129,6 @@ export default function RegisterTravelPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
-  const [slugManual, setSlugManual] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [serverError, setServerError] = useState("")
@@ -110,7 +137,7 @@ export default function RegisterTravelPage() {
   const set = (k: keyof Form) => (v: string) => {
     setForm((f) => {
       const next = { ...f, [k]: v }
-      if (k === "travel_name" && !slugManual) {
+      if (k === "travel_name") {
         next.slug = slugify(v)
       }
       return next
@@ -119,38 +146,20 @@ export default function RegisterTravelPage() {
   }
 
   const validateStep = (s: Step): boolean => {
-    const errs: Record<string, string> = {}
-
-    if (s === 1) {
-      if (!form.travel_name.trim()) errs.travel_name = "Nama travel wajib diisi"
-      else if (form.travel_name.trim().length < 3) errs.travel_name = "Minimal 3 karakter"
-      if (!form.slug.trim()) errs.slug = "Subdomain wajib diisi"
+    const schemas = { 1: STEP1_SCHEMA, 2: STEP2_SCHEMA, 3: STEP3_SCHEMA, 4: STEP4_SCHEMA }
+    const schema = schemas[s]
+    const result = schema.safeParse(form)
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {}
+      result.error.issues.forEach((err) => {
+        const field = err.path[0] as string
+        if (field) fieldErrors[field] = err.message
+      })
+      setErrors(fieldErrors)
+      return false
     }
-
-    if (s === 2) {
-      if (!form.ppiu_number.trim()) errs.ppiu_number = "Nomor Izin PPIU wajib diisi"
-      if (!form.sk_ppiu_doc_url) errs.sk_ppiu_doc_url = "File SK PPIU wajib diupload"
-      if (!form.nib.trim()) errs.nib = "NIB wajib diisi"
-      if (!form.nib_doc_url) errs.nib_doc_url = "File Dokumen NIB wajib diupload"
-    }
-
-    if (s === 3) {
-      if (!form.name.trim()) errs.name = "Nama lengkap wajib diisi"
-      if (!form.email.trim()) errs.email = "Email wajib diisi"
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = "Email tidak valid"
-      if (!form.admin_phone.trim()) errs.admin_phone = "Nomor WhatsApp wajib diisi"
-      if (!form.password) errs.password = "Kata sandi wajib diisi"
-      else if (form.password.length < 8) errs.password = "Minimal 8 karakter"
-      if (form.password !== form.confirm_password) errs.confirm_password = "Kata sandi tidak cocok"
-    }
-
-    if (s === 4) {
-      if (!form.full_address.trim()) errs.full_address = "Alamat lengkap wajib diisi"
-      if (!form.province.trim()) errs.province = "Provinsi wajib diisi"
-    }
-
-    setErrors(errs)
-    return Object.keys(errs).length === 0
+    setErrors({})
+    return true
   }
 
   const nextStep = () => {
@@ -248,17 +257,30 @@ export default function RegisterTravelPage() {
             error={errors.travel_name}
             icon={Building2}
           />
-          <AuthInputField
-            label="Subdomain (URL Travel)"
-            value={form.slug}
-            onChange={(v) => { set("slug")(v); setSlugManual(true) }}
-            placeholder="al-haramain"
-            error={errors.slug}
-            icon={Globe}
-          />
-          <p className="text-[12px] text-auth-muted-foreground -mt-2">
-            Akan digunakan sebagai URL: {form.slug || "nama-travel"}.umrahqu.id
-          </p>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
+              Subdomain (URL Travel)
+            </label>
+            <div
+              className="flex min-h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-auth-border bg-gray-50"
+            >
+              <div className="flex items-center pl-3.5 text-auth-muted-foreground">
+                <Globe size={18} />
+              </div>
+              <input
+                type="text"
+                value={form.slug || slugify(form.travel_name)}
+                disabled
+                className="flex-1 border-none bg-transparent px-3 py-3.5 text-[15px] text-auth-foreground outline-none placeholder:text-auth-muted-foreground/60 cursor-not-allowed opacity-60"
+              />
+              <div className="flex shrink-0 items-center border-l-[1.5px] border-auth-border bg-auth-bg px-3 py-3.5">
+                <span className="text-[14px] font-medium text-auth-muted-foreground">.umrahqu.id</span>
+              </div>
+            </div>
+            <p className="text-[12px] text-auth-muted-foreground">
+              URL travel Anda: <span className="font-medium text-auth-foreground">{form.slug || "nama-travel"}.umrahqu.id</span>
+            </p>
+          </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
               Deskripsi Travel

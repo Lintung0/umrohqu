@@ -97,6 +97,7 @@ export interface Package {
   country: string | null
   country_code: string | null
   city: string | null
+  cashback_amount: number | null
 }
 
 export interface Booking {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Upload, FileText, X, AlertCircle, Loader2 } from "lucide-react"
+import { Upload, FileText, X, AlertCircle, Loader2, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface FileUploadProps {
@@ -20,6 +20,8 @@ const ACCEPT_MAP: Record<string, string> = {
   image: "image/jpeg,image/png,image/webp",
   document: "application/pdf",
 }
+
+const MAX_SIZE = 2 * 1024 * 1024 // 2MB
 
 export function FileUpload({
   label,
@@ -40,8 +42,8 @@ export function FileUpload({
   const acceptTypes = ACCEPT_MAP[accept] || accept
 
   async function handleFile(file: File) {
-    if (file.size > 5 * 1024 * 1024) {
-      onError?.("Ukuran file maksimal 5MB")
+    if (file.size > MAX_SIZE) {
+      onError?.("Ukuran file maksimal 2MB")
       return
     }
 
@@ -105,21 +107,35 @@ export function FileUpload({
       {hasFile && !uploading ? (
         <div className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-auth-primary/30 bg-auth-primary-light/50 px-4 py-3">
           {isImage ? (
-            <img
-              src={value}
-              alt={fileName || "Preview"}
-              className="h-12 w-12 rounded-lg object-cover"
-            />
+            <a href={value} target="_blank" rel="noopener noreferrer" className="shrink-0">
+              <img
+                src={value}
+                alt={fileName || "Preview"}
+                className="h-12 w-12 rounded-lg object-cover hover:opacity-80 transition-opacity"
+              />
+            </a>
           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100">
+            <a
+              href={value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-emerald-100 hover:bg-emerald-200 transition-colors"
+            >
               <FileText className="h-5 w-5 text-emerald-600" />
-            </div>
+            </a>
           )}
           <div className="flex-1 min-w-0">
             <p className="text-[14px] font-medium text-auth-foreground truncate">
               {fileName || "File terupload"}
             </p>
-            <p className="text-[12px] text-auth-muted-foreground">Terupload</p>
+            <a
+              href={value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[12px] text-emerald-600 hover:underline inline-flex items-center gap-1"
+            >
+              Lihat file <ExternalLink size={10} />
+            </a>
           </div>
           <button
             type="button"
@@ -153,7 +169,7 @@ export function FileUpload({
             {uploading ? "Mengupload..." : "Klik atau seret file ke sini"}
           </p>
           <p className="text-[11px] text-auth-muted-foreground/60">
-            {isImage ? "JPG, PNG, WebP (maks. 5MB)" : "PDF (maks. 5MB)"}
+            {isImage ? "JPG, PNG, WebP (maks. 2MB)" : "PDF (maks. 2MB)"}
           </p>
         </div>
       )}

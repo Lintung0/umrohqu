@@ -142,6 +142,7 @@ export const MOCK_PACKAGES: Package[] = [
     country: "Arab Saudi",
     country_code: "SA",
     city: "Makkah",
+    cashback_amount: 1500000,
   },
   {
     id: "preview-pkg-2",
@@ -184,6 +185,7 @@ export const MOCK_PACKAGES: Package[] = [
     country: "Arab Saudi",
     country_code: "SA",
     city: "Makkah",
+    cashback_amount: 0,
   },
   {
     id: "preview-pkg-3",
@@ -226,5 +228,6 @@ export const MOCK_PACKAGES: Package[] = [
     country: "Arab Saudi",
     country_code: "SA",
     city: "Makkah",
+    cashback_amount: 500000,
   },
 ]

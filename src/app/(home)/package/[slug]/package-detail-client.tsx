@@ -346,8 +346,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                             {/* Content */}
                             <div className="flex-1 pt-1">
                               <div className="bg-gray-50 rounded-xl p-4 border border-border/40 hover:border-primary/20 hover:bg-primary/[0.02] transition-all">
-                                <p className="text-xs font-semibold text-primary mb-1">Hari ke-{item.day}</p>
-                                {item.title && <p className="text-sm font-semibold text-foreground mb-1">{item.title}</p>}
+                                {item.title && !/^Hari ke-\d+$/.test(item.title) && <p className="text-sm font-semibold text-foreground mb-1">{item.title}</p>}
                                 <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
                                </div>
                              </div>

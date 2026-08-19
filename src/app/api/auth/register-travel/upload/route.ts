@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
 
 const ALLOWED_BUCKETS = ["ppiu", "nib", "logo"]
-const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_SIZE = 2 * 1024 * 1024 // 2MB
 
 export async function POST(request: Request) {
   try {
