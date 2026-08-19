@@ -249,29 +249,33 @@ function SearchContent() {
           tnts.forEach((t) => tenantMap.set(t.id, t as Tenant))
           setTenants(tenantMap)
 
-          const { data: bids } = await supabase
-            .from("bids")
-            .select("travel_id, bid_value, is_active, impressions, clicks")
-            .eq("is_active", true)
+          try {
+            const { data: bids } = await supabase
+              .from("bids")
+              .select("travel_id, bid_value, is_active, impressions, clicks")
+              .eq("is_active", true)
 
-          if (bids && bids.length > 0) {
-            const entries = bids.map((b: any) => ({
-              travelId: b.travel_id,
-              factors: {
-                bidScore: b.bid_value || 0,
-                rating: 0,
-                reviewCount: 0,
-                totalBookings: 0,
-                conversionRate: b.impressions > 0 ? (b.clicks / b.impressions) * 100 : 0,
-                isVerified: tenantMap.get(b.travel_id)?.is_verified ?? false,
-                hasPromo: false,
-                sponsored: false,
-              } as RankingFactors,
-            }))
-            const ranked = rankTravels(entries, DEFAULT_RANKING_CONFIG)
-            const scoreMap = new Map<string, number>()
-            ranked.forEach((r) => scoreMap.set(r.travelId, r.score))
-            setRankingScores(scoreMap)
+            if (bids && bids.length > 0) {
+              const entries = bids.map((b: any) => ({
+                travelId: b.travel_id,
+                factors: {
+                  bidScore: b.bid_value || 0,
+                  rating: 0,
+                  reviewCount: 0,
+                  totalBookings: 0,
+                  conversionRate: b.impressions > 0 ? (b.clicks / b.impressions) * 100 : 0,
+                  isVerified: tenantMap.get(b.travel_id)?.is_verified ?? false,
+                  hasPromo: false,
+                  sponsored: false,
+                } as RankingFactors,
+              }))
+              const ranked = rankTravels(entries, DEFAULT_RANKING_CONFIG)
+              const scoreMap = new Map<string, number>()
+              ranked.forEach((r) => scoreMap.set(r.travelId, r.score))
+              setRankingScores(scoreMap)
+            }
+          } catch {
+            // bids table may not exist yet, ranking stays empty
           }
         }
       } catch (error) {
