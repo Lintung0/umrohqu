@@ -47,12 +47,6 @@ const HOTEL_STARS = [
   { value: "5", label: "Bintang 5" },
 ]
 
-function formatPriceShort(v: number): string {
-  if (v >= 100000000) return `${Math.round(v / 1000000000) * 1}M`
-  if (v >= 10000000) return `${Math.round(v / 1000000)}jt`
-  return `${Math.round(v / 1000)}rb`
-}
-
 function CountrySelectFilter({
   value,
   onChange,
@@ -137,7 +131,7 @@ export default function SearchSidebar({
     priceRange[0] === range[0] && priceRange[1] === range[1]
 
   const handlePriceQuick = (range: [number, number]) => {
-    if (isPriceQuickActive(range)) setPriceRange([10000000, 500000000])
+    if (isPriceQuickActive(range)) setPriceRange([0, 500000000])
     else setPriceRange(range)
   }
 
@@ -183,27 +177,6 @@ export default function SearchSidebar({
         <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
           <Banknote className="w-3.5 h-3.5 text-emerald-600" /> Estimasi Harga
         </label>
-
-        <div className="px-1">
-          <input
-            type="range"
-            min={10000000}
-            max={500000000}
-            step={5000000}
-            value={priceRange[1]}
-            onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-            aria-label="Estimasi harga maksimum"
-            aria-valuetext={`Rp ${formatPriceShort(priceRange[1])}`}
-            className="w-full h-2 bg-slate-200 rounded-full appearance-none cursor-pointer accent-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
-          />
-          <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-            <span>Rp 10jt</span>
-            <span className="font-semibold text-emerald-700 text-xs">
-              Rp {formatPriceShort(priceRange[0])} – {formatPriceShort(priceRange[1])}
-            </span>
-            <span>Rp 500jt</span>
-          </div>
-        </div>
 
         <div className="flex flex-wrap gap-1.5">
           {PRICE_RANGES.map((pr) => (

@@ -60,7 +60,7 @@ function SearchContent() {
   const parsedMin = parseInt(searchParams.get("priceMin") ?? "", 10)
   const parsedMax = parseInt(searchParams.get("priceMax") ?? "", 10)
   const priceRange: [number, number] = [
-    Number.isFinite(parsedMin) ? parsedMin : 10000000,
+    Number.isFinite(parsedMin) ? parsedMin : 0,
     Number.isFinite(parsedMax) ? parsedMax : 500000000,
   ]
   const searchQueryParam = searchQuery
