@@ -3,11 +3,36 @@ import { createAdminClient } from "@/lib/supabase/server"
 import { z } from "zod"
 
 const registerTravelSchema = z.object({
+  // Step 1: Profil Publik
+  travel_name: z.string().min(3, "Nama travel minimal 3 karakter"),
+  slug: z.string().min(3, "Subdomain minimal 3 karakter"),
+  description: z.string().optional(),
+  logo_url: z.string().url().optional().or(z.literal("")),
+  city: z.string().optional(),
+  travel_phone: z.string().optional(),
+
+  // Step 2: Legalitas
+  ppiu_number: z.string().min(1, "Nomor Izin PPIU wajib diisi"),
+  sk_ppiu_doc_url: z.string().url("File SK PPIU wajib diupload"),
+  nib: z.string().min(1, "NIB wajib diisi"),
+  nib_doc_url: z.string().url("File Dokumen NIB wajib diupload"),
+  npwp: z.string().optional(),
+  akreditasi_ppiu: z.string().optional(),
+
+  // Step 3: Akun Admin
   name: z.string().min(3, "Nama minimal 3 karakter"),
   email: z.string().email("Email tidak valid"),
+  admin_phone: z.string().min(10, "Nomor telepon minimal 10 digit"),
   password: z.string().min(8, "Kata sandi minimal 8 karakter"),
-  travel_name: z.string().min(3, "Nama travel minimal 3 karakter"),
-  travel_phone: z.string().optional(),
+  confirm_password: z.string(),
+
+  // Step 4: Alamat
+  full_address: z.string().min(10, "Alamat lengkap wajib diisi"),
+  province: z.string().min(1, "Provinsi wajib diisi"),
+  postal_code: z.string().optional(),
+}).refine((data) => data.password === data.confirm_password, {
+  message: "Kata sandi tidak cocok",
+  path: ["confirm_password"],
 })
 
 function slugify(text: string): string {
@@ -28,11 +53,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: msg }, { status: 400 })
     }
 
-    const { name, email, password, travel_name, travel_phone } = parsed.data
+    const {
+      travel_name, slug: rawSlug, description, logo_url, city, travel_phone,
+      ppiu_number, sk_ppiu_doc_url, nib, nib_doc_url, npwp, akreditasi_ppiu,
+      name, email, admin_phone, password,
+      full_address, province, postal_code,
+    } = parsed.data
+
     const lowerEmail = email.toLowerCase()
     const admin = createAdminClient()
 
-    let slug = slugify(travel_name)
+    // Ensure slug uniqueness
+    let slug = rawSlug || slugify(travel_name)
     const { data: existingTenant } = await admin
       .from("tenants")
       .select("id")
@@ -43,6 +75,7 @@ export async function POST(request: Request) {
       slug = slug + "-" + Date.now().toString(36)
     }
 
+    // Create tenant
     const { data: tenant, error: tenantError } = await admin
       .from("tenants")
       .insert({
@@ -50,15 +83,31 @@ export async function POST(request: Request) {
         slug,
         contact_email: lowerEmail,
         contact_phone: travel_phone || null,
+        description: description || null,
+        logo_url: logo_url || null,
+        city: city || null,
+        ppiu_number,
+        sk_ppiu_doc_url,
+        nib,
+        nib_doc_url,
+        npwp: npwp || null,
+        akreditasi_ppiu: akreditasi_ppiu || null,
+        full_address,
+        province,
+        postal_code: postal_code || null,
         status: "pending",
       })
       .select("id")
       .single()
 
     if (tenantError || !tenant) {
-      return NextResponse.json({ error: "Gagal membuat travel: " + (tenantError?.message || "unknown") }, { status: 500 })
+      return NextResponse.json(
+        { error: "Gagal membuat travel: " + (tenantError?.message || "unknown") },
+        { status: 500 }
+      )
     }
 
+    // Create auth user
     const { data: authData, error: authError } = await admin.auth.admin.createUser({
       email: lowerEmail,
       password,
@@ -67,6 +116,7 @@ export async function POST(request: Request) {
         full_name: name,
         role: "travel_admin",
         tenant_id: tenant.id,
+        phone: admin_phone,
       },
     })
 
@@ -84,12 +134,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Gagal membuat user" }, { status: 500 })
     }
 
+    // Create users row
     const { error: insertError } = await admin.from("users").upsert({
       id: userId,
       email: lowerEmail,
       full_name: name,
       role: "travel_admin",
       tenant_id: tenant.id,
+      phone: admin_phone || null,
     }, { onConflict: "id", ignoreDuplicates: true })
 
     if (insertError) {

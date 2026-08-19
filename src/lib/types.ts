@@ -29,6 +29,17 @@ export interface Tenant {
   packages_count: number
   total_revenue: number
   founded_year: string | null
+  // legalitas
+  ppiu_number: string | null
+  sk_ppiu_doc_url: string | null
+  nib: string | null
+  nib_doc_url: string | null
+  npwp: string | null
+  akreditasi_ppiu: string | null
+  // alamat
+  full_address: string | null
+  province: string | null
+  postal_code: string | null
 }
 
 export interface User {

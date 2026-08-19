@@ -87,6 +87,17 @@ export const MOCK_TENANT: Tenant = {
   packages_count: 3,
   total_revenue: 0,
   founded_year: "2015",
+  // legalitas
+  ppiu_number: null,
+  sk_ppiu_doc_url: null,
+  nib: null,
+  nib_doc_url: null,
+  npwp: null,
+  akreditasi_ppiu: null,
+  // alamat
+  full_address: null,
+  province: null,
+  postal_code: null,
 }
 
 export const MOCK_PACKAGES: Package[] = [
