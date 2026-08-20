@@ -211,6 +211,7 @@ function SearchContent() {
           .from("packages")
           .select("*")
           .in("status", ["active", "ongoing"])
+          .neq("type", "haji")
           .is("deleted_at", null)
 
         if (searchQueryParam) {
@@ -292,6 +293,7 @@ function SearchContent() {
           .from("packages")
           .select("*")
           .in("status", ["active", "ongoing"])
+          .neq("type", "haji")
           .is("deleted_at", null)
         query.then(async ({ data }) => {
           const enriched = await enrichPackagesWithCovers(supabase, (data as Package[]) || [])

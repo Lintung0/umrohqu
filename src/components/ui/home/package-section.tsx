@@ -35,6 +35,7 @@ export default function PackageSection() {
       .from("packages")
       .select("*")
       .in("status", ["active", "ongoing"])
+      .neq("type", "haji")
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .range(from, to);

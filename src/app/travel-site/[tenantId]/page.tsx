@@ -25,7 +25,7 @@ export default function TravelSitePage() {
     const fetchData = async () => {
       const [tenantRes, pkgRes, websiteRes] = await Promise.all([
         supabase.from("tenants").select("*").eq("id", tenantId).single(),
-        supabase.from("packages").select("*").eq("tenant_id", tenantId).or("status.in.(active,ongoing,completed),doc_drive_link.not.is.null").order("created_at", { ascending: false }),
+        supabase.from("packages").select("*").eq("tenant_id", tenantId).neq("type", "haji").or("status.in.(active,ongoing,completed),doc_drive_link.not.is.null").order("created_at", { ascending: false }),
         supabase.from("tenant_websites").select("template_id, theme_config").eq("tenant_id", tenantId).single(),
       ])
 

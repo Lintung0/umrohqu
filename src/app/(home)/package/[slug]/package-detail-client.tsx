@@ -6,7 +6,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
-  Star, MapPin, Clock, Users, Plane, Hotel, Shield, CheckCircle,
+  Star, MapPin, Clock, Plane, Hotel, Shield, CheckCircle,
   XCircle, BadgeCheck, Zap, Calendar, GitCompare, Loader2, ChevronLeft, ChevronRight,
   Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
   Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package, Maximize2, X,
@@ -421,10 +421,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {pkg.airline && <InfoCard icon={Plane} label="Maskapai" value={decodeUnicodeEscapes(pkg.airline)} color="blue" />}
                       {pkg.duration_days && <InfoCard icon={Clock} label="Durasi" value={`${pkg.duration_days} Hari`} />}
+                      {pkg.departure_city && <InfoCard icon={MapPin} label="Kota Berangkat" value={pkg.departure_city} />}
+                      {pkg.departure_date && <InfoCard icon={Calendar} label="Tanggal Berangkat" value={new Date(pkg.departure_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} />}
                       {pkg.hotel_makkah && <InfoCard icon={Hotel} label="Hotel Makkah" value={pkg.hotel_makkah} color="amber" />}
                       {pkg.hotel_madinah && <InfoCard icon={Hotel} label="Hotel Madinah" value={pkg.hotel_madinah} color="amber" />}
-                      {pkg.departure_city && <InfoCard icon={MapPin} label="Berangkat dari" value={pkg.departure_city} />}
-                      {displayPkg.quota && <InfoCard icon={Users} label="Kuota" value={`${displayPkg.quota} orang`} color="blue" />}
                     </div>
                     {includesList.length > 0 && (
                       <div className="pt-1">
@@ -726,11 +726,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           {/* RIGHT: Info & Booking */}
           <div className="lg:col-span-1" ref={sidebarRef}>
             <div className="lg:sticky lg:top-24 space-y-3">
-            {/* Title & Price */}
-            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3">
+            {/* Booking Card — title + price + seats + CTA (satu kartu) */}
+            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm">
               <div className="flex flex-wrap items-center gap-1.5 mb-2">
                 <PackageStatusBadge status={pkg.status} />
-                {pkg.type && (
+                {pkg.type && pkg.type !== "haji" && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary uppercase tracking-wide">
                     {pkg.type}
                   </span>
@@ -745,22 +745,17 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   </span>
                 )}
               </div>
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <h1 className="text-lg font-bold leading-tight line-clamp-2">{pkg.name}</h1>
-                <button
-                  onClick={handleShare}
-                  className="shrink-0 w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 text-muted-foreground hover:text-primary flex items-center justify-center transition-all"
-                  aria-label="Bagikan paket"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              {pkg.original_price && (
-                <p className="text-sm text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>
-              )}
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <p className="text-2xl font-extrabold text-primary">{formatRupiah(pkg.price)}</p>
-                <span className="text-xs text-muted-foreground">/ orang</span>
+
+              <h1 className="text-lg font-bold leading-tight line-clamp-2 mb-2">{pkg.name}</h1>
+
+              <div className="flex items-end justify-between gap-2 mb-1">
+                <div className="flex items-baseline gap-1.5">
+                  {pkg.original_price && (
+                    <span className="text-sm text-muted-foreground line-through mr-1">{formatRupiah(pkg.original_price)}</span>
+                  )}
+                  <p className="text-2xl font-extrabold text-primary">{formatRupiah(pkg.price)}</p>
+                  <span className="text-xs text-muted-foreground">/ orang</span>
+                </div>
               </div>
               {!!pkg.cashback_amount && pkg.cashback_amount > 0 && (
                 <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold">
@@ -768,89 +763,51 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 </div>
               )}
 
-              {/* Quick Info — interactive chips */}
-              <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-border/50">
-                {pkg.duration_days && (
-                  <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/10 rounded-xl px-2.5 py-2 hover:bg-primary/10 hover:border-primary/25 transition-colors">
-                    <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span className="font-medium truncate">{pkg.duration_days} Hari</span>
-                  </div>
-                )}
-                {pkg.airline && (
-                  <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/10 rounded-xl px-2.5 py-2 hover:bg-primary/10 hover:border-primary/25 transition-colors">
-                    <Plane className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span className="font-medium truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
-                  </div>
-                )}
-                {pkg.departure_city && (
-                  <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/10 rounded-xl px-2.5 py-2 hover:bg-primary/10 hover:border-primary/25 transition-colors">
-                    <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span className="font-medium truncate">{pkg.departure_city}</span>
-                  </div>
-                )}
-                {pkg.departure_date && (
-                  <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/10 rounded-xl px-2.5 py-2 hover:bg-primary/10 hover:border-primary/25 transition-colors">
-                    <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span className="font-medium truncate">{new Date(pkg.departure_date).toLocaleDateString("id-ID", { month: "short", year: "numeric" })}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Seat */}
-            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-bold flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-primary" /> Sisa Kursi
-                </h3>
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${seat.bgColor} ${seat.textColor}`}>
-                  {seat.label}
-                </span>
-              </div>
-              <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="detail" showLabel={false} />
-            </div>
-
-            {/* Ongoing Banner */}
-            {displayPkg.status === "ongoing" && (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-2xl p-4 mb-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-lg">🚌</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-amber-800">Paket Sedang Berlangsung</p>
-                    <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-                      {displayPkg.quota - getPackageAvailable(displayPkg)} dari {displayPkg.quota} jamaah sudah berangkat.{" "}
-                      Sisa {getPackageAvailable(displayPkg)} kursi masih tersedia untuk bergabung.
-                    </p>
-                  </div>
+              {/* Seat — terintegrasi, bukan kartu terpisah */}
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-medium text-muted-foreground">Sisa kursi</span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${seat.bgColor} ${seat.textColor}`}>
+                    {seat.label}
+                  </span>
                 </div>
+                <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="compact" showLabel={false} />
               </div>
-            )}
 
-            {/* CTA */}
-            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3 space-y-2.5">
-              <Link href={`/checkout?slug=${pkg.slug}`} className="block">
-                <Button className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]">
-                  Pesan Sekarang
+              {/* Ongoing Banner inline */}
+              {displayPkg.status === "ongoing" && (
+                <div className="mt-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-xl px-3 py-2.5 flex items-start gap-2">
+                  <span className="text-lg leading-none">🚌</span>
+                  <p className="text-[11px] text-amber-800 leading-relaxed">
+                    {displayPkg.quota - getPackageAvailable(displayPkg)} dari {displayPkg.quota} jamaah sudah berangkat. Sisa {getPackageAvailable(displayPkg)} kursi.
+                  </p>
+                </div>
+              )}
+
+              {/* CTA */}
+              <div className="mt-4 space-y-2.5">
+                <Link href={`/checkout?slug=${pkg.slug}`} className="block">
+                  <Button className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]">
+                    Pesan Sekarang
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  className="w-full h-11 text-xs gap-2 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
+                  onClick={() => {
+                    if (comparePackages.some((p) => p.id === pkg.id)) return
+                    if (isFull) {
+                      toast.warning("Maksimal 3 paket untuk dibandingkan")
+                      return
+                    }
+                    addToCompare(pkg as unknown as PackageType)
+                    toast.success("Paket berhasil ditambahkan ke perbandingan")
+                  }}
+                >
+                  <GitCompare className="w-4 h-4" /> Bandingkan Paket
                 </Button>
-              </Link>
-              <Button
-                variant="outline"
-                className="w-full h-11 text-xs gap-2 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
-                onClick={() => {
-                  if (comparePackages.some((p) => p.id === pkg.id)) return
-                  if (isFull) {
-                    toast.warning("Maksimal 3 paket untuk dibandingkan")
-                    return
-                  }
-                  addToCompare(pkg as unknown as PackageType)
-                  toast.success("Paket berhasil ditambahkan ke perbandingan")
-                }}
-              >
-                <GitCompare className="w-4 h-4" /> Bandingkan Paket
-              </Button>
-              <p className="text-[10px] text-muted-foreground text-center">Bayar via saldo dompet, transfer, atau pembayaran lainnya</p>
+                <p className="text-[10px] text-muted-foreground text-center">Bayar via saldo dompet, transfer, atau pembayaran lainnya</p>
+              </div>
             </div>
 
             {/* Travel */}

@@ -173,6 +173,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
       .from("packages")
       .select("*")
       .eq("tenant_id", tenant.id)
+      .neq("type", "haji")
       .is("deleted_at", null)
       .order("status", { ascending: false })
       .order("price", { ascending: true })
