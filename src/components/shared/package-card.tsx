@@ -163,14 +163,17 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
   }
 
+  function handleTravelClick(e: React.MouseEvent) {
+    e.stopPropagation()
+  }
+
   if (variant === "clean") {
     return (
       <Link
         href={`/package/${pkg.slug}`}
         className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group cursor-pointer"
       >
-        {/* ── Image ── */}
-        <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+        <div className="relative aspect-video w-full overflow-hidden">
           <Image
             src={imgSrc}
             alt={pkg.name}
@@ -181,7 +184,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
 
-          {/* Top-left: status + type badges */}
           <div className="absolute top-2.5 left-2.5 flex gap-1.5 pointer-events-none">
             <PackageStatusBadge status={pkg.status} />
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${typeColor}`}>
@@ -194,13 +196,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             )}
           </div>
 
-          {/* Top-right: cashback badge + wishlist/compare */}
-          <div className="absolute top-2.5 right-2.5 z-10 flex items-start gap-1.5">
-            {hasCashback && (
-              <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-amber-400 text-white shadow-sm pointer-events-none">
-                Cashback {formatRupiah(pkg.cashback_amount!)}
-              </span>
-            )}
+          <div className="absolute top-2.5 right-2.5 z-10 flex gap-1.5">
             <button
               onClick={handleWishlist}
               className="bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
@@ -224,87 +220,95 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        {/* ── Content ── */}
         <div className="flex flex-col flex-1 p-3.5">
-          {/* Package name */}
-          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2">
-            {pkg.name}
-          </h3>
-
-          {/* Rating row */}
-          {avgRating !== null && (
-            <div className="flex items-center gap-1 mb-2">
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span className="text-xs font-semibold text-slate-700">{avgRating}</span>
-              <span className="text-[11px] text-slate-400">({reviewCount} ulasan)</span>
-            </div>
-          )}
-
-          {/* Info row: duration · airline · hotel */}
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-slate-500 mb-2">
-            {pkg.duration_days && (
-              <span className="inline-flex items-center gap-0.5">
-                <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>{pkg.duration_days} {t("card.days")}</span>
-              </span>
-            )}
-            {pkg.airline && (
-              <>
-                <span className="text-slate-300">·</span>
-                <span className="inline-flex items-center gap-0.5">
-                  <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
-                  <span className="truncate max-w-[100px]">{decodeUnicodeEscapes(pkg.airline)}</span>
-                </span>
-              </>
-            )}
-            {pkg.hotel_makkah_stars && (
-              <>
-                <span className="text-slate-300">·</span>
-                <span className="inline-flex items-center gap-0.5">
-                  <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
-                  <span className="text-amber-500">{"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}</span>
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Departure city */}
-          {(pkg.departure_cities?.length || pkg.departure_city) && (
-            <div className="flex items-center gap-1 text-[11px] text-slate-500 mb-3">
-              <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ")}</span>
-            </div>
-          )}
-
-          {/* Price — mt-auto pushes to bottom */}
-          <div className="pt-2.5 border-t border-slate-100 mt-auto">
-            <div className="flex items-baseline gap-1">
-              <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
-              <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
-            </div>
-          </div>
-
-          {/* Travel agent */}
           {showTravel && travel && (
-            <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-slate-50">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                router.push(`/travel/${travel.slug}`)
+              }}
+              className="inline-flex items-center gap-1.5 mb-1.5 w-fit pointer-events-auto cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-md"
+            >
               {travel.logo_url ? (
                 <Image
                   src={travel.logo_url}
                   alt={travel.name}
-                  width={14}
-                  height={14}
+                  width={16}
+                  height={16}
                   unoptimized
                   className="rounded-full object-cover"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
                 />
               ) : (
-                <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <span className="text-[5px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
+                <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
                 </div>
               )}
-              <span className="text-[10px] text-slate-400 truncate max-w-[160px]">{travel.name}</span>
+              <span className="text-[11px] text-slate-500 hover:text-emerald-600 transition-colors truncate max-w-[160px]">
+                {travel.name}
+              </span>
+            </button>
+          )}
+
+          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2">
+            {pkg.name}
+          </h3>
+
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-slate-500 mb-3">
+            <span className="inline-flex items-center gap-0.5 max-w-full">
+              <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ")}</span>
+            </span>
+            {pkg.duration_days && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span>{pkg.duration_days} {t("card.days")}</span>
+              </>
+            )}
+            {pkg.airline && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
+              </>
+            )}
+            {pkg.hotel_makkah_stars ? (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="inline-flex items-center gap-0.5">
+                  <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span>Hotel</span>
+                  <span className="text-amber-500">{"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}</span>
+                </span>
+              </>
+            ) : null}
+          </div>
+
+          {avgRating !== null && (
+            <div className="flex items-center gap-1 mb-2">
+              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span className="text-xs font-semibold text-slate-700">{avgRating}</span>
+              <span className="text-[11px] text-slate-400">({reviewCount})</span>
             </div>
           )}
+
+          <div className="mb-3">
+            <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
+          </div>
+
+          <div className="flex items-end justify-between pt-2.5 border-t border-slate-100 mt-auto">
+            <div>
+              <div className="flex items-baseline gap-1">
+                <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
+                <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
+              </div>
+              {hasCashback && (
+                <p className="text-[11px] font-medium text-amber-600">
+                  Cashback {formatRupiah(pkg.cashback_amount!)}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         <CenterPopup show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "" })} />
@@ -416,10 +420,9 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   return (
     <Link
       href={`/package/${pkg.slug}`}
-      className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all group cursor-pointer"
+      className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 transition-colors group cursor-pointer"
     >
-      {/* ── Image ── */}
-      <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+      <div className="relative aspect-video w-full overflow-hidden">
         <Image
           src={imgSrc}
           alt={pkg.name}
@@ -430,7 +433,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
-        {/* Top-left: status + type badges */}
         <div className="absolute top-2.5 left-2.5 flex gap-1 pointer-events-none">
           <PackageStatusBadge status={pkg.status} />
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${typeColor}`}>
@@ -443,13 +445,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           )}
         </div>
 
-        {/* Top-right: cashback badge + wishlist/compare */}
-        <div className="absolute top-2.5 right-2.5 z-10 flex items-start gap-1.5">
-          {hasCashback && (
-            <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-amber-400 text-white shadow-sm pointer-events-none">
-              Cashback {formatRupiah(pkg.cashback_amount!)}
-            </span>
-          )}
+        <div className="absolute top-2.5 right-2.5 z-10 flex gap-1.5">
           <button
             onClick={handleWishlist}
             className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
@@ -471,16 +467,64 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
           </button>
         </div>
+
+        <div className="absolute bottom-2.5 left-2.5 pointer-events-none">
+          <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
+            <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
+            {pkg.duration_days} {t("card.days")}
+          </span>
+        </div>
       </div>
 
-      {/* ── Content ── */}
       <div className="flex flex-col flex-1 p-3.5">
-        {/* Package name */}
-        <h3 className="font-semibold text-sm leading-snug text-gray-900 group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2">
+        {showTravel && travel && (
+          <Link
+            href={`/travel/${travel.slug}`}
+            onClick={handleTravelClick}
+            className="inline-flex items-center gap-1.5 mb-2 w-fit pointer-events-auto"
+          >
+            {travel.logo_url ? (
+              <Image
+                src={travel.logo_url}
+                alt={travel.name}
+                width={16}
+                height={16}
+                unoptimized
+                className="rounded-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+              />
+            ) : (
+              <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
+                <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
+              </div>
+            )}
+            <span className="text-[11px] text-gray-500 hover:text-emerald-600 transition-colors truncate max-w-[140px]">
+              {travel.name}
+            </span>
+          </Link>
+        )}
+
+        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2.5">
           {pkg.name}
         </h3>
 
-        {/* Rating row */}
+        <div className="space-y-1.5 mb-3 text-xs text-gray-500">
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ")}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="truncate">{decodeUnicodeEscapes(pkg.airline || "")}</span>
+          </div>
+          {pkg.hotel_makkah && (
+            <div className="flex items-center gap-1.5">
+              <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span className="truncate">{pkg.hotel_makkah}{pkg.hotel_makkah_stars ? ` ${"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}` : ""}</span>
+            </div>
+          )}
+        </div>
+
         {avgRating !== null && (
           <div className="flex items-center gap-1 mb-2">
             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
@@ -489,71 +533,36 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         )}
 
-        {/* Info row: duration · airline · hotel */}
-        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-gray-500 mb-3">
-          {pkg.duration_days && (
-            <span className="inline-flex items-center gap-0.5">
-              <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span>{pkg.duration_days} {t("card.days")}</span>
-            </span>
-          )}
-          {pkg.airline && (
-            <>
-              <span className="text-gray-300">·</span>
-              <span className="inline-flex items-center gap-0.5">
-                <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span className="truncate max-w-[100px]">{decodeUnicodeEscapes(pkg.airline)}</span>
+        <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
+
+        {pkg.facilities && pkg.facilities.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2 h-6 overflow-hidden">
+            {(pkg.facilities as string[]).slice(0, 3).map((f) => (
+              <span key={f} className="px-2 py-0.5 text-[10px] rounded bg-gray-100 text-gray-600 whitespace-nowrap">
+                {f}
               </span>
-            </>
-          )}
-          {pkg.hotel_makkah_stars && (
-            <>
-              <span className="text-gray-300">·</span>
-              <span className="inline-flex items-center gap-0.5">
-                <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span className="text-amber-500">{"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}</span>
+            ))}
+            {pkg.facilities.length > 3 && (
+              <span className="px-2 py-0.5 text-[10px] rounded bg-gray-100 text-gray-500 whitespace-nowrap">
+                +{pkg.facilities.length - 3}
               </span>
-            </>
-          )}
-        </div>
-
-        {/* Departure city */}
-        {(pkg.departure_cities?.length || pkg.departure_city) && (
-          <div className="flex items-center gap-1 text-[11px] text-gray-500 mb-3">
-            <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ")}</span>
-          </div>
-        )}
-
-        {/* Price + cashback — mt-auto pushes to bottom */}
-        <div className="pt-2.5 border-t border-gray-100 mt-auto">
-          <div className="flex items-baseline gap-1">
-            <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
-            <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
-          </div>
-        </div>
-
-        {/* Travel agent */}
-        {showTravel && travel && (
-          <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-gray-50">
-            {travel.logo_url ? (
-              <Image
-                src={travel.logo_url}
-                alt={travel.name}
-                width={14}
-                height={14}
-                unoptimized
-                className="rounded-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
-              />
-            ) : (
-              <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center">
-                <span className="text-[5px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
-              </div>
             )}
-            <span className="text-[10px] text-gray-400 truncate max-w-[140px]">{travel.name}</span>
           </div>
         )}
+
+        <div className="flex items-end justify-between pt-3 border-t border-gray-100 mt-auto">
+          <div>
+            <div className="flex items-baseline gap-1">
+              <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
+              <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
+            </div>
+            {hasCashback && (
+              <p className="text-[11px] font-medium text-amber-600">
+                Cashback {formatRupiah(pkg.cashback_amount!)}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       <CenterPopup show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "" })} />
