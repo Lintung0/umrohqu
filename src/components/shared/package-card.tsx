@@ -2,9 +2,9 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, GitCompare, Heart, Loader2 } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, GitCompare, Heart, Loader2, Star } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -58,6 +58,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
   const [popup, setPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" })
+  const [avgRating, setAvgRating] = useState<number | null>(null)
+  const [reviewCount, setReviewCount] = useState(0)
 
   const soldOut = (pkg.available ?? 0) <= 0
   const hasCashback = (pkg.cashback_amount ?? 0) > 0
@@ -65,6 +67,35 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const typeKey = (pkg.type || "reguler").toLowerCase()
   const typeLabel = TYPE_LABEL[typeKey] || pkg.type
   const typeColor = TYPE_COLOR[typeKey] || "bg-gray-100 text-gray-700"
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchRating() {
+      try {
+        const { data: bookings } = await supabase
+          .from("bookings")
+          .select("id")
+          .eq("package_id", pkg.id)
+        const bookingIds = (bookings || []).map((b: { id: string }) => b.id)
+        if (bookingIds.length === 0 || cancelled) return
+
+        const { data: reviews } = await supabase
+          .from("reviews")
+          .select("rating")
+          .in("booking_id", bookingIds)
+          .eq("status", "published")
+
+        if (cancelled || !reviews || reviews.length === 0) return
+        const sum = reviews.reduce((s: number, r: { rating: number }) => s + r.rating, 0)
+        setAvgRating(Math.round((sum / reviews.length) * 10) / 10)
+        setReviewCount(reviews.length)
+      } catch {
+        // silent
+      }
+    }
+    fetchRating()
+    return () => { cancelled = true }
+  }, [pkg.id, supabase])
 
   function handleError() {
     if (!imgError) {
@@ -253,6 +284,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             ) : null}
           </div>
 
+          {avgRating !== null && (
+            <div className="flex items-center gap-1 mb-2">
+              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span className="text-xs font-semibold text-slate-700">{avgRating}</span>
+              <span className="text-[11px] text-slate-400">({reviewCount})</span>
+            </div>
+          )}
+
           <div className="mb-3">
             <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
           </div>
@@ -343,6 +382,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   <div className="flex items-center gap-1 text-xs text-gray-500">
                     <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
                     <span className="truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
+                  </div>
+                )}
+                {avgRating !== null && (
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <Star className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" />
+                    <span className="font-semibold">{avgRating}</span>
+                    <span className="text-gray-400">({reviewCount})</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -478,6 +524,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             </div>
           )}
         </div>
+
+        {avgRating !== null && (
+          <div className="flex items-center gap-1 mb-2">
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span className="text-xs font-semibold text-gray-700">{avgRating}</span>
+            <span className="text-[11px] text-gray-400">({reviewCount} ulasan)</span>
+          </div>
+        )}
 
         <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
 

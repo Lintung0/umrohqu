@@ -128,6 +128,14 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const [singleImageLightbox, setSingleImageLightbox] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
+  // Review form state
+  const [reviewRating, setReviewRating] = useState(0)
+  const [reviewHoverRating, setReviewHoverRating] = useState(0)
+  const [reviewText, setReviewText] = useState("")
+  const [canReview, setCanReview] = useState<boolean | null>(null)
+  const [eligibleBookingId, setEligibleBookingId] = useState<string | null>(null)
+  const [submittingReview, setSubmittingReview] = useState(false)
+
   const supabase = createClient()
   const avgRating = initialReviews.length > 0
     ? initialReviews.reduce((s, r) => s + r.rating, 0) / initialReviews.length
@@ -176,6 +184,76 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   }
 
   const itineraryList = parseItinerary(pkg.itinerary)
+
+  useEffect(() => {
+    let cancelled = false
+    async function checkEligibility() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || cancelled) { setCanReview(false); return }
+
+        const { data: booking } = await supabase
+          .from("bookings")
+          .select("id")
+          .eq("customer_id", user.id)
+          .eq("package_id", pkg.id)
+          .in("status", ["completed", "confirmed"])
+          .maybeSingle()
+
+        if (cancelled) return
+
+        if (booking) {
+          const { data: existingReview } = await supabase
+            .from("reviews")
+            .select("id")
+            .eq("booking_id", booking.id)
+            .eq("customer_id", user.id)
+            .maybeSingle()
+
+          if (!cancelled) {
+            setCanReview(!existingReview)
+            setEligibleBookingId(booking.id)
+          }
+        } else {
+          if (!cancelled) setCanReview(false)
+        }
+      } catch {
+        if (!cancelled) setCanReview(false)
+      }
+    }
+    checkEligibility()
+    return () => { cancelled = true }
+  }, [pkg.id, pkg.tenant_id, supabase])
+
+  async function handleSubmitReview() {
+    if (reviewRating === 0) { toast.error("Pilih rating bintang"); return }
+    setSubmittingReview(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { toast.error("Silakan login terlebih dahulu"); return }
+
+      const { error } = await supabase.from("reviews").insert({
+        booking_id: eligibleBookingId,
+        customer_id: user.id,
+        tenant_id: pkg.tenant_id,
+        rating: reviewRating,
+        review: reviewText.trim() || null,
+        status: "pending",
+      })
+      if (error) {
+        toast.error("Gagal mengirim ulasan: " + error.message)
+      } else {
+        toast.success("Ulasan berhasil dikirim! Akan tampil setelah moderasi.")
+        setCanReview(false)
+        setReviewRating(0)
+        setReviewText("")
+      }
+    } catch {
+      toast.error("Terjadi kesalahan saat mengirim ulasan")
+    } finally {
+      setSubmittingReview(false)
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -439,6 +517,58 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                             ))}
                           </div>
                         </div>
+
+                        {/* Review Form */}
+                        {canReview === true && (
+                          <div className="p-4 bg-white rounded-xl border border-border/60 shadow-sm">
+                            <h4 className="text-sm font-semibold mb-3">Tulis Ulasan Anda</h4>
+                            <div className="flex gap-1 mb-3">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => setReviewRating(s)}
+                                  onMouseEnter={() => setReviewHoverRating(s)}
+                                  onMouseLeave={() => setReviewHoverRating(0)}
+                                  className="p-0.5 transition-transform hover:scale-110"
+                                >
+                                  <Star
+                                    className={`w-6 h-6 ${
+                                      s <= (reviewHoverRating || reviewRating)
+                                        ? "fill-amber-400 text-amber-400"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                </button>
+                              ))}
+                              {reviewRating > 0 && (
+                                <span className="text-xs text-muted-foreground self-center ml-2">{reviewRating}/5</span>
+                              )}
+                            </div>
+                            <textarea
+                              value={reviewText}
+                              onChange={(e) => setReviewText(e.target.value)}
+                              placeholder="Ceritakan pengalaman Anda (opsional)"
+                              rows={3}
+                              className="w-full text-sm border border-border/60 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleSubmitReview}
+                              disabled={submittingReview || reviewRating === 0}
+                              className="mt-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+                            >
+                              {submittingReview && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                              Kirim Ulasan
+                            </button>
+                          </div>
+                        )}
+                        {canReview === false && eligibleBookingId && (
+                          <div className="p-3 bg-gray-50 rounded-xl border border-border/40 text-center">
+                            <p className="text-xs text-muted-foreground">Anda sudah memberikan ulasan untuk paket ini.</p>
+                          </div>
+                        )}
+
                         <div className="space-y-3">
                           {initialReviews.map((r) => {
                             const reviewerName = r.customer_id ? (reviewerMap[r.customer_id] || "Pengguna") : "Pengguna"
@@ -467,17 +597,68 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         </div>
                       </>
                     ) : (
-                      <div className="text-center py-12">
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center mx-auto mb-4 border border-amber-100">
-                          <div className="relative">
-                            <Star className="w-10 h-10 text-amber-300" />
-                            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center">
-                              <span className="text-[8px] font-bold text-amber-600">?</span>
+                      <div className="space-y-4">
+                        {/* Review Form (also shown when no reviews yet) */}
+                        {canReview === true && (
+                          <div className="p-4 bg-white rounded-xl border border-border/60 shadow-sm">
+                            <h4 className="text-sm font-semibold mb-3">Jadilah yang pertama memberikan ulasan</h4>
+                            <div className="flex gap-1 mb-3">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => setReviewRating(s)}
+                                  onMouseEnter={() => setReviewHoverRating(s)}
+                                  onMouseLeave={() => setReviewHoverRating(0)}
+                                  className="p-0.5 transition-transform hover:scale-110"
+                                >
+                                  <Star
+                                    className={`w-6 h-6 ${
+                                      s <= (reviewHoverRating || reviewRating)
+                                        ? "fill-amber-400 text-amber-400"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                </button>
+                              ))}
+                              {reviewRating > 0 && (
+                                <span className="text-xs text-muted-foreground self-center ml-2">{reviewRating}/5</span>
+                              )}
+                            </div>
+                            <textarea
+                              value={reviewText}
+                              onChange={(e) => setReviewText(e.target.value)}
+                              placeholder="Ceritakan pengalaman Anda (opsional)"
+                              rows={3}
+                              className="w-full text-sm border border-border/60 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleSubmitReview}
+                              disabled={submittingReview || reviewRating === 0}
+                              className="mt-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+                            >
+                              {submittingReview && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                              Kirim Ulasan
+                            </button>
+                          </div>
+                        )}
+                        <div className="text-center py-8">
+                          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center mx-auto mb-4 border border-amber-100">
+                            <div className="relative">
+                              <Star className="w-10 h-10 text-amber-300" />
+                              <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center">
+                                <span className="text-[8px] font-bold text-amber-600">?</span>
+                              </div>
                             </div>
                           </div>
+                          <h4 className="font-semibold text-foreground mb-1">Belum ada ulasan</h4>
+                          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                            {canReview === false
+                              ? "Booking dan selesaikan perjalanan untuk bisa memberikan ulasan."
+                              : "Ulasan Anda akan muncul di sini setelah perjalanan selesai."}
+                          </p>
                         </div>
-                        <h4 className="font-semibold text-foreground mb-1">Belum ada ulasan</h4>
-                        <p className="text-sm text-muted-foreground max-w-xs mx-auto">Jadilah yang pertama memberikan ulasan untuk paket ini setelah perjalanan Anda.</p>
                       </div>
                     )}
                   </div>

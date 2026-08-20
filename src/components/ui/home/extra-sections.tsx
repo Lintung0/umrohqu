@@ -163,7 +163,7 @@ export function TestimonialSection() {
         const { data } = await supabase
           .from("reviews")
           .select("id, rating, review, created_at, customer_id, booking_id")
-          .in("status", ["active", "ongoing"])
+          .eq("status", "published")
           .order("created_at", { ascending: false })
           .limit(3)
         if (data && data.length > 0) {
