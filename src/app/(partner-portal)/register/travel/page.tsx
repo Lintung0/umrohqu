@@ -88,21 +88,21 @@ function slugify(text: string): string {
 function ProgressBar({ current }: { current: Step }) {
   const pct = ((current - 1) / (STEP_LABELS.length - 1)) * 100
   return (
-    <div className="mb-8">
+    <div className="mb-6">
       {/* Step indicators */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5">
         {STEP_LABELS.map((label, i) => {
           const Icon = STEP_ICONS[i]
           const stepNum = i + 1
           const isActive = stepNum === current
           const isDone = stepNum < current
           return (
-            <div key={i} className="flex flex-col items-center gap-2 flex-1">
+            <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
               <div className={`
-                w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500
-                ${isDone ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30" : isActive ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-4 ring-emerald-500/20" : "bg-gray-100 text-gray-400"}
+                w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500
+                ${isDone ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/25" : isActive ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/25 ring-3 ring-emerald-500/20" : "bg-gray-100 text-gray-400"}
               `}>
-                {isDone ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-4 h-4" />}
+                {isDone ? <CheckCircle className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
               </div>
               <span className={`text-[11px] font-semibold transition-colors duration-300 hidden sm:block ${isActive ? "text-emerald-600" : isDone ? "text-emerald-500" : "text-gray-400"}`}>
                 {label}
@@ -112,13 +112,11 @@ function ProgressBar({ current }: { current: Step }) {
         })}
       </div>
       {/* Progress bar */}
-      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-400 rounded-full transition-all duration-700 ease-out relative"
+          className="h-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-400 rounded-full transition-all duration-700 ease-out"
           style={{ width: `${pct}%` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
-        </div>
+        />
       </div>
     </div>
   )
@@ -126,14 +124,14 @@ function ProgressBar({ current }: { current: Step }) {
 
 function StepHeader({ step }: { step: Step }) {
   return (
-    <div className="flex items-center justify-between mb-6 pb-5 border-b border-gray-100">
+    <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-100">
       <div>
         <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest block mb-1">
           Langkah {step} dari {STEP_LABELS.length}
         </span>
-        <h3 className="text-xl font-extrabold text-gray-900">{STEP_LABELS[step - 1]}</h3>
+        <h3 className="text-lg font-extrabold text-gray-900">{STEP_LABELS[step - 1]}</h3>
       </div>
-      <div className="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center">
+      <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
         {(() => {
           const Icon = STEP_ICONS[step - 1]
           return <Icon className="w-5 h-5 text-emerald-600" />
@@ -150,8 +148,8 @@ function InputField({ label, icon: Icon, error, children }: {
   children: React.ReactNode
 }) {
   return (
-    <div>
-      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+    <div className="group">
+      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 group-focus-within:text-emerald-600 transition-colors">
         {label}
       </label>
       {children}
@@ -285,7 +283,7 @@ export default function RegisterTravelPage() {
       {/* Form Card */}
       <div
         ref={cardRef}
-        className="bg-white text-gray-900 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-black/5 border border-gray-100/80 text-left w-full animate-fade-in-up"
+        className="bg-white text-gray-900 rounded-3xl p-6 sm:p-10 shadow-xl shadow-black/[0.03] border border-gray-100/80 text-left w-full animate-fade-in-up"
         style={{ animationDelay: "0.1s" }}
       >
         <ProgressBar current={step} />
@@ -307,7 +305,7 @@ export default function RegisterTravelPage() {
           >
             {/* Step 1: Profil Agensi */}
             {step === 1 && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <InputField label="Nama Travel / Agensi *" icon={Building2} error={errors.travel_name}>
                   <div className="relative flex items-center">
                     <Building2 className="w-4 h-4 absolute left-3.5 text-gray-400" />
@@ -316,7 +314,7 @@ export default function RegisterTravelPage() {
                       value={form.travel_name}
                       onChange={(e) => set("travel_name")(e.target.value)}
                       placeholder="Contoh: Al-Haramain Tour & Travel"
-                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all ${
+                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:shadow-md focus:shadow-emerald-500/5 font-medium transition-all ${
                         errors.travel_name ? "border-red-400" : "border-gray-200 focus:border-emerald-500"
                       }`}
                     />
@@ -358,15 +356,15 @@ export default function RegisterTravelPage() {
 
                 <InputField label="Logo Resmi Travel" icon={Building2}>
                   {form.logo_url ? (
-                    <div className="flex items-center gap-4 rounded-xl border border-emerald-200 bg-emerald-50/50 px-4 py-3">
-                      <img src={form.logo_url} alt="Logo" className="h-14 w-14 rounded-xl object-cover ring-2 ring-white shadow-sm" />
+                    <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/50 px-3 py-2.5">
+                      <img src={form.logo_url} alt="Logo" className="h-12 w-12 rounded-lg object-cover ring-2 ring-white shadow-sm" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900">Logo terupload</p>
                         <a href={form.logo_url} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-600 hover:underline">
                           Lihat file
                         </a>
                       </div>
-                      <button type="button" onClick={() => set("logo_url")("")} className="text-red-400 hover:text-red-600 hover:bg-red-50 w-8 h-8 rounded-lg flex items-center justify-center transition-colors">
+                      <button type="button" onClick={() => set("logo_url")("")} className="text-red-400 hover:text-red-600 hover:bg-red-50 w-7 h-7 rounded-lg flex items-center justify-center transition-colors">
                         &times;
                       </button>
                     </div>
@@ -383,7 +381,7 @@ export default function RegisterTravelPage() {
                   )}
                 </InputField>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <InputField label="Kota" icon={MapPin}>
                     <div className="relative flex items-center">
                       <MapPin className="w-4 h-4 absolute left-3.5 text-gray-400" />
@@ -406,7 +404,7 @@ export default function RegisterTravelPage() {
 
             {/* Step 2: Legalitas */}
             {step === 2 && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <InputField label="Nomor Izin PPIU *" icon={Shield} error={errors.ppiu_number}>
                   <div className="relative flex items-center">
                     <Shield className="w-4 h-4 absolute left-3.5 text-gray-400" />
@@ -415,7 +413,7 @@ export default function RegisterTravelPage() {
                       value={form.ppiu_number}
                       onChange={(e) => set("ppiu_number")(e.target.value)}
                       placeholder="Contoh: U.1234/IV.1.1/PMU.00/2024"
-                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all ${
+                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:shadow-md focus:shadow-emerald-500/5 font-medium transition-all ${
                         errors.ppiu_number ? "border-red-400" : "border-gray-200 focus:border-emerald-500"
                       }`}
                     />
@@ -424,14 +422,14 @@ export default function RegisterTravelPage() {
 
                 <FileUpload
                   label="File SK PPIU"
-                  accept="document"
+                  accept="document-or-image"
                   bucket="ppiu"
                   value={form.sk_ppiu_doc_url}
                   onUpload={set("sk_ppiu_doc_url")}
                   onError={(e) => setErrors((prev) => ({ ...prev, sk_ppiu_doc_url: e }))}
                   error={errors.sk_ppiu_doc_url}
                   required
-                  description="Upload surat keputusan PPIU dalam format PDF"
+                  description="Upload surat keputusan PPIU dalam format PDF atau gambar"
                 />
 
                 <InputField label="NIB (Nomor Induk Berusaha) *" icon={FileText} error={errors.nib}>
@@ -442,7 +440,7 @@ export default function RegisterTravelPage() {
                       value={form.nib}
                       onChange={(e) => set("nib")(e.target.value)}
                       placeholder="Contoh: 1234567890123"
-                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all ${
+                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:shadow-md focus:shadow-emerald-500/5 font-medium transition-all ${
                         errors.nib ? "border-red-400" : "border-gray-200 focus:border-emerald-500"
                       }`}
                     />
@@ -451,17 +449,17 @@ export default function RegisterTravelPage() {
 
                 <FileUpload
                   label="File Dokumen NIB"
-                  accept="document"
+                  accept="document-or-image"
                   bucket="nib"
                   value={form.nib_doc_url}
                   onUpload={set("nib_doc_url")}
                   onError={(e) => setErrors((prev) => ({ ...prev, nib_doc_url: e }))}
                   error={errors.nib_doc_url}
                   required
-                  description="Upload dokumen NIB dalam format PDF"
+                  description="Upload dokumen NIB dalam format PDF atau gambar"
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <InputField label="NPWP Badan Usaha" icon={FileText}>
                     <div className="relative flex items-center">
                       <FileText className="w-4 h-4 absolute left-3.5 text-gray-400" />
@@ -489,7 +487,7 @@ export default function RegisterTravelPage() {
 
             {/* Step 3: Akun Admin */}
             {step === 3 && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <InputField label="Nama Lengkap Admin *" icon={User} error={errors.name}>
                   <div className="relative flex items-center">
                     <User className="w-4 h-4 absolute left-3.5 text-gray-400" />
@@ -498,7 +496,7 @@ export default function RegisterTravelPage() {
                       value={form.name}
                       onChange={(e) => set("name")(e.target.value)}
                       placeholder="Nama admin travel"
-                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all ${
+                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:shadow-md focus:shadow-emerald-500/5 font-medium transition-all ${
                         errors.name ? "border-red-400" : "border-gray-200 focus:border-emerald-500"
                       }`}
                     />
@@ -513,7 +511,7 @@ export default function RegisterTravelPage() {
                       value={form.email}
                       onChange={(e) => set("email")(e.target.value)}
                       placeholder="admin@travel.com"
-                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all ${
+                      className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:shadow-md focus:shadow-emerald-500/5 font-medium transition-all ${
                         errors.email ? "border-red-400" : "border-gray-200 focus:border-emerald-500"
                       }`}
                     />
@@ -536,20 +534,20 @@ export default function RegisterTravelPage() {
 
             {/* Step 4: Alamat & Review */}
             {step === 4 && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <InputField label="Alamat Lengkap *" icon={MapPin} error={errors.full_address}>
                   <textarea
                     value={form.full_address}
                     onChange={(e) => { set("full_address")(e.target.value); setErrors((p) => ({ ...p, full_address: "" })) }}
                     rows={3}
                     placeholder="Jl. Contoh No. 123, RT 01/RW 02..."
-                    className={`w-full p-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all resize-none ${
+                    className={`w-full p-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:shadow-md focus:shadow-emerald-500/5 font-medium transition-all resize-none ${
                       errors.full_address ? "border-red-400 bg-red-50" : "border-gray-200 focus:border-emerald-500"
                     }`}
                   />
                 </InputField>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <InputField label="Provinsi *" icon={MapPin} error={errors.province}>
                     <div className="relative flex items-center">
                       <MapPin className="w-4 h-4 absolute left-3.5 text-gray-400" />
@@ -558,7 +556,7 @@ export default function RegisterTravelPage() {
                         value={form.province}
                         onChange={(e) => set("province")(e.target.value)}
                         placeholder="DKI Jakarta"
-                        className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all ${
+                        className={`w-full pl-10 pr-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:shadow-md focus:shadow-emerald-500/5 font-medium transition-all ${
                           errors.province ? "border-red-400" : "border-gray-200 focus:border-emerald-500"
                         }`}
                       />
@@ -593,14 +591,14 @@ export default function RegisterTravelPage() {
                 </InputField>
 
                 {/* Review Summary */}
-                <div className="mt-6 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-white p-6">
-                  <h3 className="text-sm font-extrabold text-gray-900 mb-4 flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-                      <CheckCircle size={14} className="text-emerald-600" />
+                <div className="mt-4 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-white p-5">
+                  <h3 className="text-sm font-extrabold text-gray-900 mb-3 flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <CheckCircle size={13} className="text-emerald-600" />
                     </div>
                     Ringkasan Data
                   </h3>
-                  <div className="space-y-3 text-[13px]">
+                  <div className="space-y-2 text-[13px]">
                     <ReviewRow label="Travel" value={form.travel_name} />
                     <ReviewRow label="Subdomain" value={`${displaySlug}.umrahqu.id`} highlight />
                     <ReviewRow label="PPIU" value={form.ppiu_number || "-"} />
@@ -619,7 +617,7 @@ export default function RegisterTravelPage() {
         </div>
 
         {/* Navigation */}
-        <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
+        <div className="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between">
           {step > 1 ? (
             <button
               type="button"
@@ -639,7 +637,7 @@ export default function RegisterTravelPage() {
             <button
               type="button"
               onClick={nextStep}
-              className="px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.97] text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:shadow-emerald-600/30 transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 hover:-translate-y-0.5 active:scale-[0.97] text-white text-sm font-bold rounded-xl shadow-md shadow-emerald-600/20 hover:shadow-lg hover:shadow-emerald-600/25 transition-all flex items-center gap-2"
             >
               Lanjut
               <ChevronRight className="w-4 h-4" />
@@ -649,7 +647,7 @@ export default function RegisterTravelPage() {
               type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.97] text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:shadow-emerald-600/30 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 hover:-translate-y-0.5 active:scale-[0.97] text-white text-sm font-bold rounded-xl shadow-md shadow-emerald-600/20 hover:shadow-lg hover:shadow-emerald-600/25 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>{loading ? "Mendaftarkan..." : "Daftar Sekarang"}</span>
@@ -660,7 +658,7 @@ export default function RegisterTravelPage() {
       </div>
 
       {/* Footer links */}
-      <div className="mt-8 text-center space-y-2">
+      <div className="mt-6 text-center space-y-1.5">
         <p className="text-sm text-gray-500">
           Sudah punya akun mitra?{" "}
           <Link className="text-emerald-400 hover:text-emerald-300 hover:underline font-semibold transition-colors" href="/login">

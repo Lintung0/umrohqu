@@ -20,6 +20,7 @@ interface FileUploadProps {
 const ACCEPT_MAP: Record<string, string> = {
   image: "image/jpeg,image/png,image/webp",
   document: "application/pdf",
+  "document-or-image": "application/pdf,image/jpeg,image/png,image/webp",
 }
 
 const MAX_SIZE = 2 * 1024 * 1024 // 2MB
@@ -98,6 +99,7 @@ export function FileUpload({
   }
 
   const isImage = accept === "image"
+  const isDocOrImage = accept === "document-or-image"
   const hasFile = !!value
 
   return (
@@ -110,7 +112,7 @@ export function FileUpload({
 
       {hasFile && !uploading ? (
         <div className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-auth-primary/30 bg-auth-primary-light/50 px-4 py-3">
-          {isImage ? (
+          {(isImage || (isDocOrImage && value && /\.(jpg|jpeg|png|webp)$/i.test(value))) ? (
             <a href={value} target="_blank" rel="noopener noreferrer" className="shrink-0">
               <img
                 src={value}
@@ -173,7 +175,7 @@ export function FileUpload({
             {uploading ? "Mengupload..." : "Klik atau seret file ke sini"}
           </p>
           <p className="text-[11px] text-auth-muted-foreground/60">
-            {isImage ? "JPG, PNG, WebP (maks. 2MB)" : "PDF (maks. 2MB)"}
+            {isImage ? "JPG, PNG, WebP (maks. 2MB)" : isDocOrImage ? "PDF, JPG, PNG, WebP (maks. 2MB)" : "PDF (maks. 2MB)"}
           </p>
         </div>
       )}
