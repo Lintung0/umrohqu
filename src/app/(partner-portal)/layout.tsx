@@ -11,10 +11,10 @@ export default function PartnerPortalLayout({
   children: React.ReactNode
 }) {
   return (
-    <main className="min-h-dvh bg-gradient-to-br from-emerald-950 via-slate-950 to-emerald-950 text-white flex flex-col items-center relative overflow-hidden">
+    <main className="min-h-dvh bg-gradient-to-br from-emerald-900 via-slate-800 to-emerald-900 text-white flex flex-col items-center relative overflow-hidden">
 
       {/* Ambient Glow Effects */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-emerald-500/8 blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-emerald-500/12 blur-[150px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-amber-500/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-emerald-400/5 blur-[100px] rounded-full pointer-events-none" />
 
