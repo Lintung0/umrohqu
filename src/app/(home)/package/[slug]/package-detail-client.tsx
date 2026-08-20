@@ -52,6 +52,7 @@ interface PackageDetail {
   hotel_makkah_stars: number | null
   hotel_madinah: string | null
   hotel_madinah_stars: number | null
+  cashback_amount?: number | null
   travel: { id: string; name: string; slug: string; is_verified?: boolean; logo_url?: string | null; city?: string | null; description?: string | null; phone?: string | null; contact_email?: string | null } | null
 }
 
@@ -413,7 +414,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 {activeTab === "overview" && (
                   <div className="space-y-4 animate-in fade-in duration-200">
                     {pkg.description && (
-                      <p className="text-sm text-muted-foreground leading-relaxed">{pkg.description}</p>
+                      <div className="bg-white border-l-4 border-primary/60 rounded-r-xl border border-border/50 p-4">
+                        <p className="text-sm text-muted-foreground leading-relaxed">{pkg.description}</p>
+                      </div>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {pkg.airline && <InfoCard icon={Plane} label="Maskapai" value={decodeUnicodeEscapes(pkg.airline)} color="blue" />}
@@ -423,6 +426,20 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                       {pkg.departure_city && <InfoCard icon={MapPin} label="Berangkat dari" value={pkg.departure_city} />}
                       {displayPkg.quota && <InfoCard icon={Users} label="Kuota" value={`${displayPkg.quota} orang`} color="blue" />}
                     </div>
+                    {includesList.length > 0 && (
+                      <div className="pt-1">
+                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <TrendingUp className="w-3.5 h-3.5 text-primary" /> Fasilitas Utama
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {includesList.slice(0, 6).map((inc) => (
+                            <span key={inc} className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-2.5 py-1">
+                              <CheckCircle className="w-3 h-3 shrink-0" /> {inc}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -710,58 +727,87 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           <div className="lg:col-span-1" ref={sidebarRef}>
             <div className="lg:sticky lg:top-24 space-y-3">
             {/* Title & Price */}
-            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <h1 className="text-lg font-bold leading-tight">{pkg.name}</h1>
-                {avgRating > 0 && (
-                  <span className="flex items-center gap-1 bg-amber-50 text-amber-600 text-xs font-medium px-2 py-1 rounded-lg shrink-0">
-                    <Star className="w-3 h-3 fill-amber-400" /> {avgRating.toFixed(1)}
+            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3">
+              <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                <PackageStatusBadge status={pkg.status} />
+                {pkg.type && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary uppercase tracking-wide">
+                    {pkg.type}
                   </span>
                 )}
+                {discount > 0 && (
+                  <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-md">-{discount}%</span>
+                )}
+                {avgRating > 0 && (
+                  <span className="flex items-center gap-1 text-xs font-semibold text-amber-600 ml-auto">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {avgRating.toFixed(1)}
+                    <span className="text-[10px] font-normal text-muted-foreground">({initialReviews.length})</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <h1 className="text-lg font-bold leading-tight line-clamp-2">{pkg.name}</h1>
+                <button
+                  onClick={handleShare}
+                  className="shrink-0 w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 text-muted-foreground hover:text-primary flex items-center justify-center transition-all"
+                  aria-label="Bagikan paket"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </button>
               </div>
               {pkg.original_price && (
                 <p className="text-sm text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>
               )}
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-primary">{formatRupiah(pkg.price)}</p>
-                {discount > 0 && (
-                  <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded">-{discount}%</span>
-                )}
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <p className="text-2xl font-extrabold text-primary">{formatRupiah(pkg.price)}</p>
+                <span className="text-xs text-muted-foreground">/ orang</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">per orang · belum termasuk biaya layanan</p>
+              {!!pkg.cashback_amount && pkg.cashback_amount > 0 && (
+                <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold">
+                  🎁 Cashback {formatRupiah(pkg.cashback_amount)}
+                </div>
+              )}
 
-              {/* Quick Info */}
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border/50">
+              {/* Quick Info — interactive chips */}
+              <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-border/50">
                 {pkg.duration_days && (
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <Clock className="w-3.5 h-3.5 text-primary" />
-                    <span>{pkg.duration_days} Hari</span>
+                  <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/10 rounded-xl px-2.5 py-2 hover:bg-primary/10 hover:border-primary/25 transition-colors">
+                    <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="font-medium truncate">{pkg.duration_days} Hari</span>
                   </div>
                 )}
                 {pkg.airline && (
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <Plane className="w-3.5 h-3.5 text-primary" />
-                    <span className="truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
+                  <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/10 rounded-xl px-2.5 py-2 hover:bg-primary/10 hover:border-primary/25 transition-colors">
+                    <Plane className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="font-medium truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
                   </div>
                 )}
                 {pkg.departure_city && (
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <MapPin className="w-3.5 h-3.5 text-primary" />
-                    <span>{pkg.departure_city}</span>
+                  <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/10 rounded-xl px-2.5 py-2 hover:bg-primary/10 hover:border-primary/25 transition-colors">
+                    <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="font-medium truncate">{pkg.departure_city}</span>
                   </div>
                 )}
                 {pkg.departure_date && (
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <Calendar className="w-3.5 h-3.5 text-primary" />
-                    <span>{new Date(pkg.departure_date).toLocaleDateString("id-ID", { month: "short", year: "numeric" })}</span>
+                  <div className="flex items-center gap-2 text-xs bg-primary/5 border border-primary/10 rounded-xl px-2.5 py-2 hover:bg-primary/10 hover:border-primary/25 transition-colors">
+                    <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="font-medium truncate">{new Date(pkg.departure_date).toLocaleDateString("id-ID", { month: "short", year: "numeric" })}</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Seat */}
-            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3">
-              <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="detail" />
+            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-sm font-bold flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-primary" /> Sisa Kursi
+                </h3>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${seat.bgColor} ${seat.textColor}`}>
+                  {seat.label}
+                </span>
+              </div>
+              <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="detail" showLabel={false} />
             </div>
 
             {/* Ongoing Banner */}
@@ -783,15 +829,15 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             )}
 
             {/* CTA */}
-            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3 space-y-2.5">
+            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3 space-y-2.5">
               <Link href={`/checkout?slug=${pkg.slug}`} className="block">
-                <Button className="w-full h-11 font-semibold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all">
-                  Pesan
+                <Button className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]">
+                  Pesan Sekarang
                 </Button>
               </Link>
               <Button
                 variant="outline"
-                className="w-full h-10 text-xs gap-1.5"
+                className="w-full h-11 text-xs gap-2 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
                 onClick={() => {
                   if (comparePackages.some((p) => p.id === pkg.id)) return
                   if (isFull) {
@@ -802,34 +848,40 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   toast.success("Paket berhasil ditambahkan ke perbandingan")
                 }}
               >
-                <><GitCompare className="w-3.5 h-3.5" /> Bandingkan Paket</>
+                <GitCompare className="w-4 h-4" /> Bandingkan Paket
               </Button>
+              <p className="text-[10px] text-muted-foreground text-center">Bayar via saldo dompet, transfer, atau pembayaran lainnya</p>
             </div>
 
             {/* Travel */}
             {pkg.travel && (
-              <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3">
-                <Link href={`/travel/${pkg.travel.slug}`} className="flex items-center gap-3 group">
+              <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3">
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Diselenggarakan oleh</p>
+                <div className="flex items-center gap-3">
                   {pkg.travel.logo_url ? (
-                    <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={40} height={40} unoptimized className="rounded-lg object-cover" />
+                    <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={48} height={48} unoptimized className="rounded-xl object-cover ring-2 ring-white shadow-sm" />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shrink-0">
-                      <span className="text-sm font-bold text-white">{pkg.travel.name.charAt(0)}</span>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shrink-0">
+                      <span className="text-base font-bold text-white">{pkg.travel.name.charAt(0)}</span>
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                      <span className="text-sm font-semibold group-hover:text-primary transition-colors truncate">{pkg.travel.name}</span>
-                      {pkg.travel.is_verified && <BadgeCheck className="w-3.5 h-3.5 text-primary shrink-0" />}
+                      <span className="text-sm font-bold group-hover:text-primary transition-colors truncate">{pkg.travel.name}</span>
+                      {pkg.travel.is_verified && <BadgeCheck className="w-4 h-4 text-primary shrink-0" />}
                     </div>
-                    {pkg.travel.city && <p className="text-[10px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{pkg.travel.city}</p>}
+                    {pkg.travel.city && <p className="text-[11px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-3 h-3" />{pkg.travel.city}</p>}
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </Link>
+                  <Link href={`/travel/${pkg.travel.slug}`} className="shrink-0">
+                    <Button variant="ghost" size="sm" className="text-xs text-primary hover:bg-primary/5 gap-1">
+                      Profil <ChevronRight className="w-3 h-3" />
+                    </Button>
+                  </Link>
+                </div>
                 {pkg.travel.phone && (
                   <a href={`https://wa.me/${pkg.travel.phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="mt-3 block">
-                    <Button variant="outline" className="w-full h-10 text-xs gap-1.5 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all">
-                      <MessageCircle className="w-3.5 h-3.5" /> Hubungi via WhatsApp
+                    <Button className="w-full h-11 text-xs font-bold gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all">
+                      <MessageCircle className="w-4 h-4" /> Tanya via WhatsApp
                     </Button>
                   </a>
                 )}
@@ -837,15 +889,18 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             )}
 
             {/* Trust */}
-            <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm">
-              <div className="space-y-2">
+            <div className="bg-white rounded-2xl border border-border/60 p-5">
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Keamanan & Jaminan</p>
+              <div className="space-y-2.5">
                 {[
-                  { icon: Shield, text: "Pembayaran aman & terenkripsi" },
-                  { icon: BadgeCheck, text: "Travel partner terverifikasi" },
-                  { icon: CheckCircle, text: "Jaminan keberangkatan" },
+                  { icon: Shield, text: "Pembayaran aman & terenkripsi", highlight: false },
+                  { icon: BadgeCheck, text: "Travel partner terverifikasi", highlight: false },
+                  { icon: CheckCircle, text: "Jaminan keberangkatan", highlight: false },
                 ].map((item) => (
-                  <div key={item.text} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <item.icon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <div key={item.text} className="flex items-center gap-2.5 text-xs text-muted-foreground bg-gray-50/80 border border-border/40 rounded-xl px-3 py-2.5">
+                    <span className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                      <item.icon className="w-3.5 h-3.5 text-emerald-600" />
+                    </span>
                     {item.text}
                   </div>
                 ))}
