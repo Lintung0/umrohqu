@@ -32,7 +32,7 @@ interface BookingDetail {
   service_fee?: number
   tax_amount?: number
   fee_channel?: string
-  package: { name: string; slug: string; image_url: string | null; departure_city: string | null; duration_days: number | null; airline: string | null; hotel_makkah: string | null; hotel_makkah_stars: number | null; hotel_madinah: string | null; hotel_madinah_stars: number | null } | null
+  package: { name: string; slug: string; departure_city: string | null; duration_days: number | null; airline?: string | null; hotel_makkah?: string | null; hotel_makkah_stars?: number | null; hotel_madinah?: string | null; hotel_madinah_stars?: number | null } | null
   participants: { id: string; full_name: string; nik: string | null; passport_no: string | null; gender: string | null; phone: string | null; relation: string }[]
 }
 
@@ -78,7 +78,7 @@ export default function BookingDetailPage() {
     async function load() {
       console.log("[DEBUG BOOKING LOAD] Starting load for booking:", params.id, "authChecked:", authChecked, "user:", user?.id)
 
-      const selectFields = "*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)"
+      const selectFields = "*, package:packages(name, slug, departure_city, duration_days), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)"
 
       let bookingData: any = null
 

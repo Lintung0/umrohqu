@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { enrichEmbeddedPackageCovers } from "@/lib/package-covers"
 import { User } from "@supabase/supabase-js"
 import { Heart, Clock, Trash2, ChevronRight } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
@@ -38,10 +39,11 @@ export default function WishlistPage() {
       if (user) {
         const { data } = await supabase
           .from("wishlists")
-          .select("id, package:packages(id, name, slug, image_url, price, duration_days, tenant_id, status)")
+          .select("id, package:packages(id, name, slug, price, duration_days, tenant_id, status)")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
-        setItems((data as any) || [])
+        const enriched = await enrichEmbeddedPackageCovers(supabase, data as any)
+        setItems((enriched as any) || [])
       }
       setLoading(false)
     }

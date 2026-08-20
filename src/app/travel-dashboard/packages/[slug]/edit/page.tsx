@@ -180,9 +180,18 @@ export default function EditPackagePage() {
       setExcludes(pkg.excludes || [])
       setTerms(pkg.terms || [])
       setCancellationPolicy(pkg.cancellation_policy || "")
-      setImageUrl(pkg.image_url || "")
+      setImageUrl((pkg as any).image_url || "")
       setIsActive(pkg.status === "active")
       setPkgStatus(pkg.status || null)
+
+      const { data: covers } = await supabase
+        .from("package_gallery")
+        .select("image_url")
+        .eq("package_id", pkg.id)
+        .order("sort_order", { ascending: true })
+        .limit(1)
+        .maybeSingle()
+      if (covers?.image_url) setImageUrl(covers.image_url)
 
       if (pkg.itinerary && Array.isArray(pkg.itinerary)) {
         const lines = pkg.itinerary.map((item: any) => {
@@ -247,7 +256,10 @@ export default function EditPackagePage() {
       ? itinerary
           .split("\n")
           .filter((l) => l.trim())
-          .map((line) => ({ text: line.trim() }))
+          .map((line, i) => {
+            const clean = (line.match(/^\s*(?:Hari\s*(?:ke[-: ]*)?\d+|Day\s*\d+)\s*[:.-]?\s*(.*)$/i) || [, line])[1]?.trim() || line.trim()
+            return { day: i + 1, title: `Hari ke-${i + 1}`, description: clean }
+          })
       : null
 
     const { error } = await supabase
@@ -256,36 +268,43 @@ export default function EditPackagePage() {
         name,
         type,
         price: result.data.price,
-        original_price: result.data.original_price || null,
-        is_promo: !!originalPrice,
         quota: result.data.quota,
-        available: result.data.quota,
         duration_days: result.data.duration_days,
-        departure_cities: departureCities,
         departure_city: departureCities[0] || null,
-        airline,
-        hotel_makkah: hotelMakkah || null,
-        hotel_makkah_stars: hotelMakkahStars ? Number(hotelMakkahStars) : null,
-        hotel_madinah: hotelMadinah || null,
-        hotel_madinah_stars: hotelMadinahStars ? Number(hotelMadinahStars) : null,
-        hotel_info: {
-          makkah: hotelMakkah || null,
-          makkah_stars: hotelMakkahStars ? Number(hotelMakkahStars) : null,
-          madinah: hotelMadinah || null,
-          madinah_stars: hotelMadinahStars ? Number(hotelMadinahStars) : null,
-        },
+        departure_date: null,
         description: description || null,
         itinerary: itineraryArray,
-        facilities: facilities.length ? facilities : null,
         includes: includes.length ? includes : null,
         excludes: excludes.length ? excludes : null,
         terms: terms.length ? terms : null,
         cancellation_policy: cancellationPolicy || null,
-        image_url: imageUrl || null,
         status: pkgStatus === "ongoing" || pkgStatus === "completed" ? pkgStatus : (isActive ? "active" : "nonaktif"),
         updated_at: new Date().toISOString(),
       })
       .eq("id", packageId)
+
+    if (imageUrl) {
+      const { data: existing } = await supabase
+        .from("package_gallery")
+        .select("id")
+        .eq("package_id", packageId)
+        .order("sort_order", { ascending: true })
+        .limit(1)
+        .maybeSingle()
+      if (existing) {
+        const { data: galleryData } = await supabase.from("package_gallery").select("image_url").eq("id", existing.id).single()
+        if (galleryData?.image_url !== imageUrl) {
+          await supabase.from("package_gallery").update({ image_url: imageUrl }).eq("id", existing.id)
+        }
+      } else {
+        await supabase.from("package_gallery").insert({
+          package_id: packageId,
+          image_url: imageUrl,
+          media_type: "image",
+          sort_order: 0,
+        })
+      }
+    }
 
     if (error) {
       toast.error("Gagal mengupdate paket: " + error.message)

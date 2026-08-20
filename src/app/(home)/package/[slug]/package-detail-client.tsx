@@ -17,7 +17,7 @@ import ImageGallery from "@/components/shared/image-gallery"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import { Button } from "@/components/ui/button"
 import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
-import { getSeatAvailability } from "@/lib/utils"
+import { getSeatAvailability, getPackageAvailable } from "@/lib/utils"
 import { toast } from "sonner"
 import { useCompare } from "@/lib/compare-context"
 import type { Package as PackageType } from "@/lib/types"
@@ -31,6 +31,7 @@ interface PackageDetail {
   original_price: number | null
   currency: string
   quota: number
+  quota_taken: number | null
   available: number | null
   departure_city: string | null
   departure_date: string | null
@@ -141,7 +142,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
     ? initialReviews.reduce((s, r) => s + r.rating, 0) / initialReviews.length
     : 0
 
-  const seat = getSeatAvailability(pkg.available, pkg.quota)
+  const seat = getSeatAvailability(pkg.available, pkg.quota, pkg.quota_taken)
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
@@ -155,6 +156,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const facilitiesList: string[] = Array.isArray(pkg.facilities) ? pkg.facilities : []
   const includesList: string[] = Array.isArray(pkg.includes) ? pkg.includes : (typeof pkg.facilities === "object" && pkg.facilities?.includes ? pkg.facilities.includes : [])
   const excludesList: string[] = Array.isArray(pkg.excludes) ? pkg.excludes : (typeof pkg.facilities === "object" && pkg.facilities?.excludes ? pkg.facilities.excludes : [])
+  const cleanItineraryTitle = (raw: string) =>
+    raw.replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "").trim()
+
   const parseItinerary = (raw: any): { day: number; title: string; description: string }[] => {
     if (Array.isArray(raw)) {
       return raw.map((item: any, idx: number) => {
@@ -162,8 +166,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         if (item && typeof item === "object") {
           return {
             day: Number(item.day) || idx + 1,
-            title: item.title ? String(item.title) : `Hari ke-${idx + 1}`,
-            description: item.description || item.text || "",
+            title: cleanItineraryTitle(item.title ? String(item.title) : `Hari ke-${idx + 1}`),
+            description: item.description || item.text || String(item.title ?? ""),
           }
         }
         return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: "" }
@@ -722,7 +726,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
             {/* Seat */}
             <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3">
-              <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="detail" />
+              <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} quotaTaken={pkg.quota_taken} variant="detail" />
             </div>
 
             {/* Ongoing Banner */}
@@ -735,8 +739,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   <div>
                     <p className="text-sm font-semibold text-amber-800">Paket Sedang Berlangsung</p>
                     <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-                      {pkg.quota - (pkg.available ?? 0)} dari {pkg.quota} jamaah sudah berangkat.{" "}
-                      Sisa {pkg.available ?? 0} kursi masih tersedia untuk bergabung.
+                      {pkg.quota - getPackageAvailable(pkg)} dari {pkg.quota} jamaah sudah berangkat.{" "}
+                      Sisa {getPackageAvailable(pkg)} kursi masih tersedia untuk bergabung.
                     </p>
                   </div>
                 </div>

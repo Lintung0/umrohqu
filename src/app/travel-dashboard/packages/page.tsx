@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import { User } from "@supabase/supabase-js"
 import { Plus, Search, Edit, Trash2, Eye, EyeOff, MoreHorizontal, Calendar, Hotel, Loader2, Package, ExternalLink } from "lucide-react"
 import Image from "next/image"
@@ -53,7 +54,8 @@ export default function TravelPackagesPage() {
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
 
-      setPackages((data as any) || [])
+      const enriched = await enrichPackagesWithCovers(supabase, (data as any) || [])
+      setPackages((enriched as any) || [])
       setLoading(false)
     }
     load()

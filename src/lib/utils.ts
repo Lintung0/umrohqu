@@ -22,8 +22,16 @@ export function parseRupiahInput(formatted: string): number {
   return cleaned ? parseInt(cleaned, 10) : 0
 }
 
-export function getSeatAvailability(available: number | null | undefined, quota: number) {
-  const avail = available ?? quota
+export function getPackageAvailable(pkg: { available?: number | null; quota?: number | null; quota_taken?: number | null }): number {
+  return pkg.available ?? Math.max(0, (pkg.quota ?? 0) - (pkg.quota_taken ?? 0))
+}
+
+export function getSeatAvailability(
+  available: number | null | undefined,
+  quota: number,
+  quotaTaken?: number | null,
+) {
+  const avail = available ?? (quotaTaken != null ? Math.max(0, quota - quotaTaken) : quota)
   const percent = quota > 0 ? (avail / quota) * 100 : 100
   const color = percent <= 20 ? "bg-red-500" : percent <= 50 ? "bg-amber-500" : "bg-emerald-500"
   const textColor = percent <= 20 ? "text-red-600" : percent <= 50 ? "text-amber-600" : "text-emerald-600"

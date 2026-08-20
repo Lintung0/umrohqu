@@ -6,6 +6,8 @@ import { Search, SearchX, X, SlidersHorizontal, MapPin } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getAseanCountryByCode } from "@/lib/constants"
 import { createClient } from "@/lib/supabase/client"
+import { enrichPackagesWithCovers } from "@/lib/package-covers"
+import { getPackageAvailable } from "@/lib/utils"
 import type { Package, Tenant } from "@/lib/types"
 import SharedPackageCard from "@/components/shared/package-card"
 import SearchSidebar from "@/components/search/search-sidebar"
@@ -49,11 +51,6 @@ function SearchContent() {
   const month = searchParams.get("month") ?? ""
   const cost = searchParams.get("cost") ?? ""
   const type = searchParams.get("type") ?? "semua"
-  const airlines = (searchParams.get("airlines") ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-  const hotelStars = searchParams.get("hotelStars") ?? ""
   const duration = searchParams.get("duration") ?? ""
   const sortBy = searchParams.get("sort") ?? "relevance"
   const searchQuery = searchParams.get("search") ?? ""
@@ -160,8 +157,6 @@ function SearchContent() {
   const setMonth = useCallback((v: string) => setUrl({ month: v }), [setUrl])
   const setCost = useCallback((v: string) => setUrl({ cost: v === "Semua Biaya" ? null : v }), [setUrl])
   const setType = useCallback((v: string) => setUrl({ type: v === "semua" ? null : v }), [setUrl])
-  const setAirlines = useCallback((v: string[]) => setUrl({ airlines: v.length ? v.join(",") : null }), [setUrl])
-  const setHotelStars = useCallback((v: string) => setUrl({ hotelStars: v }), [setUrl])
   const setDuration = useCallback((v: string) => setUrl({ duration: v }), [setUrl])
   const setPriceRange = useCallback(
     (range: [number, number]) => {
@@ -232,7 +227,8 @@ function SearchContent() {
           console.error("Error fetching packages:", pkgError)
           setPackages([])
         } else {
-          setPackages((pkgs as Package[]) || [])
+          const enriched = await enrichPackagesWithCovers(supabase, (pkgs as Package[]) || [])
+          setPackages(enriched || [])
         }
 
         const { data: tnts, error: tenantError } = await supabase
@@ -287,6 +283,27 @@ function SearchContent() {
     fetchData()
   }, [searchQueryParam])
 
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel("search-packages-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "packages" }, () => {
+        const query = supabase
+          .from("packages")
+          .select("*")
+          .in("status", ["active", "ongoing"])
+          .is("deleted_at", null)
+        query.then(async ({ data }) => {
+          const enriched = await enrichPackagesWithCovers(supabase, (data as Package[]) || [])
+          setPackages(enriched || [])
+        })
+      })
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
   const filtered = packages
     .filter((pkg) => {
       if (country) {
@@ -295,11 +312,14 @@ function SearchContent() {
       }
       if (departure) {
         const dep = departure.toLowerCase()
-        const cities = (pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).map((c) => c?.toLowerCase() || "")
+        const cities = [pkg.departure_city].filter(Boolean).map((c) => c?.toLowerCase() || "")
         if (!cities.some((c) => c.includes(dep))) return false
       }
       if (month && month !== "") {
-        if (!pkg.departure_month?.toLowerCase().includes(month.toLowerCase())) return false
+        const monthName = pkg.departure_date
+          ? new Intl.DateTimeFormat("id-ID", { month: "long" }).format(new Date(pkg.departure_date))
+          : ""
+        if (!monthName.toLowerCase().includes(month.toLowerCase())) return false
       }
       if (cost && cost !== "Semua Biaya" && cost !== "") {
         if (cost === "< Rp 25 Juta" && pkg.price >= 25000000) return false
@@ -313,13 +333,6 @@ function SearchContent() {
       if (type && type !== "semua") {
         if (pkg.type !== type) return false
       }
-      if (airlines.length > 0) {
-        if (!airlines.some((a) => pkg.airline?.toLowerCase().includes(a.toLowerCase()))) return false
-      }
-      if (hotelStars) {
-        const minStars = parseInt(hotelStars)
-        if ((pkg.hotel_makkah_stars || 0) < minStars && (pkg.hotel_madinah_stars || 0) < minStars) return false
-      }
       if (duration) {
         const days = pkg.duration_days || 0
         if (duration === "7-10 Hari" && (days < 7 || days > 10)) return false
@@ -329,8 +342,8 @@ function SearchContent() {
       return true
     })
     .sort((a, b) => {
-      const aSoldOut = (a.available ?? 0) <= 0
-      const bSoldOut = (b.available ?? 0) <= 0
+      const aSoldOut = getPackageAvailable(a) <= 0
+      const bSoldOut = getPackageAvailable(b) <= 0
       if (aSoldOut !== bSoldOut) return aSoldOut ? 1 : -1
       if (sortBy === "price-asc") return a.price - b.price
       if (sortBy === "price-desc") return b.price - a.price
@@ -353,7 +366,7 @@ function SearchContent() {
     router.replace("/search", { scroll: false })
   }
 
-  const hasActiveFilters = Boolean(departure || country || month || cost || airlines.length > 0 || hotelStars || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
+  const hasActiveFilters = Boolean(departure || country || month || cost || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
 
   const activeFilterChips: { label: string; onRemove: () => void }[] = []
   if (departure) activeFilterChips.push({ label: departure, onRemove: () => setDeparture("") })
@@ -361,8 +374,6 @@ function SearchContent() {
   if (month) activeFilterChips.push({ label: month, onRemove: () => setMonth("") })
   if (cost && cost !== "Semua Biaya") activeFilterChips.push({ label: cost, onRemove: () => setCost("") })
   if (type !== "semua") activeFilterChips.push({ label: type, onRemove: () => setType("semua") })
-  airlines.forEach((a) => activeFilterChips.push({ label: a, onRemove: () => setAirlines(airlines.filter((x) => x !== a)) }))
-  if (hotelStars) activeFilterChips.push({ label: `Bintang ${hotelStars}+`, onRemove: () => setHotelStars("") })
   if (duration) activeFilterChips.push({ label: duration, onRemove: () => setDuration("") })
   if (searchQuery) activeFilterChips.push({ label: `"${searchQuery}"`, onRemove: () => handleSearchInput("") })
 
@@ -583,10 +594,6 @@ function SearchContent() {
               setPriceRange={setPriceRange}
               duration={duration}
               setDuration={setDuration}
-              airlines={airlines}
-              setAirlines={setAirlines}
-              hotelStars={hotelStars}
-              setHotelStars={setHotelStars}
               hasActiveFilters={!!hasActiveFilters}
               clearFilters={clearFilters}
             />
@@ -614,10 +621,6 @@ function SearchContent() {
                   setPriceRange={setPriceRange}
                   duration={duration}
                   setDuration={setDuration}
-                  airlines={airlines}
-                  setAirlines={setAirlines}
-                  hotelStars={hotelStars}
-                  setHotelStars={setHotelStars}
                   hasActiveFilters={!!hasActiveFilters}
                   clearFilters={clearFilters}
                 />

@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     // 1. Get package (harga & fee SELALU dari database, bukan dari client)
     const { data: pkg, error: pkgErr } = await admin
       .from("packages")
-      .select("id, tenant_id, name, price, quota, available, slug")
+      .select("id, tenant_id, name, price, quota, quota_taken, slug")
       .eq("id", packageId)
       .in("status", ["active", "ongoing"])
       .is("deleted_at", null)
@@ -178,8 +178,7 @@ export async function POST(request: NextRequest) {
     await admin
       .from("packages")
       .update({
-        quota: Math.max(0, (pkg.quota || 0) - pilgrimCount),
-        available: Math.max(0, (pkg.available || 0) - pilgrimCount),
+        quota_taken: Math.max(0, (pkg.quota_taken ?? 0) + pilgrimCount),
       })
       .eq("id", packageId)
 

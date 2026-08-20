@@ -36,7 +36,7 @@ export default function BookingsPage() {
       if (user) {
         const { data } = await supabase
           .from("bookings")
-          .select("id, status, pilgrim_count, price, fee, total, booking_channel, created_at, package:packages(name, slug, image_url)")
+          .select("id, status, pilgrim_count, price, fee, total, booking_channel, created_at, package:packages(name, slug)")
           .eq("customer_id", user.id)
           .is("deleted_at", null)
           .order("created_at", { ascending: false })

@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { MapPin, Phone, Mail, Clock, Plane, Hotel, Users, ArrowRight, Crown } from "lucide-react"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
-import { formatRupiah } from "@/lib/utils"
+import { formatRupiah, getPackageAvailable } from "@/lib/utils"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Tenant, Package } from "@/lib/types"
 
@@ -172,7 +172,7 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
           </div>
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <Users className="w-3 h-3 shrink-0" style={{ color: gold }} />
-            <span>Sisa <span className="font-semibold text-white">{pkg.available ?? pkg.quota}</span> kursi</span>
+            <span>Sisa <span className="font-semibold text-white">{getPackageAvailable(pkg)}</span> kursi</span>
           </div>
         </div>
         <div className="flex items-end justify-between pt-3 border-t" style={{ borderColor: `${gold}22` }}>

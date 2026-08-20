@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import { Loader2, Wallet, CreditCard, Users, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User, Phone, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
@@ -71,7 +72,8 @@ function CheckoutContent() {
           return
         }
 
-        setPkg(pkgData as any)
+        const enriched = await enrichPackagesWithCovers(supabase, [pkgData as any])
+        setPkg((enriched?.[0] as any) || (pkgData as any))
         setTravel((pkgData as any).travel as Tenant || null)
 
         const { data: { user } } = await supabase.auth.getUser()

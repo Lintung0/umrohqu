@@ -7,7 +7,7 @@ interface DocPackage {
   id: string
   name: string
   slug: string
-  image_url: string | null
+  image_url?: string | null
   doc_drive_link: string | null
   status?: string
 }

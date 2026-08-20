@@ -10,6 +10,7 @@ import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/com
 import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
+import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import { useCompare, MAX_COMPARE } from "@/lib/compare-context"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Package } from "@/lib/types"
@@ -453,8 +454,9 @@ function CompareContent() {
         .in("slug", packagesParam)
         .is("deleted_at", null)
       if (data && data.length > 0) {
-        data.forEach((pkg) => {
-          addToCompare(pkg as Package)
+        const enriched = await enrichPackagesWithCovers(supabase, data as Package[])
+        ;(enriched || []).forEach((pkg) => {
+          addToCompare(pkg)
         })
       }
     }

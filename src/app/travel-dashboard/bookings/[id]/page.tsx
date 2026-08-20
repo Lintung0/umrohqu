@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { formatRupiah } from "@/lib/utils"
+import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import {
   ArrowLeft, User, CreditCard, MapPin, Plane, Hotel, Calendar,
   CheckCircle, Clock, XCircle, Loader2, Phone, Mail, FileText,
@@ -53,7 +54,7 @@ export default function TravelBookingDetailPage() {
         .from("bookings")
         .select(`
           *,
-          packages(name, slug, duration_days, price, image_url, departure_cities, airline, hotel_makkah),
+          packages(name, slug, duration_days, price, departure_city),
           users(full_name, email, phone),
           booking_participants(*)
         `)
@@ -61,7 +62,8 @@ export default function TravelBookingDetailPage() {
         .single()
 
       if (!error && data) {
-        setBooking(data as BookingDetail)
+        const enriched = await enrichPackagesWithCovers(supabase, data.packages ? [data.packages] : [])
+        setBooking({ ...(data as BookingDetail), packages: (enriched?.[0] as Package) || (data as any).packages })
       }
       setLoading(false)
     }
@@ -186,11 +188,13 @@ export default function TravelBookingDetailPage() {
                   <p className="font-semibold">{booking.packages.name}</p>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {booking.packages.duration_days} {t("package.day")}</span>
-                    <span className="flex items-center gap-1"><Plane className="w-3.5 h-3.5" /> {booking.packages.airline}</span>
+                    {booking.packages.airline && <span className="flex items-center gap-1"><Plane className="w-3.5 h-3.5" /> {booking.packages.airline}</span>}
                   </div>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Hotel className="w-3.5 h-3.5" /> {booking.packages.hotel_makkah}
-                  </p>
+                  {booking.packages.hotel_makkah && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Hotel className="w-3.5 h-3.5" /> {booking.packages.hotel_makkah}
+                    </p>
+                  )}
                   <p className="font-bold text-primary">{formatRupiah(booking.packages.price)} / {t("booking.participants")}</p>
                 </div>
               </div>

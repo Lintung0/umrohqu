@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { MapPin, Phone, Mail, Clock, Plane, Hotel, Users, ArrowRight } from "lucide-react"
-import { formatRupiah } from "@/lib/utils"
+import { formatRupiah, getPackageAvailable } from "@/lib/utils"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Tenant, Package } from "@/lib/types"
 
@@ -71,7 +71,7 @@ export default function CleanMinimalTemplate({ tenant, packages, themeConfig }: 
             </div>
             <div className="w-px h-10 bg-border/50" />
             <div>
-              <p className="font-bold text-2xl" style={{ color: primary }}>{packages.reduce((sum, p) => sum + (p.available ?? p.quota), 0)}</p>
+              <p className="font-bold text-2xl" style={{ color: primary }}>{packages.reduce((sum, p) => sum + getPackageAvailable(p), 0)}</p>
               <p className="text-xs text-muted-foreground">Kursi Tersisa</p>
             </div>
           </div>
@@ -170,7 +170,7 @@ function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Users className="w-3 h-3 shrink-0 text-gray-400" />
-            <span>{pkg.available ?? pkg.quota} kursi tersisa</span>
+            <span>{getPackageAvailable(pkg)} kursi tersisa</span>
           </div>
         </div>
         <div className="flex items-end justify-between pt-3 border-t border-border/40">

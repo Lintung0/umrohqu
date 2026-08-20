@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { MapPin, Phone, Mail, Clock, Plane, Hotel, Users, ArrowRight, Star } from "lucide-react"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
-import { formatRupiah } from "@/lib/utils"
+import { formatRupiah, getPackageAvailable } from "@/lib/utils"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Tenant, Package } from "@/lib/types"
 
@@ -60,7 +60,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
             <p className="text-xs text-muted-foreground mt-0.5">Total Paket</p>
           </div>
           <div>
-            <p className="text-2xl font-bold" style={{ color: primary }}>{packages.reduce((sum, p) => sum + (p.available ?? p.quota), 0)}</p>
+            <p className="text-2xl font-bold" style={{ color: primary }}>{packages.reduce((sum, p) => sum + getPackageAvailable(p), 0)}</p>
             <p className="text-xs text-muted-foreground mt-0.5">Kursi Tersisa</p>
           </div>
         </div>
@@ -165,7 +165,7 @@ function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: strin
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Users className="w-3 h-3 shrink-0" style={{ color: primary }} />
-            <span>Sisa <span className="font-semibold text-foreground">{pkg.available ?? pkg.quota}</span> kursi</span>
+            <span>Sisa <span className="font-semibold text-foreground">{getPackageAvailable(pkg)}</span> kursi</span>
           </div>
         </div>
         <div className="flex items-end justify-between pt-3 border-t border-border/50">

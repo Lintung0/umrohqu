@@ -64,12 +64,11 @@ export interface Package {
   price: number
   currency: string
   quota: number
+  quota_taken: number | null
   departure_city: string | null
   departure_date: string | null
   duration_days: number | null
-  hotel_info: Record<string, unknown>
-  airline: string | null
-  facilities: string[] | null
+  hotel_info: Record<string, unknown> | null
   status: string
   is_shared_to_marketplace: boolean
   created_at: string
@@ -77,26 +76,29 @@ export interface Package {
   deleted_at: string | null
   // added columns (migration 3)
   type: string | null
-  departure_cities: string[] | null
-  departure_month: string | null
-  original_price: number | null
-  image_url: string | null
   is_promo: boolean
-  available: number
+  available: number | null
   doc_drive_link: string | null
-  hotel_makkah: string | null
-  hotel_makkah_stars: number | null
-  hotel_madinah: string | null
-  hotel_madinah_stars: number | null
   itinerary: unknown[] | null
   includes: string[] | null
   excludes: string[] | null
   terms: string[] | null
   cancellation_policy: string | null
-  country: string | null
-  country_code: string | null
-  city: string | null
   cashback_amount: number | null
+  // ghost columns — tidak ada di DB (Faris schema), fallback opsional
+  airline?: string | null
+  facilities?: string[] | null
+  departure_cities?: string[] | null
+  departure_month?: string | null
+  original_price?: number | null
+  image_url?: string | null
+  hotel_makkah?: string | null
+  hotel_makkah_stars?: number | null
+  hotel_madinah?: string | null
+  hotel_madinah_stars?: number | null
+  country?: string | null
+  country_code?: string | null
+  city?: string | null
 }
 
 export interface Booking {

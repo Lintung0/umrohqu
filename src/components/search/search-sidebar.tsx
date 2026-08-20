@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { X, RotateCcw, MapPin, Plane, Star, Clock, Banknote, ChevronDown, SlidersHorizontal } from "lucide-react"
+import { X, RotateCcw, MapPin, Clock, Banknote, ChevronDown, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ASEAN_COUNTRIES } from "@/lib/constants"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
@@ -15,10 +15,6 @@ interface SearchSidebarProps {
   setPriceRange: (v: [number, number]) => void
   duration: string
   setDuration: (v: string) => void
-  airlines: string[]
-  setAirlines: (v: string[]) => void
-  hotelStars: string
-  setHotelStars: (v: string) => void
   hasActiveFilters: boolean
   clearFilters: () => void
 }
@@ -31,21 +27,6 @@ const PRICE_RANGES: { label: string; range: [number, number] }[] = [
 ]
 
 const DURATION_OPTIONS = ["7-10 Hari", "10-14 Hari", "14-21 Hari"]
-
-const AIRLINES = [
-  "Garuda Indonesia",
-  "Saudi Airlines",
-  "Qatar Airways",
-  "Turkish Airlines",
-  "Batik Air",
-  "Lion Air",
-]
-
-const HOTEL_STARS = [
-  { value: "3", label: "Bintang 3" },
-  { value: "4", label: "Bintang 4" },
-  { value: "5", label: "Bintang 5" },
-]
 
 function CountrySelectFilter({
   value,
@@ -118,14 +99,9 @@ export default function SearchSidebar({
   country, setCountry,
   priceRange, setPriceRange,
   duration, setDuration,
-  airlines, setAirlines,
-  hotelStars, setHotelStars,
   hasActiveFilters, clearFilters,
 }: SearchSidebarProps) {
   const toggleDuration = (d: string) => setDuration(duration === d ? "" : d)
-  const toggleAirline = (a: string) =>
-    setAirlines(airlines.includes(a) ? airlines.filter((x) => x !== a) : [...airlines, a])
-  const toggleStars = (s: string) => setHotelStars(hotelStars === s ? "" : s)
 
   const isPriceQuickActive = (range: [number, number]) =>
     priceRange[0] === range[0] && priceRange[1] === range[1]
@@ -216,61 +192,6 @@ export default function SearchSidebar({
               )}
             >
               {d}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Maskapai */}
-      <div className="space-y-2.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-          <Plane className="w-3.5 h-3.5 text-emerald-600" /> Maskapai
-        </label>
-        <div className="space-y-1">
-          {AIRLINES.map((a) => (
-            <label
-              key={a}
-              className={cn(
-                "flex items-center gap-2.5 min-h-11 px-3 rounded-lg text-xs font-medium cursor-pointer transition-all focus-within:ring-2 focus-within:ring-emerald-500/50 focus-within:outline-none",
-                airlines.includes(a)
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  : "text-slate-600 hover:bg-slate-50 border border-transparent"
-              )}
-            >
-              <input
-                type="checkbox"
-                name="airlines"
-                checked={airlines.includes(a)}
-                onChange={() => toggleAirline(a)}
-                aria-label={a}
-                className="w-4 h-4 text-emerald-600 accent-emerald-600 rounded"
-              />
-              {a}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Bintang Hotel */}
-      <div className="space-y-2.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-          <Star className="w-3.5 h-3.5 text-emerald-600" /> Bintang Hotel
-        </label>
-        <div className="flex gap-2">
-          {HOTEL_STARS.map((h) => (
-            <button
-              key={h.value}
-              onClick={() => toggleStars(h.value)}
-              aria-pressed={hotelStars === h.value}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1 min-h-11 rounded-lg text-xs font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60",
-                hotelStars === h.value
-                  ? "bg-amber-400 border-amber-400 text-amber-900 shadow-sm"
-                  : "bg-slate-50 border-slate-200 text-slate-500 hover:border-amber-300"
-              )}
-            >
-              <Star className="w-3 h-3" />
-              {h.label}
             </button>
           ))}
         </div>

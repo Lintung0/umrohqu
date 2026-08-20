@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Clock, MapPin, Plane, Hotel, Calendar, GitCompare, Heart, Loader2, Star } from "lucide-react"
-import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
+import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
 import { createClient } from "@/lib/supabase/client"
@@ -61,7 +61,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [avgRating, setAvgRating] = useState<number | null>(null)
   const [reviewCount, setReviewCount] = useState(0)
 
-  const soldOut = (pkg.available ?? 0) <= 0
+  const soldOut = getPackageAvailable(pkg) <= 0
   const hasCashback = (pkg.cashback_amount ?? 0) > 0
 
   const typeKey = (pkg.type || "reguler").toLowerCase()
@@ -293,7 +293,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           )}
 
           <div className="mb-3">
-            <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} />
+            <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
           </div>
 
           <div className="flex items-end justify-between pt-2.5 border-t border-slate-100 mt-auto">
@@ -392,7 +392,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} />
+                  <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
                 </div>
               </div>
             </div>
@@ -540,7 +540,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         )}
 
-        <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} />
+        <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
 
         {pkg.facilities && pkg.facilities.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2 h-6 overflow-hidden">

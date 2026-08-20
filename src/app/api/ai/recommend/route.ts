@@ -23,7 +23,7 @@ Paket ${i + 1}: "${p.name}" (ID: ${p.id})
 - Hotel Madinah: ${p.hotel_madinah || "-"} (${p.hotel_madinah_stars || 0} bintang)
 - Fasilitas: ${(p.facilities || []).join(", ") || "-"}
 - Kuota: ${p.quota || 0}
-- Sisa Kursi: ${p.available ?? p.quota ?? 0}
+- Sisa Kursi: ${p.available ?? (p.quota ?? 0) - (p.quota_taken ?? 0)}
 `).join("\n---\n")
 }
 

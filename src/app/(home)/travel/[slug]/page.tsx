@@ -2,7 +2,9 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { MapPin, Clock, Users, Plane, BadgeCheck, Shield, Package, ChevronRight, Phone, Mail, MessageCircle, Zap, Building2, Globe, FileCheck, Award } from "lucide-react"
-import { formatRupiah, getSeatAvailability } from "@/lib/utils"
+import { formatRupiah, getSeatAvailability, getPackageAvailable } from "@/lib/utils"
+import { enrichPackagesWithCovers } from "@/lib/package-covers"
+import type { Package as PackageType } from "@/lib/types"
 import { createAdminClient } from "@/lib/supabase/server"
 import ImageGallery from "@/components/shared/image-gallery"
 import { PackageDocumentationSection } from "@/components/shared/package-documentation"
@@ -47,6 +49,7 @@ interface PackageRow {
   hotel_madinah_stars: number | null
   available: number | null
   quota: number | null
+  quota_taken: number | null
   image_url: string | null
   is_promo: boolean
   status: string
@@ -57,7 +60,7 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
   const discount = pkg.original_price
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
-  const seat = getSeatAvailability(pkg.available, pkg.quota ?? 0)
+  const seat = getSeatAvailability(pkg.available, pkg.quota ?? 0, pkg.quota_taken)
 
   const typeColor: Record<string, string> = {
     vip: "bg-amber-100 text-amber-800",
@@ -174,7 +177,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
       .order("status", { ascending: false })
       .order("price", { ascending: true })
 
-    packages = (packagesResult.data as PackageRow[]) || []
+    packages = ((await enrichPackagesWithCovers(supabase, (packagesResult.data as PackageType[]) || [])) as unknown as PackageRow[]) || []
   } catch {
     notFound()
   }
@@ -242,7 +245,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { value: salePackages.length, label: "Paket Tersedia", color: "text-emerald-700" },
-            { value: totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+` : packages.reduce((s, p) => s + (p.available || 0), 0), label: "Jamaah Diberangkatkan", color: "text-blue-700" },
+            { value: totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+` : packages.reduce((s, p) => s + getPackageAvailable(p), 0), label: "Jamaah Diberangkatkan", color: "text-blue-700" },
             { value: tenantData.founded_year || "-", label: "Berdiri Sejak", color: "text-amber-700" },
             { value: tenantData.is_verified ? "Aktif" : "Proses", label: "Status Verifikasi", color: "text-emerald-700" },
           ].map((m) => (
@@ -309,7 +312,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               {[
                 { icon: Building2, label: "Berdiri Sejak", value: tenantData.founded_year || "-" },
                 { icon: Package, label: "Total Paket", value: `${salePackages.length} paket` },
-                { icon: Users, label: "Kuota Tersedia", value: `${salePackages.reduce((sum, p) => sum + (p.available || 0), 0)} kursi` },
+                { icon: Users, label: "Kuota Tersedia", value: `${salePackages.reduce((sum, p) => sum + getPackageAvailable(p), 0)} kursi` },
                 { icon: Globe, label: "Website", value: `${tenantData.slug}.umrahqu.com` },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2.5 min-w-0">

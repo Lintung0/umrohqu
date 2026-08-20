@@ -23,7 +23,7 @@ export default function DashboardOverview() {
 
         if (user) {
           const [bookingsRes, allBookingsRes, wishlistRes] = await Promise.all([
-            supabase.from("bookings").select("id, status, total, created_at, package:packages(name, slug, image_url)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
+            supabase.from("bookings").select("id, status, total, created_at, package:packages(name, slug)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
             supabase.from("bookings").select("id, status, created_at").eq("customer_id", user.id),
             supabase.from("wishlists").select("id", { count: "exact" }).eq("user_id", user.id),
           ])

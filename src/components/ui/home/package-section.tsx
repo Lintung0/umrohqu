@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Calendar, Clock, Loader2, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils";
+import { enrichPackagesWithCovers } from "@/lib/package-covers";
 import PackageCard from "@/components/shared/package-card";
 import type { Package } from "@/lib/types";
 
@@ -39,7 +40,7 @@ export default function PackageSection() {
       .range(from, to);
 
     if (!error && data) {
-      const pkgs = (data as Package[]) || [];
+      const pkgs = (await enrichPackagesWithCovers(supabase, (data as Package[]) || [])) || [];
       if (pkgs.length > 0) {
         const ids = pkgs.map((p) => p.id);
         const { data: bookings } = await supabase
@@ -85,6 +86,23 @@ export default function PackageSection() {
       initialLoadDone.current = true;
       fetchPackages(1);
     }
+  }, [fetchPackages]);
+
+  // Realtime: refetch on package changes + gentle polling fallback
+  useEffect(() => {
+    const channel = supabase
+      .channel("packages-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "packages" },
+        () => fetchPackages(1)
+      )
+      .subscribe();
+    const interval = setInterval(() => fetchPackages(1), 30000);
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
   }, [fetchPackages]);
 
   function loadMore() {

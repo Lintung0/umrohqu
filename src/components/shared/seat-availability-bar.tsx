@@ -7,14 +7,15 @@ import { useTranslation } from "@/lib/i18n"
 interface SeatAvailabilityBarProps {
   available: number | null | undefined
   quota: number
+  quotaTaken?: number | null
   variant?: "card" | "detail" | "compact"
   showLabel?: boolean
   soldOut?: boolean
 }
 
-export default function SeatAvailabilityBar({ available, quota, variant = "card", showLabel = true, soldOut = false }: SeatAvailabilityBarProps) {
+export default function SeatAvailabilityBar({ available, quota, quotaTaken, variant = "card", showLabel = true, soldOut = false }: SeatAvailabilityBarProps) {
   const { t } = useTranslation()
-  const seat = getSeatAvailability(available, quota)
+  const seat = getSeatAvailability(available, quota, quotaTaken)
 
   if (variant === "compact") {
     return (

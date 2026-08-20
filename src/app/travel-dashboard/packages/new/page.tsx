@@ -200,44 +200,44 @@ export default function NewPackagePage() {
       ? itinerary
           .split("\n")
           .filter((l) => l.trim())
-          .map((line) => ({ text: line.trim() }))
+          .map((line, i) => ({ day: i + 1, title: `Hari ke-${i + 1}`, description: line.trim() }))
       : null
 
-    const { error } = await supabase.from("packages").insert({
-      tenant_id: tenantId,
-      name,
-      slug,
-      type,
-      price: result.data.price,
-      original_price: result.data.original_price || null,
-      is_promo: !!originalPrice,
-      quota: result.data.quota,
-      available: result.data.quota,
-      duration_days: result.data.duration_days,
-      departure_cities: departureCities,
-      departure_city: departureCities[0] || null,
-      airline,
-      hotel_makkah: hotelMakkah || null,
-      hotel_makkah_stars: hotelMakkahStars ? Number(hotelMakkahStars) : null,
-      hotel_madinah: hotelMadinah || null,
-      hotel_madinah_stars: hotelMadinahStars ? Number(hotelMadinahStars) : null,
-      hotel_info: {
-        makkah: hotelMakkah || null,
-        makkah_stars: hotelMakkahStars ? Number(hotelMakkahStars) : null,
-        madinah: hotelMadinah || null,
-        madinah_stars: hotelMadinahStars ? Number(hotelMadinahStars) : null,
-      },
-      description: description || null,
-      itinerary: itineraryArray,
-      facilities: facilities.length ? facilities : null,
-      includes: includes.length ? includes : null,
-      excludes: excludes.length ? excludes : null,
-      terms: terms.length ? terms : null,
-      cancellation_policy: cancellationPolicy || null,
-      image_url: imageUrl || null,
-      status: isActive ? "active" : "nonaktif",
-      currency: "IDR",
-    })
+    const { data: created, error } = await supabase
+      .from("packages")
+      .insert({
+        tenant_id: tenantId,
+        name,
+        slug,
+        type,
+        price: result.data.price,
+        quota: result.data.quota,
+        quota_taken: 0,
+        departure_city: departureCities[0] || null,
+        departure_date: null,
+        duration_days: result.data.duration_days,
+        description: description || null,
+        itinerary: itineraryArray,
+        includes: includes.length ? includes : null,
+        excludes: excludes.length ? excludes : null,
+        terms: terms.length ? terms : null,
+        cancellation_policy: cancellationPolicy || null,
+        status: isActive ? "active" : "nonaktif",
+        currency: "IDR",
+        is_promo: !!originalPrice,
+        is_shared_to_marketplace: true,
+      })
+      .select("id")
+      .single()
+
+    if (imageUrl && created) {
+      await supabase.from("package_gallery").insert({
+        package_id: created.id,
+        image_url: imageUrl,
+        media_type: "image",
+        sort_order: 0,
+      })
+    }
 
     if (error) {
       toast.error("Gagal menyimpan paket: " + error.message)

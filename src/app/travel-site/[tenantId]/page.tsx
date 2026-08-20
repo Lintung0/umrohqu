@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import { Loader2 } from "lucide-react"
 import { TEMPLATE_MAP } from "@/components/travel-site/templates"
 import { PackageDocumentationSection } from "@/components/shared/package-documentation"
@@ -29,7 +30,7 @@ export default function TravelSitePage() {
       ])
 
       setTenant(tenantRes.data as Tenant | null)
-      const allPackages = (pkgRes.data as Package[]) || []
+      const allPackages = (await enrichPackagesWithCovers(supabase, (pkgRes.data as Package[]) || [])) || []
       setPackages(allPackages.filter((p) => p.status === "active" || p.status === "ongoing"))
       setDocPackages(allPackages.filter((p) => p.doc_drive_link))
 

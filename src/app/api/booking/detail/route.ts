@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error } = await admin
       .from("bookings")
-      .select("*, package:packages(name, slug, image_url, departure_city, duration_days, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
+      .select("*, package:packages(name, slug, departure_city, duration_days), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)")
       .eq("id", bookingId)
       .single()
 
