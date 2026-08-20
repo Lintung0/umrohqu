@@ -216,7 +216,6 @@ function SearchContent() {
           .from("packages")
           .select("*")
           .in("status", ["active", "ongoing"])
-          .eq("is_active", true)
           .is("deleted_at", null)
 
         if (searchQueryParam) {
@@ -251,20 +250,20 @@ function SearchContent() {
 
           try {
             const { data: bids } = await supabase
-              .from("bids")
-              .select("travel_id, bid_value, is_active, impressions, clicks")
-              .eq("is_active", true)
+              .from("biddings")
+              .select("tenant_id, bid_value, status, impressions, clicks")
+              .eq("status", "active")
 
             if (bids && bids.length > 0) {
               const entries = bids.map((b: any) => ({
-                travelId: b.travel_id,
+                travelId: b.tenant_id,
                 factors: {
                   bidScore: b.bid_value || 0,
                   rating: 0,
                   reviewCount: 0,
                   totalBookings: 0,
                   conversionRate: b.impressions > 0 ? (b.clicks / b.impressions) * 100 : 0,
-                  isVerified: tenantMap.get(b.travel_id)?.is_verified ?? false,
+                  isVerified: tenantMap.get(b.tenant_id)?.is_verified ?? false,
                   hasPromo: false,
                   sponsored: false,
                 } as RankingFactors,

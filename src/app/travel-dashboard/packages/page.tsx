@@ -18,7 +18,6 @@ interface TravelPackage {
   price: number
   quota: number
   status: string
-  is_active: boolean
   departure_city: string | null
   departure_date: string | null
   duration_days: number | null
@@ -49,7 +48,7 @@ export default function TravelPackagesPage() {
 
       const { data } = await supabase
         .from("packages")
-        .select("id, name, slug, price, quota, status, is_active, departure_city, departure_date, duration_days, airline, hotel_info, image_url, doc_drive_link")
+        .select("*")
         .eq("tenant_id", tId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false })

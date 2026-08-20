@@ -34,7 +34,6 @@ export default function PackageSection() {
       .from("packages")
       .select("*")
       .in("status", ["active", "ongoing"])
-      .eq("is_active", true)
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .range(from, to);

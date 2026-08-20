@@ -28,7 +28,7 @@ interface BidRow {
   bid_value: number
   start_date: string
   end_date: string
-  is_active: boolean
+  status: string
   impressions: number
   clicks: number
   position: number | null
@@ -202,7 +202,7 @@ export default function TravelPromotionsPage() {
   // ─── Bidding CRUD ─────────────────────────────────────────────────────────
 
   const bidStats = useMemo(() => {
-    const active = bids.filter((b) => b.is_active)
+    const active = bids.filter((b) => b.status === "active")
     const totalBudget = active.reduce((sum, b) => {
       const start = new Date(b.start_date)
       const end = new Date(b.end_date)
@@ -264,7 +264,7 @@ export default function TravelPromotionsPage() {
       bid_value: bidForm.bid_value,
       start_date: bidForm.start_date,
       end_date: bidForm.end_date,
-      is_active: true,
+      status: "active",
       impressions: 0,
       clicks: 0,
     }
@@ -306,18 +306,19 @@ export default function TravelPromotionsPage() {
 
   async function toggleBidActive(bid: BidRow) {
     setTogglingBidId(bid.id)
-    const { error } = await supabase.from("biddings").update({ is_active: !bid.is_active }).eq("id", bid.id)
+    const newStatus = bid.status === "active" ? "paused" : "active"
+    const { error } = await supabase.from("biddings").update({ status: newStatus }).eq("id", bid.id)
     if (error) {
       toast.error("Gagal mengubah status bid")
     } else {
-      setBids((prev) => prev.map((b) => b.id === bid.id ? { ...b, is_active: !b.is_active } : b))
-      toast.success(`Bid ${bid.is_active ? "dinonaktifkan" : "diaktifkan"}`)
+      setBids((prev) => prev.map((b) => b.id === bid.id ? { ...b, status: newStatus } : b))
+      toast.success(`Bid ${bid.status === "active" ? "dinonaktifkan" : "diaktifkan"}`)
     }
     setTogglingBidId(null)
   }
 
   function getBidStatus(bid: BidRow) {
-    if (!bid.is_active) return { label: "Nonaktif", color: "bg-gray-100 text-gray-500" }
+    if (bid.status !== "active") return { label: "Nonaktif", color: "bg-gray-100 text-gray-500" }
     const now = new Date()
     const start = new Date(bid.start_date)
     const end = new Date(bid.end_date)
@@ -508,15 +509,15 @@ export default function TravelPromotionsPage() {
                                 onClick={() => toggleBidActive(bid)}
                                 disabled={togglingBidId === bid.id}
                                 className={`p-1.5 rounded-lg transition-colors ${
-                                  bid.is_active
+                                  bid.status === "active"
                                     ? "text-emerald-600 hover:bg-emerald-50"
                                     : "text-muted-foreground hover:bg-gray-100"
                                 } disabled:opacity-50`}
-                                title={bid.is_active ? "Nonaktifkan" : "Aktifkan"}
+                                title={bid.status === "active" ? "Nonaktifkan" : "Aktifkan"}
                               >
                                 {togglingBidId === bid.id ? (
                                   <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : bid.is_active ? (
+                                ) : bid.status === "active" ? (
                                   <Eye className="w-4 h-4" />
                                 ) : (
                                   <EyeOff className="w-4 h-4" />

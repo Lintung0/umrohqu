@@ -48,7 +48,6 @@ const packageSchema = z.object({
   terms: z.array(z.string()).optional(),
   cancellation_policy: z.string().optional().nullable(),
   image_url: z.string().url("URL tidak valid").optional().or(z.literal("")),
-  is_active: z.boolean(),
 })
 
 const PACKAGE_TYPES = [
@@ -182,7 +181,7 @@ export default function EditPackagePage() {
       setTerms(pkg.terms || [])
       setCancellationPolicy(pkg.cancellation_policy || "")
       setImageUrl(pkg.image_url || "")
-      setIsActive(pkg.is_active ?? pkg.status === "active")
+      setIsActive(pkg.status === "active")
       setPkgStatus(pkg.status || null)
 
       if (pkg.itinerary && Array.isArray(pkg.itinerary)) {
@@ -228,7 +227,6 @@ export default function EditPackagePage() {
       terms,
       cancellation_policy: cancellationPolicy || null,
       image_url: imageUrl || "",
-      is_active: isActive,
     })
 
     if (!result.success) {
@@ -284,7 +282,6 @@ export default function EditPackagePage() {
         terms: terms.length ? terms : null,
         cancellation_policy: cancellationPolicy || null,
         image_url: imageUrl || null,
-        is_active: isActive,
         status: pkgStatus === "ongoing" || pkgStatus === "completed" ? pkgStatus : (isActive ? "active" : "nonaktif"),
         updated_at: new Date().toISOString(),
       })

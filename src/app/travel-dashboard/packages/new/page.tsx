@@ -48,7 +48,6 @@ const packageSchema = z.object({
   terms: z.array(z.string()).optional(),
   cancellation_policy: z.string().optional().nullable(),
   image_url: z.string().url("URL tidak valid").optional().or(z.literal("")),
-  is_active: z.boolean(),
 })
 
 type PackageFormData = z.infer<typeof packageSchema>
@@ -174,7 +173,6 @@ export default function NewPackagePage() {
       terms,
       cancellation_policy: cancellationPolicy || null,
       image_url: imageUrl || "",
-      is_active: isActive,
     })
 
     if (!result.success) {
@@ -237,7 +235,6 @@ export default function NewPackagePage() {
       terms: terms.length ? terms : null,
       cancellation_policy: cancellationPolicy || null,
       image_url: imageUrl || null,
-      is_active: isActive,
       status: isActive ? "active" : "nonaktif",
       currency: "IDR",
     })

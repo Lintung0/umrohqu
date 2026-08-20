@@ -82,7 +82,6 @@ export interface Package {
   original_price: number | null
   image_url: string | null
   is_promo: boolean
-  is_active: boolean
   available: number
   doc_drive_link: string | null
   hotel_makkah: string | null

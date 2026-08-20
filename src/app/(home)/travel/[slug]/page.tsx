@@ -49,7 +49,6 @@ interface PackageRow {
   quota: number | null
   image_url: string | null
   is_promo: boolean
-  is_active: boolean
   status: string
   doc_drive_link: string | null
 }
@@ -169,10 +168,10 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
 
     const packagesResult = await supabase
       .from("packages")
-      .select("id, name, slug, type, departure_cities, duration_days, departure_month, price, original_price, airline, hotel_makkah, hotel_makkah_stars, hotel_madinah, hotel_madinah_stars, available, quota, image_url, is_promo, is_active, status, doc_drive_link")
+      .select("*")
       .eq("tenant_id", tenant.id)
       .is("deleted_at", null)
-      .order("is_active", { ascending: false })
+      .order("status", { ascending: false })
       .order("price", { ascending: true })
 
     packages = (packagesResult.data as PackageRow[]) || []
