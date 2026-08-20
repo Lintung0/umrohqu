@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const { data: pkg } = await supabase
     .from("packages")
-    .select("name, description, price, image_url, travel:tenants(name)")
+    .select("name, description, price, id, travel:tenants(name)")
     .eq("slug", slug)
     .in("status", ["active", "ongoing"])
     .single()
@@ -20,8 +20,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: "Paket Tidak Ditemukan - UmrahQu" }
   }
 
+  const { data: coverImg } = await supabase
+    .from("package_gallery")
+    .select("image_url")
+    .eq("package_id", (pkg as any).id)
+    .order("sort_order", { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
   const travelName = (pkg.travel as any)?.name || "UmrahQu"
   const description = pkg.description || `Paket umroh ${pkg.name} dari ${travelName} mulai dari Rp ${(pkg.price || 0).toLocaleString("id-ID")}`
+  const ogImage = coverImg?.image_url
 
   return {
     title: `${pkg.name} - UmrahQu`,
@@ -29,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: pkg.name,
       description,
-      images: pkg.image_url ? [pkg.image_url] : [],
+      images: ogImage ? [ogImage] : [],
       type: "website",
     },
   }
