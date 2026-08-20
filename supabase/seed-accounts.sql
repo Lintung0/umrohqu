@@ -28,7 +28,7 @@ VALUES (
   'a0000000-0000-0000-0000-000000000001',
   'admin@gmail.com',
   'Admin Utama',
-  'super_admin',
+  'admin',
   now(), now()
 ) ON CONFLICT (id) DO NOTHING;
 
@@ -55,7 +55,7 @@ VALUES (
   'a0000000-0000-0000-0000-000000000002',
   'finance@gmail.com',
   'Finance Admin',
-  'marketplace_finance',
+  'finance',
   now(), now()
 ) ON CONFLICT (id) DO NOTHING;
 
@@ -82,7 +82,7 @@ VALUES (
   'a0000000-0000-0000-0000-000000000003',
   'operation@gmail.com',
   'Operation Admin',
-  'marketplace_operational',
+  'operational',
   now(), now()
 ) ON CONFLICT (id) DO NOTHING;
 

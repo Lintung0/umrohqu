@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Tidak memiliki akses" }, { status: 403 })
     }
 
-    if (!["travel_admin", "travel_staff"].includes(profile.role)) {
+    if (!["travel_admin", "travel_operational", "travel_finance"].includes(profile.role)) {
       return NextResponse.json({ error: "Tidak memiliki akses" }, { status: 403 })
     }
 

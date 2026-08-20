@@ -95,7 +95,7 @@ VALUES (
   crypt('Password123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Admin Utama","role":"marketplace_admin"}',
+  '{"full_name":"Admin Utama","role":"admin"}',
   now(), now()
 )
 ON CONFLICT (id) DO NOTHING;
@@ -110,7 +110,7 @@ VALUES (
   crypt('Password123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Admin Finance","role":"marketplace_finance"}',
+  '{"full_name":"Admin Finance","role":"finance"}',
   now(), now()
 )
 ON CONFLICT (id) DO NOTHING;
@@ -125,7 +125,7 @@ VALUES (
   crypt('Password123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Admin Operational","role":"marketplace_operational"}',
+  '{"full_name":"Admin Operational","role":"operational"}',
   now(), now()
 )
 ON CONFLICT (id) DO NOTHING;
@@ -196,9 +196,9 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.users (id, email, full_name, phone, role, tenant_id, profile)
 VALUES
-  ('10000000-0000-0000-0000-000000000001', '081111111111@phone.umrohq.id', 'Admin Utama', NULL, 'marketplace_admin'::user_role, NULL, '{"provider":"email","avatar_url":""}'),
-  ('10000000-0000-0000-0000-000000000002', '081222222222@phone.umrohq.id', 'Admin Finance', NULL, 'marketplace_finance'::user_role, NULL, '{"provider":"email","avatar_url":""}'),
-  ('10000000-0000-0000-0000-000000000003', '081333333333@phone.umrohq.id', 'Admin Operational', NULL, 'marketplace_operational'::user_role, NULL, '{"provider":"email","avatar_url":""}'),
+  ('10000000-0000-0000-0000-000000000001', '081111111111@phone.umrohq.id', 'Admin Utama', NULL, 'admin'::user_role, NULL, '{"provider":"email","avatar_url":""}'),
+  ('10000000-0000-0000-0000-000000000002', '081222222222@phone.umrohq.id', 'Admin Finance', NULL, 'finance'::user_role, NULL, '{"provider":"email","avatar_url":""}'),
+  ('10000000-0000-0000-0000-000000000003', '081333333333@phone.umrohq.id', 'Admin Operational', NULL, 'operational'::user_role, NULL, '{"provider":"email","avatar_url":""}'),
   ('20000000-0000-0000-0000-000000000001', '082111111111@phone.umrohq.id', 'Admin Al-Haramain', '082111111111', 'travel_admin'::user_role, 'b0000000-0000-0000-0000-000000000001', '{"provider":"email","avatar_url":""}'),
   ('20000000-0000-0000-0000-000000000002', '082222222222@phone.umrohq.id', 'Admin Baitullah', '082222222222', 'travel_admin'::user_role, 'b0000000-0000-0000-0000-000000000002', '{"provider":"email","avatar_url":""}'),
   ('30000000-0000-0000-0000-000000000001', '081298765432@phone.umrohq.id', 'Ahmad Fauzi', '081298765432', 'customer'::user_role, NULL, '{"provider":"email","avatar_url":""}'),

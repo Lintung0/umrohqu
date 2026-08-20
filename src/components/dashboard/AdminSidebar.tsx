@@ -8,23 +8,23 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 
 const ADMIN_NAV = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["super_admin", "marketplace_admin", "marketplace_operational", "marketplace_finance"] as AdminRole[], category: "utama" },
-  { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["super_admin", "marketplace_admin"], category: "utama" },
-  { href: "/admin/verification", label: "Verifikasi Travel", icon: ClipboardCheck, roles: ["super_admin", "marketplace_operational"], category: "utama" },
-  { href: "/admin/users", label: "Pengguna", icon: Shield, roles: ["super_admin", "marketplace_admin"], category: "utama" },
-  { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["super_admin", "marketplace_admin"], category: "transaksi" },
-  { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["super_admin", "marketplace_finance"], category: "transaksi" },
-  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["super_admin", "marketplace_finance"], category: "transaksi" },
-  { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["super_admin", "marketplace_admin"], category: "transaksi" },
-  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["super_admin", "marketplace_finance"], category: "transaksi" },
-  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["super_admin", "marketplace_finance"], category: "transaksi" },
-  { href: "/admin/promos", label: "Promo & Voucher", icon: Tag, roles: ["super_admin", "marketplace_admin", "marketplace_finance"], category: "pemasaran" },
-  { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["super_admin", "marketplace_admin"], category: "pemasaran" },
-  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["super_admin", "marketplace_operational"], category: "pemasaran" },
-  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["super_admin", "marketplace_operational"], category: "bantuan" },
-  { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["super_admin", "marketplace_admin"], category: "bantuan" },
-  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["super_admin", "marketplace_finance"], category: "bantuan" },
-  { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["super_admin", "marketplace_operational"], category: "bantuan" },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["admin", "finance", "operational"] as AdminRole[], category: "utama" },
+  { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["admin"], category: "utama" },
+  { href: "/admin/verification", label: "Verifikasi Travel", icon: ClipboardCheck, roles: ["admin", "operational"], category: "utama" },
+  { href: "/admin/users", label: "Pengguna", icon: Shield, roles: ["admin"], category: "utama" },
+  { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["admin"], category: "transaksi" },
+  { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["admin", "finance"], category: "transaksi" },
+  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["admin", "finance"], category: "transaksi" },
+  { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["admin"], category: "transaksi" },
+  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["admin", "finance"], category: "transaksi" },
+  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["admin", "finance"], category: "transaksi" },
+  { href: "/admin/promos", label: "Promo & Voucher", icon: Tag, roles: ["admin", "finance"], category: "pemasaran" },
+  { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["admin"], category: "pemasaran" },
+  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["admin", "operational"], category: "pemasaran" },
+  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["admin", "operational"], category: "bantuan" },
+  { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["admin"], category: "bantuan" },
+  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["admin", "finance"], category: "bantuan" },
+  { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["admin", "operational"], category: "bantuan" },
 ]
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -35,17 +35,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const ROLE_LABELS: Record<AdminRole, string> = {
-  super_admin: "Super Admin",
-  marketplace_admin: "Admin",
-  marketplace_operational: "Operational",
-  marketplace_finance: "Finance",
+  admin: "Admin",
+  finance: "Finance",
+  operational: "Operational",
 }
 
 const ROLE_COLORS: Record<AdminRole, string> = {
-  super_admin: "bg-purple-100 text-purple-700",
-  marketplace_admin: "bg-emerald-100 text-emerald-700",
-  marketplace_operational: "bg-blue-100 text-blue-700",
-  marketplace_finance: "bg-amber-100 text-amber-700",
+  admin: "bg-purple-100 text-purple-700",
+  finance: "bg-amber-100 text-amber-700",
+  operational: "bg-blue-100 text-blue-700",
 }
 
 interface AdminSidebarProps {

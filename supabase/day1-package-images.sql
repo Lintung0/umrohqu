@@ -17,7 +17,7 @@ CREATE POLICY "Public can view package images"
 CREATE POLICY "Travel staff can manage package images"
   ON package_images FOR ALL
   USING (
-    auth_role() IN ('travel_admin', 'travel_staff')
+    auth_role() IN ('travel_admin', 'travel_operational', 'travel_finance')
     AND auth_tenant_id() = (SELECT tenant_id FROM packages WHERE id = package_id)
   );
 
@@ -47,7 +47,7 @@ CREATE POLICY "Users can manage their own participants"
 CREATE POLICY "Travel can view participants of their bookings"
   ON participants FOR SELECT
   USING (
-    auth_role() IN ('travel_admin', 'travel_staff')
+    auth_role() IN ('travel_admin', 'travel_operational', 'travel_finance')
     AND EXISTS (
       SELECT 1 FROM bookings b
       WHERE b.tenant_id = auth_tenant_id()

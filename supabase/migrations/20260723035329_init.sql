@@ -21,12 +21,12 @@ create extension if not exists "pgcrypto";
 -- 1. ENUM TYPES
 -- ---------------------------------------------------------
 create type user_role as enum (
-  'super_admin',
-  'marketplace_admin',
-  'marketplace_finance',
-  'marketplace_operational',
+  'admin',
+  'finance',
+  'operational',
   'travel_admin',
-  'travel_staff',
+  'travel_operational',
+  'travel_finance',
   'customer'
 );
 
@@ -342,21 +342,14 @@ returns boolean
 language sql stable
 as $$
   select coalesce(auth_role(), '') in
-    ('super_admin', 'marketplace_admin', 'marketplace_finance', 'marketplace_operational');
-$$;
-
-create or replace function is_super_admin()
-returns boolean
-language sql stable
-as $$
-  select auth_role() = 'super_admin';
+    ('admin', 'finance', 'operational');
 $$;
 
 create or replace function is_tenant_staff(check_tenant_id uuid)
 returns boolean
 language sql stable
 as $$
-  select coalesce(auth_role(), '') in ('travel_admin', 'travel_staff')
+  select coalesce(auth_role(), '') in ('travel_admin', 'travel_operational', 'travel_finance')
     and auth_tenant_id() = check_tenant_id;
 $$;
 

@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   const { data: userData } = await supabase.from("users").select("role").eq("id", user.id).single()
-  if (!userData || !["super_admin", "marketplace_admin", "marketplace_finance", "marketplace_operational"].includes(userData.role as string)) {
+  if (!userData || !["admin", "finance", "operational"].includes(userData.role as string)) {
     return Response.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -41,7 +41,7 @@ export async function PATCH(req: NextRequest) {
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   const { data: userData } = await supabase.from("users").select("role").eq("id", user.id).single()
-  if (!userData || !["super_admin", "marketplace_admin"].includes(userData.role as string)) {
+  if (!userData || !["admin"].includes(userData.role as string)) {
     return Response.json({ error: "Forbidden" }, { status: 403 })
   }
 

@@ -26,7 +26,7 @@ export default function TravelDashboardLayout({ children }: { children: React.Re
         .eq("id", user.id)
         .single()
 
-      if (profile?.role === "travel_admin") {
+      if (["travel_admin", "travel_operational", "travel_finance"].includes(profile?.role)) {
         setAuthorized(true)
       }
       setLoading(false)

@@ -41,8 +41,8 @@ CREATE POLICY "user can view own wallet" ON public.wallets
 
 CREATE POLICY "system can manage all wallets" ON public.wallets
   FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('super_admin','marketplace_admin','marketplace_finance')))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('super_admin','marketplace_admin','marketplace_finance')));
+  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('admin','finance')))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('admin','finance')));
 
 CREATE TABLE IF NOT EXISTS public.wallet_transactions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -69,8 +69,8 @@ CREATE POLICY "user can view own transactions" ON public.wallet_transactions
 
 CREATE POLICY "system can manage transactions" ON public.wallet_transactions
   FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('super_admin','marketplace_admin','marketplace_finance')))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('super_admin','marketplace_admin','marketplace_finance')));
+  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('admin','finance')))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('admin','finance')));
 
 -- 6. TRIGGER: AUTO-CREATE WALLET UNTUK USER BARU
 CREATE OR REPLACE FUNCTION public.auto_create_wallet()
@@ -182,7 +182,7 @@ CREATE POLICY "Tenant staff can upload package images" ON storage.objects
     AND EXISTS (
       SELECT 1 FROM public.users
       WHERE id = auth.uid()
-      AND role IN ('travel_admin', 'travel_staff', 'super_admin', 'marketplace_admin')
+      AND role IN ('travel_admin', 'travel_operational', 'travel_finance', 'admin')
     )
   );
 

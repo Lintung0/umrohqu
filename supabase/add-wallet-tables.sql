@@ -20,8 +20,8 @@ CREATE POLICY "user can view own wallet" ON public.wallets
 
 CREATE POLICY "system can manage all wallets" ON public.wallets
   FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('super_admin','marketplace_admin','marketplace_finance')))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('super_admin','marketplace_admin','marketplace_finance')));
+  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('admin','finance')))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('admin','finance')));
 
 -- 2. Wallet Transactions
 CREATE TABLE IF NOT EXISTS public.wallet_transactions (
@@ -49,8 +49,8 @@ CREATE POLICY "user can view own transactions" ON public.wallet_transactions
 
 CREATE POLICY "system can manage transactions" ON public.wallet_transactions
   FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('super_admin','marketplace_admin','marketplace_finance')))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('super_admin','marketplace_admin','marketplace_finance')));
+  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('admin','finance')))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('admin','finance')));
 
 -- 3. Trigger: auto-create wallet for new users
 CREATE OR REPLACE FUNCTION public.auto_create_wallet()

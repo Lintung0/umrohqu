@@ -14,22 +14,22 @@ import { cn } from "@/lib/utils"
 import { useCompare } from "@/lib/compare-context"
 
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
-  super_admin: "/admin",
-  marketplace_admin: "/admin",
-  marketplace_finance: "/admin",
-  marketplace_operational: "/admin",
+  admin: "/admin",
+  finance: "/admin",
+  operational: "/admin",
   travel_admin: "/travel-dashboard",
-  travel_staff: "/travel-dashboard",
+  travel_operational: "/travel-dashboard",
+  travel_finance: "/travel-dashboard",
   customer: "/dashboard",
 }
 
 const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
-  super_admin: "admin_dashboard",
-  marketplace_admin: "admin_dashboard",
-  marketplace_finance: "finance_dashboard",
-  marketplace_operational: "operational_dashboard",
+  admin: "admin_dashboard",
+  finance: "finance_dashboard",
+  operational: "operational_dashboard",
   travel_admin: "travel_dashboard",
-  travel_staff: "travel_staff_dashboard",
+  travel_operational: "travel_dashboard",
+  travel_finance: "travel_dashboard",
   customer: "dashboard_saya",
 }
 

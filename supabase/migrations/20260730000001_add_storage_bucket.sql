@@ -14,7 +14,7 @@ with check (
   and exists (
     select 1 from public.users
     where id = auth.uid()
-    and role in ('travel_admin', 'travel_staff', 'super_admin', 'marketplace_admin')
+    and role in ('travel_admin', 'travel_operational', 'travel_finance', 'admin')
   )
 );
 

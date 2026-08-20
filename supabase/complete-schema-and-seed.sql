@@ -21,8 +21,8 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- =========================================================
 DO $$ BEGIN
   CREATE TYPE user_role AS ENUM (
-    'super_admin','marketplace_admin','marketplace_finance',
-    'marketplace_operational','travel_admin','travel_staff','customer'
+    'admin','finance','operational',
+    'travel_admin','travel_operational','travel_finance','customer'
   );
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
@@ -633,21 +633,14 @@ RETURNS boolean
 LANGUAGE sql STABLE
 AS $$
   SELECT COALESCE(public.auth_role(), '') IN
-    ('super_admin','marketplace_admin','marketplace_finance','marketplace_operational');
-$$;
-
-CREATE OR REPLACE FUNCTION public.is_super_admin()
-RETURNS boolean
-LANGUAGE sql STABLE
-AS $$
-  SELECT public.auth_role() = 'super_admin';
+    ('admin','finance','operational');
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_tenant_staff(check_tenant_id uuid)
 RETURNS boolean
 LANGUAGE sql STABLE
 AS $$
-  SELECT COALESCE(public.auth_role(), '') IN ('travel_admin','travel_staff')
+  SELECT COALESCE(public.auth_role(), '') IN ('travel_admin','travel_operational','travel_finance')
     AND public.auth_tenant_id() = check_tenant_id;
 $$;
 
@@ -1071,17 +1064,17 @@ DELETE FROM auth.users WHERE email IN (
 
 -- Admin Utama
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
-VALUES ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', '081111111111@phone.umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Utama","role":"marketplace_admin","phone":"081111111111"}', now(), now())
+VALUES ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', '081111111111@phone.umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Utama","role":"admin","phone":"081111111111"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Admin Billing
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
-VALUES ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', '082222222222@phone.umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Finance","role":"marketplace_finance","phone":"082222222222"}', now(), now())
+VALUES ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', '082222222222@phone.umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Finance","role":"finance","phone":"082222222222"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Admin Support
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
-VALUES ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', '083333333333@phone.umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Operational","role":"marketplace_operational","phone":"083333333333"}', now(), now())
+VALUES ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', '083333333333@phone.umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Operational","role":"operational","phone":"083333333333"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Travel Admin (Al-Haramain)
@@ -1119,9 +1112,9 @@ ON CONFLICT (id) DO NOTHING;
 -- Kalau trigger gagal, INSERT ini tetap buat row-nya.
 INSERT INTO public.users (id, email, full_name, phone, role, tenant_id, profile)
 VALUES
-  ('10000000-0000-0000-0000-000000000001', '081111111111@phone.umrohq.id', 'Admin Utama', '081111111111', 'marketplace_admin', NULL, '{"provider":"email","avatar_url":""}'),
-  ('10000000-0000-0000-0000-000000000002', '082222222222@phone.umrohq.id', 'Admin Finance', '082222222222', 'marketplace_finance', NULL, '{"provider":"email","avatar_url":""}'),
-  ('10000000-0000-0000-0000-000000000003', '083333333333@phone.umrohq.id', 'Admin Operational', '083333333333', 'marketplace_operational', NULL, '{"provider":"email","avatar_url":""}'),
+  ('10000000-0000-0000-0000-000000000001', '081111111111@phone.umrohq.id', 'Admin Utama', '081111111111', 'admin', NULL, '{"provider":"email","avatar_url":""}'),
+  ('10000000-0000-0000-0000-000000000002', '082222222222@phone.umrohq.id', 'Admin Finance', '082222222222', 'finance', NULL, '{"provider":"email","avatar_url":""}'),
+  ('10000000-0000-0000-0000-000000000003', '083333333333@phone.umrohq.id', 'Admin Operational', '083333333333', 'operational', NULL, '{"provider":"email","avatar_url":""}'),
   ('20000000-0000-0000-0000-000000000001', '085555555501@phone.umrohq.id', 'Admin Al-Haramain', '085555555501', 'travel_admin', 'b0000000-0000-0000-0000-000000000001', '{"provider":"email","avatar_url":""}'),
   ('20000000-0000-0000-0000-000000000002', '085555555502@phone.umrohq.id', 'Admin Baitullah', '085555555502', 'travel_admin', 'b0000000-0000-0000-0000-000000000002', '{"provider":"email","avatar_url":""}'),
   ('20000000-0000-0000-0000-000000000003', '085555555503@phone.umrohq.id', 'Admin Mabrur', '085555555503', 'travel_admin', 'b0000000-0000-0000-0000-000000000003', '{"provider":"email","avatar_url":""}'),

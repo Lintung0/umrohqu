@@ -16,14 +16,16 @@ interface StaffMember {
 }
 
 const ROLE_OPTIONS = [
-  { value: "travel_staff", label: "Staff", desc: "Akses terbatas (pesanan, jamaah)" },
+  { value: "travel_operational", label: "Operational", desc: "Akses terbatas (pesanan, jamaah)" },
+  { value: "travel_finance", label: "Finance", desc: "Keuangan travel" },
   { value: "travel_admin", label: "Admin", desc: "Akses penuh (paket, keuangan, settings)" },
 ]
 
 function getRoleBadge(role: string) {
   switch (role) {
     case "travel_admin": return "bg-emerald-100 text-emerald-700"
-    case "travel_staff": return "bg-blue-100 text-blue-700"
+    case "travel_operational": return "bg-blue-100 text-blue-700"
+    case "travel_finance": return "bg-cyan-100 text-cyan-700"
     default: return "bg-gray-100 text-gray-600"
   }
 }
@@ -31,7 +33,8 @@ function getRoleBadge(role: string) {
 function getRoleLabel(role: string) {
   switch (role) {
     case "travel_admin": return "Admin"
-    case "travel_staff": return "Staff"
+    case "travel_operational": return "Operational"
+    case "travel_finance": return "Finance"
     default: return role
   }
 }
@@ -46,7 +49,7 @@ export default function TravelStaffPage() {
   const [showInactive, setShowInactive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showInvite, setShowInvite] = useState(false)
-  const [inviteForm, setInviteForm] = useState({ email: "", full_name: "", phone: "", role: "travel_staff" })
+  const [inviteForm, setInviteForm] = useState({ email: "", full_name: "", phone: "", role: "travel_operational" })
   const [inviting, setInviting] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
@@ -64,7 +67,7 @@ export default function TravelStaffPage() {
         .from("users")
         .select("id, email, full_name, phone, role, created_at, deleted_at")
         .eq("tenant_id", profile.tenant_id)
-        .in("role", ["travel_admin", "travel_staff"])
+        .in("role", ["travel_admin", "travel_operational", "travel_finance"])
         .order("created_at", { ascending: false })
 
       setStaff(staffData || [])
@@ -105,7 +108,7 @@ export default function TravelStaffPage() {
         deleted_at: null,
       }, ...prev])
       setShowInvite(false)
-      setInviteForm({ email: "", full_name: "", phone: "", role: "travel_staff" })
+      setInviteForm({ email: "", full_name: "", phone: "", role: "travel_operational" })
     } catch (e) {
       alert("Terjadi kesalahan")
     } finally {
@@ -141,7 +144,8 @@ export default function TravelStaffPage() {
 
   const activeCount = staff.filter((s) => !s.deleted_at).length
   const adminCount = staff.filter((s) => s.role === "travel_admin" && !s.deleted_at).length
-  const staffCount = staff.filter((s) => s.role === "travel_staff" && !s.deleted_at).length
+  const staffCount = staff.filter((s) => s.role === "travel_operational" && !s.deleted_at).length
+  const financeCount = staff.filter((s) => s.role === "travel_finance" && !s.deleted_at).length
   const inactiveCount = staff.filter((s) => s.deleted_at).length
 
   if (loading) {
@@ -168,7 +172,7 @@ export default function TravelStaffPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div className="bg-white border border-border rounded-2xl p-5">
           <p className="text-[10px] text-muted-foreground uppercase font-medium">Total Aktif</p>
           <p className="text-2xl font-bold mt-1">{activeCount}</p>
@@ -178,8 +182,12 @@ export default function TravelStaffPage() {
           <p className="text-2xl font-bold mt-1 text-emerald-600">{adminCount}</p>
         </div>
         <div className="bg-white border border-border rounded-2xl p-5">
-          <p className="text-[10px] text-muted-foreground uppercase font-medium">Staff</p>
+          <p className="text-[10px] text-muted-foreground uppercase font-medium">Operational</p>
           <p className="text-2xl font-bold mt-1 text-blue-600">{staffCount}</p>
+        </div>
+        <div className="bg-white border border-border rounded-2xl p-5">
+          <p className="text-[10px] text-muted-foreground uppercase font-medium">Finance</p>
+          <p className="text-2xl font-bold mt-1 text-cyan-600">{financeCount}</p>
         </div>
         <div className="bg-white border border-border rounded-2xl p-5">
           <p className="text-[10px] text-muted-foreground uppercase font-medium">Nonaktif</p>
@@ -206,7 +214,8 @@ export default function TravelStaffPage() {
           >
             <option value="all">Semua Role</option>
             <option value="travel_admin">Admin</option>
-            <option value="travel_staff">Staff</option>
+            <option value="travel_operational">Operational</option>
+            <option value="travel_finance">Finance</option>
           </select>
           <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
             <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} className="rounded" />

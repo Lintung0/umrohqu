@@ -166,19 +166,19 @@ DELETE FROM auth.users WHERE email IN (
 -- Admin Utama
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 VALUES
-  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'admin@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Utama","role":"marketplace_admin"}', now(), now())
+  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'admin@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Utama","role":"admin"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Admin Finance
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 VALUES
-  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'billing@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Finance","role":"marketplace_finance"}', now(), now())
+  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'billing@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Finance","role":"finance"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Admin Operational
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 VALUES
-  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'support@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Operational","role":"marketplace_operational"}', now(), now())
+  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated', 'support@umrohq.id', crypt('Password123!', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin Operational","role":"operational"}', now(), now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Travel Admin (Al-Haramain)
@@ -210,9 +210,9 @@ ON CONFLICT (id) DO NOTHING;
 -- The auth trigger should have created these rows automatically.
 -- We update role + tenant_id for travel admins.
 -- =========================================================
-UPDATE public.users SET role = 'marketplace_admin', full_name = 'Admin Utama' WHERE id = '10000000-0000-0000-0000-000000000001';
-UPDATE public.users SET role = 'marketplace_finance', full_name = 'Admin Finance' WHERE id = '10000000-0000-0000-0000-000000000002';
-UPDATE public.users SET role = 'marketplace_operational', full_name = 'Admin Operational' WHERE id = '10000000-0000-0000-0000-000000000003';
+UPDATE public.users SET role = 'admin', full_name = 'Admin Utama' WHERE id = '10000000-0000-0000-0000-000000000001';
+UPDATE public.users SET role = 'finance', full_name = 'Admin Finance' WHERE id = '10000000-0000-0000-0000-000000000002';
+UPDATE public.users SET role = 'operational', full_name = 'Admin Operational' WHERE id = '10000000-0000-0000-0000-000000000003';
 UPDATE public.users SET role = 'travel_admin', tenant_id = 'b0000000-0000-0000-0000-000000000001', full_name = 'Admin Al-Haramain' WHERE id = '20000000-0000-0000-0000-000000000001';
 UPDATE public.users SET role = 'travel_admin', tenant_id = 'b0000000-0000-0000-0000-000000000002', full_name = 'Admin Baitullah' WHERE id = '20000000-0000-0000-0000-000000000002';
 UPDATE public.users SET role = 'customer', full_name = 'Ahmad Fauzi', phone = '081298765432' WHERE id = '30000000-0000-0000-0000-000000000001';

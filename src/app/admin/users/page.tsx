@@ -7,22 +7,22 @@ import { formatRupiah } from "@/lib/utils"
 
 const ROLES = [
   { value: "all", label: "Semua Role" },
-  { value: "super_admin", label: "Super Admin" },
-  { value: "marketplace_admin", label: "Admin" },
-  { value: "marketplace_finance", label: "Finance" },
-  { value: "marketplace_operational", label: "Operational" },
+  { value: "admin", label: "Admin" },
+  { value: "finance", label: "Finance" },
+  { value: "operational", label: "Operational" },
   { value: "travel_admin", label: "Travel Admin" },
-  { value: "travel_staff", label: "Travel Staff" },
+  { value: "travel_operational", label: "Travel Operational" },
+  { value: "travel_finance", label: "Travel Finance" },
   { value: "customer", label: "Customer" },
 ]
 
 const ROLE_BADGES: Record<string, { icon: any; class: string }> = {
-  super_admin: { icon: ShieldAlert, class: "bg-red-100 text-red-700" },
-  marketplace_admin: { icon: Shield, class: "bg-purple-100 text-purple-700" },
-  marketplace_finance: { icon: UserCog, class: "bg-blue-100 text-blue-700" },
-  marketplace_operational: { icon: UserCog, class: "bg-amber-100 text-amber-700" },
+  admin: { icon: ShieldAlert, class: "bg-red-100 text-red-700" },
+  finance: { icon: UserCog, class: "bg-amber-100 text-amber-700" },
+  operational: { icon: UserCog, class: "bg-blue-100 text-blue-700" },
   travel_admin: { icon: Shield, class: "bg-emerald-100 text-emerald-700" },
-  travel_staff: { icon: UserCog, class: "bg-teal-100 text-teal-700" },
+  travel_operational: { icon: UserCog, class: "bg-teal-100 text-teal-700" },
+  travel_finance: { icon: UserCog, class: "bg-cyan-100 text-cyan-700" },
   customer: { icon: UserCog, class: "bg-gray-100 text-gray-700" },
 }
 

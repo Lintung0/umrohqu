@@ -15,8 +15,7 @@
     "admin_dashboard": "لوحة الإدارة",
     "finance_dashboard": "المالية",
     "operational_dashboard": "العمليات",
-    "travel_dashboard": "السفر",
-    "travel_staff_dashboard": "لوحة تحكم السفر"
+    "travel_dashboard": "السفر"
   },
   "hero": {
     "title": "ابحث وقارن أفضل باقات العمرة",

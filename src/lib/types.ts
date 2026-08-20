@@ -1,4 +1,4 @@
-export type AdminRole = "super_admin" | "marketplace_admin" | "marketplace_operational" | "marketplace_finance"
+export type AdminRole = "admin" | "finance" | "operational"
 
 // ─── Database Row Types ────────────────────────────────────────────────────────
 // These mirror the Supabase schema exactly (snake_case column names)

@@ -210,7 +210,7 @@ export async function middleware(request: NextRequest) {
   const role = profile?.role as string | undefined
 
   if (pathname.startsWith("/admin")) {
-    if (!role || !["super_admin", "marketplace_admin", "marketplace_finance", "marketplace_operational"].includes(role)) {
+    if (!role || !["admin", "finance", "operational"].includes(role)) {
       const redirectUrl = request.nextUrl.clone()
       redirectUrl.pathname = "/dashboard"
       return NextResponse.redirect(redirectUrl)
@@ -218,7 +218,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/travel-dashboard")) {
-    if (!role || !["travel_admin", "travel_staff"].includes(role)) {
+    if (!role || !["travel_admin", "travel_operational", "travel_finance"].includes(role)) {
       const redirectUrl = request.nextUrl.clone()
       redirectUrl.pathname = "/dashboard"
       return NextResponse.redirect(redirectUrl)
