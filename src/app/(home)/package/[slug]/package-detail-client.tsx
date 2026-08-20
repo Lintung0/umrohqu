@@ -185,7 +185,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           return {
             day: Number(item.day) || idx + 1,
             title: cleanItineraryTitle(item.title ? String(item.title) : `Hari ke-${idx + 1}`),
-            description: item.description || item.text || String(item.title ?? ""),
+            description: item.description || item.text || "",
           }
         }
         return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: "" }
@@ -435,23 +435,40 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                           <div key={idx} className="relative flex gap-4 pb-6 last:pb-0">
                             {/* Timeline line */}
                             {idx < itineraryList.length - 1 && (
-                              <div className="absolute left-[15px] top-[32px] bottom-0 w-0.5 bg-gradient-to-b from-primary/30 to-primary/10" />
+                              <div className="absolute left-[26px] top-[52px] bottom-0 w-0.5 bg-gradient-to-b from-emerald-500/30 to-emerald-100" />
                             )}
                             {/* Day marker */}
                             <div className="relative z-10 shrink-0">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shadow-md shadow-primary/20">
-                                <span className="text-[10px] font-bold text-white">{item.day}</span>
+                              <div className="w-[52px] h-[52px] rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-lg shadow-emerald-600/25 flex flex-col items-center justify-center ring-4 ring-emerald-50">
+                                <span className="text-[8px] font-semibold uppercase tracking-wide text-emerald-200">Hari</span>
+                                <span className="text-sm font-extrabold text-white leading-none">{item.day}</span>
                               </div>
                             </div>
                             {/* Content */}
-                            <div className="flex-1 pt-1">
-                              <div className="bg-gray-50 rounded-xl p-4 border border-border/40 hover:border-primary/20 hover:bg-primary/[0.02] transition-all">
-                                {item.title && !/^Hari ke-\d+$/.test(item.title) && <p className="text-sm font-semibold text-foreground mb-1">{item.title}</p>}
-                                <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-                               </div>
-                             </div>
+                            <div className="flex-1 pt-0.5">
+                              <div className="bg-white border border-border/60 hover:border-emerald-300 hover:shadow-md rounded-2xl p-4 sm:p-5 transition-all group">
+                                <div className="flex items-center justify-between gap-3 mb-1">
+                                  <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
+                                    Hari ke-{item.day}
+                                  </p>
+                                  <span className="text-[10px] font-medium text-muted-foreground/70 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
+                                    {item.day} / {itineraryList.length}
+                                  </span>
+                                </div>
+                                {item.title && !/^Hari ke-\d+$/.test(item.title) && (
+                                  <p className="text-sm font-bold text-foreground mb-1.5 group-hover:text-emerald-700 transition-colors">
+                                    {item.title}
+                                  </p>
+                                )}
+                                {item.description && (
+                                  <p className="text-sm text-muted-foreground leading-relaxed">
+                                    {item.description}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                          ))}
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <div className="text-center py-12">
