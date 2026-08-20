@@ -283,7 +283,7 @@ export default function RegisterTravelPage() {
       {/* Form Card */}
       <div
         ref={cardRef}
-        className="bg-white text-gray-900 rounded-3xl p-6 sm:p-10 shadow-xl shadow-black/[0.03] border border-gray-100/80 text-left w-full animate-fade-in-up"
+        className="bg-white text-gray-900 rounded-3xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100/80 text-left w-full mb-4 animate-fade-in-up"
         style={{ animationDelay: "0.1s" }}
       >
         <ProgressBar current={step} />
