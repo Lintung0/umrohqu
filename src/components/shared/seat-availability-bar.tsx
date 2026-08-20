@@ -9,9 +9,10 @@ interface SeatAvailabilityBarProps {
   quota: number
   variant?: "card" | "detail" | "compact"
   showLabel?: boolean
+  soldOut?: boolean
 }
 
-export default function SeatAvailabilityBar({ available, quota, variant = "card", showLabel = true }: SeatAvailabilityBarProps) {
+export default function SeatAvailabilityBar({ available, quota, variant = "card", showLabel = true, soldOut = false }: SeatAvailabilityBarProps) {
   const { t } = useTranslation()
   const seat = getSeatAvailability(available, quota)
 
@@ -22,10 +23,14 @@ export default function SeatAvailabilityBar({ available, quota, variant = "card"
           <span className="text-muted-foreground flex items-center gap-1">
             <Users className="w-3 h-3" /> {t("card.seats_left")}
           </span>
-          <span className="font-semibold">{seat.available}/{quota}</span>
+          {soldOut ? (
+            <span className="font-bold text-red-600">Habis Terjual</span>
+          ) : (
+            <span className="font-semibold">{seat.available}/{quota}</span>
+          )}
         </div>
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
+          <div className={`h-full rounded-full transition-all duration-700 ${soldOut ? "bg-gray-300" : seat.color}`} style={{ width: `${soldOut ? 100 : seat.percent}%` }} />
         </div>
       </div>
     )

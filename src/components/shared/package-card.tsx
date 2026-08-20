@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, GitCompare, Heart, Loader2, Star } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, Calendar, GitCompare, Heart, Loader2, Star } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -293,7 +293,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           )}
 
           <div className="mb-3">
-            <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
+            <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} />
           </div>
 
           <div className="flex items-end justify-between pt-2.5 border-t border-slate-100 mt-auto">
@@ -303,9 +303,9 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
               </div>
               {hasCashback && (
-                <p className="text-[11px] font-medium text-amber-600">
-                  Cashback {formatRupiah(pkg.cashback_amount!)}
-                </p>
+                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold">
+                  🎁 Cashback {formatRupiah(pkg.cashback_amount!)}
+                </span>
               )}
             </div>
           </div>
@@ -392,20 +392,20 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
+                  <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} />
                 </div>
               </div>
             </div>
             <div className="flex items-end justify-between pt-2 border-t border-gray-100">
               <div>
-                <p className="text-base font-bold text-emerald-700">
+                <p className="text-lg font-extrabold text-emerald-700">
                   {formatRupiah(pkg.price)}
                   <span className="text-[10px] text-gray-400 font-normal">{t("card.per_person")}</span>
                 </p>
                 {hasCashback && (
-                  <p className="text-[11px] font-medium text-amber-600">
-                    Cashback {formatRupiah(pkg.cashback_amount!)}
-                  </p>
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold">
+                    🎁 Cashback {formatRupiah(pkg.cashback_amount!)}
+                  </span>
                 )}
               </div>
             </div>
@@ -477,32 +477,37 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       </div>
 
       <div className="flex flex-col flex-1 p-3.5">
-        {showTravel && travel && (
-          <Link
-            href={`/travel/${travel.slug}`}
-            onClick={handleTravelClick}
-            className="inline-flex items-center gap-1.5 mb-2 w-fit pointer-events-auto"
-          >
-            {travel.logo_url ? (
-              <Image
-                src={travel.logo_url}
-                alt={travel.name}
-                width={16}
-                height={16}
-                unoptimized
-                className="rounded-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
-              />
-            ) : (
-              <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
-                <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
-              </div>
-            )}
-            <span className="text-[11px] text-gray-500 hover:text-emerald-600 transition-colors truncate max-w-[140px]">
-              {travel.name}
-            </span>
-          </Link>
-        )}
+        <div className="flex items-center justify-between text-xs mb-1.5">
+          <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded whitespace-nowrap">
+            ✓ PPIU Resmi
+          </span>
+          {showTravel && travel && (
+            <Link
+              href={`/travel/${travel.slug}`}
+              onClick={handleTravelClick}
+              className="inline-flex items-center gap-1 min-w-0 pl-2 pointer-events-auto"
+            >
+              {travel.logo_url ? (
+                <Image
+                  src={travel.logo_url}
+                  alt={travel.name}
+                  width={14}
+                  height={14}
+                  unoptimized
+                  className="rounded-full object-cover shrink-0"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+                />
+              ) : (
+                <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                  <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
+                </div>
+              )}
+              <span className="text-gray-500 font-medium truncate hover:text-emerald-600 transition-colors">
+                {travel.name}
+              </span>
+            </Link>
+          )}
+        </div>
 
         <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2.5">
           {pkg.name}
@@ -515,14 +520,16 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
           <div className="flex items-center gap-1.5">
             <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="truncate">{decodeUnicodeEscapes(pkg.airline || "")}</span>
+            <span className="truncate">{decodeUnicodeEscapes(pkg.airline || "Saudi Airlines")}</span>
           </div>
-          {pkg.hotel_makkah && (
-            <div className="flex items-center gap-1.5">
-              <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="truncate">{pkg.hotel_makkah}{pkg.hotel_makkah_stars ? ` ${"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}` : ""}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="truncate">{pkg.hotel_makkah || "Hotel Makkah"}{pkg.hotel_makkah_stars ? ` ${"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}` : " ★★★★★"}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="truncate">{pkg.departure_month || "Oktober 2026"}</span>
+          </div>
         </div>
 
         {avgRating !== null && (
@@ -533,7 +540,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         )}
 
-        <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" />
+        <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} />
 
         {pkg.facilities && pkg.facilities.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2 h-6 overflow-hidden">
@@ -553,13 +560,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="flex items-end justify-between pt-3 border-t border-gray-100 mt-auto">
           <div>
             <div className="flex items-baseline gap-1">
-              <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
+              <p className="text-lg font-extrabold text-emerald-700">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
             </div>
             {hasCashback && (
-              <p className="text-[11px] font-medium text-amber-600">
-                Cashback {formatRupiah(pkg.cashback_amount!)}
-              </p>
+              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold">
+                🎁 Cashback {formatRupiah(pkg.cashback_amount!)}
+              </span>
             )}
           </div>
         </div>
