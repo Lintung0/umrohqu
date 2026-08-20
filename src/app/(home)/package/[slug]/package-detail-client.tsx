@@ -322,17 +322,17 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               ) : (
                 <div
                   className="relative aspect-[16/9] cursor-pointer"
-                  onClick={() => pkg.image_url && setSingleImageLightbox(true)}
+                  onClick={() => initialImages?.[0] && setSingleImageLightbox(true)}
                 >
-                  {pkg.image_url ? (
-                    <Image src={pkg.image_url} alt={pkg.name} fill className="object-cover" />
+                  {initialImages?.[0] ? (
+                    <Image src={initialImages[0]} alt={pkg.name} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-primary/10 to-emerald-50 flex items-center justify-center">
                       <Package className="w-16 h-16 text-primary/30" />
                     </div>
                   )}
                   {/* Maximize button for single image */}
-                  {pkg.image_url && (
+                  {initialImages?.[0] && (
                     <button
                       className="absolute top-3 right-3 w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors z-10"
                       aria-label="Perbesar foto"
@@ -847,7 +847,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       )}
 
       {/* Single Image Lightbox */}
-      {singleImageLightbox && pkg.image_url && (
+      {singleImageLightbox && initialImages?.[0] && (
         <div
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
           onClick={() => setSingleImageLightbox(false)}
@@ -860,7 +860,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             <X className="w-5 h-5" />
           </button>
           <Image
-            src={pkg.image_url}
+            src={initialImages[0]}
             alt={pkg.name}
             width={1200}
             height={800}

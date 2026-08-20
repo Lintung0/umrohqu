@@ -40,6 +40,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.nos.wjv-1.neo.id",
       },
+      {
+        protocol: "https",
+        hostname: "cloud.umroh.com",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
     ],
   },
 };
