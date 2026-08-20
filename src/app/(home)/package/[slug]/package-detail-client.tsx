@@ -183,10 +183,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       return raw.map((item: any, idx: number) => {
         if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
         if (item && typeof item === "object") {
+          const description = String(item.description || item.details || item.text || "")
+            .replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "")
+            .trim()
           return {
             day: Number(item.day) || idx + 1,
-            title: cleanItineraryTitle(item.title ? String(item.title) : `Hari ke-${idx + 1}`),
-            description: item.description || item.text || "",
+            title: cleanItineraryTitle(item.title ? String(item.title) : ""),
+            description,
           }
         }
         return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: "" }
@@ -478,7 +481,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                   </p>
                                 )}
                                 {item.description && (
-                                  <p className="text-sm text-muted-foreground leading-relaxed">
+                                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                                     {item.description}
                                   </p>
                                 )}
