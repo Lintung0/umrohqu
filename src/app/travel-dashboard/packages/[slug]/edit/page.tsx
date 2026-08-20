@@ -122,6 +122,7 @@ export default function EditPackagePage() {
   const [terms, setTerms] = useState<string[]>([])
   const [cancellationPolicy, setCancellationPolicy] = useState("")
   const [imageUrl, setImageUrl] = useState("")
+  const [videoUrl, setVideoUrl] = useState("")
   const [isActive, setIsActive] = useState(true)
   const [pkgStatus, setPkgStatus] = useState<string | null>(null)
 
@@ -192,6 +193,15 @@ export default function EditPackagePage() {
         .limit(1)
         .maybeSingle()
       if (covers?.image_url) setImageUrl(covers.image_url)
+
+      const { data: videoRow } = await supabase
+        .from("package_gallery")
+        .select("image_url")
+        .eq("package_id", pkg.id)
+        .eq("media_type", "video")
+        .limit(1)
+        .maybeSingle()
+      if (videoRow?.image_url) setVideoUrl(videoRow.image_url)
 
       if (pkg.itinerary && Array.isArray(pkg.itinerary)) {
         const lines = pkg.itinerary.map((item: any) => {
@@ -302,6 +312,29 @@ export default function EditPackagePage() {
           image_url: imageUrl,
           media_type: "image",
           sort_order: 0,
+        })
+      }
+    }
+
+    if (videoUrl) {
+      const { data: existingVideo } = await supabase
+        .from("package_gallery")
+        .select("id")
+        .eq("package_id", packageId)
+        .eq("media_type", "video")
+        .limit(1)
+        .maybeSingle()
+      if (existingVideo) {
+        const { data: v } = await supabase.from("package_gallery").select("image_url").eq("id", existingVideo.id).single()
+        if (v?.image_url !== videoUrl) {
+          await supabase.from("package_gallery").update({ image_url: videoUrl }).eq("id", existingVideo.id)
+        }
+      } else {
+        await supabase.from("package_gallery").insert({
+          package_id: packageId,
+          image_url: videoUrl,
+          media_type: "video",
+          sort_order: 1,
         })
       }
     }
@@ -795,11 +828,11 @@ export default function EditPackagePage() {
           </div>
         </div>
 
-        {/* Gambar */}
+        {/* Media */}
         <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
           <div className="flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-emerald-600" />
-            <h2 className="font-semibold">Gambar</h2>
+            <h2 className="font-semibold">Media (Gambar & Video)</h2>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1.5">
@@ -807,6 +840,19 @@ export default function EditPackagePage() {
             </label>
             <ImageUpload value={imageUrl} onChange={setImageUrl} />
             {fieldError("image_url")}
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">
+              URL Video (YouTube atau MP4) <span className="text-xs text-muted-foreground font-normal">Opsional — direkomendasikan</span>
+            </label>
+            <input
+              type="url"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            />
+            <p className="text-xs text-muted-foreground mt-1.5">Video akan muncul di galeri paket dengan badge ▶ Video.</p>
           </div>
         </div>
 

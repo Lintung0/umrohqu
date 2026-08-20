@@ -92,6 +92,7 @@ export interface Package {
   departure_month?: string | null
   original_price?: number | null
   image_url?: string | null
+  video_url?: string | null
   hotel_makkah?: string | null
   hotel_makkah_stars?: number | null
   hotel_madinah?: string | null

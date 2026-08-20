@@ -9,14 +9,28 @@ export async function enrichPackagesWithCovers(
   const ids = pkgs.map((p) => p.id)
   const { data } = await supabase
     .from("package_gallery")
-    .select("package_id, image_url, sort_order")
+    .select("package_id, image_url, sort_order, media_type")
     .in("package_id", ids)
     .order("sort_order", { ascending: true })
-  const map = new Map<string, string>()
-  data?.forEach((g: { package_id: string; image_url: string; sort_order: number }) => {
-    if (g.image_url && !map.has(g.package_id)) map.set(g.package_id, g.image_url)
+  const coverMap = new Map<string, string>()
+  const videoMap = new Map<string, string>()
+  data?.forEach((g: { package_id: string; image_url: string; sort_order: number; media_type?: string }) => {
+    if (!g.image_url) return
+    if (g.media_type === "video") {
+      if (!videoMap.has(g.package_id)) videoMap.set(g.package_id, g.image_url)
+    } else if (!coverMap.has(g.package_id)) {
+      coverMap.set(g.package_id, g.image_url)
+    }
   })
-  return pkgs.map((p) => (map.has(p.id) ? { ...p, image_url: map.get(p.id) } : p))
+  return pkgs.map((p) => {
+    const next = { ...p } as any
+    if (coverMap.has(p.id)) next.image_url = coverMap.get(p.id)
+    if (videoMap.has(p.id)) {
+      next.video_url = videoMap.get(p.id)
+      next.image_url = next.image_url || videoMap.get(p.id)
+    }
+    return next as Package
+  })
 }
 
 export async function enrichEmbeddedPackageCovers<T extends { package?: Package | Package[] | null }>(

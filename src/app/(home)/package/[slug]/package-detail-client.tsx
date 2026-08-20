@@ -113,6 +113,24 @@ function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; 
 export default function PackageDetailClient({ pkg, reviews: initialReviews, reviewerMap = {}, images: initialImages, galleryItems }: Props) {
   const router = useRouter()
   const { addToCompare, isFull, comparePackages } = useCompare()
+  const [livePkg, setLivePkg] = useState<PackageDetail | null>(null)
+
+  const supabase = createClient()
+
+  // Realtime: refetch package seats/status on change
+  useEffect(() => {
+    const channel = supabase
+      .channel(`package-${pkg.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "packages", filter: `id=eq.${pkg.id}` }, (payload) => {
+        if (payload.new && (payload.new as any).id === pkg.id) {
+          setLivePkg((payload.new as unknown) as PackageDetail)
+        }
+      })
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [pkg.id, supabase])
   const TAB_ITEMS = [
     { id: "overview", label: "Ringkasan", icon: Info },
     { id: "itinerary", label: "Itinerary", icon: Calendar },
@@ -137,14 +155,14 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const [eligibleBookingId, setEligibleBookingId] = useState<string | null>(null)
   const [submittingReview, setSubmittingReview] = useState(false)
 
-  const supabase = createClient()
   const avgRating = initialReviews.length > 0
     ? initialReviews.reduce((s, r) => s + r.rating, 0) / initialReviews.length
     : 0
 
-  const seat = getSeatAvailability(pkg.available, pkg.quota, pkg.quota_taken)
-  const discount = pkg.original_price
-    ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
+  const displayPkg = livePkg || pkg
+  const seat = getSeatAvailability(displayPkg.available, displayPkg.quota, displayPkg.quota_taken)
+  const discount = displayPkg.original_price
+    ? Math.round(((displayPkg.original_price - displayPkg.price) / displayPkg.original_price) * 100)
     : 0
 
   const ratingBreakdown = [5, 4, 3, 2, 1].map((star) => ({
@@ -317,8 +335,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           {/* LEFT: Image Gallery */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm relative">
-              {initialImages && initialImages.length > 1 ? (
-                <ImageGallery images={initialImages} items={galleryItems} title={pkg.name} />
+              {galleryItems && galleryItems.length > 0 ? (
+                <ImageGallery images={initialImages || []} items={galleryItems} title={pkg.name} />
               ) : (
                 <div
                   className="relative aspect-[16/9] cursor-pointer"
@@ -342,7 +360,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   )}
                   {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                    <PackageStatusBadge status={pkg.status} />
+                    <PackageStatusBadge status={displayPkg.status} />
                     {pkg.type && (
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
                         pkg.type === "vip" ? "bg-amber-400 text-amber-900" :
@@ -403,7 +421,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                       {pkg.hotel_makkah && <InfoCard icon={Hotel} label="Hotel Makkah" value={pkg.hotel_makkah} color="amber" />}
                       {pkg.hotel_madinah && <InfoCard icon={Hotel} label="Hotel Madinah" value={pkg.hotel_madinah} color="amber" />}
                       {pkg.departure_city && <InfoCard icon={MapPin} label="Berangkat dari" value={pkg.departure_city} />}
-                      {pkg.quota && <InfoCard icon={Users} label="Kuota" value={`${pkg.quota} orang`} color="blue" />}
+                      {displayPkg.quota && <InfoCard icon={Users} label="Kuota" value={`${displayPkg.quota} orang`} color="blue" />}
                     </div>
                   </div>
                 )}
@@ -726,11 +744,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
             {/* Seat */}
             <div className="bg-white rounded-2xl border border-border/60 p-4 shadow-sm mb-3">
-              <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} quotaTaken={pkg.quota_taken} variant="detail" />
+              <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="detail" />
             </div>
 
             {/* Ongoing Banner */}
-            {pkg.status === "ongoing" && (
+            {displayPkg.status === "ongoing" && (
               <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 rounded-2xl p-4 mb-3">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
@@ -739,8 +757,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   <div>
                     <p className="text-sm font-semibold text-amber-800">Paket Sedang Berlangsung</p>
                     <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-                      {pkg.quota - getPackageAvailable(pkg)} dari {pkg.quota} jamaah sudah berangkat.{" "}
-                      Sisa {getPackageAvailable(pkg)} kursi masih tersedia untuk bergabung.
+                      {displayPkg.quota - getPackageAvailable(displayPkg)} dari {displayPkg.quota} jamaah sudah berangkat.{" "}
+                      Sisa {getPackageAvailable(displayPkg)} kursi masih tersedia untuk bergabung.
                     </p>
                   </div>
                 </div>

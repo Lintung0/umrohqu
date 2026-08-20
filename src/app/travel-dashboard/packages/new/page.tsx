@@ -127,6 +127,7 @@ export default function NewPackagePage() {
   const [terms, setTerms] = useState<string[]>([])
   const [cancellationPolicy, setCancellationPolicy] = useState("")
   const [imageUrl, setImageUrl] = useState("")
+  const [videoUrl, setVideoUrl] = useState("")
   const [isActive, setIsActive] = useState(true)
 
   useEffect(() => {
@@ -236,6 +237,14 @@ export default function NewPackagePage() {
         image_url: imageUrl,
         media_type: "image",
         sort_order: 0,
+      })
+    }
+    if (videoUrl && created) {
+      await supabase.from("package_gallery").insert({
+        package_id: created.id,
+        image_url: videoUrl,
+        media_type: "video",
+        sort_order: imageUrl ? 1 : 0,
       })
     }
 
@@ -695,7 +704,7 @@ export default function NewPackagePage() {
         <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
           <div className="flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-emerald-600" />
-            <h2 className="font-semibold">Gambar</h2>
+            <h2 className="font-semibold">Media (Gambar & Video)</h2>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1.5">
@@ -703,6 +712,21 @@ export default function NewPackagePage() {
             </label>
             <ImageUpload value={imageUrl} onChange={setImageUrl} />
             {fieldError("image_url")}
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">
+              URL Video (YouTube atau MP4) <span className="text-xs text-muted-foreground font-normal">Opsional — direkomendasikan</span>
+            </label>
+            <input
+              type="url"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            />
+            {videoUrl && (
+              <p className="text-xs text-emerald-600 mt-1.5">Video akan muncul di galeri paket (badge ▶ Video).</p>
+            )}
           </div>
         </div>
 

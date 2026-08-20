@@ -124,6 +124,38 @@ export default function AdminOverviewPage() {
     load()
   }, [])
 
+  // Realtime: refresh stats when bookings/tenants change
+  useEffect(() => {
+    async function refresh() {
+      try {
+        const [travelRes, allBookingsRes] = await Promise.all([
+          supabase.from("tenants").select("id, status").is("deleted_at", null),
+          supabase.from("bookings").select("id, total, status").is("deleted_at", null),
+        ])
+        const tenants = travelRes.data || []
+        const allBookings = allBookingsRes.data || []
+        const REVENUE_STATUSES = ["processing", "confirmed", "completed"]
+        const totalRevenue = allBookings
+          .filter((b: any) => REVENUE_STATUSES.includes(b.status))
+          .reduce((s: number, b: any) => s + (b.total || 0), 0)
+        setStats({
+          travelCount: tenants.length,
+          bookingCount: allBookings.length,
+          totalRevenue,
+          pendingTravel: tenants.filter((t) => t.status === "pending").length,
+        })
+      } catch {}
+    }
+    const channel = supabase
+      .channel("admin-dash-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "tenants" }, refresh)
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase])
+
   if (loading) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">

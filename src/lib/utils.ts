@@ -26,6 +26,42 @@ export function getPackageAvailable(pkg: { available?: number | null; quota?: nu
   return pkg.available ?? Math.max(0, (pkg.quota ?? 0) - (pkg.quota_taken ?? 0))
 }
 
+const AIRLINE_HINTS = [
+  "Saudi Arabian Airlines", "Saudia", "Garuda Indonesia", "Qatar Airways", "Qatar",
+  "Emirates", "Etihad", "Turkish Airlines", "Batik Air", "Lion Air", "AirAsia",
+  "Royal Jordanian", "Malaysia Airlines", "Singapore Airlines",
+]
+
+export function extractAirline(includes: unknown[] | null | undefined, known?: string | null): string | null {
+  if (known?.trim()) return known.trim()
+  const text = (includes || []).map((i) => String(i ?? "")).join(" ")
+  if (!text) return null
+  return AIRLINE_HINTS.find((a) => text.includes(a)) || null
+}
+
+export function extractHotelStars(includes: unknown[] | null | undefined, known?: number | null): number | null {
+  if (known && known > 0) return known
+  const text = (includes || []).map((i) => String(i ?? "")).join(" ")
+  const m = text.match(/bintang\s*(\d)/i)
+  return m ? Math.min(Number(m[1]), 5) : null
+}
+
+export function extractHotelName(includes: unknown[] | null | undefined, known?: string | null): string | null {
+  if (known?.trim()) return known.trim()
+  const hotelLines = (includes || []).map((i) => String(i ?? "")).filter((l) => /hotel/i.test(l))
+  if (hotelLines.length === 0) return null
+  const text = hotelLines.join(" ")
+  const m = text.match(/\(([A-Z][A-Za-z0-9 ,.&'-]+)\)/)
+  return m?.[1]?.trim() || null
+}
+
+export function formatDepartureDate(date: string | null | undefined): string | null {
+  if (!date) return null
+  const d = new Date(date)
+  if (Number.isNaN(d.getTime())) return null
+  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(d)
+}
+
 export function getSeatAvailability(
   available: number | null | undefined,
   quota: number,

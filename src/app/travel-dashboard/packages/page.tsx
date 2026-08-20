@@ -61,6 +61,31 @@ export default function TravelPackagesPage() {
     load()
   }, [])
 
+  // Realtime: refetch list when packages change
+  useEffect(() => {
+    if (!tenantId) return
+    const channel = supabase
+      .channel("td-packages-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "packages", filter: `tenant_id=eq.${tenantId}` },
+        async () => {
+          const { data } = await supabase
+            .from("packages")
+            .select("*")
+            .eq("tenant_id", tenantId)
+            .is("deleted_at", null)
+            .order("created_at", { ascending: false })
+          const enriched = await enrichPackagesWithCovers(supabase, (data as any) || [])
+          setPackages((enriched as any) || [])
+        }
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [tenantId, supabase])
+
   async function toggleStatus(pkg: TravelPackage) {
     if (pkg.status !== "active" && pkg.status !== "nonaktif") return
     const newStatus = pkg.status === "active" ? "nonaktif" : "active"

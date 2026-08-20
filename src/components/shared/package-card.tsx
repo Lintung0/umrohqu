@@ -4,8 +4,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, Calendar, GitCompare, Heart, Loader2, Star } from "lucide-react"
-import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable } from "@/lib/utils"
+import { Clock, MapPin, Plane, Hotel, Calendar, Play, GitCompare, Heart, Loader2, Star } from "lucide-react"
+import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
 import { createClient } from "@/lib/supabase/client"
@@ -63,6 +63,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
   const soldOut = getPackageAvailable(pkg) <= 0
   const hasCashback = (pkg.cashback_amount ?? 0) > 0
+
+  const airline = extractAirline(pkg.includes, pkg.airline)
+  const hotelStars = extractHotelStars(pkg.includes, pkg.hotel_makkah_stars)
+  const hotelName = extractHotelName(pkg.includes, pkg.hotel_makkah)
+  const departureLabel = formatDepartureDate(pkg.departure_date)
 
   const typeKey = (pkg.type || "reguler").toLowerCase()
   const typeLabel = TYPE_LABEL[typeKey] || pkg.type
@@ -266,19 +271,19 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <span>{pkg.duration_days} {t("card.days")}</span>
               </>
             )}
-            {pkg.airline && (
+            {airline && (
               <>
                 <span className="text-slate-300">·</span>
-                <span className="truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
+                <span className="truncate">{decodeUnicodeEscapes(airline)}</span>
               </>
             )}
-            {pkg.hotel_makkah_stars ? (
+            {hotelStars ? (
               <>
                 <span className="text-slate-300">·</span>
                 <span className="inline-flex items-center gap-0.5">
                   <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
                   <span>Hotel</span>
-                  <span className="text-amber-500">{"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}</span>
+                  <span className="text-amber-500">{"★".repeat(hotelStars)}</span>
                 </span>
               </>
             ) : null}
@@ -468,7 +473,12 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </button>
         </div>
 
-        <div className="absolute bottom-2.5 left-2.5 pointer-events-none">
+        <div className="absolute bottom-2.5 left-2.5 flex gap-1.5 pointer-events-none">
+          {pkg.video_url && (
+            <span className="bg-black/60 text-white text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1 backdrop-blur-sm">
+              <Play className="w-2.5 h-2.5 fill-white" /> Video
+            </span>
+          )}
           <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
             <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
             {pkg.duration_days} {t("card.days")}
@@ -518,18 +528,24 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
             <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ")}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="truncate">{decodeUnicodeEscapes(pkg.airline || "Saudi Airlines")}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="truncate">{pkg.hotel_makkah || "Hotel Makkah"}{pkg.hotel_makkah_stars ? ` ${"★".repeat(Math.min(pkg.hotel_makkah_stars, 5))}` : " ★★★★★"}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="truncate">{pkg.departure_month || "Oktober 2026"}</span>
-          </div>
+          {airline && (
+            <div className="flex items-center gap-1.5">
+              <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span className="truncate">{decodeUnicodeEscapes(airline)}</span>
+            </div>
+          )}
+          {(hotelName || hotelStars) && (
+            <div className="flex items-center gap-1.5">
+              <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span className="truncate">{hotelName || "Hotel"}{hotelStars ? ` ${"★".repeat(hotelStars)}` : ""}</span>
+            </div>
+          )}
+          {departureLabel && (
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3 h-3 text-emerald-600 shrink-0" />
+              <span className="truncate">{departureLabel}</span>
+            </div>
+          )}
         </div>
 
         {avgRating !== null && (
