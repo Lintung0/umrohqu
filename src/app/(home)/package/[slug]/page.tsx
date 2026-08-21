@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .single()
 
   if (!pkg) {
-    return { title: "Paket Tidak Ditemukan - UmrahQu" }
+    return notFound()
   }
 
   const { data: coverImg } = await supabase
