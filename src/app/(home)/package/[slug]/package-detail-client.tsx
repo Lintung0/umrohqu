@@ -183,8 +183,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       return raw.map((item: any, idx: number) => {
         if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
         if (item && typeof item === "object") {
-          const description = String(item.description || item.details || item.text || "")
+          let description = String(item.description || item.details || item.text || "")
+            // Strip "Hari ke-N"/"Day N" prefix dari START of description (jika ada)
             .replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "")
+            // Hapus juga "Hari ke-N"/"Day N" yang mungkin ada di tengah/akhir deskripsi
+            .replace(/hari\s*ke\s*\d+|day\s*\d+/gi, "")
             .trim()
           return {
             day: Number(item.day) || idx + 1,
