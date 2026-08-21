@@ -451,59 +451,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   </div>
                 )}
 
-                {/* Itinerary */}
-                {activeTab === "itinerary" && (
-                  <div className="animate-in fade-in duration-200">
-                    {itineraryList.length > 0 ? (
-                      <div className="relative">
-                        {itineraryList.map((item, idx) => (
-                          <div key={idx} className="relative flex gap-4 pb-6 last:pb-0">
-                            {/* Timeline line */}
-                            {idx < itineraryList.length - 1 && (
-                              <div className="absolute left-[26px] top-[52px] bottom-0 w-0.5 bg-gradient-to-b from-emerald-500/30 to-emerald-100" />
-                            )}
-                            {/* Day marker */}
-                            <div className="relative z-10 shrink-0">
-                              <div className="w-[52px] h-[52px] rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 shadow-lg shadow-emerald-600/25 flex flex-col items-center justify-center ring-4 ring-emerald-50">
-                                <span className="text-[8px] font-semibold uppercase tracking-wide text-emerald-200">Hari</span>
-                                <span className="text-sm font-extrabold text-white leading-none">{item.day}</span>
-                              </div>
-                            </div>
-                            {/* Content */}
-                            <div className="flex-1 pt-0.5">
-                              <div className="bg-white border border-border/60 hover:border-emerald-300 hover:shadow-md rounded-2xl p-4 sm:p-5 transition-all group">
-                                <div className="flex items-center justify-between gap-3 mb-1">
-                                  <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
-                                    Hari ke-{item.day}
-                                  </p>
-                                  <span className="text-[10px] font-medium text-muted-foreground/70 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
-                                    {item.day} / {itineraryList.length}
-                                  </span>
-                                </div>
-                                {item.title && !/^Hari ke-\d+$/.test(item.title) && (
-                                  <p className="text-sm font-bold text-foreground mb-1.5 group-hover:text-emerald-700 transition-colors">
-                                    {item.title}
-                                  </p>
-                                )}
-                                {item.description && (
-                                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                                    {item.description}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                          <Calendar className="w-8 h-8 text-gray-300" />
-                        </div>
-                        <p className="text-sm text-muted-foreground">Belum ada itinerary</p>
-                      </div>
-                    )}
-                  </div>
+{activeTab === "itinerary" && (                  <div className="animate-in fade-in duration-200">                    {itineraryList.length > 0 ? (                      <div className="space-y-4">                        {itineraryList.map((item, idx) => (                          <article                            key={idx}                            className="group transition-all duration-300 hover:border-emerald-400 hover:shadow-lg border-b border-border/60">                            <div className="flex items-start gap-3">                              {/* Day indicator circle */}                              <div                                className="relative shrink-0 flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-emerald-600/10 border border-emerald-600/20 group-hover:bg-emerald-600/20 transition-colors">                                <span className="text-xs font-medium text-emerald-600 uppercase tracking-wider">                                  {item.day}                                </span>                              </div>                              {/* Content area */}                              <div className="flex-1 min-w-0">                                <h3 className="text-sm font-medium text-foreground line-clamp-1 transition-colors group-hover:text-emerald-600">                                  {item.title || ""}                                </h3>                                <p className="mt-1 text-sm text-muted-foreground leading-relaxed whitespace-pre-line line-clamp-3">                                  {item.description || ""}                                </p>                              </div>                            </div>                          </article>                        ))}                      </div>                    ) : (                      <div className="text-center py-12">                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">                          <Calendar className="w-8 h-8 text-gray-300" />                        </div>                        <p className="text-muted-foreground text-sm">                          Tidak ada informasi itinerary                        </p>                      </div>                    )}                  </div>
                 )}
 
                 {/* Facilities */}
