@@ -184,12 +184,15 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
         if (item && typeof item === "object") {
           let description = String(item.description || item.details || item.text || "")
-            // Strip "Hari ke-N"/"Day N" prefix dari START of description (jika ada)
+            // 1. Hapus SEMUA "Hari ke-N" dan "Hari N" dari mana saja (global) — INI YANG KUNCI biar "UMROH AWAL MUSIM Hari ke-1" jadi bersih
+            .replace(/hari\s*ke\s*\d+/gi, "")
+            // 2. Ekstra hapus "Hari1"/"Hari 1" tanpa "ke"
+            .replace(/\bHari\d+\b/gi, "")
+            // 3. Hapus "Day N" dan "DayN"
+            .replace(/\bDay\d+\b/gi, "")
+            // 4. Strip prefix "Hari ke-N"/"Day N" dari START of description (jika ada, sebagai safety)
             .replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "")
-            // Strip "Hari ke-N"/"Day N" dari MANUAPUN di deskripsi (global) — diperkuat dengan word boundary
-            .replace(/\b(Hari\s+ke\s+\d+|Day\s+\d+)\b/gi, "")
-            // Ekstra: hapus also "Hari1"/"Day1" tanpa spasi (kasus ekstrem)
-            .replace(/\bHari\d+\b/gi, "").replace(/\bDay\d+\b/gi, "")
+            // 5. Trim sisa spasi
             .trim()
           return {
             day: Number(item.day) || idx + 1,
