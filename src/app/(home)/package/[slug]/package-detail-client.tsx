@@ -186,8 +186,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           let description = String(item.description || item.details || item.text || "")
             // Strip "Hari ke-N"/"Day N" prefix dari START of description (jika ada)
             .replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "")
-            // Hapus juga "Hari ke-N"/"Day N" yang mungkin ada di tengah/akhir deskripsi
-            .replace(/hari\s*ke\s*\d+|day\s*\d+/gi, "")
+            // Strip "Hari ke-N"/"Day N" dari MANUAPUN di deskripsi (global) — diperkuat dengan word boundary
+            .replace(/\b(Hari\s+ke\s+\d+|Day\s+\d+)\b/gi, "")
+            // Ekstra: hapus also "Hari1"/"Day1" tanpa spasi (kasus ekstrem)
+            .replace(/\bHari\d+\b/gi, "").replace(/\bDay\d+\b/gi, "")
             .trim()
           return {
             day: Number(item.day) || idx + 1,
