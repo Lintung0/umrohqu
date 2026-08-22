@@ -99,7 +99,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
 
   const images = pkgImages.map((i: any) => i.image_url).filter(Boolean) as string[]
 
-  const galleryItems = pkgImages
+  const galleryItems = pkgImages.map((i: any) => ({ url: i.image_url, type: (i.media_type === "video" ? "video" : "image") as "image" | "video" }))
 
   return (
     <PackageDetailClient
