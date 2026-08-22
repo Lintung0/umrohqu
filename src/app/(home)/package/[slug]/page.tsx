@@ -75,26 +75,17 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     notFound()
   }
 
-  const pkgImagesData = (await supabase
+  const { data: pkgImagesData } = await supabase
     .from("package_gallery")
     .select("image_url, media_type")
     .eq("package_id", pkg.id)
-    .order("sort_order", { ascending: true })) || []
+    .order("sort_order", { ascending: true })
 
-  // Get reviews for this package via bookings join
-  const pkgBookingIds: any[] = [] as any[]
+  const pkgImages: any[] = pkgImagesData || []
 
-  const { data: reviews }: any[] = pkgBookingIds.length > 0
-    ? await supabase
-        .from("reviews")
-        .select("id, rating, review, created_at, customer_id")
-        .in("booking_id", pkgBookingIds)
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(20)
-    : []
+  const reviews: any[] = []
 
-  const reviewerIds = [...new Set((reviews || []).map((r: any) => r.customer_id).filter(Boolean))]
+  const reviewerIds = [...new Set(reviews.map((r: any) => r.customer_id).filter(Boolean))]
   let reviewerMap: Record<string, string> = {}
   if (reviewerIds.length > 0) {
     const { data: reviewers } = await supabase
@@ -106,9 +97,9 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     }
   }
 
-  const images = pkgImagesData.map((i: any) => i.image_url).filter(Boolean) as string[]
+  const images = pkgImages.map((i: any) => i.image_url).filter(Boolean) as string[]
 
-  const galleryItems = pkgImagesData
+  const galleryItems = pkgImages
 
   return (
     <PackageDetailClient
