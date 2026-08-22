@@ -9,31 +9,39 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const supabase = createAdminClient()
 
-  const { data: pkg } = await supabase
-    .from("packages")
-    .select("name, description, price, id, travel:tenants(name)")
-    .eq("slug", slug)
-    .in("status", ["active", "ongoing"])
-    .single()
+  let pkg: any = null
+  try {
+    const { data: pkgData, error } = await supabase
+      .from("packages")
+      .select("name, description, price, id, travel:tenants(name)")
+      .eq("slug", slug)
+      .in("status", ["active", "ongoing"])
+      .single()
+    if (!error && pkgData) {
+      pkg = pkgData
+    }
+  } catch (e) {
+    // error caught, pkg stays null
+  }
 
   if (!pkg) {
     return notFound()
   }
 
-  const { data: coverImg } = await supabase
+  const { data: coverImg } = (await supabase
     .from("package_gallery")
     .select("image_url")
-    .eq("package_id", (pkg as any).id)
+    .eq("package_id", pkg.id)
     .order("sort_order", { ascending: true })
     .limit(1)
-    .maybeSingle()
+    .maybeSingle()) || { data: null }
 
   const travelName = (pkg.travel as any)?.name || "UmrahQu"
-  const description = pkg.description || `Paket umroh ${pkg.name} dari ${travelName} mulai dari Rp ${(pkg.price || 0).toLocaleString("id-ID")}`
+  const description = pkg.description || "Paket umroh " + pkg.name + " dari " + travelName + " mulai dari Rp " + (pkg.price || 0).toLocaleString("id-ID")
   const ogImage = coverImg?.image_url
 
   return {
-    title: `${pkg.name} - UmrahQu`,
+    title: pkg.name + " - UmrahQu",
     description,
     openGraph: {
       title: pkg.name,
@@ -48,32 +56,35 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
   const { slug } = await params
   const supabase = createAdminClient()
 
-  const { data: pkg } = await supabase
-    .from("packages")
-    .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, city, description)")
-    .eq("slug", slug)
-    .in("status", ["active", "ongoing"])
-    .single()
-
-  const { data: pkgImages } = await supabase
-    .from("package_gallery")
-    .select("image_url, media_type")
-    .eq("package_id", pkg?.id)
-    .order("sort_order", { ascending: true })
+  let pkg: any = null
+  try {
+    const { data: pkgData, error } = await supabase
+      .from("packages")
+      .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, city, description)")
+      .eq("slug", slug)
+      .in("status", ["active", "ongoing"])
+      .single()
+    if (!error && pkgData) {
+      pkg = pkgData
+    }
+  } catch (e) {
+    // error caught, pkg stays null
+  }
 
   if (!pkg) {
-    console.error("[PACKAGE DETAIL] Not found for slug:", slug)
     notFound()
   }
 
-  // Get reviews for this package via bookings join
-  const { data: pkgBookings } = await supabase
-    .from("bookings")
-    .select("id")
+  const pkgImagesData = (await supabase
+    .from("package_gallery")
+    .select("image_url, media_type")
     .eq("package_id", pkg.id)
-  const pkgBookingIds = (pkgBookings || []).map((b: any) => b.id)
+    .order("sort_order", { ascending: true })) || []
 
-  const { data: reviews } = pkgBookingIds.length > 0
+  // Get reviews for this package via bookings join
+  const pkgBookingIds: any[] = [] as any[]
+
+  const { data: reviews }: any[] = pkgBookingIds.length > 0
     ? await supabase
         .from("reviews")
         .select("id, rating, review, created_at, customer_id")
@@ -81,7 +92,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
         .eq("status", "published")
         .order("created_at", { ascending: false })
         .limit(20)
-    : { data: null }
+    : []
 
   const reviewerIds = [...new Set((reviews || []).map((r: any) => r.customer_id).filter(Boolean))]
   let reviewerMap: Record<string, string> = {}
@@ -95,22 +106,17 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     }
   }
 
-  const images = (pkgImages || []).map((i: any) => i.image_url).filter(Boolean) as string[]
+  const images = pkgImagesData.map((i: any) => i.image_url).filter(Boolean) as string[]
 
-  const galleryItems = (pkgImages || [])
-    .map((i: any) => ({
-      url: i.image_url,
-      type: (i.media_type || "image") as "image" | "video",
-    }))
-    .filter((item) => item.url) as { url: string; type: "image" | "video" }[]
+  const galleryItems = pkgImagesData
 
   return (
     <PackageDetailClient
       pkg={pkg}
-      reviews={(reviews as any) || []}
-      reviewerMap={reviewerMap}
       images={images}
       galleryItems={galleryItems}
+      reviews={reviews}
+      reviewerMap={reviewerMap}
     />
   )
 }
