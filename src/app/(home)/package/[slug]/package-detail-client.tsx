@@ -454,7 +454,88 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   </div>
                 )}
 
-{activeTab === "itinerary" && (                  <div className="animate-in fade-in duration-200">                    {itineraryList.length > 0 ? (                      <div className="space-y-4">                        {itineraryList.map((item, idx) => (                          <article                            key={idx}                            className="group transition-all duration-300 hover:border-emerald-400 hover:shadow-lg border-b border-border/60">                            <div className="flex items-start gap-3">                              {/* Day indicator circle */}                              <div                                className="relative shrink-0 flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-emerald-600/10 border border-emerald-600/20 group-hover:bg-emerald-600/20 transition-colors">                                <span className="text-xs font-medium text-emerald-600 uppercase tracking-wider">                                  {item.day}                                </span>                              </div>                              {/* Content area */}                              <div className="flex-1 min-w-0">                                <h3 className="text-sm font-medium text-foreground line-clamp-1 transition-colors group-hover:text-emerald-600">                                  {item.title || ""}                                </h3>                                <p className="mt-1 text-sm text-muted-foreground leading-relaxed whitespace-pre-line line-clamp-3">                                  {item.description || "".replace(/hari\s*ke\s*\d+/gi, "").trim()}                                </p>                              </div>                            </div>                          </article>                        ))}                      </div>                    ) : (                      <div className="text-center py-12">                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">                          <Calendar className="w-8 h-8 text-gray-300" />                        </div>                        <p className="text-muted-foreground text-sm">                          Tidak ada informasi itinerary                        </p>                      </div>                    )}                  </div>
+{activeTab === "itinerary" && (
+                  <div className="animate-in fade-in duration-200">
+                    {itineraryList.length > 0 ? (
+                      <div className="relative">
+                        {/* Header summary */}
+                        <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
+                            <Calendar className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-emerald-800">Perjalanan {itineraryList.length} Hari</p>
+                            <p className="text-xs text-emerald-600">Ikuti langkah demi langkah perjalanan ibadah Anda</p>
+                          </div>
+                        </div>
+
+                        {/* Timeline */}
+                        <div className="relative ml-5 border-l-2 border-emerald-200 space-y-0">
+                          {itineraryList.map((item, idx) => {
+                            const isOpen = expandedItinerary === idx
+                            const isLast = idx === itineraryList.length - 1
+                            return (
+                              <div
+                                key={idx}
+                                className="relative group"
+                              >
+                                {/* Timeline dot */}
+                                <div className={`absolute -left-[1.35rem] top-4 w-3 h-3 rounded-full border-2 transition-all duration-300 ${
+                                  isOpen
+                                    ? "bg-emerald-500 border-emerald-500 scale-125 shadow-md shadow-emerald-200"
+                                    : "bg-white border-emerald-300 group-hover:border-emerald-500 group-hover:bg-emerald-50"
+                                }`} />
+
+                                {/* Day card */}
+                                <button
+                                  onClick={() => setExpandedItinerary(isOpen ? null : idx)}
+                                  className={`w-full text-left ml-6 p-4 rounded-xl transition-all duration-300 ${
+                                    isOpen
+                                      ? "bg-emerald-50/80 border border-emerald-200 shadow-sm"
+                                      : "hover:bg-gray-50/80 border border-transparent hover:border-gray-100"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                      <span className={`shrink-0 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                                        isOpen
+                                          ? "bg-emerald-600 text-white"
+                                          : "bg-emerald-100 text-emerald-700"
+                                      }`}>
+                                        Hari {item.day}
+                                      </span>
+                                      <h3 className={`text-sm font-semibold truncate transition-colors ${
+                                        isOpen ? "text-emerald-800" : "text-foreground group-hover:text-emerald-700"
+                                      }`}>
+                                        {item.title || `Hari ke-${item.day}`}
+                                      </h3>
+                                    </div>
+                                    <ChevronRight className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-300 ${
+                                      isOpen ? "rotate-90 text-emerald-600" : ""
+                                    }`} />
+                                  </div>
+
+                                  {/* Expandable description */}
+                                  <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-3" : "max-h-0"}`}>
+                                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line border-t border-emerald-100 pt-3">
+                                      {item.description || ""}
+                                    </p>
+                                  </div>
+                                </button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-16">
+                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                          <Calendar className="w-8 h-8 text-gray-300" />
+                        </div>
+                        <p className="text-muted-foreground text-sm">Tidak ada informasi itinerary</p>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Facilities */}
