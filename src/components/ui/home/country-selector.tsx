@@ -33,21 +33,11 @@ export default function CountrySelector() {
     async function load() {
       const { data } = await supabase
         .from("tenants")
-        .select("country")
+        .select("id")
         .eq("status", "active")
-        .not("country", "is", null)
 
       if (data) {
-        const map = new Map<string, number>()
-        for (const row of data) {
-          const c = row.country || "Indonesia"
-          map.set(c, (map.get(c) || 0) + 1)
-        }
-        const arr = Array.from(map.entries())
-          .map(([country, count]) => ({ country, count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 8)
-        setCounts(arr)
+        setCounts([{ country: "Indonesia", count: data.length }])
       }
       setLoading(false)
     }

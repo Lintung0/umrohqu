@@ -161,7 +161,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
   try {
     const tenantResult = await supabase
       .from("tenants")
-      .select("id, slug, name, logo_url, city, description, founded_year, is_verified, is_featured, phone, contact_email, brand_color, ppiu_number, accredited_at, total_jamaah, gallery_urls, video_urls")
+      .select("id, slug, name, logo_url, description, founded_year, is_verified, is_featured, brand_color, total_jamaah")
       .eq("slug", slug)
       .is("deleted_at", null)
       .single()

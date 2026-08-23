@@ -23,7 +23,7 @@ export default function AdminVerificationPage() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from("tenants").select("id, name, slug, contact_email, contact_phone, status, created_at").is("deleted_at", null).order("created_at", { ascending: false })
+      const { data } = await supabase.from("tenants").select("id, name, slug, status, created_at").is("deleted_at", null).order("created_at", { ascending: false })
       setTenants((data as any) || [])
       setLoading(false)
     }

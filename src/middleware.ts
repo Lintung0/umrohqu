@@ -86,7 +86,7 @@ export async function middleware(request: NextRequest) {
 
     const { data: tenant } = await supabase
       .from("tenants")
-      .select("id, slug, name, logo_url, brand_color, custom_domain, description")
+      .select("id, slug, name, logo_url, brand_color, description")
       .eq("slug", subdomain)
       .eq("status", "active")
       .single()
@@ -115,39 +115,7 @@ export async function middleware(request: NextRequest) {
       return response
     }
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return request.cookies.getAll() },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          },
-        },
-      }
-    )
-
-    const { data: customTenant } = await supabase
-      .from("tenants")
-      .select("id, slug, name, logo_url, brand_color, custom_domain, description")
-      .eq("custom_domain", hostname)
-      .eq("status", "active")
-      .single()
-
-    if (customTenant) {
-      CUSTOM_DOMAIN_CACHE.set(hostname, {
-        tenantId: customTenant.id,
-        expiresAt: Date.now() + CACHE_TTL_MS,
-      })
-
-      const response = NextResponse.rewrite(
-        new URL(`/travel-site/${customTenant.id}${pathname === "/" ? "" : pathname}`, request.url)
-      )
-      response.headers.set("x-tenant-id", customTenant.id)
-      response.headers.set("x-tenant-data", JSON.stringify(customTenant))
-      return response
-    }
+    // custom_domain column does not exist in tenants table — skip custom domain routing
   }
 
   let supabaseResponse = NextResponse.next({ request })

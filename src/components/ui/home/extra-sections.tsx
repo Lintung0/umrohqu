@@ -95,7 +95,7 @@ export function TravelAgenciesSection() {
   useEffect(() => {
     supabase
       .from("tenants")
-      .select("id, name, slug, logo_url, city, is_verified, is_featured, packages_count")
+      .select("id, name, slug, logo_url, is_verified, is_featured, packages_count")
       .eq("status", "active")
       .order("is_featured", { ascending: false })
       .limit(12)

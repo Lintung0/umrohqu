@@ -28,11 +28,11 @@ export default function TravelSettingsPage() {
         const { data: profile } = await supabase.from("users").select("tenant_id").eq("id", user.id).single()
         if (profile?.tenant_id) {
           setTenantId(profile.tenant_id)
-          const { data: tenant } = await supabase.from("tenants").select("name, contact_email, contact_phone").eq("id", profile.tenant_id).single()
+          const { data: tenant } = await supabase.from("tenants").select("name, description").eq("id", profile.tenant_id).single()
           if (tenant) {
             setTenantName(tenant.name || "")
-            setTenantEmail(tenant.contact_email || "")
-            setTenantPhone(tenant.contact_phone || "")
+            setTenantEmail("")
+            setTenantPhone("")
           }
         }
       }

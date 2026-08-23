@@ -30,7 +30,7 @@ export default function TravelListPage() {
     const supabase = createClient()
     supabase
       .from("tenants")
-      .select("id, slug, name, logo_url, city, description, founded_year, is_verified, is_featured, packages_count")
+      .select("id, slug, name, logo_url, description, founded_year, is_verified, is_featured, packages_count")
       .is("deleted_at", null)
       .order("is_featured", { ascending: false })
       .order("is_verified", { ascending: false })

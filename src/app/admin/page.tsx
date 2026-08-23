@@ -77,7 +77,7 @@ export default function AdminOverviewPage() {
           supabase.from("tenants").select("id, status").is("deleted_at", null),
           supabase.from("bookings").select("id, status, total, pilgrim_count, package:packages(name), customer:users(full_name), created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(5),
           supabase.from("bookings").select("id, total, status").is("deleted_at", null),
-          supabase.from("tenants").select("id, name, city, status, created_at").eq("status", "pending").is("deleted_at", null).order("created_at", { ascending: false }).limit(4),
+          supabase.from("tenants").select("id, name, status, created_at").eq("status", "pending").is("deleted_at", null).order("created_at", { ascending: false }).limit(4),
           supabase.from("support_tickets").select("id, subject, status, priority, created_at, user:users(full_name)").order("created_at", { ascending: false }).limit(4),
         ])
 

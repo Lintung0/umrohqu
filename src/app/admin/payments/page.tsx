@@ -40,7 +40,7 @@ export default function AdminPaymentsPage() {
   async function fetchData() {
     const supabase = createClient()
     const [tntsRes, pRes, feeRes] = await Promise.all([
-      supabase.from("tenants").select("id, name, logo_url, status, total_revenue").is("deleted_at", null),
+      supabase.from("tenants").select("id, name, logo_url, status").is("deleted_at", null),
       supabase.from("payouts").select("id, tenant_id, amount, status, created_at, tenants(name, logo_url)").order("created_at", { ascending: false }),
       supabase.from("fee_config").select("service_fee_percent").limit(1).single(),
     ])
