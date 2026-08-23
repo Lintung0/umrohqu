@@ -23,10 +23,14 @@ export default function PackageSection() {
   const [compared, setCompared] = useState<string[]>([]);
   const initialLoadDone = useRef(false);
 
-  const fetchPackages = useCallback(async (pageNum: number) => {
-    const isInitial = pageNum === 1;
+  const lastFetchTime = useRef(0);
+
+  const fetchPackages = useCallback(async (pageNum: number, showLoading = false) => {
+    const isInitial = pageNum === 1 && showLoading;
     if (isInitial) setLoading(true);
-    else setLoadingMore(true);
+    else if (pageNum > 1) setLoadingMore(true);
+
+    lastFetchTime.current = Date.now();
 
     const from = 0;
     const to = pageNum * PAGE_SIZE - 1;
@@ -85,7 +89,7 @@ export default function PackageSection() {
   useEffect(() => {
     if (!initialLoadDone.current) {
       initialLoadDone.current = true;
-      fetchPackages(1);
+      fetchPackages(1, true);
     }
   }, [fetchPackages]);
 
