@@ -13,6 +13,14 @@ import type { Package } from "@/lib/types";
 
 const PAGE_SIZE = 6;
 
+function packagesEqual(a: Package[], b: Package[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].id !== b[i].id || (a[i] as any).image_url !== (b[i] as any).image_url) return false;
+  }
+  return true;
+}
+
 export default function PackageSection() {
   const { t } = useTranslation();
   const [packages, setPackages] = useState<Package[]>([]);
@@ -21,30 +29,29 @@ export default function PackageSection() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [compared, setCompared] = useState<string[]>([]);
+  const packagesRef = useRef<Package[]>([]);
   const initialLoadDone = useRef(false);
-
-  const lastFetchTime = useRef(0);
 
   const fetchPackages = useCallback(async (pageNum: number, showLoading = false) => {
     const isInitial = pageNum === 1 && showLoading;
     if (isInitial) setLoading(true);
     else if (pageNum > 1) setLoadingMore(true);
 
-    lastFetchTime.current = Date.now();
+    try {
+      const from = 0;
+      const to = pageNum * PAGE_SIZE - 1;
 
-    const from = 0;
-    const to = pageNum * PAGE_SIZE - 1;
+      const { data, error } = await supabase
+        .from("packages")
+        .select("*")
+        .in("status", ["active", "ongoing"])
+        .neq("type", "haji")
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
-    const { data, error } = await supabase
-      .from("packages")
-      .select("*")
-      .in("status", ["active", "ongoing"])
-      .neq("type", "haji")
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false })
-      .range(from, to);
+      if (error || !data) return;
 
-    if (!error && data) {
       const pkgs = (await enrichPackagesWithCovers(supabase, (data as Package[]) || [])) || [];
       if (pkgs.length > 0) {
         const ids = pkgs.map((p) => p.id);
@@ -78,12 +85,17 @@ export default function PackageSection() {
         });
       }
 
-      setPackages(pkgs);
-      setHasMore(pkgs.length > pageNum * PAGE_SIZE);
+      if (!packagesEqual(packagesRef.current, pkgs)) {
+        packagesRef.current = pkgs;
+        setPackages(pkgs);
+        setHasMore(pkgs.length > pageNum * PAGE_SIZE);
+      }
+    } catch {
+      // silently ignore network / enrich errors
+    } finally {
+      if (isInitial) setLoading(false);
+      if (pageNum > 1) setLoadingMore(false);
     }
-
-    setLoading(false);
-    setLoadingMore(false);
   }, []);
 
   useEffect(() => {
@@ -93,20 +105,17 @@ export default function PackageSection() {
     }
   }, [fetchPackages]);
 
-  // Realtime: refetch on package changes + gentle polling fallback
   useEffect(() => {
     const channel = supabase
-      .channel("packages-live")
+      .channel("packages-home")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "packages" },
         () => fetchPackages(1)
       )
       .subscribe();
-    const interval = setInterval(() => fetchPackages(1), 30000);
     return () => {
       supabase.removeChannel(channel);
-      clearInterval(interval);
     };
   }, [fetchPackages]);
 
