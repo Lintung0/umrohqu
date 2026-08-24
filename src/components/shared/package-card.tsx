@@ -75,6 +75,27 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
   useEffect(() => {
     let cancelled = false
+    async function checkWishlist() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || cancelled) return
+        const { data } = await supabase
+          .from("wishlists")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("package_id", pkg.id)
+          .maybeSingle()
+        if (!cancelled && data) setIsWishlisted(true)
+      } catch {
+        // silent
+      }
+    }
+    checkWishlist()
+    return () => { cancelled = true }
+  }, [pkg.id, supabase])
+
+  useEffect(() => {
+    let cancelled = false
     async function fetchRating() {
       try {
         const { data: bookings } = await supabase
