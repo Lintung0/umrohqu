@@ -69,14 +69,14 @@ export default function AdminInvoicesPage() {
     if (error) {
       toast.error("Gagal update status: " + error.message)
     } else {
-      toast.success("Invoice ditandai sebagai lunas")
+      toast.success("Faktur ditandai sebagai lunas")
       fetchInvoices()
       setSelectedInvoice(null)
     }
   }
 
   async function handleSendReminder(invoice: InvoiceRow) {
-    toast.success(`Reminder terkirim ke ${invoice.tenants?.name || "travel"}`)
+    toast.success(`Pengingat terkirim ke ${invoice.tenants?.name || "travel"}`)
     setSelectedInvoice(null)
   }
 
@@ -103,7 +103,7 @@ Terima kasih.
     a.download = `invoice-${invoice.id.slice(0, 8)}.txt`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success("Invoice berhasil diunduh")
+    toast.success("Faktur berhasil diunduh")
   }
 
   const filtered = invoices.filter((inv) => {
@@ -136,15 +136,15 @@ Terima kasih.
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Invoice</h1>
-          <p className="text-muted-foreground mt-1">Kelola invoice untuk travel</p>
+          <h1 className="text-2xl font-bold">Faktur</h1>
+          <p className="text-muted-foreground mt-1">Kelola faktur untuk travel</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
         >
           <FileText className="w-4 h-4" />
-          Buat Invoice
+          Buat Faktur
         </button>
       </div>
 
@@ -241,7 +241,7 @@ Terima kasih.
                           <button
                             onClick={() => handleSendReminder(inv)}
                             className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg"
-                            title="Kirim Reminder"
+                            title="Kirim Pengingat"
                           >
                             <Send className="w-4 h-4" />
                           </button>
@@ -332,14 +332,14 @@ function CreateInvoiceModal({ onClose, onCreated }: { onClose: () => void; onCre
       tenant_id: tenantId,
       amount: Number(amount),
       type,
-      description: description || `Invoice ${type}`,
+      description: description || `Faktur ${type}`,
       status: "pending",
     })
     setSaving(false)
     if (error) {
       toast.error("Gagal membuat invoice: " + error.message)
     } else {
-      toast.success("Invoice berhasil dibuat")
+      toast.success("Faktur berhasil dibuat")
       onCreated()
     }
   }
@@ -362,9 +362,9 @@ function CreateInvoiceModal({ onClose, onCreated }: { onClose: () => void; onCre
           <div>
             <label className="block text-sm font-medium mb-1">Tipe</label>
             <select value={type} onChange={(e) => setType(e.target.value)} className="w-full px-3 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <option value="service_fee">Service Fee</option>
-              <option value="setup_fee">Setup Fee</option>
-              <option value="subscription">Subscription</option>
+              <option value="service_fee">Biaya Layanan</option>
+              <option value="setup_fee">Biaya Pemasangan</option>
+              <option value="subscription">Langganan</option>
             </select>
           </div>
           <div>

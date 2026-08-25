@@ -182,7 +182,7 @@ export default function BookingDetailPage() {
             </Link>
             {!user && (
               <Link href={`/login?redirect_to=/dashboard/bookings/${params.id}`} className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors">
-                Login untuk Melihat Pesanan
+                Masuk untuk Melihat Pesanan
               </Link>
             )}
           </div>

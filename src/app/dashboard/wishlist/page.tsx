@@ -80,7 +80,7 @@ export default function WishlistPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Wishlist</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Daftar Keinginan</h1>
         <p className="text-muted-foreground mt-1">Paket umroh yang Anda simpan</p>
       </div>
 

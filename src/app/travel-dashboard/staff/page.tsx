@@ -16,9 +16,9 @@ interface StaffMember {
 }
 
 const ROLE_OPTIONS = [
-  { value: "travel_operational", label: "Operational", desc: "Akses terbatas (pesanan, jamaah)" },
-  { value: "travel_finance", label: "Finance", desc: "Keuangan travel" },
-  { value: "travel_admin", label: "Admin", desc: "Akses penuh (paket, keuangan, settings)" },
+  { value: "travel_operational", label: "Operasional", desc: "Akses terbatas (pesanan, jamaah)" },
+  { value: "travel_finance", label: "Keuangan", desc: "Keuangan travel" },
+  { value: "travel_admin", label: "Admin", desc: "Akses penuh (paket, keuangan, pengaturan)" },
 ]
 
 function getRoleBadge(role: string) {
@@ -33,8 +33,8 @@ function getRoleBadge(role: string) {
 function getRoleLabel(role: string) {
   switch (role) {
     case "travel_admin": return "Admin"
-    case "travel_operational": return "Operational"
-    case "travel_finance": return "Finance"
+    case "travel_operational": return "Operasional"
+    case "travel_finance": return "Keuangan"
     default: return role
   }
 }
@@ -182,11 +182,11 @@ export default function TravelStaffPage() {
           <p className="text-2xl font-bold mt-1 text-emerald-600">{adminCount}</p>
         </div>
         <div className="bg-white border border-border rounded-2xl p-5">
-          <p className="text-[10px] text-muted-foreground uppercase font-medium">Operational</p>
+          <p className="text-[10px] text-muted-foreground uppercase font-medium">Operasional</p>
           <p className="text-2xl font-bold mt-1 text-blue-600">{staffCount}</p>
         </div>
         <div className="bg-white border border-border rounded-2xl p-5">
-          <p className="text-[10px] text-muted-foreground uppercase font-medium">Finance</p>
+          <p className="text-[10px] text-muted-foreground uppercase font-medium">Keuangan</p>
           <p className="text-2xl font-bold mt-1 text-cyan-600">{financeCount}</p>
         </div>
         <div className="bg-white border border-border rounded-2xl p-5">
@@ -214,8 +214,8 @@ export default function TravelStaffPage() {
           >
             <option value="all">Semua Role</option>
             <option value="travel_admin">Admin</option>
-            <option value="travel_operational">Operational</option>
-            <option value="travel_finance">Finance</option>
+            <option value="travel_operational">Operasional</option>
+            <option value="travel_finance">Keuangan</option>
           </select>
           <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
             <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} className="rounded" />

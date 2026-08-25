@@ -97,7 +97,7 @@ export default function DashboardOverview() {
         />
         <StatCard
           icon={Heart}
-          label="Wishlist"
+          label="Daftar Keinginan"
           value={stats.wishlist}
           color="bg-rose-100 text-rose-600"
           href="/dashboard/wishlist"

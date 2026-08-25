@@ -121,7 +121,7 @@ export default function SearchSidebar({
         </span>
         {hasActiveFilters && (
           <button onClick={clearFilters} className="text-xs text-emerald-600 hover:underline flex items-center gap-1 cursor-pointer">
-            <RotateCcw className="w-3 h-3" /> Reset All
+            <RotateCcw className="w-3 h-3" /> Atur Ulang
           </button>
         )}
       </div>

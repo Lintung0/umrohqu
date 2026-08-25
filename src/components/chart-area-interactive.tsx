@@ -218,7 +218,7 @@ export function ChartAreaInteractive() {
                 : format(date.from, "LLL dd, y")}
             </>
           ) : (
-            "Select date range"
+            "Pilih rentang tanggal"
           )}
         </CardDescription>
         <CardAction>
@@ -247,7 +247,7 @@ export function ChartAreaInteractive() {
             <SelectTrigger
               className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
               size="sm"
-              aria-label="Select a value"
+              aria-label="Pilih nilai"
             >
               <SelectValue placeholder="Pilih rentang" />
             </SelectTrigger>

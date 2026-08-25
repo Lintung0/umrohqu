@@ -17,11 +17,11 @@ interface Transaction {
 }
 
 const TYPE_LABEL: Record<string, string> = {
-  topup: "Topup",
+  topup: "Isi Saldo",
   payment: "Pembayaran",
-  refund: "Refund",
+  refund: "Pengembalian",
   withdrawal: "Penarikan",
-  fee_deduction: "Fee Platform",
+  fee_deduction: "Biaya Platform",
 }
 
 const TYPE_ICON: Record<string, typeof ArrowUpRight> = {
@@ -234,7 +234,7 @@ export default function TravelWalletPage() {
       )}
       {showTopup && (
         <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
-          <h3 className="font-semibold">Topup Saldo</h3>
+          <h3 className="font-semibold">Isi Saldo</h3>
           <p className="text-sm text-muted-foreground">
             Isi saldo dompet travel Anda. Minimal topup Rp 10.000.
           </p>
@@ -278,7 +278,7 @@ export default function TravelWalletPage() {
               {topupLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                "Topup"
+                "Isi Saldo"
               )}
             </button>
           </div>

@@ -75,7 +75,7 @@ export function ImageUpload({ value, onChange, bucket = "packages", folder = "im
           ) : (
             <img
               src={value}
-              alt="Preview"
+              alt="Pratinjau"
               className="w-full h-full object-cover"
               onError={() => setPreviewError(true)}
               onLoad={() => setPreviewError(false)}

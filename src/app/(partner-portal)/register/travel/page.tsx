@@ -253,7 +253,7 @@ export default function RegisterTravelPage() {
           href="/login"
           className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg shadow-emerald-600/25 transition-all hover:shadow-xl hover:shadow-emerald-600/30 active:scale-95"
         >
-          Login Sekarang
+          Masuk Sekarang
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>

@@ -19,9 +19,9 @@ interface TenantRow {
 const ONBOARDING_STEPS = [
   { step: 1, label: "Pendaftaran", desc: "Travel mengisi form pendaftaran" },
   { step: 2, label: "Verifikasi Data", desc: "Tim memverifikasi dokumen" },
-  { step: 3, label: "Setup Website", desc: "Pilih template & branding" },
-  { step: 4, label: "Training", desc: "Onboarding penggunaan sistem" },
-  { step: 5, label: "Go Live", desc: "Website aktif & menerima booking" },
+  { step: 3, label: "Pemasangan Situs", desc: "Pilih template & branding" },
+  { step: 4, label: "Pelatihan", desc: "Pengenalan penggunaan sistem" },
+  { step: 5, label: "Situs Aktif", desc: "Website aktif & menerima booking" },
 ]
 
 function getOnboardingStep(tenant: TenantRow): number {

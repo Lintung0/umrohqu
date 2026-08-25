@@ -20,9 +20,9 @@ interface TravelStats {
 const ONBOARDING_STEPS = [
   { step: 1, label: "Pendaftaran", desc: "Form pendaftaran terisi" },
   { step: 2, label: "Verifikasi Data", desc: "Dokumen terverifikasi" },
-  { step: 3, label: "Setup Website", desc: "Pilih template & branding" },
-  { step: 4, label: "Training", desc: "Onboarding penggunaan" },
-  { step: 5, label: "Go Live", desc: "Website aktif" },
+  { step: 3, label: "Pemasangan Situs", desc: "Pilih template & branding" },
+  { step: 4, label: "Pelatihan", desc: "Pengenalan penggunaan" },
+  { step: 5, label: "Situs Aktif", desc: "Website aktif" },
 ]
 
 export default function TravelDashboardOverview() {

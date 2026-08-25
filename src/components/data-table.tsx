@@ -365,13 +365,13 @@ export function DataTable({ data: initialData }: DataTableProps) {
               Bidding
             </TabsTrigger>
             <TabsTrigger value="withdrawal" className="text-xs">
-              Withdrawal
+              Pencairan
             </TabsTrigger>
             <TabsTrigger value="onboarding" className="text-xs">
-              Onboarding
+              Pendaftaran
             </TabsTrigger>
             <TabsTrigger value="refund" className="text-xs">
-              Refund
+              Pengembalian
             </TabsTrigger>
           </TabsList>
         </Tabs>

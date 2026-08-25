@@ -34,8 +34,8 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 
 const CATEGORY_MAP: Record<string, string> = {
   technical: "Teknis",
-  billing: "Billing",
-  onboarding: "Onboarding",
+  billing: "Tagihan",
+  onboarding: "Pendaftaran",
   general: "Umum",
 }
 

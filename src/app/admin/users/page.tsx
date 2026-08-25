@@ -8,12 +8,12 @@ import { formatRupiah } from "@/lib/utils"
 const ROLES = [
   { value: "all", label: "Semua Role" },
   { value: "admin", label: "Admin" },
-  { value: "finance", label: "Finance" },
-  { value: "operational", label: "Operational" },
-  { value: "travel_admin", label: "Travel Admin" },
-  { value: "travel_operational", label: "Travel Operational" },
-  { value: "travel_finance", label: "Travel Finance" },
-  { value: "customer", label: "Customer" },
+  { value: "finance", label: "Keuangan" },
+  { value: "operational", label: "Operasional" },
+  { value: "travel_admin", label: "Admin Travel" },
+  { value: "travel_operational", label: "Operasional Travel" },
+  { value: "travel_finance", label: "Keuangan Travel" },
+  { value: "customer", label: "Pelanggan" },
 ]
 
 const ROLE_BADGES: Record<string, { icon: any; class: string }> = {

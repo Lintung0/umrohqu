@@ -39,7 +39,7 @@ export function NavMain({
             >
               <MailIcon
               />
-              <span className="sr-only">Inbox</span>
+              <span className="sr-only">Kotak Masuk</span>
             </Button>
           </SidebarMenuItem>
         </SidebarMenu>

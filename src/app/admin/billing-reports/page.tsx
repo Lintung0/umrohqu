@@ -113,7 +113,7 @@ export default function AdminBillingReportsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
-          { icon: Receipt, label: "Service Fee Terkumpul", value: formatRupiah(totalPaid), color: "bg-blue-100 text-blue-700" },
+          { icon: Receipt, label: "Biaya Layanan Terkumpul", value: formatRupiah(totalPaid), color: "bg-blue-100 text-blue-700" },
           { icon: CreditCard, label: "Belum Dibayar", value: formatRupiah(totalPending), color: "bg-amber-100 text-amber-700" },
           { icon: AlertTriangle, label: "Terlambat", value: invoices.filter((i) => i.status === "overdue").length, color: "bg-red-100 text-red-700" },
         ].map((s) => (

@@ -55,9 +55,9 @@ export default function AdminSetupFeesPage() {
       .from("fee_config")
       .upsert({ id: "default", setup_fee: setupFee }, { onConflict: "id" })
     if (error) {
-      toast.error("Gagal menyimpan setup fee")
+      toast.error("Gagal menyimpan biaya pemasangan")
     } else {
-      toast.success("Setup fee berhasil diperbarui")
+      toast.success("Biaya pemasangan berhasil diperbarui")
     }
     setSaving(false)
   }

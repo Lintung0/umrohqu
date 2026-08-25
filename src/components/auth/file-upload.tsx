@@ -116,7 +116,7 @@ export function FileUpload({
             <a href={value} target="_blank" rel="noopener noreferrer" className="shrink-0">
               <img
                 src={value}
-                alt={fileName || "Preview"}
+                alt={fileName || "Pratinjau"}
                 className="h-12 w-12 rounded-lg object-cover hover:opacity-80 transition-opacity"
               />
             </a>

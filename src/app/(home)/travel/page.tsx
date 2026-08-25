@@ -157,7 +157,7 @@ export default function TravelListPage() {
               onClick={() => { setSearchQuery(""); setCityFilter("semua"); setVerifiedOnly(false) }}
               className="mt-3 text-sm text-emerald-600 hover:text-emerald-700"
             >
-              Reset filter
+              Atur Ulang Filter
             </button>
           </div>
         ) : (

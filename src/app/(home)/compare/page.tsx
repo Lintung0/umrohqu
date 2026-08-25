@@ -500,7 +500,7 @@ function CompareContent() {
               onClick={clearCompare}
               className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
             >
-              Reset
+              Atur Ulang
             </button>
           </div>
         )}

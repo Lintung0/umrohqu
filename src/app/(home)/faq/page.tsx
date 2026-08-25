@@ -137,7 +137,7 @@ export default function FAQPage() {
                 onClick={() => { setSearch(""); setCategory("Semua") }}
                 className="text-sm text-emerald-600 hover:underline mt-2"
               >
-                Reset filter
+                Atur Ulang Filter
               </button>
             </div>
           ) : (

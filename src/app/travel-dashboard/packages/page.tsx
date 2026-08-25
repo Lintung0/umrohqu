@@ -228,7 +228,7 @@ export default function TravelPackagesPage() {
                       className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
                     >
                       <Edit className="w-3.5 h-3.5" />
-                      Edit
+                      Ubah
                     </Link>
                     {(pkg.status === "active" || pkg.status === "nonaktif") && (
                       <button

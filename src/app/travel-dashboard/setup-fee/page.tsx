@@ -116,7 +116,7 @@ export default function SetupFeePage() {
               <span className="font-medium">{tenant?.name}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Setup Fee</span>
+              <span className="text-muted-foreground">Biaya Pemasangan</span>
               <span className="font-semibold text-lg text-emerald-700">
                 {formatRupiah(tenant?.setup_fee || DEFAULT_FEE_CONFIG.setupFee)}
               </span>
