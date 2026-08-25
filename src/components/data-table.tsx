@@ -67,7 +67,7 @@ interface TaskRow {
   category: "onboarding" | "withdrawal" | "refund" | "bidding";
   vendor_name: string;
   request_type: string;
-  request_status: "Waiting" | "Process" | "Done";
+  request_status: "Menunggu" | "Diproses" | "Selesai";
   detail: string;
   amount?: number;
   date: string;
@@ -127,8 +127,8 @@ export function DataTable({ data: initialData }: DataTableProps) {
         id: item.id,
         category: "onboarding",
         vendor_name: item.name || "PT. Travel Partner",
-        request_type: "Onboarding",
-        request_status: idx === 0 ? "Waiting" : "Process",
+        request_type: "Pendaftaran",
+        request_status: idx === 0 ? "Menunggu" : "Diproses",
         detail: `Domain: ${item.slug}.umrohq.id`,
         date: item.created_at || new Date().toISOString(),
         badgeColor:
@@ -143,8 +143,8 @@ export function DataTable({ data: initialData }: DataTableProps) {
         id: item.id,
         category: "withdrawal",
         vendor_name: item.tenant_name || "Travel Partner",
-        request_type: "Withdrawal",
-        request_status: idx === 0 ? "Waiting" : "Process",
+        request_type: "Pencairan",
+        request_status: idx === 0 ? "Menunggu" : "Diproses",
         detail: `Pencairan ${formatRupiah(item.amount || 0)}`,
         amount: item.amount,
         date: item.date || new Date().toISOString(),
@@ -160,8 +160,8 @@ export function DataTable({ data: initialData }: DataTableProps) {
         id: item.id,
         category: "refund",
         vendor_name: item.customer_name || "Nama Jamaah",
-        request_type: "Refund",
-        request_status: "Waiting",
+        request_type: "Pengembalian",
+        request_status: "Menunggu",
         detail: `Paket: ${item.package_name}`,
         amount: item.amount,
         date: item.date || new Date().toISOString(),
@@ -178,7 +178,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
         category: "bidding",
         vendor_name: item.tenants?.name || "Travel Partner",
         request_type: "Bidding",
-        request_status: "Process",
+        request_status: "Diproses",
         detail: `Paket: ${item.packages?.name}`,
         amount: item.bid_value,
         date: item.created_at || new Date().toISOString(),
@@ -196,10 +196,10 @@ export function DataTable({ data: initialData }: DataTableProps) {
 
   const handleStatusChange = (
     itemId: string,
-    newStatus: "Waiting" | "Process" | "Done",
+    newStatus: "Menunggu" | "Diproses" | "Selesai",
     name: string,
   ) => {
-    toast.success(`${name} status updated to ${newStatus}!`);
+    toast.success(`Status ${name} diperbarui ke ${newStatus}!`);
     setRows((prev) =>
       prev.map((row) =>
         row.id === itemId ? { ...row, request_status: newStatus } : row,
@@ -250,24 +250,24 @@ export function DataTable({ data: initialData }: DataTableProps) {
         cell: ({ row }) => {
           const status = row.original.request_status;
 
-          if (status === "Waiting") {
+          if (status === "Menunggu") {
             return (
               <Badge
                 variant="outline"
                 className="text-yellow-600 border-yellow-500/20 bg-yellow-50/50 dark:text-yellow-400 dark:bg-yellow-950/20 gap-1 rounded-xl font-semibold"
               >
                 <Clock className="h-3 w-3" />
-                Waiting
+                Menunggu
               </Badge>
             );
-          } else if (status === "Process") {
+          } else if (status === "Diproses") {
             return (
               <Badge
                 variant="outline"
                 className="text-blue-600 border-blue-500/20 bg-blue-50/50 dark:text-blue-400 dark:bg-blue-950/20 gap-1 rounded-xl font-semibold"
               >
                 <Loader className="h-3 w-3 animate-spin" />
-                Process
+                Diproses
               </Badge>
             );
           } else {
@@ -277,7 +277,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
                 className="text-green-600 border-green-500/20 bg-green-50/50 dark:text-green-400 dark:bg-green-950/20 gap-1 rounded-xl font-semibold"
               >
                 <Check className="h-3 w-3" />
-                Done
+                Selesai
               </Badge>
             );
           }
@@ -309,7 +309,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
         header: () => <div className="text-right">Aksi</div>,
         cell: ({ row }) => (
           <div className="text-right">
-            {row.original.request_status !== "Done" ? (
+              {row.original.request_status !== "Selesai" ? (
               <Button
                 size="sm"
                 variant="outline"
@@ -327,7 +327,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
                 variant="outline"
                 className="text-green-700 border-green-500/20 bg-green-50/50 dark:text-green-400 dark:bg-green-950/20 gap-1 rounded-xl font-bold"
               >
-                Done
+                Selesai
               </Badge>
             )}
           </div>
@@ -389,14 +389,14 @@ export function DataTable({ data: initialData }: DataTableProps) {
             <SelectItem value="all" className="text-xs rounded-lg">
               Semua Status
             </SelectItem>
-            <SelectItem value="Waiting" className="text-xs rounded-lg">
-              Waiting
+            <SelectItem value="Menunggu" className="text-xs rounded-lg">
+              Menunggu
             </SelectItem>
-            <SelectItem value="Process" className="text-xs rounded-lg">
-              Process
+            <SelectItem value="Diproses" className="text-xs rounded-lg">
+              Diproses
             </SelectItem>
-            <SelectItem value="Done" className="text-xs rounded-lg">
-              Done
+            <SelectItem value="Selesai" className="text-xs rounded-lg">
+              Selesai
             </SelectItem>
           </SelectContent>
         </Select>
@@ -458,7 +458,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
             <div className="flex justify-between items-center px-6 py-4 border-b border-border bg-muted/20">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-foreground uppercase tracking-wide">
-                  Approval Panel: {activeItem.request_type}
+                  Panel Persetujuan: {activeItem.request_type}
                 </span>
               </div>
               <Button
@@ -639,7 +639,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
                         onClick={() =>
                           handleStatusChange(
                             activeItem.id,
-                            "Waiting",
+                            "Menunggu",
                             activeTaskType === "onboarding"
                               ? item.name || ""
                               : activeTaskType === "withdrawal"
@@ -650,7 +650,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
                           )
                         }
                       >
-                        Set Waiting
+                        Atur Menunggu
                       </Button>
                       <Button
                         variant="outline"
@@ -658,7 +658,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
                         onClick={() =>
                           handleStatusChange(
                             activeItem.id,
-                            "Process",
+                            "Diproses",
                             activeTaskType === "onboarding"
                               ? item.name || ""
                               : activeTaskType === "withdrawal"
@@ -669,14 +669,14 @@ export function DataTable({ data: initialData }: DataTableProps) {
                           )
                         }
                       >
-                        Set Process
+                        Atur Diproses
                       </Button>
                       <Button
                         className="flex-1 bg-primary text-primary-foreground hover:bg-primary/80 text-xs h-9"
                         onClick={() =>
                           handleStatusChange(
                             activeItem.id,
-                            "Done",
+                            "Selesai",
                             activeTaskType === "onboarding"
                               ? item.name || ""
                               : activeTaskType === "withdrawal"
@@ -687,7 +687,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
                           )
                         }
                       >
-                        Set Done
+                        Atur Selesai
                       </Button>
                     </div>
                   </div>

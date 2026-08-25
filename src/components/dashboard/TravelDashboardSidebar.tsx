@@ -9,7 +9,7 @@ import { User } from "@supabase/supabase-js"
 import Image from "next/image"
 
 const NAV_ITEMS = [
-  { href: "/travel-dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/travel-dashboard", label: "Ringkasan", icon: LayoutDashboard },
   { href: "/travel-dashboard/packages", label: "Paket Saya", icon: Package },
   { href: "/travel-dashboard/bookings", label: "Pesanan", icon: BookOpen },
   { href: "/travel-dashboard/pilgrims", label: "Jamaah", icon: Users },

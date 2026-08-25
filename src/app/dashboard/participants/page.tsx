@@ -173,7 +173,7 @@ export default function ParticipantsPage() {
             {/* Modal Header */}
             <div className="flex items-start justify-between px-6 pt-6 pb-2">
               <div>
-                <h3 className="text-lg font-bold">{editingId ? "Edit Peserta" : "Isi Data Jamaah Baru"}</h3>
+                <h3 className="text-lg font-bold">{editingId ? "Ubah Peserta" : "Isi Data Jamaah Baru"}</h3>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   {editingId ? "Ubah data peserta yang sudah ada." : "Lengkapi identitas sesuai paspor/KTP untuk mempermudah booking."}
                 </p>

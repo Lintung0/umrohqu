@@ -9,9 +9,9 @@ import { User } from "@supabase/supabase-js"
 import Image from "next/image"
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Ringkasan", icon: LayoutDashboard },
   { href: "/dashboard/bookings", label: "Pesan Saya", icon: BookOpen },
-  { href: "/dashboard/wishlist", label: "Wishlist", icon: Heart },
+  { href: "/dashboard/wishlist", label: "Daftar Keinginan", icon: Heart },
   { href: "/dashboard/participants", label: "Data Peserta", icon: Users },
   { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
 ]

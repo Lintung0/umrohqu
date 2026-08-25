@@ -186,7 +186,7 @@ export default function AdminOverviewPage() {
           { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, iconBg: "bg-emerald-50 text-emerald-600" },
           { icon: BookOpen, label: "Total Pesan", value: stats.bookingCount, sub: "Sepanjang platform", iconBg: "bg-blue-50 text-blue-600" },
           { icon: DollarSign, label: "Pendapatan Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", iconBg: "bg-amber-50 text-amber-600" },
-          { icon: AlertTriangle, label: "Pending Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu review", iconBg: "bg-rose-50 text-rose-600" },
+          { icon: AlertTriangle, label: "Menunggu Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu tinjauan", iconBg: "bg-rose-50 text-rose-600" },
         ].map((s) => (
           <div key={s.label} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
             <div className="flex items-start justify-between">

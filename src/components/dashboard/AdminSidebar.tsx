@@ -8,19 +8,19 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 
 const ADMIN_NAV = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard, roles: ["admin", "finance", "operational"] as AdminRole[], category: "utama" },
+  { href: "/admin", label: "Ringkasan", icon: LayoutDashboard, roles: ["admin", "finance", "operational"] as AdminRole[], category: "utama" },
   { href: "/admin/travels", label: "Akun Travel", icon: Building2, roles: ["admin"], category: "utama" },
   { href: "/admin/verification", label: "Verifikasi Travel", icon: ClipboardCheck, roles: ["admin", "operational"], category: "utama" },
   { href: "/admin/users", label: "Pengguna", icon: Shield, roles: ["admin"], category: "utama" },
   { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["admin"], category: "transaksi" },
   { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["admin", "finance"], category: "transaksi" },
-  { href: "/admin/service-fees", label: "Service Fee", icon: Receipt, roles: ["admin", "finance"], category: "transaksi" },
+  { href: "/admin/service-fees", label: "Biaya Layanan", icon: Receipt, roles: ["admin", "finance"], category: "transaksi" },
   { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["admin"], category: "transaksi" },
-  { href: "/admin/invoices", label: "Invoice", icon: FileText, roles: ["admin", "finance"], category: "transaksi" },
+  { href: "/admin/invoices", label: "Faktur", icon: FileText, roles: ["admin", "finance"], category: "transaksi" },
   { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["admin", "finance"], category: "transaksi" },
   { href: "/admin/promos", label: "Promo & Voucher", icon: Tag, roles: ["admin", "finance"], category: "pemasaran" },
   { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["admin"], category: "pemasaran" },
-  { href: "/admin/onboarding", label: "Onboarding", icon: ClipboardCheck, roles: ["admin", "operational"], category: "pemasaran" },
+  { href: "/admin/onboarding", label: "Pendaftaran", icon: ClipboardCheck, roles: ["admin", "operational"], category: "pemasaran" },
   { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["admin", "operational"], category: "bantuan" },
   { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["admin"], category: "bantuan" },
   { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["admin", "finance"], category: "bantuan" },
@@ -36,8 +36,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const ROLE_LABELS: Record<AdminRole, string> = {
   admin: "Admin",
-  finance: "Finance",
-  operational: "Operational",
+  finance: "Keuangan",
+  operational: "Operasional",
 }
 
 const ROLE_COLORS: Record<AdminRole, string> = {

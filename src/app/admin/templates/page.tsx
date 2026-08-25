@@ -262,7 +262,7 @@ export default function AdminTemplatesPage() {
         </div>
         <div className="bg-white rounded-xl border border-border p-3">
           <div className="text-2xl font-bold text-gray-500">{templates.filter((t) => !t.is_active).length}</div>
-          <div className="text-xs text-muted-foreground">Draft</div>
+          <div className="text-xs text-muted-foreground">Konsep</div>
         </div>
         <div className="bg-white rounded-xl border border-border p-3">
           <div className="text-2xl font-bold text-blue-600">{templates.reduce((sum, t) => sum + (t.used_by_count || 0), 0)}</div>
@@ -317,7 +317,7 @@ export default function AdminTemplatesPage() {
                   </div>
                   <div className="absolute top-3 right-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tpl.is_active ? "bg-emerald-500 text-white" : "bg-gray-500 text-white"}`}>
-                      {tpl.is_active ? "Aktif" : "Draft"}
+                      {tpl.is_active ? "Aktif" : "Konsep"}
                     </span>
                   </div>
                 </div>
@@ -339,13 +339,13 @@ export default function AdminTemplatesPage() {
                       onClick={() => setPreviewId(tpl.id)}
                       className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
                     >
-                      <Eye className="w-3.5 h-3.5" /> Preview
+                      <Eye className="w-3.5 h-3.5" /> Pratinjau
                     </button>
                     <button
                       onClick={() => openEditModal(tpl)}
                       className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
                     >
-                      <Edit className="w-3.5 h-3.5" /> Edit
+                      <Edit className="w-3.5 h-3.5" /> Ubah
                     </button>
                     <button
                       onClick={() => setDeleteId(tpl.id)}
@@ -375,7 +375,7 @@ export default function AdminTemplatesPage() {
           <div className="absolute inset-0 bg-black/50" onClick={() => !saving && setShowModal(false)} />
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="text-lg font-semibold">{editingTemplate ? "Edit Template" : "Tambah Template"}</h2>
+              <h2 className="text-lg font-semibold">{editingTemplate ? "Ubah Template" : "Tambah Template"}</h2>
               <button onClick={() => !saving && setShowModal(false)} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
                 <X className="w-5 h-5" />
               </button>

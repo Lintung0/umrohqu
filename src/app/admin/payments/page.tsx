@@ -95,7 +95,7 @@ export default function AdminPaymentsPage() {
     a.download = `payout-history-${new Date().toISOString().split("T")[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success("Export berhasil")
+    toast.success("Ekspor berhasil")
   }
 
   const activeTravels = tenants.filter((t) => t.status === "active")
@@ -150,7 +150,7 @@ export default function AdminPaymentsPage() {
       <div className="bg-white rounded-2xl border border-border">
         <div className="p-5 border-b border-border flex items-center justify-between">
           <h2 className="font-semibold">Riwayat Payout</h2>
-          <button onClick={handleExport} className="text-sm text-emerald-600 hover:underline flex items-center gap-1"><Download className="w-4 h-4" /> Export</button>
+          <button onClick={handleExport} className="text-sm text-emerald-600 hover:underline flex items-center gap-1"><Download className="w-4 h-4" /> Ekspor</button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

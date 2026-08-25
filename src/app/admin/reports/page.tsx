@@ -94,7 +94,7 @@ export default function AdminReportsPage() {
         </div>
         <button className="inline-flex items-center gap-2 px-4 py-2.5 border border-border rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
           <Download className="w-4 h-4" />
-          Export Laporan
+          Ekspor Laporan
         </button>
       </div>
 

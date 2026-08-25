@@ -58,7 +58,7 @@ export function ImageUpload({ value, onChange, bucket = "packages", folder = "im
         />
         <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-gray-50 border border-border rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors">
           {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          {uploading ? "Upload..." : "Upload"}
+          {uploading ? "Mengunggah..." : "Unggah"}
           <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" disabled={uploading} />
         </label>
       </div>

@@ -555,7 +555,7 @@ export default function TravelPromotionsPage() {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="text-lg font-bold">{editingPromo ? "Edit Promo" : "Tambah Promo Baru"}</h2>
+              <h2 className="text-lg font-bold">{editingPromo ? "Ubah Promo" : "Tambah Promo Baru"}</h2>
               <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-4">
@@ -629,7 +629,7 @@ export default function TravelPromotionsPage() {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setShowBidModal(false)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <h2 className="text-lg font-bold">{editingBid ? "Edit Bidding" : "Buat Bidding Baru"}</h2>
+              <h2 className="text-lg font-bold">{editingBid ? "Ubah Bidding" : "Buat Bidding Baru"}</h2>
               <button onClick={() => setShowBidModal(false)} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-4">

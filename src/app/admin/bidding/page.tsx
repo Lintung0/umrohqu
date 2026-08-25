@@ -215,7 +215,7 @@ export default function AdminBiddingPage() {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setEditingBid(null)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold">Edit Bidding</h2>
+              <h2 className="text-lg font-bold">Ubah Bidding</h2>
               <button onClick={() => setEditingBid(null)} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-3">
