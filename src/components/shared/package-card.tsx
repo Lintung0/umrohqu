@@ -4,14 +4,13 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, Calendar, Play, GitCompare, Heart, Loader2, Star } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, Calendar, GitCompare, Heart, Loader2, Star } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
 import { createClient } from "@/lib/supabase/client"
 import { CenterPopup } from "@/components/ui/center-popup"
 import SeatAvailabilityBar from "./seat-availability-bar"
-import { PackageStatusBadge } from "./package-status-badge"
 import type { Package, Tenant } from "@/lib/types"
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=80&fm=webp&auto=format"
@@ -23,22 +22,6 @@ function getSafeImage(url: string | null | undefined): string {
   const lower = url.toLowerCase()
   if (BLOCKED.some((b) => lower.includes(b))) return FALLBACK_IMAGE
   return url
-}
-
-const TYPE_LABEL: Record<string, string> = {
-  vip: "VIP",
-  plus: "Plus",
-  furoda: "Furoda",
-  reguler: "Reguler",
-  hemat: "Hemat",
-}
-
-const TYPE_COLOR: Record<string, string> = {
-  vip: "bg-amber-100 text-amber-800",
-  plus: "bg-purple-100 text-purple-800",
-  furoda: "bg-rose-100 text-rose-800",
-  reguler: "bg-emerald-100 text-emerald-800",
-  hemat: "bg-sky-100 text-sky-800",
 }
 
 interface PackageCardProps {
@@ -68,10 +51,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const hotelStars = extractHotelStars(pkg.includes, pkg.hotel_makkah_stars)
   const hotelName = extractHotelName(pkg.includes, pkg.hotel_makkah)
   const departureLabel = formatDepartureDate(pkg.departure_date)
-
-  const typeKey = (pkg.type || "reguler").toLowerCase()
-  const typeLabel = TYPE_LABEL[typeKey] || pkg.type
-  const typeColor = TYPE_COLOR[typeKey] || "bg-gray-100 text-gray-700"
 
   useEffect(() => {
     let cancelled = false
@@ -211,12 +190,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
 
           <div className="absolute top-2.5 left-2.5 flex gap-1.5 pointer-events-none">
-            <PackageStatusBadge status={pkg.status} />
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${typeColor}`}>
-              {typeLabel}
-            </span>
+            {pkg.duration_days && (
+              <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
+                <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
+                {pkg.duration_days} {t("card.days")}
+              </span>
+            )}
             {soldOut && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-red-500 text-white">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500 text-white">
                 Habis Terjual
               </span>
             )}
@@ -358,11 +339,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               onError={handleError}
               unoptimized
             />
-            <div className="absolute top-2 left-2 flex gap-1">
-              <PackageStatusBadge status={pkg.status} />
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${typeColor}`}>
-                {typeLabel}
-              </span>
+            <div className="absolute top-2 left-2 flex gap-1 pointer-events-none">
+              {pkg.duration_days && (
+                <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
+                  <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
+                  {pkg.duration_days} {t("card.days")}
+                </span>
+              )}
             </div>
             <div className="absolute top-2 right-2 z-10 flex gap-1.5">
               <button
@@ -460,10 +443,12 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
         <div className="absolute top-2.5 left-2.5 flex gap-1 pointer-events-none">
-          <PackageStatusBadge status={pkg.status} />
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${typeColor}`}>
-            {typeLabel}
-          </span>
+          {pkg.duration_days && (
+            <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
+              <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
+              {pkg.duration_days} {t("card.days")}
+            </span>
+          )}
           {soldOut && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500 text-white">
               Habis Terjual
@@ -494,17 +479,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </button>
         </div>
 
-        <div className="absolute bottom-2.5 left-2.5 flex gap-1.5 pointer-events-none">
-          {pkg.video_url && (
-            <span className="bg-black/60 text-white text-[10px] font-semibold px-2 py-0.5 rounded flex items-center gap-1 backdrop-blur-sm">
-              <Play className="w-2.5 h-2.5 fill-white" /> Video
-            </span>
-          )}
-          <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
-            <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
-            {pkg.duration_days} {t("card.days")}
-          </span>
-        </div>
       </div>
 
       <div className="flex flex-col flex-1 p-3.5">
