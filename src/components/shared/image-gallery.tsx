@@ -74,7 +74,7 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
             {galleryItems.map((item, i) => (
               <div
                 key={i}
-                className={`flex-[0_0_100%] min-w-0 relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden ${item.type !== "video" ? "cursor-pointer" : ""}`}
+                className={`flex-[0_0_100%] min-w-0 relative aspect-video max-h-[360px] w-full overflow-hidden ${item.type !== "video" ? "cursor-pointer" : ""}`}
                 onClick={() => item.type !== "video" && setLightbox(i)}
               >
                 {item.type === "video" && isYouTubeUrl(item.url) ? (
