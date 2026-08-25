@@ -99,24 +99,18 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
           <div>
             <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors mb-2">{pkg.name}</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-2">
-              {pkg.departure_cities?.[0] && (
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-                  <span className="truncate">{pkg.departure_cities.join(", ")}</span>
-                </div>
-              )}
-              {pkg.duration_days && (
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
-                  {pkg.duration_days} Hari
-                </div>
-              )}
-              {pkg.airline && (
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
-                  {pkg.airline}
-                </div>
-              )}
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+                <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities.join(", ") : null) || "-"}</span>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
+                {pkg.duration_days ? `${pkg.duration_days} Hari` : "-"}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
+                {pkg.airline || "-"}
+              </div>
               <div className="flex items-center gap-1 text-xs text-gray-500">
                 <Users className="w-3 h-3 text-emerald-600 shrink-0" />
                 Sisa {seat.available} kursi

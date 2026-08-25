@@ -144,7 +144,7 @@ function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: strin
         <div className="absolute bottom-3 left-3">
           <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
             <Clock className="w-3 h-3" />
-            {pkg.duration_days} Hari
+            {pkg.duration_days ? `${pkg.duration_days} Hari` : "-"}
           </div>
         </div>
       </div>
@@ -153,15 +153,15 @@ function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: strin
         <div className="space-y-1.5">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 shrink-0" style={{ color: primary }} />
-            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).slice(0, 2).join(", ")}</span>
+            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Plane className="w-3 h-3 shrink-0" style={{ color: primary }} />
-            {pkg.airline}
+            {pkg.airline || "-"}
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Hotel className="w-3 h-3 shrink-0" style={{ color: primary }} />
-            <span className="truncate">{pkg.hotel_makkah} ({'★'.repeat(pkg.hotel_makkah_stars || 0)})</span>
+            <span className="truncate">{pkg.hotel_makkah ? `${pkg.hotel_makkah} (${"★".repeat(pkg.hotel_makkah_stars || 0)})` : "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Users className="w-3 h-3 shrink-0" style={{ color: primary }} />

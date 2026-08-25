@@ -153,7 +153,7 @@ function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
         </div>
         <div className="absolute bottom-3 right-3">
           <span className="flex items-center gap-1 bg-white/90 text-gray-700 text-[10px] font-medium px-2 py-1 rounded-md">
-            <Clock className="w-3 h-3" /> {pkg.duration_days} Hari
+            <Clock className="w-3 h-3" /> {pkg.duration_days ? `${pkg.duration_days} Hari` : "-"}
           </span>
         </div>
       </div>
@@ -162,11 +162,11 @@ function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 shrink-0 text-gray-400" />
-            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).slice(0, 2).join(", ")}</span>
+            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Hotel className="w-3 h-3 shrink-0 text-gray-400" />
-            <span className="truncate">{pkg.hotel_makkah}</span>
+            <span className="truncate">{pkg.hotel_makkah || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Users className="w-3 h-3 shrink-0 text-gray-400" />

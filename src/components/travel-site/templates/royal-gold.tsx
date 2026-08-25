@@ -149,7 +149,7 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
         <div className="absolute bottom-3 left-3">
           <div className="flex items-center gap-1.5 text-white text-xs font-medium px-3 py-1.5 rounded-full backdrop-blur-sm" style={{ background: `${primary}99`, border: `1px solid ${gold}33` }}>
             <Clock className="w-3 h-3" />
-            {pkg.duration_days} Hari
+            {pkg.duration_days ? `${pkg.duration_days} Hari` : "-"}
           </div>
         </div>
       </div>
@@ -157,18 +157,18 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
         <h3 className="font-semibold text-sm leading-snug text-white line-clamp-2 min-h-[2.5rem] transition-colors" style={{ color: `${gold}cc` }}>
           {pkg.name}
         </h3>
-        <div className="space-y-1.5">
+          <div className="space-y-1.5">
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <MapPin className="w-3 h-3 shrink-0" style={{ color: gold }} />
-            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).slice(0, 2).join(", ")}</span>
+            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <Plane className="w-3 h-3 shrink-0" style={{ color: gold }} />
-            {pkg.airline}
+            {pkg.airline || "-"}
           </div>
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <Hotel className="w-3 h-3 shrink-0" style={{ color: gold }} />
-            <span className="truncate">{pkg.hotel_makkah} ({'★'.repeat(pkg.hotel_makkah_stars || 0)})</span>
+            <span className="truncate">{pkg.hotel_makkah ? `${pkg.hotel_makkah} (${"★".repeat(pkg.hotel_makkah_stars || 0)})` : "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <Users className="w-3 h-3 shrink-0" style={{ color: gold }} />

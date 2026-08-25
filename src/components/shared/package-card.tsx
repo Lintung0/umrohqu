@@ -265,30 +265,31 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-slate-500 mb-3">
             <span className="inline-flex items-center gap-0.5 max-w-full">
               <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ")}</span>
+              <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
             </span>
-            {pkg.duration_days && (
-              <>
-                <span className="text-slate-300">·</span>
-                <span>{pkg.duration_days} {t("card.days")}</span>
-              </>
-            )}
+            <span className="text-slate-300">·</span>
+            <span>{pkg.duration_days ? `${pkg.duration_days} ${t("card.days")}` : "-"}</span>
             {airline && (
               <>
                 <span className="text-slate-300">·</span>
                 <span className="truncate">{decodeUnicodeEscapes(airline)}</span>
               </>
             )}
-            {hotelStars ? (
-              <>
-                <span className="text-slate-300">·</span>
+            <>
+              <span className="text-slate-300">·</span>
+              {hotelStars ? (
                 <span className="inline-flex items-center gap-0.5">
                   <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
                   <span>Hotel</span>
                   <span className="text-amber-500">{"★".repeat(hotelStars)}</span>
                 </span>
-              </>
-            ) : null}
+              ) : (
+                <span className="inline-flex items-center gap-0.5">
+                  <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span>-</span>
+                </span>
+              )}
+            </>
           </div>
 
           {avgRating !== null && (
@@ -375,31 +376,18 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <div>
               <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors mb-2 line-clamp-2">{pkg.name}</h3>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 mb-2">
-                {pkg.departure_cities?.[0] && (
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-                    <span className="truncate">{pkg.departure_cities.join(", ")}</span>
-                  </div>
-                )}
-                {pkg.duration_days && (
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
-                    {pkg.duration_days} {t("card.days")}
-                  </div>
-                )}
-                {pkg.airline && (
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
-                    <span className="truncate">{decodeUnicodeEscapes(pkg.airline)}</span>
-                  </div>
-                )}
-                {avgRating !== null && (
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <Star className="w-3 h-3 text-amber-400 fill-amber-400 shrink-0" />
-                    <span className="font-semibold">{avgRating}</span>
-                    <span className="text-gray-400">({reviewCount})</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities.join(", ") : pkg.departure_city) || "-"}</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
+                  {pkg.duration_days ? `${pkg.duration_days} ${t("card.days")}` : "-"}
+                </div>
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate">{pkg.airline ? decodeUnicodeEscapes(pkg.airline) : "-"}</span>
+                </div>
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
                 </div>
@@ -521,26 +509,20 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="space-y-1.5 mb-3 text-xs text-gray-500">
           <div className="flex items-center gap-1.5">
             <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ")}</span>
+            <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
-          {airline && (
-            <div className="flex items-center gap-1.5">
-              <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="truncate">{decodeUnicodeEscapes(airline)}</span>
-            </div>
-          )}
-          {(hotelName || hotelStars) && (
-            <div className="flex items-center gap-1.5">
-              <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="truncate">{hotelName || "Hotel"}{hotelStars ? ` ${"★".repeat(hotelStars)}` : ""}</span>
-            </div>
-          )}
-          {departureLabel && (
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="truncate">{departureLabel}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="truncate">{airline ? decodeUnicodeEscapes(airline) : "-"}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="truncate">{hotelName ? `${hotelName}${hotelStars ? ` ${"★".repeat(hotelStars)}` : ""}` : hotelStars ? `Hotel ${"★".repeat(hotelStars)}` : "-"}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-3 h-3 text-emerald-600 shrink-0" />
+            <span className="truncate">{departureLabel || "-"}</span>
+          </div>
         </div>
 
         {avgRating !== null && (
