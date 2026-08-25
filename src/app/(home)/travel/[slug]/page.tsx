@@ -8,7 +8,6 @@ import type { Package as PackageType } from "@/lib/types"
 import { createAdminClient } from "@/lib/supabase/server"
 import ImageGallery from "@/components/shared/image-gallery"
 import { PackageDocumentationSection } from "@/components/shared/package-documentation"
-import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 
 export const dynamic = "force-dynamic"
 
@@ -61,14 +60,7 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
     ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
     : 0
   const seat = getSeatAvailability(pkg.available, pkg.quota ?? 0, pkg.quota_taken)
-
-  const typeColor: Record<string, string> = {
-    vip: "bg-amber-100 text-amber-800",
-    plus: "bg-purple-100 text-purple-800",
-    furoda: "bg-rose-100 text-rose-800",
-    reguler: "bg-emerald-100 text-emerald-800",
-    hemat: "bg-sky-100 text-sky-800",
-  }
+  const soldOut = seat.available <= 0
 
   const isDoc = typeof href === "string" && href !== `/package/${pkg.slug}`
 
@@ -83,10 +75,18 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
             unoptimized
           />
           <div className="absolute top-2 left-2 flex gap-1">
-            <PackageStatusBadge status={pkg.status} />
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${typeColor[pkg.type] || "bg-gray-100 text-gray-700"}`}>
-              {pkg.type}
-            </span>
+            {pkg.duration_days && (
+              <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5" />
+                {pkg.duration_days} Hari
+              </span>
+            )}
+            {soldOut && (
+              <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1">
+                <Clock className="w-2.5 h-2.5" />
+                Paket ini penuh
+              </span>
+            )}
             {pkg.is_promo && discount > 0 && (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-100 text-red-700">
                 -{discount}%
@@ -117,7 +117,7 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
               </div>
             </div>
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
-              <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
+              <div className={`h-full rounded-full transition-all duration-700 ${soldOut ? "bg-gray-400" : seat.color}`} style={{ width: `${soldOut ? 100 : seat.percent}%` }} />
             </div>
           </div>
 
@@ -128,9 +128,16 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
               )}
               <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}<span className="text-[10px] text-gray-400 font-normal">/org</span></p>
             </div>
-            <span className={`inline-flex items-center gap-1 text-xs font-medium group-hover:gap-1.5 transition-all ${isDoc ? "text-blue-600" : "text-emerald-700"}`}>
-              {isDoc ? "Lihat Dokumentasi" : "Lihat"} <ChevronRight className="w-3.5 h-3.5" />
-            </span>
+            {!soldOut && (
+              <span className={`inline-flex items-center gap-1 text-xs font-medium group-hover:gap-1.5 transition-all ${isDoc ? "text-blue-600" : "text-emerald-700"}`}>
+                {isDoc ? "Lihat Dokumentasi" : "Lihat"} <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+            )}
+            {soldOut && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-400">
+                <Clock className="w-3.5 h-3.5" /> Sedang Berlangsung
+              </span>
+            )}
           </div>
         </div>
       </div>

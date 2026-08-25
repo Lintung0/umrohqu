@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, Calendar, GitCompare, Heart, Loader2, Star } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, Calendar, GitCompare, Heart, Loader2, Star, Timer } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -197,8 +197,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               </span>
             )}
             {soldOut && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500 text-white">
-                Habis Terjual
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800/80 text-white backdrop-blur-sm flex items-center gap-1">
+                <Timer className="w-2.5 h-2.5" /> Paket ini penuh
               </span>
             )}
           </div>
@@ -216,14 +216,16 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
               )}
             </button>
-            <button
-              onClick={handleCompare}
-              className="bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
-              type="button"
-              aria-label="Bandingkan paket"
-            >
-              <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
-            </button>
+            {!soldOut && (
+              <button
+                onClick={handleCompare}
+                className="bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+                type="button"
+                aria-label="Bandingkan paket"
+              >
+                <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -361,14 +363,16 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
                 )}
               </button>
-              <button
-                onClick={handleCompare}
-                className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
-                type="button"
-                aria-label="Bandingkan paket"
-              >
-                <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
-              </button>
+              {!soldOut && (
+                <button
+                  onClick={handleCompare}
+                  className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+                  type="button"
+                  aria-label="Bandingkan paket"
+                >
+                  <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -438,8 +442,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             </span>
           )}
           {soldOut && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500 text-white">
-              Habis Terjual
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800/80 text-white backdrop-blur-sm flex items-center gap-1">
+              <Timer className="w-2.5 h-2.5" /> Paket ini penuh
             </span>
           )}
         </div>
@@ -457,14 +461,16 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
             )}
           </button>
-          <button
-            onClick={handleCompare}
-            className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
-            type="button"
-            aria-label="Bandingkan paket"
-          >
-            <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
-          </button>
+          {!soldOut && (
+            <button
+              onClick={handleCompare}
+              className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+              type="button"
+              aria-label="Bandingkan paket"
+            >
+              <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+            </button>
+          )}
         </div>
 
       </div>

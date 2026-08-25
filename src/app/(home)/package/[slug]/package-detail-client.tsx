@@ -9,7 +9,7 @@ import {
   Star, MapPin, Clock, Plane, Hotel, Shield, CheckCircle,
   XCircle, BadgeCheck, Zap, Calendar, GitCompare, Loader2, ChevronLeft, ChevronRight,
   Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
-  Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package, Maximize2, X,
+  Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package, Maximize2, X, Timer,
 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { decodeUnicodeEscapes } from "@/lib/utils"
@@ -162,6 +162,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
   const displayPkg = livePkg || pkg
   const seat = getSeatAvailability(displayPkg.available, displayPkg.quota, displayPkg.quota_taken)
+  const soldOut = getPackageAvailable(displayPkg) <= 0
   const discount = displayPkg.original_price
     ? Math.round(((displayPkg.original_price - displayPkg.price) / displayPkg.original_price) * 100)
     : 0
@@ -811,7 +812,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     {seat.label}
                   </span>
                 </div>
-                <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="compact" showLabel={false} />
+                <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="compact" showLabel={false} soldOut={soldOut} />
               </div>
 
               {/* Ongoing Banner inline */}
@@ -826,26 +827,35 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
               {/* CTA */}
               <div className="mt-4 space-y-2.5">
-                <Link href={`/checkout?slug=${pkg.slug}`} className="block">
-                  <Button className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]">
-                    Pesan Sekarang
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  className="w-full h-11 text-xs gap-2 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
-                  onClick={() => {
-                    if (comparePackages.some((p) => p.id === pkg.id)) return
-                    if (isFull) {
-                      toast.warning("Maksimal 3 paket untuk dibandingkan")
-                      return
-                    }
-                    addToCompare(pkg as unknown as PackageType)
-                    toast.success("Paket berhasil ditambahkan ke perbandingan")
-                  }}
-                >
-                  <GitCompare className="w-4 h-4" /> Bandingkan Paket
-                </Button>
+                {soldOut ? (
+                  <div className="w-full h-12 flex items-center justify-center gap-2 rounded-lg bg-gray-100 border border-gray-200 text-gray-500 text-sm font-semibold">
+                    <Timer className="w-4 h-4" />
+                    Paket ini penuh — sedang berlangsung
+                  </div>
+                ) : (
+                  <>
+                    <Link href={`/checkout?slug=${pkg.slug}`} className="block">
+                      <Button className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]">
+                        Pesan Sekarang
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      className="w-full h-11 text-xs gap-2 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
+                      onClick={() => {
+                        if (comparePackages.some((p) => p.id === pkg.id)) return
+                        if (isFull) {
+                          toast.warning("Maksimal 3 paket untuk dibandingkan")
+                          return
+                        }
+                        addToCompare(pkg as unknown as PackageType)
+                        toast.success("Paket berhasil ditambahkan ke perbandingan")
+                      }}
+                    >
+                      <GitCompare className="w-4 h-4" /> Bandingkan Paket
+                    </Button>
+                  </>
+                )}
                 <p className="text-[10px] text-muted-foreground text-center">Bayar via saldo dompet, transfer, atau pembayaran lainnya</p>
               </div>
             </div>
@@ -909,7 +919,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       </div>
 
       {/* Sticky Mobile CTA */}
-      {showStickyCta && (
+      {showStickyCta && !soldOut && (
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 px-3 pt-3 pb-safe z-50 lg:hidden">
           <div className="max-w-lg mx-auto flex items-center gap-3">
             <div className="flex-1 min-w-0">
@@ -919,6 +929,14 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             <Link href={`/checkout?slug=${pkg.slug}`}>
               <Button className="h-10 px-5 font-semibold text-sm bg-primary shadow-lg shadow-primary/20">Pesan</Button>
             </Link>
+          </div>
+        </div>
+      )}
+      {showStickyCta && soldOut && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 px-3 pt-3 pb-safe z-50 lg:hidden">
+          <div className="max-w-lg mx-auto flex items-center justify-center gap-2 py-2 text-gray-500 text-sm font-semibold">
+            <Timer className="w-4 h-4" />
+            Paket ini penuh — sedang berlangsung
           </div>
         </div>
       )}
