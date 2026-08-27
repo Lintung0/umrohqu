@@ -845,7 +845,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   <>
                     <button onClick={handleCheckout} className="w-full block">
                       <Button className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]">
-                        Pesan Sekarang
+                        Pesan
                       </Button>
                     </button>
                     <Button
