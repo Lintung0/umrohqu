@@ -476,12 +476,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       </div>
 
       <div className="flex flex-col flex-1 p-3.5">
-        <div className="flex items-center text-xs mb-1.5">
-          <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded whitespace-nowrap">
-            ✓ PPIU Resmi
-          </span>
-        </div>
-
         <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-1.5">
           {pkg.name}
         </h3>
