@@ -323,6 +323,15 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
     setTogglingWishlist(false)
   }
 
+  async function handleCheckout() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      window.location.href = `/login?redirect_to=${encodeURIComponent(`/checkout?slug=${pkg.slug}`)}`
+      return
+    }
+    window.location.href = `/checkout?slug=${pkg.slug}`
+  }
+
   function handleShare() {
     if (navigator.share) {
       navigator.share({ title: pkg.name, url: window.location.href })
@@ -834,11 +843,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   </div>
                 ) : (
                   <>
-                    <Link href={`/checkout?slug=${pkg.slug}`} className="block">
+                    <button onClick={handleCheckout} className="w-full block">
                       <Button className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]">
                         Pesan Sekarang
                       </Button>
-                    </Link>
+                    </button>
                     <Button
                       variant="outline"
                       className="w-full h-11 text-xs gap-2 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
@@ -926,9 +935,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               <p className="text-lg font-bold text-primary truncate">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-muted-foreground">per orang</p>
             </div>
-            <Link href={`/checkout?slug=${pkg.slug}`}>
+            <button onClick={handleCheckout}>
               <Button className="h-10 px-5 font-semibold text-sm bg-primary shadow-lg shadow-primary/20">Pesan</Button>
-            </Link>
+            </button>
           </div>
         </div>
       )}

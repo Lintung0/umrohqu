@@ -230,6 +230,10 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
 
         <div className="flex flex-col flex-1 p-3.5">
+          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-1.5">
+            {pkg.name}
+          </h3>
+
           {showTravel && travel && (
             <button
               type="button"
@@ -237,7 +241,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 e.stopPropagation()
                 router.push(`/travel/${travel.slug}`)
               }}
-              className="inline-flex items-center gap-1.5 mb-1.5 w-fit pointer-events-auto cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-md"
+              className="inline-flex items-center gap-1.5 mb-2 w-fit pointer-events-auto cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-md"
             >
               {travel.logo_url ? (
                 <Image
@@ -259,10 +263,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               </span>
             </button>
           )}
-
-          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2">
-            {pkg.name}
-          </h3>
 
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-slate-500 mb-3">
             <span className="inline-flex items-center gap-0.5 max-w-full">
@@ -476,41 +476,42 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       </div>
 
       <div className="flex flex-col flex-1 p-3.5">
-        <div className="flex items-center justify-between text-xs mb-1.5">
+        <div className="flex items-center text-xs mb-1.5">
           <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded whitespace-nowrap">
             ✓ PPIU Resmi
           </span>
-          {showTravel && travel && (
-            <Link
-              href={`/travel/${travel.slug}`}
-              onClick={handleTravelClick}
-              className="inline-flex items-center gap-1 min-w-0 pl-2 pointer-events-auto"
-            >
-              {travel.logo_url ? (
-                <Image
-                  src={travel.logo_url}
-                  alt={travel.name}
-                  width={14}
-                  height={14}
-                  unoptimized
-                  className="rounded-full object-cover shrink-0"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
-                />
-              ) : (
-                <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                  <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
-                </div>
-              )}
-              <span className="text-gray-500 font-medium truncate hover:text-emerald-600 transition-colors">
-                {travel.name}
-              </span>
-            </Link>
-          )}
         </div>
 
-        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-2.5">
+        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-1.5">
           {pkg.name}
         </h3>
+
+        {showTravel && travel && (
+          <Link
+            href={`/travel/${travel.slug}`}
+            onClick={handleTravelClick}
+            className="inline-flex items-center gap-1 mb-2 w-fit pointer-events-auto"
+          >
+            {travel.logo_url ? (
+              <Image
+                src={travel.logo_url}
+                alt={travel.name}
+                width={14}
+                height={14}
+                unoptimized
+                className="rounded-full object-cover shrink-0"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+              />
+            ) : (
+              <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
+              </div>
+            )}
+            <span className="text-gray-500 font-medium truncate hover:text-emerald-600 transition-colors text-[11px]">
+              {travel.name}
+            </span>
+          </Link>
+        )}
 
         <div className="space-y-1.5 mb-3 text-xs text-gray-500">
           <div className="flex items-center gap-1.5">
