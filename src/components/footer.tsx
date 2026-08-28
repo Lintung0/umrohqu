@@ -5,12 +5,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import { useTranslation } from "@/lib/i18n"
-import dynamic from "next/dynamic"
 import { useState } from "react"
 import CountrySelect from "@/components/shared/country-select"
 import { CompactLanguageSwitcher } from "@/components/shared/compact-language-switcher"
-
-const Kaaba3D = dynamic(() => import("@/components/ui/home/kaaba-3d"), { ssr: false })
 
 const columnHeadingClass = "font-bold text-xs uppercase tracking-wider text-white/50"
 
@@ -65,24 +62,6 @@ const Footer = () => {
       </div>
 
       <div className="relative max-w-7xl mx-auto pt-16 pb-20 lg:pb-8 px-4 sm:px-6 lg:px-8">
-        {/* Kaaba3D showcase */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-14 pb-14 border-b border-white/10">
-          <div className="space-y-4 text-center lg:text-left">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 text-amber-300 text-xs font-semibold">
-              {t.footer.tagline}
-            </span>
-            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-              {t.footer.headline}
-            </h2>
-            <p className="text-sm text-white/60 leading-relaxed max-w-lg">
-              {t.footer.hero_desc}
-            </p>
-          </div>
-          <div className="w-full h-[300px]">
-            <Kaaba3D />
-          </div>
-        </div>
-
         {/* Main columns */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-10 py-6">
           {/* Brand + Contact */}
