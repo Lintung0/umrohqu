@@ -1,7 +1,6 @@
 "use client"
 
 import PackageSection from "@/components/ui/home/package-section"
-import { IslamicWidgets } from "@/components/ui/islamic-widgets"
 import {
   WhyUsSection,
   TravelAgenciesSection,
@@ -157,7 +156,6 @@ export default function Home() {
       </section>
 
       <PackageSection />
-      <IslamicWidgets />
       <WhyUsSection />
       <TravelAgenciesSection />
       <TrustSection />
