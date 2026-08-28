@@ -28,6 +28,23 @@ const PRICE_RANGES: { label: string; range: [number, number] }[] = [
 
 const DURATION_OPTIONS = ["7-10 Hari", "10-14 Hari", "14-21 Hari"]
 
+function SectionLabel({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <label className="flex items-center gap-2 text-xs font-bold tracking-wide text-slate-700 uppercase">
+      <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700">
+        {icon}
+      </span>
+      {children}
+    </label>
+  )
+}
+
 function CountrySelectFilter({
   value,
   onChange,
@@ -54,11 +71,11 @@ function CountrySelectFilter({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={selected ? `Negara: ${selected.name}` : "Semua Negara"}
-        className="w-full h-11 flex items-center justify-between gap-2 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 hover:border-emerald-300 transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+        className="w-full h-11 flex items-center justify-between gap-2 px-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 shadow-sm hover:border-emerald-300 hover:shadow transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
       >
         <div className="flex items-center gap-2">
           <span className="text-base">{selected?.emoji || "🌏"}</span>
-          <span className="font-medium">{selected?.name || "Semua Negara"}</span>
+          <span className={cn("font-medium", !selected && "text-slate-400")}>{selected?.name || "Semua Negara"}</span>
         </div>
         <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform", open && "rotate-180")} />
       </button>
@@ -94,6 +111,23 @@ function CountrySelectFilter({
   )
 }
 
+function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "min-h-10 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
+        active
+          ? "bg-gradient-to-r from-emerald-600 to-emerald-500 border-transparent text-white shadow-md shadow-emerald-600/20"
+          : "bg-slate-50 border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700"
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
 export default function SearchSidebar({
   departure, setDeparture,
   country, setCountry,
@@ -112,91 +146,67 @@ export default function SearchSidebar({
   }
 
   return (
-    <div className="sticky top-36 max-h-[calc(100vh-9.5rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar space-y-5">
+    <div className="sticky top-36 max-h-[calc(100vh-9.5rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar">
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
 
-      {/* Header */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
-          <SlidersHorizontal className="w-3.5 h-3.5" /> Filter Pencarian
-        </span>
-        {hasActiveFilters && (
-          <button onClick={clearFilters} className="text-xs text-emerald-600 hover:underline flex items-center gap-1 cursor-pointer">
-            <RotateCcw className="w-3 h-3" /> Atur Ulang
-          </button>
-        )}
-      </div>
-
-      {/* Negara */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-          <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Negara
-        </label>
-        <CountrySelectFilter value={country} onChange={setCountry} />
-      </div>
-
-      {/* Kota Keberangkatan — Geoapify Autocomplete */}
-      <div className="space-y-2">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-          <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Kota Keberangkatan
-        </label>
-        <CityAutocomplete
-          value={departure}
-          onChange={setDeparture}
-          countryFilter={country}
-          placeholder="Ketik nama kota..."
-          className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-        />
-      </div>
-
-      {/* Price Range */}
-      <div className="space-y-2.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-          <Banknote className="w-3.5 h-3.5 text-emerald-600" /> Estimasi Harga
-        </label>
-
-        <div className="flex flex-wrap gap-1.5">
-          {PRICE_RANGES.map((pr) => (
-            <button
-              key={pr.label}
-              onClick={() => handlePriceQuick(pr.range)}
-              aria-pressed={isPriceQuickActive(pr.range)}
-              className={cn(
-                "min-h-11 px-3 rounded-md text-[11px] font-semibold border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
-                isPriceQuickActive(pr.range)
-                  ? "bg-emerald-600 border-emerald-600 text-white"
-                  : "bg-slate-50 border-slate-200 text-slate-500 hover:border-emerald-300"
-              )}
-            >
-              {pr.label}
+        {/* Header */}
+        <div className="flex items-center justify-between gap-2 px-4 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500">
+          <span className="inline-flex items-center gap-2 text-white text-sm font-bold">
+            <SlidersHorizontal className="w-4 h-4" /> Filter Pencarian
+          </span>
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="text-xs text-white/90 hover:text-white hover:underline flex items-center gap-1 cursor-pointer font-medium">
+              <RotateCcw className="w-3 h-3" /> Atur Ulang
             </button>
-          ))}
+          )}
+        </div>
+
+        <div className="divide-y divide-slate-100 px-4">
+
+          {/* Negara */}
+          <div className="py-4 space-y-3">
+            <SectionLabel icon={<MapPin className="w-3.5 h-3.5" />}>Negara</SectionLabel>
+            <CountrySelectFilter value={country} onChange={setCountry} />
+          </div>
+
+          {/* Kota Keberangkatan — Geoapify Autocomplete */}
+          <div className="py-4 space-y-3">
+            <SectionLabel icon={<MapPin className="w-3.5 h-3.5" />}>Kota Keberangkatan</SectionLabel>
+            <CityAutocomplete
+              value={departure}
+              onChange={setDeparture}
+              countryFilter={country}
+              placeholder="Ketik nama kota..."
+              className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-white shadow-sm text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+            />
+          </div>
+
+          {/* Price Range */}
+          <div className="py-4 space-y-3">
+            <SectionLabel icon={<Banknote className="w-3.5 h-3.5" />}>Estimasi Harga</SectionLabel>
+            <div className="grid grid-cols-2 gap-2">
+              {PRICE_RANGES.map((pr) => (
+                <Pill key={pr.label} active={isPriceQuickActive(pr.range)} onClick={() => handlePriceQuick(pr.range)}>
+                  {pr.label}
+                </Pill>
+              ))}
+            </div>
+          </div>
+
+          {/* Durasi Hari */}
+          <div className="py-4 space-y-3">
+            <SectionLabel icon={<Clock className="w-3.5 h-3.5" />}>Durasi Perjalanan</SectionLabel>
+            <div className="flex flex-col gap-2">
+              {DURATION_OPTIONS.map((d) => (
+                <Pill key={d} active={duration === d} onClick={() => toggleDuration(d)}>
+                  {d}
+                </Pill>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
-
-      {/* Durasi Hari */}
-      <div className="space-y-2.5">
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-          <Clock className="w-3.5 h-3.5 text-emerald-600" /> Durasi Perjalanan
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {DURATION_OPTIONS.map((d) => (
-            <button
-              key={d}
-              onClick={() => toggleDuration(d)}
-              aria-pressed={duration === d}
-              className={cn(
-                "min-h-11 px-3 rounded-lg text-xs font-medium border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50",
-                duration === d
-                  ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
-                  : "bg-slate-50 border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-700"
-              )}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-      </div>
-
     </div>
   )
 }
