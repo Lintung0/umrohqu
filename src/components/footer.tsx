@@ -57,24 +57,26 @@ const Footer = () => {
             <p className="text-sm text-white/50 leading-relaxed max-w-sm">
               {t.footer.description}
             </p>
-            <div className="flex items-center gap-3 pt-2">
+            <div className="space-y-4">
               <h3 className={columnHeadingClass}>{t.footer.contact_us}</h3>
-              <Link
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "6281234567890"}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp"
-                className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors group"
-              >
-                <Image src="/icons/whatsapp.svg" alt="WhatsApp" width={18} height={18} className="brightness-0 invert" />
-              </Link>
-              <Link
-                href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@umrahqu.com"}`}
-                aria-label="Email"
-                className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors group"
-              >
-                <Image src="/icons/gmail.svg" alt="Email" width={18} height={18} className="brightness-0 invert" />
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link
+                  href={`https://wa.me/${process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "6281234567890"}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp"
+                  className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors"
+                >
+                  <Image src="/icons/whatsapp.svg" alt="WhatsApp" width={18} height={18} className="brightness-0 invert" />
+                </Link>
+                <Link
+                  href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@umrahqu.com"}`}
+                  aria-label="Email"
+                  className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors"
+                >
+                  <Image src="/icons/gmail.svg" alt="Email" width={18} height={18} className="brightness-0 invert" />
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -100,22 +102,20 @@ const Footer = () => {
           {/* Follow Us */}
           <div className="col-span-1 md:col-span-2 space-y-4">
             <h3 className={columnHeadingClass}>{t.footer.follow_us}</h3>
-            <ul className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
               {socialLinks.map((s) => (
-                <li key={s.label}>
-                  <Link
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={s.label}
-                    className="flex items-center gap-2.5 text-white/50 hover:text-white transition-colors text-sm"
-                  >
-                    <Image src={s.icon} alt={s.label} width={16} height={16} className="brightness-0 invert opacity-50" />
-                    {s.label}
-                  </Link>
-                </li>
+                <Link
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors"
+                >
+                  <Image src={s.icon} alt={s.label} width={18} height={18} className="brightness-0 invert" />
+                </Link>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
 
