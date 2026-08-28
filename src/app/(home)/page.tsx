@@ -137,16 +137,12 @@ export default function Home() {
             <span>Marketplace Umrah Resmi · PPIU Kemenhaj</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 leading-tight drop-shadow-lg">
-            Cari, Bandingkan & Pesan{" "}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-10 leading-tight drop-shadow-lg">
+            Cari, Bandingkan &amp; Pesan{" "}
             <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-300 bg-clip-text text-transparent">
               Paket Umrah
             </span>
           </h1>
-
-          <p className="text-sm sm:text-base text-emerald-100/80 max-w-xl mx-auto mb-8 leading-relaxed">
-            Temukan, bandingkan, dan pesan paket umrah dari banyak PPIU resmi dalam satu platform marketplace.
-          </p>
 
           <HeroSearch />
 
