@@ -180,9 +180,6 @@ export default function PackageSection() {
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
               {t.package.title}
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {packages.length > 0 ? `${packages.length} paket tersedia` : "Cari paket umroh sesuai kebutuhan Anda"}
-            </p>
           </div>
           <Link
             href="/search"
@@ -225,36 +222,29 @@ export default function PackageSection() {
           </div>
         )}
 
-        {hasMore && packages.length > 0 && (
-          <div className="mt-10 text-center">
-            <button
-              onClick={loadMore}
-              disabled={loadingMore}
-              className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold border-2 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loadingMore ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Memuat...
-                </>
-              ) : (
-                <>
-                  Muat Lebih Banyak
-                  <span className="text-xs text-muted-foreground">({packages.length} paket)</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {!hasMore && packages.length > 0 && (
-          <div className="mt-10 text-center">
-            <p className="text-sm text-muted-foreground">
-              Semua paket sudah ditampilkan ({packages.length} paket)
-            </p>
-          </div>
-        )}
-      </div>
-    </section>
+          {hasMore && packages.length > 0 && (
+            <div className="mt-10 text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold border-2 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Memuat...
+                  </>
+                ) : (
+                  <>
+                    Muat Lebih Banyak
+                    <span className="text-xs text-muted-foreground">({packages.length} paket)</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+    );
   );
 }
