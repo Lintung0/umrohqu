@@ -57,33 +57,23 @@ const Footer = () => {
             <p className="text-sm text-white/50 leading-relaxed max-w-sm">
               {t.footer.description}
             </p>
-            <div className="space-y-2.5 pt-2">
+            <div className="flex items-center gap-3 pt-2">
               <h3 className={columnHeadingClass}>{t.footer.contact_us}</h3>
               <Link
                 href={`https://wa.me/${process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "6281234567890"}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group"
+                aria-label="WhatsApp"
+                className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors group"
               >
-                <div className="p-2 rounded-lg bg-white/8 group-hover:bg-white/12 transition-colors">
-                  <Image src="/icons/whatsapp.svg" alt="WhatsApp" width={18} height={18} className="brightness-0 invert" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/30">WhatsApp</p>
-                  <p className="text-sm font-medium">{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</p>
-                </div>
+                <Image src="/icons/whatsapp.svg" alt="WhatsApp" width={18} height={18} className="brightness-0 invert" />
               </Link>
               <Link
                 href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@umrahqu.com"}`}
-                className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group"
+                aria-label="Email"
+                className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors group"
               >
-                <div className="p-2 rounded-lg bg-white/8 group-hover:bg-white/12 transition-colors">
-                  <Image src="/icons/gmail.svg" alt="Email" width={18} height={18} className="brightness-0 invert" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/30">Email</p>
-                  <p className="text-sm font-medium">{process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@umrahqu.com"}</p>
-                </div>
+                <Image src="/icons/gmail.svg" alt="Email" width={18} height={18} className="brightness-0 invert" />
               </Link>
             </div>
           </div>
