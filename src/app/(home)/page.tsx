@@ -138,10 +138,7 @@ export default function Home() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 leading-tight drop-shadow-lg">
-            Cari, bandingkan &{" "}
-            <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-300 bg-clip-text text-transparent">
-              pesan paket Umrah
-            </span>
+            Cari, Bandingkan & Pesan paket Umrah
           </h1>
 
           <p className="text-sm sm:text-base text-emerald-100/80 max-w-xl mx-auto mb-8 leading-relaxed">
