@@ -2,14 +2,14 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Home, Search, GitCompare, ClipboardList, User } from "lucide-react"
+import { Home, Search, Scale, ClipboardList, User } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useCompare } from "@/lib/compare-context"
 
 const NAV_ITEMS = [
   { href: "/", label: "Beranda", icon: Home },
   { href: "/search", label: "Cari", icon: Search },
-  { href: "/compare", label: "Bandingkan", icon: GitCompare },
+  { href: "/compare", label: "Bandingkan", icon: Scale },
   { href: "/dashboard/bookings", label: "Pesanan", icon: ClipboardList },
   { href: "/dashboard", label: "Akun", icon: User },
 ]

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { X, Check, Minus, GitCompare, Award, Sparkles, TrendingDown, Star } from "lucide-react"
+import { X, Check, Minus, Scale, Award, Sparkles, TrendingDown, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { formatRupiah } from "@/lib/utils"
@@ -325,7 +325,7 @@ function CompareView() {
   if (comparePackages.length === 0) {
     return (
       <div className="text-center py-16">
-        <GitCompare className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+        <Scale className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
         <h3 className="font-semibold text-lg mb-2">Belum ada paket dibandingkan</h3>
         <p className="text-sm text-muted-foreground mb-6">Klik icon bandingkan di kartu paket untuk membandingkan hingga {MAX_COMPARE} paket</p>
         <Link href="/search">
@@ -485,7 +485,7 @@ function CompareContent() {
       <div className="bg-white border-b border-border px-4 sm:px-6 py-4 sm:py-5">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <GitCompare className="w-5 h-5 text-primary" />
+            <Scale className="w-5 h-5 text-primary" />
             Bandingkan Paket
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>

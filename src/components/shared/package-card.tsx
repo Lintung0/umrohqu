@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, Calendar, GitCompare, Heart, Loader2, Star, Timer } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, Calendar, Scale, Heart, Loader2, Star, Timer } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -221,7 +221,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 type="button"
                 aria-label="Bandingkan paket"
               >
-                <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+                <Scale className="w-3.5 h-3.5 text-emerald-600" />
               </button>
             )}
           </div>
@@ -363,7 +363,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   type="button"
                   aria-label="Bandingkan paket"
                 >
-                  <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+                  <Scale className="w-3.5 h-3.5 text-emerald-600" />
                 </button>
               )}
             </div>
@@ -456,7 +456,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               type="button"
               aria-label="Bandingkan paket"
             >
-              <GitCompare className="w-3.5 h-3.5 text-emerald-600" />
+              <Scale className="w-3.5 h-3.5 text-emerald-600" />
             </button>
           )}
         </div>

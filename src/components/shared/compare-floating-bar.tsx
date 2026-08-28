@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { GitCompare, X, ArrowRight } from "lucide-react"
+import { Scale, X, ArrowRight } from "lucide-react"
 import { useCompare, MAX_COMPARE } from "@/lib/compare-context"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -28,7 +28,7 @@ export default function CompareFloatingBar() {
       <div className="bg-white border border-emerald-200 rounded-2xl shadow-lg shadow-emerald-100/50 px-4 py-2.5 flex items-center gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-            <GitCompare className="w-4 h-4 text-emerald-600" />
+            <Scale className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold text-slate-800 leading-tight">

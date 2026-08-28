@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Search, GitCompare, Package, Inbox, LucideIcon } from "lucide-react"
+import { Search, Scale, Package, Inbox, LucideIcon } from "lucide-react"
 
 type EmptyVariant = "search" | "compare" | "packages" | "bookings" | "generic"
 
@@ -20,7 +20,7 @@ const VARIANTS: Record<EmptyVariant, VariantConfig> = {
     cta: { label: "Reset Pencarian", href: "/search" },
   },
   compare: {
-    icon: GitCompare,
+    icon: Scale,
     title: "Belum ada paket dipilih",
     desc: "Pilih paket dari halaman pencarian untuk mulai membandingkan.",
     cta: { label: "Cari Paket", href: "/search" },

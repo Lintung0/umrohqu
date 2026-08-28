@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
   Star, MapPin, Clock, Plane, Hotel, Shield, CheckCircle,
-  XCircle, BadgeCheck, Zap, Calendar, GitCompare, Loader2, ChevronLeft, ChevronRight,
+  XCircle, BadgeCheck, Zap, Calendar, Scale, Loader2, ChevronLeft, ChevronRight,
   Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
   Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package, Maximize2, X, Timer,
 } from "lucide-react"
@@ -848,7 +848,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         toast.success("Paket berhasil ditambahkan ke perbandingan")
                       }}
                     >
-                      <GitCompare className="w-4 h-4" /> Bandingkan Paket
+                      <Scale className="w-4 h-4" /> Bandingkan Paket
                     </Button>
                   </>
                 )}
