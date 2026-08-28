@@ -133,7 +133,7 @@ export default function Home() {
         <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 text-center text-white">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/25 text-emerald-300 text-xs font-medium mb-4 backdrop-blur-sm">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Marketplace Umrah Resmi · PPIU Kemenhaj</span>
+            <span>Marketplace Umrah Resmi PPIU Kemenhaj</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-10 leading-tight drop-shadow-lg">
