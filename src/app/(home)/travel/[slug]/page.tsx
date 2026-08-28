@@ -3,8 +3,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { MapPin, Clock, Users, Plane, BadgeCheck, Shield, Package, ChevronRight, Phone, Mail, MessageCircle, Zap, Building2, Globe, FileCheck, Award } from "lucide-react"
 import { formatRupiah, getSeatAvailability, getPackageAvailable } from "@/lib/utils"
-import { enrichPackagesWithCovers } from "@/lib/package-covers"
-import type { Package as PackageType } from "@/lib/types"
+import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
+import { enrichTenantsWithDetail } from "@/lib/tenant-detail-fields"
+import type { Package as PackageType, Tenant } from "@/lib/types"
 import { createAdminClient } from "@/lib/supabase/server"
 import ImageGallery from "@/components/shared/image-gallery"
 import { PackageDocumentationSection } from "@/components/shared/package-documentation"
@@ -26,9 +27,6 @@ interface TenantRow {
   brand_color: string | null
   ppiu_number: string | null
   accredited_at: string | null
-  total_jamaah: number
-  gallery_urls: string[]
-  video_urls: string[]
 }
 
 interface PackageRow {
@@ -37,29 +35,19 @@ interface PackageRow {
   slug: string
   type: string
   departure_cities: string[]
-  duration_days: number | null
-  departure_month: string | null
+  duration_nights: number | null
   price: number
   original_price: number | null
   airline: string | null
-  hotel_makkah: string | null
-  hotel_makkah_stars: number | null
-  hotel_madinah: string | null
-  hotel_madinah_stars: number | null
-  available: number | null
   quota: number | null
   quota_taken: number | null
   image_url: string | null
-  is_promo: boolean
   status: string
   doc_drive_link: string | null
 }
 
 function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
-  const discount = pkg.original_price
-    ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
-    : 0
-  const seat = getSeatAvailability(pkg.available, pkg.quota ?? 0, pkg.quota_taken)
+  const seat = getSeatAvailability(undefined, pkg.quota ?? 0, pkg.quota_taken)
   const soldOut = seat.available <= 0
 
   const isDoc = typeof href === "string" && href !== `/package/${pkg.slug}`
@@ -75,21 +63,16 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
             unoptimized
           />
           <div className="absolute top-2 left-2 flex gap-1">
-            {pkg.duration_days && (
+            {pkg.duration_nights && (
               <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1">
                 <Clock className="w-2.5 h-2.5" />
-                {pkg.duration_days} Hari
+                {pkg.duration_nights} Hari
               </span>
             )}
             {soldOut && (
               <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1">
                 <Clock className="w-2.5 h-2.5" />
                 Paket ini penuh
-              </span>
-            )}
-            {pkg.is_promo && discount > 0 && (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-100 text-red-700">
-                -{discount}%
               </span>
             )}
           </div>
@@ -105,7 +88,7 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-500">
                 <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
-                {pkg.duration_days ? `${pkg.duration_days} Hari` : "-"}
+                {pkg.duration_nights ? `${pkg.duration_nights} Hari` : "-"}
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-500">
                 <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
@@ -123,9 +106,6 @@ function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
 
           <div className="flex items-end justify-between">
             <div>
-              {pkg.original_price && (
-                <p className="text-[11px] text-gray-400 line-through">{formatRupiah(pkg.original_price)}</p>
-              )}
               <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}<span className="text-[10px] text-gray-400 font-normal">/org</span></p>
             </div>
             {!soldOut && (
@@ -155,17 +135,20 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
 
   let tenant: TenantRow | null = null
   let packages: PackageRow[] = []
+  let totalJamaah = 0
 
   try {
-    const tenantResult = await supabase
+    const tenantQuery = await supabase
       .from("tenants")
-      .select("id, slug, name, logo_url, description, founded_year, is_verified, is_featured, brand_color, total_jamaah")
+      .select("id, slug, name, logo_url, description, founded_year, is_verified, is_featured, brand_color")
       .eq("slug", slug)
       .is("deleted_at", null)
       .single()
 
-    if (tenantResult.error || !tenantResult.data) notFound()
-    tenant = tenantResult.data as TenantRow
+    if (tenantQuery.error || !tenantQuery.data) notFound()
+    const tenantBase = tenantQuery.data as Tenant
+    const tenantEnriched = (await enrichTenantsWithDetail(supabase, [tenantBase])) as unknown as TenantRow[]
+    tenant = tenantEnriched?.[0] ?? (tenantBase as unknown as TenantRow)
 
     const packagesResult = await supabase
       .from("packages")
@@ -176,18 +159,30 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
       .order("status", { ascending: false })
       .order("price", { ascending: true })
 
-    packages = ((await enrichPackagesWithCovers(supabase, (packagesResult.data as PackageType[]) || [])) as unknown as PackageRow[]) || []
+    packages = ((await enrichPackagesWithDetail(supabase, (packagesResult.data as PackageType[]) || [])) as unknown as PackageRow[]) || []
+
+    const bookingIdsResult = await supabase
+      .from("bookings")
+      .select("id")
+      .eq("tenant_id", tenant.id)
+      .in("status", ["confirmed", "paid", "ongoing", "completed"])
+
+    const bookingIds = (bookingIdsResult.data ?? []).map((b) => b.id)
+    if (bookingIds.length > 0) {
+      const participantsResult = await supabase
+        .from("booking_participants")
+        .select("id", { count: "exact", head: true })
+        .in("booking_id", bookingIds)
+      totalJamaah = participantsResult.count ?? 0
+    }
   } catch {
     notFound()
   }
 
   const tenantData = tenant as TenantRow
   const primaryColor = tenantData.brand_color || "#0E5C4E"
-  const totalJamaah = tenantData.total_jamaah || 0
 
-  const galleryImages: string[] = Array.isArray(tenantData.gallery_urls) && tenantData.gallery_urls.length > 0
-    ? tenantData.gallery_urls
-    : packages.flatMap((p) => p.image_url ? [p.image_url] : []).slice(0, 6)
+  const galleryImages: string[] = packages.map((p) => p.image_url).filter((u): u is string => !!u).slice(0, 6)
 
   const salePackages = packages.filter((p) => p.status === "active" || p.status === "ongoing")
   const otherPackages = packages.filter((p) => p.status !== "active" && p.status !== "ongoing")

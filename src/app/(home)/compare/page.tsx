@@ -10,7 +10,7 @@ import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/com
 import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
-import { enrichPackagesWithCovers } from "@/lib/package-covers"
+import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import { useCompare, MAX_COMPARE } from "@/lib/compare-context"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Package } from "@/lib/types"
@@ -61,7 +61,7 @@ function getFacilitiesList(facilities: unknown): string[] {
 
 function calcScore(pkg: Package) {
   const price = Number(pkg.price) || 0
-  const duration = Number(pkg.duration_days) || 1
+  const duration = Number(pkg.duration_nights) || 1
   const pricePerDay = price / duration
   const makkahStars = Number(pkg.hotel_makkah_stars) || 0
   const madinahStars = Number(pkg.hotel_madinah_stars) || 0
@@ -207,7 +207,7 @@ function renderValue(key: string, pkg: Package, highlight?: "best" | "worst") {
     case "hotel_madinah_stars":
       return <span className={hlClass}>{"★".repeat(Math.max(0, Number(pkg.hotel_madinah_stars) || 0))}</span>
     case "duration":
-      return <span className={hlClass}>{pkg.duration_days || "-"} Hari</span>
+      return <span className={hlClass}>{pkg.duration_nights || "-"} Hari</span>
     case "type":
       return <span className={`capitalize font-medium ${hlClass}`}>{pkg.type || "-"}</span>
     case "facilities": {
@@ -242,8 +242,8 @@ function compareRows(pkgs: Package[], key: string, _scores: ReturnType<typeof ca
         if (a > b) return "worst"
       }
       if (key === "duration") {
-        const a = Number(pkg.duration_days) || 0
-        const b = Number(other.duration_days) || 0
+        const a = Number(pkg.duration_nights) || 0
+        const b = Number(other.duration_nights) || 0
         if (a > b) return "best"
         if (a < b) return "worst"
       }
@@ -454,7 +454,7 @@ function CompareContent() {
         .in("slug", packagesParam)
         .is("deleted_at", null)
       if (data && data.length > 0) {
-        const enriched = await enrichPackagesWithCovers(supabase, data as Package[])
+        const enriched = await enrichPackagesWithDetail(supabase, data as Package[])
         ;(enriched || []).forEach((pkg) => {
           addToCompare(pkg)
         })

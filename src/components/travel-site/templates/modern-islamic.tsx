@@ -116,10 +116,6 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
 }
 
 function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: string; secondary: string }) {
-  const discount = pkg.original_price
-    ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
-    : 0
-
   return (
     <Link href={`/package/${pkg.slug}`} className="group block bg-white border border-border/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1">
       <div className="relative h-48 overflow-hidden">
@@ -132,11 +128,6 @@ function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: strin
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <PackageStatusBadge status={pkg.status} />
-          {pkg.is_promo && (
-            <span className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg">
-              PROMO {discount}%
-            </span>
-          )}
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm" style={{ background: `${primary}e6`, color: "white" }}>
             {pkg.type === "vip" ? "★ VIP" : pkg.type === "plus" ? "+ Plus" : pkg.type === "furoda" ? "Furoda" : "Reguler"}
           </span>
@@ -144,7 +135,7 @@ function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: strin
         <div className="absolute bottom-3 left-3">
           <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
             <Clock className="w-3 h-3" />
-            {pkg.duration_days ? `${pkg.duration_days} Hari` : "-"}
+            {pkg.duration_nights ? `${pkg.duration_nights} Hari` : "-"}
           </div>
         </div>
       </div>

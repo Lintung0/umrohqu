@@ -9,8 +9,8 @@ import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 interface PilgrimRow {
   id: string
   full_name: string
-  nik: string | null
-  passport_no: string | null
+  national_id: string | null
+  passport_number: string | null
   gender: string | null
   phone: string | null
   relation: string
@@ -51,7 +51,7 @@ export default function TravelPilgrimsPage() {
       const bookingIds = bookings.map((b: any) => b.id)
       const { data: participantData } = await supabase
         .from("booking_participants")
-        .select("id, full_name, nik, passport_no, gender, phone, relation, booking_id")
+        .select("id, full_name, national_id, passport_number, gender, phone, relation, booking_id")
         .in("booking_id", bookingIds)
 
       const enriched = (participantData || []).map((p: any) => {
@@ -71,7 +71,7 @@ export default function TravelPilgrimsPage() {
 
   const filtered = pilgrims.filter((p) => {
     const q = searchQuery.toLowerCase()
-    return !q || p.full_name.toLowerCase().includes(q) || p.passport_no?.toLowerCase().includes(q) || p.nik?.includes(q)
+    return !q || p.full_name.toLowerCase().includes(q) || p.passport_number?.toLowerCase().includes(q) || p.national_id?.includes(q)
   })
 
   const confirmedCount = pilgrims.filter((p) => p.booking_status === "confirmed").length
@@ -138,8 +138,8 @@ export default function TravelPilgrimsPage() {
               ) : filtered.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-4 py-3 font-medium">{p.full_name}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{p.nik || "-"}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{p.passport_no || "-"}</td>
+                  <td className="px-4 py-3 font-mono text-xs">{p.national_id || "-"}</td>
+                  <td className="px-4 py-3 font-mono text-xs">{p.passport_number || "-"}</td>
                   <td className="px-4 py-3 text-muted-foreground max-w-[180px] truncate">{p.package_name}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(p.booking_status, "booking")}`}>

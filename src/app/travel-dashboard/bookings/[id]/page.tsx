@@ -16,8 +16,8 @@ import { useTranslation } from "@/lib/i18n"
 
 interface Participant {
   full_name: string
-  nik: string
-  passport_no: string
+  national_id: string
+  passport_number: string
   gender: string
   phone: string
 }
@@ -54,7 +54,7 @@ export default function TravelBookingDetailPage() {
         .from("bookings")
         .select(`
           *,
-          packages(name, slug, duration_days, price, departure_city),
+          packages(name, slug, duration_nights, price, departure_city),
           users(full_name, email, phone),
           booking_participants(*)
         `)
@@ -187,7 +187,7 @@ export default function TravelBookingDetailPage() {
                 <div className="space-y-1">
                   <p className="font-semibold">{booking.packages.name}</p>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {booking.packages.duration_days} {t("package.day")}</span>
+                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {booking.packages.duration_nights} {t("package.day")}</span>
                     {booking.packages.airline && <span className="flex items-center gap-1"><Plane className="w-3.5 h-3.5" /> {booking.packages.airline}</span>}
                   </div>
                   {booking.packages.hotel_makkah && (
@@ -220,11 +220,11 @@ export default function TravelBookingDetailPage() {
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground uppercase">NIK</p>
-                        <p className="font-medium font-mono text-xs">{p.nik || "-"}</p>
+                        <p className="font-medium font-mono text-xs">{p.national_id || "-"}</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground uppercase">Paspor</p>
-                        <p className="font-medium font-mono text-xs">{p.passport_no || "-"}</p>
+                        <p className="font-medium font-mono text-xs">{p.passport_number || "-"}</p>
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground uppercase">Gender</p>
@@ -268,10 +268,6 @@ export default function TravelBookingDetailPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("booking.package")} ({booking.pilgrim_count})</span>
                 <span>{formatRupiah(booking.price)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("travel_dashboard.fee")}</span>
-                <span>{formatRupiah(booking.fee)}</span>
               </div>
               <div className="border-t pt-2 mt-2 flex justify-between font-bold text-base">
                 <span>{t("booking.total")}</span>

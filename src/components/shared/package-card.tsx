@@ -45,8 +45,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [reviewCount, setReviewCount] = useState(0)
 
   const soldOut = getPackageAvailable(pkg) <= 0
-  const hasCashback = (pkg.cashback_amount ?? 0) > 0
-
   const airline = extractAirline(pkg.includes, pkg.airline)
   const hotelStars = extractHotelStars(pkg.includes, pkg.hotel_makkah_stars)
   const hotelName = extractHotelName(pkg.includes, pkg.hotel_makkah)
@@ -190,10 +188,10 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
 
           <div className="absolute top-2.5 left-2.5 flex gap-1.5 pointer-events-none">
-            {pkg.duration_days && (
+            {pkg.duration_nights && (
               <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
                 <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
-                {pkg.duration_days} {t("card.days")}
+                {pkg.duration_nights} {t("card.days")}
               </span>
             )}
             {soldOut && (
@@ -270,7 +268,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
             </span>
             <span className="text-slate-300">·</span>
-            <span>{pkg.duration_days ? `${pkg.duration_days} ${t("card.days")}` : "-"}</span>
+            <span>{pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</span>
             {airline && (
               <>
                 <span className="text-slate-300">·</span>
@@ -312,11 +310,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
                 <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
               </div>
-              {hasCashback && (
-                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold">
-                  🎁 Cashback {formatRupiah(pkg.cashback_amount!)}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -343,10 +336,10 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               unoptimized
             />
             <div className="absolute top-2 left-2 flex gap-1 pointer-events-none">
-              {pkg.duration_days && (
+              {pkg.duration_nights && (
                 <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
                   <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
-                  {pkg.duration_days} {t("card.days")}
+                  {pkg.duration_nights} {t("card.days")}
                 </span>
               )}
             </div>
@@ -386,7 +379,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
-                  {pkg.duration_days ? `${pkg.duration_days} ${t("card.days")}` : "-"}
+                  {pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
@@ -403,11 +396,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   {formatRupiah(pkg.price)}
                   <span className="text-[10px] text-gray-400 font-normal">{t("card.per_person")}</span>
                 </p>
-                {hasCashback && (
-                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold">
-                    🎁 Cashback {formatRupiah(pkg.cashback_amount!)}
-                  </span>
-                )}
               </div>
             </div>
           </div>
@@ -435,10 +423,10 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
         <div className="absolute top-2.5 left-2.5 flex gap-1 pointer-events-none">
-          {pkg.duration_days && (
+          {pkg.duration_nights && (
             <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
               <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
-              {pkg.duration_days} {t("card.days")}
+              {pkg.duration_nights} {t("card.days")}
             </span>
           )}
           {soldOut && (
@@ -557,11 +545,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               <p className="text-lg font-extrabold text-emerald-700">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
             </div>
-            {hasCashback && (
-              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold">
-                🎁 Cashback {formatRupiah(pkg.cashback_amount!)}
-              </span>
-            )}
           </div>
         </div>
       </div>

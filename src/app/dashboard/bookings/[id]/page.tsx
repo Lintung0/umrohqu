@@ -31,9 +31,9 @@ interface BookingDetail {
   platform_fee?: number
   service_fee?: number
   tax_amount?: number
-  fee_channel?: string
-  package: { name: string; slug: string; departure_city: string | null; duration_days: number | null; airline?: string | null; hotel_makkah?: string | null; hotel_makkah_stars?: number | null; hotel_madinah?: string | null; hotel_madinah_stars?: number | null } | null
-  participants: { id: string; full_name: string; nik: string | null; passport_no: string | null; gender: string | null; phone: string | null; relation: string }[]
+  booking_source?: string
+  package: { name: string; slug: string; departure_city: string | null; duration_nights: number | null; airline?: string | null; hotel_makkah?: string | null; hotel_makkah_stars?: number | null; hotel_madinah?: string | null; hotel_madinah_stars?: number | null } | null
+  participants: { id: string; full_name: string; national_id: string | null; passport_number: string | null; gender: string | null; phone: string | null; relation: string }[]
 }
 
 export default function BookingDetailPage() {
@@ -78,7 +78,7 @@ export default function BookingDetailPage() {
     async function load() {
       console.log("[DEBUG BOOKING LOAD] Starting load for booking:", params.id, "authChecked:", authChecked, "user:", user?.id)
 
-      const selectFields = "*, package:packages(name, slug, departure_city, duration_days), participants:booking_participants(id, full_name, nik, passport_no, gender, phone, relation)"
+      const selectFields = "*, package:packages(name, slug, departure_city, duration_nights), participants:booking_participants(id, full_name, national_id, passport_number, gender, phone, relation)"
 
       let bookingData: any = null
 
@@ -130,9 +130,9 @@ export default function BookingDetailPage() {
       setLoading(false)
 
       // Step 4: Verify Xendit payment status if applicable
-      if (bookingData.xendit_invoice_id) {
+      if (bookingData.gateway_invoice_id) {
         const shouldVerify = bookingData.status === "pending_payment" ||
-          (bookingData.status === "processing" && bookingData.payment_type === "dp" && (bookingData.remaining_amount || 0) > 0 && bookingData.xendit_invoice_id?.startsWith("booking-remaining-"))
+          (bookingData.status === "processing" && bookingData.payment_type === "dp" && (bookingData.remaining_amount || 0) > 0 && bookingData.gateway_invoice_id?.startsWith("booking-remaining-"))
         if (shouldVerify) {
           try {
             const res = await fetch("/api/booking/verify-payment", {
@@ -261,10 +261,10 @@ export default function BookingDetailPage() {
                 <span>{pkg.departure_city}</span>
               </div>
             )}
-            {pkg?.duration_days && (
+            {pkg?.duration_nights && (
               <div className="flex items-center gap-3">
                 <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{pkg.duration_days} {t("package.day")}</span>
+                <span>{pkg.duration_nights} {t("package.day")}</span>
               </div>
             )}
             {pkg?.airline && (
@@ -372,8 +372,8 @@ export default function BookingDetailPage() {
                   {booking.participants.map((p) => (
                     <tr key={p.id} className="border-b border-border last:border-0">
                       <td className="py-3 font-medium">{p.full_name}</td>
-                      <td className="py-3">{p.nik || "-"}</td>
-                      <td className="py-3">{p.passport_no || "-"}</td>
+                      <td className="py-3">{p.national_id || "-"}</td>
+                      <td className="py-3">{p.passport_number || "-"}</td>
                       <td className="py-3">{p.gender === "male" ? t("checkout.gender_male") : p.gender === "female" ? t("checkout.gender_female") : "-"}</td>
                       <td className="py-3">{p.phone || "-"}</td>
                     </tr>

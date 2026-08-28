@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Calendar, Clock, Loader2, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils";
-import { enrichPackagesWithCovers } from "@/lib/package-covers";
+import { enrichPackagesWithDetail } from "@/lib/package-detail-fields";
 import PackageCard from "@/components/shared/package-card";
 import type { Package } from "@/lib/types";
 
@@ -52,7 +52,7 @@ export default function PackageSection() {
 
       if (error || !data) return;
 
-      const pkgs = (await enrichPackagesWithCovers(supabase, (data as Package[]) || [])) || [];
+      const pkgs = (await enrichPackagesWithDetail(supabase, (data as Package[]) || [])) || [];
       if (pkgs.length > 0) {
         const ids = pkgs.map((p) => p.id);
         const { data: bookings } = await supabase

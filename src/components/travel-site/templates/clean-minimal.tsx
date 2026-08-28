@@ -126,10 +126,6 @@ export default function CleanMinimalTemplate({ tenant, packages, themeConfig }: 
 }
 
 function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
-  const discount = pkg.original_price
-    ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
-    : 0
-
   return (
     <Link href={`/package/${pkg.slug}`} className="group block bg-white border border-border/60 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
       <div className="relative h-44 overflow-hidden">
@@ -142,18 +138,13 @@ function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <PackageStatusBadge status={pkg.status} />
-          {pkg.is_promo && (
-            <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
-              -{discount}%
-            </span>
-          )}
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/90 text-gray-700">
             {pkg.type === "vip" ? "VIP" : pkg.type === "plus" ? "Plus" : pkg.type === "furoda" ? "Furoda" : "Reguler"}
           </span>
         </div>
         <div className="absolute bottom-3 right-3">
           <span className="flex items-center gap-1 bg-white/90 text-gray-700 text-[10px] font-medium px-2 py-1 rounded-md">
-            <Clock className="w-3 h-3" /> {pkg.duration_days ? `${pkg.duration_days} Hari` : "-"}
+            <Clock className="w-3 h-3" /> {pkg.duration_nights ? `${pkg.duration_nights} Hari` : "-"}
           </span>
         </div>
       </div>

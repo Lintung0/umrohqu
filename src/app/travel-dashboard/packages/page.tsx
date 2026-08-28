@@ -21,7 +21,7 @@ interface TravelPackage {
   status: string
   departure_city: string | null
   departure_date: string | null
-  duration_days: number | null
+  duration_nights: number | null
   airline: string | null
   hotel_info: any
   image_url: string | null
@@ -198,7 +198,7 @@ export default function TravelPackagesPage() {
                   <div className="w-full h-full bg-muted" />
                 )}
                 <div className="absolute top-3 left-3 flex gap-2">
-                  {pkg.duration_days && <span className="bg-white/90 backdrop-blur text-xs font-medium px-2 py-1 rounded-lg">{pkg.duration_days} Hari</span>}
+                  {pkg.duration_nights && <span className="bg-white/90 backdrop-blur text-xs font-medium px-2 py-1 rounded-lg">{pkg.duration_nights} Hari</span>}
                   <span className={`px-2 py-1 rounded-lg text-xs font-medium ${PACKAGE_STATUS_BADGES[pkg.status]?.className || "bg-gray-500 text-white"}`}>
                     {PACKAGE_STATUS_BADGES[pkg.status]?.label || pkg.status}
                   </span>

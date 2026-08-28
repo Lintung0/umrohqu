@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { enrichPackagesWithCovers } from "@/lib/package-covers"
+import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
+import { enrichTenantsWithDetail } from "@/lib/tenant-detail-fields"
 import { Loader2 } from "lucide-react"
 import { TEMPLATE_MAP } from "@/components/travel-site/templates"
 import { PackageDocumentationSection } from "@/components/shared/package-documentation"
@@ -14,7 +15,7 @@ export default function TravelSitePage() {
   const tenantId = params.tenantId as string
   const supabase = createClient()
 
-  const [tenant, setTenant] = useState<Tenant | null>(null)
+  const [tenant, setTenant] = useState<(Tenant & Record<string, unknown>) | null>(null)
   const [packages, setPackages] = useState<Package[]>([])
   const [docPackages, setDocPackages] = useState<Package[]>([])
   const [templateId, setTemplateId] = useState<string | null>(null)
@@ -29,8 +30,10 @@ export default function TravelSitePage() {
         supabase.from("tenant_websites").select("template_id, theme_config").eq("tenant_id", tenantId).single(),
       ])
 
-      setTenant(tenantRes.data as Tenant | null)
-      const allPackages = (await enrichPackagesWithCovers(supabase, (pkgRes.data as Package[]) || [])) || []
+      const baseTenant = tenantRes.data as Tenant | null
+      const enrichedTenant = baseTenant ? (await enrichTenantsWithDetail(supabase, [baseTenant]))[0] ?? null : null
+      setTenant(enrichedTenant as (Tenant & Record<string, unknown>) | null)
+      const allPackages = ((await enrichPackagesWithDetail(supabase, (pkgRes.data as Package[]) || [])) || []) as Package[]
       setPackages(allPackages.filter((p) => p.status === "active" || p.status === "ongoing"))
       setDocPackages(allPackages.filter((p) => p.doc_drive_link))
 

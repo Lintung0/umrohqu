@@ -7,39 +7,27 @@ export interface Tenant {
   id: string
   name: string
   slug: string
-  custom_domain: string | null
-  contact_email: string | null
-  contact_phone: string | null
   config: Record<string, unknown>
-  status: "pending" | "active" | "grace_period" | "suspended" | "rejected"
+  status: "pending" | "active" | "grace_period" | "suspended" | "rejected" | "terminated"
   created_at: string
   updated_at: string
   deleted_at: string | null
-  // added columns (migration 3)
   logo_url: string | null
-  city: string | null
   description: string | null
-  founded: string | null
   brand_color: string | null
-  phone: string | null
-  website: string | null
-  // added columns (migration 4)
   is_verified: boolean
   is_featured: boolean
-  packages_count: number
-  total_revenue: number
   founded_year: string | null
-  // legalitas
-  ppiu_number: string | null
-  sk_ppiu_doc_url: string | null
-  nib: string | null
-  nib_doc_url: string | null
-  npwp: string | null
-  akreditasi_ppiu: string | null
-  // alamat
-  full_address: string | null
-  province: string | null
-  postal_code: string | null
+  applicant_name: string | null
+  // ghost fields — not in DB columns, filled from related tables
+  city?: string | null
+  phone?: string | null
+  contact_email?: string | null
+  ppiu_number?: string | null
+  accredited_at?: string | null
+  total_jamaah?: number
+  packages_count?: number
+  website?: string | null
 }
 
 export interface User {
@@ -61,31 +49,31 @@ export interface Package {
   name: string
   slug: string
   description: string | null
+  type: string
   price: number
   currency: string
   quota: number
   quota_taken: number | null
+  available: number | null
   departure_city: string | null
   departure_date: string | null
-  duration_days: number | null
-  hotel_info: Record<string, unknown> | null
-  status: string
-  is_shared_to_marketplace: boolean
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
-  // added columns (migration 3)
-  type: string | null
-  is_promo: boolean
-  available: number | null
-  doc_drive_link: string | null
+  duration_nights: number | null
   itinerary: unknown[] | null
   includes: string[] | null
   excludes: string[] | null
   terms: string[] | null
   cancellation_policy: string | null
-  cashback_amount: number | null
-  // ghost columns — tidak ada di DB (Faris schema), fallback opsional
+  is_shared_to_marketplace: boolean
+  status: string
+  min_dp_amount: number | null
+  doc_drive_link: string | null
+  completed_at: string | null
+  rating_avg: number | null
+  rating_count: number
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+  // ghost columns — not in DB, fallback optional
   airline?: string | null
   facilities?: string[] | null
   departure_cities?: string[] | null
@@ -93,6 +81,7 @@ export interface Package {
   original_price?: number | null
   image_url?: string | null
   video_url?: string | null
+  hotel_info?: Record<string, unknown> | null
   hotel_makkah?: string | null
   hotel_makkah_stars?: number | null
   hotel_madinah?: string | null
@@ -104,41 +93,37 @@ export interface Package {
 
 export interface Booking {
   id: string
-  tenant_id: string | null
+  tenant_id: string
   customer_id: string
   package_id: string
   booking_channel: string
+  booking_code: string | null
   status: string
   pilgrim_count: number
   price: number
-  fee: number
   total: number
-  notes: string | null
-  payment_status: string
-  payment_method: string | null
-  payment_type: string | null
+  dp_type: string | null
   dp_percentage: number | null
   dp_amount: number | null
   remaining_amount: number | null
   remaining_due_date: string | null
+  gateway_invoice_id: string | null
+  booking_source: string
+  notes: string | null
   created_at: string
   updated_at: string
   deleted_at: string | null
-  // fee_channel from booking creation
-  fee_channel?: string
-  // backward compatibility fields for travel-dashboard
+  // backward compatibility fields
   channel?: string
   price_per_person?: number
-  service_fee?: number
-  total_price?: number
 }
 
 export interface BookingParticipant {
   id: string
   booking_id: string
   full_name: string
-  nik: string | null
-  passport_no: string | null
+  national_id: string | null
+  passport_number: string | null
   passport_expiry: string | null
   birth_date: string | null
   gender: string | null

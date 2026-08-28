@@ -12,7 +12,7 @@ import MobileBottomNav from "@/components/shared/mobile-bottom-nav"
 interface Participant {
   id: string
   full_name: string
-  nik: string | null
+  national_id: string | null
   passport_number: string | null
   passport_expiry: string | null
   gender: string | null
@@ -23,7 +23,7 @@ interface Participant {
 }
 
 const emptyForm = {
-  full_name: "", nik: "", passport_number: "", passport_expiry: "",
+  full_name: "", national_id: "", passport_number: "", passport_expiry: "",
   gender: "", phone: "", birth_date: "", address: "", is_main: false,
 }
 
@@ -58,7 +58,7 @@ export default function ParticipantsPage() {
   const openEdit = (p: Participant) => {
     setForm({
       full_name: p.full_name,
-      nik: p.nik || "",
+      national_id: p.national_id || "",
       passport_number: p.passport_number || "",
       passport_expiry: p.passport_expiry || "",
       gender: p.gender || "",
@@ -149,7 +149,7 @@ export default function ParticipantsPage() {
                       {p.is_main && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium shrink-0">Utama</span>}
                     </div>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
-                      {p.nik && <span>NIK: {p.nik}</span>}
+                      {p.national_id && <span>NIK: {p.national_id}</span>}
                       {p.passport_number && <span>Paspor: {p.passport_number}</span>}
                       {p.phone && <span>Telp: {p.phone}</span>}
                       {p.gender && <span>{p.gender === "L" ? "Laki-laki" : "Perempuan"}</span>}
@@ -199,7 +199,7 @@ export default function ParticipantsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">NIK</label>
-                  <Input type="text" value={form.nik} onChange={(e) => setForm({...form, nik: e.target.value})} placeholder="16 digit NIK" className="mt-1.5" />
+                  <Input type="text" value={form.national_id} onChange={(e) => setForm({...form, national_id: e.target.value})} placeholder="16 digit NIK" className="mt-1.5" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Jenis Kelamin</label>

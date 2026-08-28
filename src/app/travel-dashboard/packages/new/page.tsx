@@ -32,7 +32,6 @@ const packageSchema = z.object({
   price: z.coerce.number().min(1, "Harga wajib diisi"),
   original_price: z.coerce.number().optional().nullable(),
   quota: z.coerce.number().min(1, "Kuota wajib diisi"),
-  duration_days: z.coerce.number().min(1, "Durasi hari wajib diisi"),
   duration_nights: z.coerce.number().min(1, "Durasi malam wajib diisi"),
   departure_cities: z.array(z.string()).min(1, "Minimal 1 kota keberangkatan"),
   airline: z.string().min(1, "Maskapai wajib diisi"),
@@ -158,7 +157,6 @@ export default function NewPackagePage() {
       price,
       original_price: originalPrice || null,
       quota,
-      duration_days: durationDays,
       duration_nights: durationNights,
       departure_cities: departureCities,
       airline,
@@ -216,7 +214,7 @@ export default function NewPackagePage() {
         quota_taken: 0,
         departure_city: departureCities[0] || null,
         departure_date: null,
-        duration_days: result.data.duration_days,
+        duration_nights: result.data.duration_nights,
         description: description || null,
         itinerary: itineraryArray,
         includes: includes.length ? includes : null,
@@ -427,7 +425,7 @@ export default function NewPackagePage() {
                 min={1}
                 className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground"
               />
-              {fieldError("duration_days")}
+              {fieldError("duration_nights")}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import { createAdminClient } from "@/lib/supabase/server"
+import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import PackageDetailClient from "./package-detail-client"
 import type { Metadata } from "next"
 
@@ -82,6 +83,9 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     .order("sort_order", { ascending: true })
 
   const pkgImages: any[] = pkgImagesData || []
+
+  const enriched = await enrichPackagesWithDetail(supabase, [pkg])
+  pkg = (enriched?.[0] ?? pkg) as any
 
   const reviews: any[] = []
 

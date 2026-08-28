@@ -6,7 +6,7 @@ import { Search, SearchX, X, SlidersHorizontal, MapPin } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getAseanCountryByCode } from "@/lib/constants"
 import { createClient } from "@/lib/supabase/client"
-import { enrichPackagesWithCovers } from "@/lib/package-covers"
+import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import { getPackageAvailable } from "@/lib/utils"
 import type { Package, Tenant } from "@/lib/types"
 import SharedPackageCard from "@/components/shared/package-card"
@@ -228,7 +228,7 @@ function SearchContent() {
           console.error("Error fetching packages:", pkgError)
           setPackages([])
         } else {
-          const enriched = await enrichPackagesWithCovers(supabase, (pkgs as Package[]) || [])
+          const enriched = await enrichPackagesWithDetail(supabase, (pkgs as Package[]) || [])
           setPackages(enriched || [])
         }
 
@@ -296,7 +296,7 @@ function SearchContent() {
           .neq("type", "haji")
           .is("deleted_at", null)
         query.then(async ({ data }) => {
-          const enriched = await enrichPackagesWithCovers(supabase, (data as Package[]) || [])
+          const enriched = await enrichPackagesWithDetail(supabase, (data as Package[]) || [])
           setPackages(enriched || [])
         })
       })
@@ -336,7 +336,7 @@ function SearchContent() {
         if (pkg.type !== type) return false
       }
       if (duration) {
-        const days = pkg.duration_days || 0
+        const days = pkg.duration_nights || 0
         if (duration === "7-10 Hari" && (days < 7 || days > 10)) return false
         if (duration === "10-14 Hari" && (days < 10 || days > 14)) return false
         if (duration === "14-21 Hari" && (days < 14 || days > 21)) return false
@@ -349,7 +349,7 @@ function SearchContent() {
       if (aSoldOut !== bSoldOut) return aSoldOut ? 1 : -1
       if (sortBy === "price-asc") return a.price - b.price
       if (sortBy === "price-desc") return b.price - a.price
-      if (sortBy === "duration") return (a.duration_days ?? 0) - (b.duration_days ?? 0)
+      if (sortBy === "duration") return (a.duration_nights ?? 0) - (b.duration_nights ?? 0)
       const scoreA = rankingScores.get(a.tenant_id) ?? 0
       const scoreB = rankingScores.get(b.tenant_id) ?? 0
       return scoreB - scoreA

@@ -35,7 +35,6 @@ interface PackageDetail {
   available: number | null
   departure_city: string | null
   departure_date: string | null
-  duration_days: number | null
   duration_nights: number | null
   airline: string | null
   hotel_info: any
@@ -46,13 +45,11 @@ interface PackageDetail {
   status: string
   image_url: string | null
   tenant_id: string
-  is_promo: boolean
   type: string | null
   hotel_makkah: string | null
   hotel_makkah_stars: number | null
   hotel_madinah: string | null
   hotel_madinah_stars: number | null
-  cashback_amount?: number | null
   travel: { id: string; name: string; slug: string; is_verified?: boolean; logo_url?: string | null; city?: string | null; description?: string | null; phone?: string | null; contact_email?: string | null } | null
 }
 
@@ -393,11 +390,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         {pkg.type === "vip" ? "★ VIP" : pkg.type === "plus" ? "+ Plus" : pkg.type === "furoda" ? "Furoda" : "Reguler"}
                       </span>
                     )}
-                    {pkg.is_promo && discount > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">
-                        -{discount}%
-                      </span>
-                    )}
                   </div>
                 </div>
               )}
@@ -441,7 +433,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {pkg.airline && <InfoCard icon={Plane} label="Maskapai" value={decodeUnicodeEscapes(pkg.airline)} color="blue" />}
-                      {pkg.duration_days && <InfoCard icon={Clock} label="Durasi" value={`${pkg.duration_days} Hari`} />}
+                      {pkg.duration_nights && <InfoCard icon={Clock} label="Durasi" value={`${pkg.duration_nights} Hari`} />}
                       {pkg.departure_city && <InfoCard icon={MapPin} label="Kota Berangkat" value={pkg.departure_city} />}
                       {pkg.departure_date && <InfoCard icon={Calendar} label="Tanggal Berangkat" value={new Date(pkg.departure_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} />}
                       {pkg.hotel_makkah && <InfoCard icon={Hotel} label="Hotel Makkah" value={pkg.hotel_makkah} color="amber" />}
@@ -807,11 +799,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   <span className="text-xs text-muted-foreground">/ orang</span>
                 </div>
               </div>
-              {!!pkg.cashback_amount && pkg.cashback_amount > 0 && (
-                <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold">
-                  🎁 Cashback {formatRupiah(pkg.cashback_amount)}
-                </div>
-              )}
 
               {/* Seat — terintegrasi, bukan kartu terpisah */}
               <div className="mt-4 pt-4 border-t border-border/50">

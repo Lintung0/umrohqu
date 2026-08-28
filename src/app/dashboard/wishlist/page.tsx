@@ -19,7 +19,7 @@ interface WishlistItem {
     slug: string
     image_url: string | null
     price: number
-    duration_days: number | null
+    duration_nights: number | null
     tenant_id: string
     status: string | null
   } | null
@@ -39,7 +39,7 @@ export default function WishlistPage() {
       if (user) {
         const { data } = await supabase
           .from("wishlists")
-          .select("id, package:packages(id, name, slug, price, duration_days, tenant_id, status)")
+          .select("id, package:packages(id, name, slug, price, duration_nights, tenant_id, status)")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
         const enriched = await enrichEmbeddedPackageCovers(supabase, data as any)
@@ -125,10 +125,10 @@ export default function WishlistPage() {
                     <h3 className="font-semibold text-sm hover:text-emerald-600 transition-colors line-clamp-1">{pkg?.name}</h3>
                   </Link>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
-                    {pkg?.duration_days && (
+                    {pkg?.duration_nights && (
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {pkg.duration_days} hari
+                        {pkg.duration_nights} hari
                       </span>
                     )}
                   </div>

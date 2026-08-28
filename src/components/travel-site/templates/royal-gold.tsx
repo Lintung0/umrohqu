@@ -121,10 +121,6 @@ export default function RoyalGoldTemplate({ tenant, packages, themeConfig }: Tem
 }
 
 function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; gold: string }) {
-  const discount = pkg.original_price
-    ? Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100)
-    : 0
-
   return (
     <Link href={`/package/${pkg.slug}`} className="group block rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1" style={{ background: `${primary}cc`, border: `1px solid ${gold}22` }}>
       <div className="relative h-48 overflow-hidden">
@@ -137,11 +133,6 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <PackageStatusBadge status={pkg.status} />
-          {pkg.is_promo && (
-            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg" style={{ background: gold, color: primary }}>
-              PROMO {discount}%
-            </span>
-          )}
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border" style={{ borderColor: `${gold}44`, color: gold }}>
             {pkg.type === "vip" ? "★ VIP" : pkg.type === "plus" ? "+ Plus" : pkg.type === "furoda" ? "Furoda" : "Reguler"}
           </span>
@@ -149,7 +140,7 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
         <div className="absolute bottom-3 left-3">
           <div className="flex items-center gap-1.5 text-white text-xs font-medium px-3 py-1.5 rounded-full backdrop-blur-sm" style={{ background: `${primary}99`, border: `1px solid ${gold}33` }}>
             <Clock className="w-3 h-3" />
-            {pkg.duration_days ? `${pkg.duration_days} Hari` : "-"}
+            {pkg.duration_nights ? `${pkg.duration_nights} Hari` : "-"}
           </div>
         </div>
       </div>
