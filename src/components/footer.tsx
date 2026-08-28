@@ -5,26 +5,11 @@ import Link from "next/link"
 import Image from "next/image"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import { useTranslation } from "@/lib/i18n"
-import { useState } from "react"
-import CountrySelect from "@/components/shared/country-select"
-import { CompactLanguageSwitcher } from "@/components/shared/compact-language-switcher"
 
 const columnHeadingClass = "font-bold text-xs uppercase tracking-wider text-white/50"
 
 const Footer = () => {
   const { t } = useTranslation()
-  const [country, setCountry] = useState("id")
-
-  const handleCountryChange = async (code: string) => {
-    setCountry(code)
-    try {
-      await fetch("/api/user/country", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ country: code }),
-      })
-    } catch {}
-  }
 
   const footerLinks = [
     {
@@ -151,8 +136,6 @@ const Footer = () => {
               &copy; 2026 UmrahQu — PT. Universal Big Data. {t.footer.rights}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <CountrySelect value={country} onChange={handleCountryChange} variant="dark" />
-              <CompactLanguageSwitcher />
               <span className="text-xs text-white/25">
                 {t.footer.made_with} <span className="text-amber-400/50">&hearts;</span> {t.footer.for_umrah}
               </span>
