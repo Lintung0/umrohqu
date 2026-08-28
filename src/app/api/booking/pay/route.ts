@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error: bErr } = await admin
       .from("bookings")
-      .select("id, status, price, fee, total, payment_type, dp_amount, remaining_amount, xendit_invoice_id, package_id, pilgrim_count, tenant_id")
+      .select("id, status, total, remaining_amount, dp_amount, gateway_invoice_id, package_id, pilgrim_count, tenant_id")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -38,14 +38,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking sudah dibayar atau dibatalkan" }, { status: 400 })
     }
 
-    const payAmount = booking.payment_type === "dp" ? (booking.dp_amount || 0) : booking.total
+    const payAmount = Number(booking.total)
+    const orderId = `booking-${booking.id}`
 
-    // Pastikan record transaksi ada (payments + invoices) untuk booking ini
+    // Pastikan record transaksi ada (payments)
     const { data: existingPayment } = await admin
       .from("payments")
       .select("id")
       .eq("booking_id", booking.id)
-      .eq("gateway", "xendit")
       .eq("status", "pending")
       .maybeSingle()
 
@@ -57,73 +57,42 @@ export async function POST(request: NextRequest) {
           booking_id: booking.id,
           tenant_id: booking.tenant_id,
           status: "pending",
-          gateway: "xendit",
+          payment_gateway: "midtrans",
           amount: payAmount,
+          currency: "IDR",
         })
         .select("id")
         .single()
       paymentId = newPayment?.id || null
     }
 
-    const { data: existingInvoice } = await admin
-      .from("invoices")
-      .select("id")
-      .eq("booking_id", booking.id)
-      .eq("type", "booking")
-      .eq("status", "issued")
-      .maybeSingle()
-
-    if (!existingInvoice) {
-      await admin.from("invoices").insert({
-        invoice_no: `INV-B-${booking.id.slice(0, 8).toUpperCase()}`,
-        booking_id: booking.id,
-        tenant_id: booking.tenant_id,
-        total: Number(booking.total) + Number(booking.remaining_amount),
-        status: "issued",
-        amount: payAmount,
-        type: "booking",
-        description: `Pembayaran ${booking.payment_type === "dp" ? "DP " : ""}booking #${booking.id.slice(0, 8).toUpperCase()}`,
-      })
-    }
-
-    let xenditInvoice: { id: string; invoice_url: string }
-
+    let snap: { token: string; redirect_url: string } | null = null
     try {
-      const { createInvoice } = await import("@/lib/services/xendit")
-      const host = request.headers.get("host") || ""
-      const protocol = host.includes("localhost") ? "http" : "https"
-      const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`
-      const inv = await createInvoice({
-        externalId: `booking-${booking.id}`,
-        amount: payAmount,
-        description: `Pembayaran ${booking.payment_type === "dp" ? "DP " : ""}booking #${booking.id.slice(0, 8).toUpperCase()}`,
-        customer: { email: user.email },
-        successRedirectUrl: `${BASE_URL}/booking-success/${booking.id}`,
-        failureRedirectUrl: `${BASE_URL}/dashboard/bookings/${booking.id}?failed=true`,
+      const { createSnapTransaction } = await import("@/lib/services/midtrans")
+      snap = await createSnapTransaction({
+        orderId,
+        grossAmount: payAmount,
+        customerEmail: user.email,
+        customerName: user.user_metadata?.full_name || user.email,
       })
-
-      xenditInvoice = { id: inv.id, invoice_url: inv.invoice_url }
 
       await admin
         .from("bookings")
-        .update({ xendit_invoice_id: inv.id })
+        .update({ gateway_invoice_id: orderId })
         .eq("id", booking.id)
 
       if (paymentId) {
         await admin
           .from("payments")
-          .update({ gateway_reference: inv.id })
+          .update({ gateway_reference: orderId })
           .eq("id", paymentId)
       }
-    } catch (xerr: any) {
-      console.error("Xendit invoice error:", xerr.message)
-      return NextResponse.json({ error: "Gagal membuat invoice pembayaran" }, { status: 500 })
+    } catch (merr: any) {
+      console.error("Midtrans Snap error:", merr.message)
+      return NextResponse.json({ error: "Gagal membuat transaksi pembayaran" }, { status: 500 })
     }
 
-    return NextResponse.json({
-      success: true,
-      xendit: xenditInvoice,
-    })
+    return NextResponse.json({ success: true, snap })
   } catch (err) {
     console.error("Pay booking error:", err)
     const message = err instanceof Error ? err.message : "Terjadi kesalahan server"

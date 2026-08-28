@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { full_name, nik, passport_number, passport_expiry, gender, phone, birth_date, address, is_main } = body
+  const { full_name, national_id, passport_number, passport_expiry, gender, phone, birth_date, address, is_main } = body
 
   if (!full_name) return Response.json({ error: "Nama wajib diisi" }, { status: 400 })
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabase
     .from("participants")
-    .insert({ user_id: user.id, full_name, nik, passport_number, passport_expiry, gender, phone, birth_date, address, is_main })
+    .insert({ user_id: user.id, full_name, national_id, passport_number, passport_expiry, gender, phone, birth_date, address, is_main })
     .select()
     .single()
 
@@ -46,7 +46,7 @@ export async function PUT(req: NextRequest) {
   if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { id, full_name, nik, passport_number, passport_expiry, gender, phone, birth_date, address, is_main } = body
+  const { id, full_name, national_id, passport_number, passport_expiry, gender, phone, birth_date, address, is_main } = body
 
   if (!id) return Response.json({ error: "ID diperlukan" }, { status: 400 })
 
@@ -56,7 +56,7 @@ export async function PUT(req: NextRequest) {
 
   const { data, error } = await supabase
     .from("participants")
-    .update({ full_name, nik, passport_number, passport_expiry, gender, phone, birth_date, address, is_main, updated_at: new Date().toISOString() })
+    .update({ full_name, national_id, passport_number, passport_expiry, gender, phone, birth_date, address, is_main, updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("user_id", user.id)
     .select()

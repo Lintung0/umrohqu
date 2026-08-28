@@ -5,11 +5,10 @@ import { useState, useEffect, useCallback, useMemo, Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { enrichPackagesWithCovers } from "@/lib/package-covers"
-import { Loader2, Wallet, CreditCard, Users, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User, Phone, Heart } from "lucide-react"
+import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
+import { Loader2, CreditCard, Users, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User, Phone, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
-import { calculateTotalFee } from "@/lib/business-logic/fees"
 import type { Package, Tenant } from "@/lib/types"
 
 const DP_OPTIONS = [30, 40, 50]
@@ -21,18 +20,16 @@ function CheckoutContent() {
 
   const [pkg, setPkg] = useState<Package | null>(null)
   const [travel, setTravel] = useState<Tenant | null>(null)
-  const [walletBalance, setWalletBalance] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [result, setResult] = useState<{ success: boolean; bookingId?: string; error?: string; balance?: number; need?: number; xendit?: { invoice_url: string } } | null>(null)
+  const [result, setResult] = useState<{ success: boolean; bookingId?: string; error?: string } | null>(null)
 
   const [step, setStep] = useState(0)
   const [pilgrimCount, setPilgrimCount] = useState(1)
   const [pilgrims, setPilgrims] = useState<Array<{ full_name: string; phone: string; relation: string; gender: string }>>([])
   const [paymentType, setPaymentType] = useState<"full" | "dp">("full")
   const [dpPercentage, setDpPercentage] = useState(30)
-  const [useWallet, setUseWallet] = useState(true)
   const [notes, setNotes] = useState("")
   const [expandedJemaah, setExpandedJemaah] = useState<Record<number, boolean>>({ 0: true })
 
@@ -43,8 +40,6 @@ function CheckoutContent() {
   ], [])
 
   const supabase = useMemo(() => createClient(), [])
-
-  // ── ALL useEffect hooks BEFORE any conditional returns ──
 
   // Fetch package data
   useEffect(() => {
@@ -72,23 +67,10 @@ function CheckoutContent() {
           return
         }
 
-        const enriched = await enrichPackagesWithCovers(supabase, [pkgData as any])
+        const enriched = await enrichPackagesWithDetail(supabase, [pkgData as any])
         setPkg((enriched?.[0] as any) || (pkgData as any))
         setTravel((pkgData as any).travel as Tenant || null)
-
-        const { data: { user } } = await supabase.auth.getUser()
-        if (cancelled) return
-
-        if (user) {
-          const { data: wallet } = await supabase
-            .from("wallets")
-            .select("balance")
-            .eq("user_id", user.id)
-            .single()
-          if (!cancelled) setWalletBalance(wallet?.balance || 0)
-        }
-
-        if (!cancelled) setLoading(false)
+        setLoading(false)
       } catch {
         if (!cancelled) {
           setError("Gagal memuat data paket.")
@@ -112,26 +94,10 @@ function CheckoutContent() {
     })
   }, [pilgrimCount])
 
-  // ── Derived values ──
-
-  const totalPrice = useMemo(() => pkg ? pkg.price * pilgrimCount : 0, [pkg, pilgrimCount])
+  const totalPrice = useMemo(() => pkg ? Number(pkg.price) * pilgrimCount : 0, [pkg, pilgrimCount])
   const dpAmount = useMemo(() => paymentType === "dp" ? Math.round(totalPrice * dpPercentage / 100) : totalPrice, [paymentType, totalPrice, dpPercentage])
   const remainingAmount = useMemo(() => paymentType === "dp" ? totalPrice - dpAmount : 0, [paymentType, totalPrice, dpAmount])
-  const feeBreakdown = useMemo(() => pkg ? calculateTotalFee(pkg.price, pilgrimCount, "portal") : null, [pkg, pilgrimCount])
-  const amountToPayNow = useMemo(() => {
-    if (!feeBreakdown) return 0
-    return paymentType === "dp" ? dpAmount : totalPrice + feeBreakdown.total
-  }, [paymentType, dpAmount, totalPrice, feeBreakdown])
-  const walletSufficient = useMemo(() => walletBalance !== null && walletBalance >= amountToPayNow, [walletBalance, amountToPayNow])
-
-  // Auto-select Transfer Bank when wallet insufficient (only after wallet loaded)
-  useEffect(() => {
-    if (walletBalance !== null && !walletSufficient && useWallet) {
-      setUseWallet(false)
-    }
-  }, [walletSufficient, walletBalance, useWallet])
-
-  // ── Handlers ──
+  const amountToPayNow = useMemo(() => paymentType === "dp" ? dpAmount : totalPrice, [paymentType, dpAmount, totalPrice])
 
   const updatePilgrim = useCallback((index: number, field: string, value: string) => {
     setPilgrims((prev) => {
@@ -148,7 +114,7 @@ function CheckoutContent() {
   }, [])
 
   const handleSubmit = useCallback(async () => {
-    if (!pkg || !feeBreakdown) return
+    if (!pkg) return
     setSubmitting(true)
     setResult(null)
     try {
@@ -166,29 +132,25 @@ function CheckoutContent() {
           })),
           paymentType,
           dpPercentage: paymentType === "dp" ? dpPercentage : undefined,
-          useWallet,
           notes,
           feeChannel: "portal",
         }),
       })
       const data = await res.json()
-      if (res.ok) {
-        if (data.xendit?.invoice_url) {
-          window.location.href = data.xendit.invoice_url
-        } else {
-          setResult({ success: true, bookingId: data.booking_id })
-          setTimeout(() => router.push(`/dashboard/bookings/${data.booking_id}`), 2000)
-        }
+      if (res.ok && data.snap) {
+        // Arahkan ke halaman pembayaran Midtrans Snap
+        window.location.href = data.snap.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.snap.token}`
+      } else if (res.ok) {
+        setResult({ success: true, bookingId: data.booking_id })
+        setTimeout(() => router.push(`/dashboard/bookings/${data.booking_id}`), 2000)
       } else {
-        setResult({ success: false, error: data.error, balance: data.balance, need: data.need })
+        setResult({ success: false, error: data.error })
       }
     } catch {
       setResult({ success: false, error: "Terjadi kesalahan jaringan. Silakan coba lagi." })
     }
     setSubmitting(false)
-  }, [pkg, feeBreakdown, pilgrimCount, pilgrims, paymentType, dpPercentage, useWallet, notes, router])
-
-  // ── Loading / Error guards ──
+  }, [pkg, pilgrimCount, pilgrims, paymentType, dpPercentage, notes, router])
 
   if (loading) {
     return (
@@ -221,8 +183,6 @@ function CheckoutContent() {
       </main>
     )
   }
-
-  // ── Safe to access pkg.* below ──
 
   return (
     <main className="min-h-screen bg-zinc-50/50">
@@ -305,12 +265,7 @@ function CheckoutContent() {
                 setDpPercentage={setDpPercentage}
                 paymentType={paymentType}
                 setPaymentType={setPaymentType}
-                walletBalance={walletBalance}
-                walletSufficient={walletSufficient}
-                useWallet={useWallet}
-                setUseWallet={setUseWallet}
                 amountToPayNow={amountToPayNow}
-                feeBreakdown={feeBreakdown!}
                 notes={notes}
                 setNotes={setNotes}
                 setStep={setStep}
@@ -328,10 +283,7 @@ function CheckoutContent() {
                 remainingAmount={remainingAmount}
                 dpPercentage={dpPercentage}
                 paymentType={paymentType}
-                useWallet={useWallet}
-                setUseWallet={setUseWallet}
                 amountToPayNow={amountToPayNow}
-                feeBreakdown={feeBreakdown!}
                 submitting={submitting}
                 result={result}
                 handleSubmit={handleSubmit}
@@ -364,9 +316,7 @@ function StepDataSingkat({
 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* LEFT COLUMN — Form */}
       <div className="lg:col-span-2 space-y-5">
-        {/* Info Banner */}
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 text-xs flex items-start gap-3">
           <span className="text-base shrink-0 mt-0.5">ℹ️</span>
           <p>
@@ -375,7 +325,6 @@ function StepDataSingkat({
           </p>
         </div>
 
-        {/* Pilgrim Count */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <label className="text-sm font-semibold flex items-center gap-2 mb-3">
             <Users className="w-4 h-4 text-emerald-600" /> Jumlah Jemaah
@@ -394,7 +343,6 @@ function StepDataSingkat({
           </div>
         </div>
 
-        {/* Dynamic Multi-Jamaah Forms */}
         {pilgrims.map((pilgrim, idx) => (
           <div key={idx} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             <button
@@ -527,7 +475,6 @@ function StepDataSingkat({
         </div>
       </div>
 
-      {/* RIGHT COLUMN — Sticky Summary */}
       <div className="lg:col-span-1">
         <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -546,7 +493,7 @@ function StepDataSingkat({
             <div className="py-4 space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-500">Harga per orang</span>
-                <span className="font-medium text-slate-900">{formatRupiah(pkg.price)}</span>
+                <span className="font-medium text-slate-900">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Jumlah jemaah</span>
@@ -557,7 +504,7 @@ function StepDataSingkat({
             <div className="bg-emerald-50 rounded-xl p-4 mb-4">
               <div className="flex justify-between items-center">
                 <span className="text-xs text-emerald-700 font-medium">Total Pembayaran</span>
-                <span className="text-lg font-bold text-emerald-800">{formatRupiah(pkg.price * pilgrimCount)}</span>
+                <span className="text-lg font-bold text-emerald-800">{formatRupiah(Number(pkg.price) * pilgrimCount)}</span>
               </div>
             </div>
 
@@ -588,8 +535,7 @@ function StepDataSingkat({
 function StepPayment({
   pkg, travel, pilgrimCount, totalPrice, dpAmount, remainingAmount,
   dpPercentage, setDpPercentage, paymentType, setPaymentType,
-  walletBalance, walletSufficient, useWallet, setUseWallet,
-  amountToPayNow, feeBreakdown, notes, setNotes, setStep,
+  amountToPayNow, notes, setNotes, setStep,
 }: {
   pkg: Package
   travel: Tenant | null
@@ -601,12 +547,7 @@ function StepPayment({
   setDpPercentage: (n: number) => void
   paymentType: "full" | "dp"
   setPaymentType: (v: "full" | "dp") => void
-  walletBalance: number | null
-  walletSufficient: boolean
-  useWallet: boolean
-  setUseWallet: (v: boolean) => void
   amountToPayNow: number
-  feeBreakdown: ReturnType<typeof calculateTotalFee>
   notes: string
   setNotes: (v: string) => void
   setStep: (n: number) => void
@@ -614,7 +555,6 @@ function StepPayment({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-5">
-        {/* Payment Type */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
           <label className="text-sm font-semibold">Tipe Pembayaran</label>
           <div className="grid grid-cols-2 gap-3">
@@ -664,65 +604,27 @@ function StepPayment({
           )}
         </div>
 
-        {/* Payment Method */}
-        {walletBalance !== null && (
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
-            <label className="text-sm font-semibold">Metode Pembayaran</label>
-
-            {walletSufficient ? (
-              <button
-                onClick={() => setUseWallet(true)}
-                className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${useWallet ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-200"}`}
-              >
-                <Wallet className={`w-5 h-5 ${useWallet ? "text-emerald-600" : "text-slate-400"}`} />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">Dompet Digital</p>
-                  <p className="text-xs text-emerald-600">Saldo: {formatRupiah(walletBalance)}</p>
-                </div>
-                <CheckCircle className={`w-4 h-4 ${useWallet ? "text-emerald-600" : "text-slate-300"}`} />
-              </button>
-            ) : (
-              <div className="w-full p-4 rounded-xl border-2 border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed flex items-center gap-3">
-                <Wallet className="w-5 h-5 text-slate-300" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-slate-400">Dompet Digital</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full font-medium">
-                      Saldo Tidak Cukup ({formatRupiah(walletBalance)})
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
+          <label className="text-sm font-semibold">Metode Pembayaran</label>
+          <div className="w-full p-4 rounded-xl border-2 border-emerald-200 bg-emerald-50/50 text-left">
+            <div className="flex items-start gap-3">
+              <CreditCard className="w-5 h-5 mt-0.5 shrink-0 text-emerald-600" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold">Pembayaran melalui Midtrans</p>
+                <p className="text-xs text-slate-500 mb-2">Pilih dari berbagai metode: Virtual Account, Kartu Kredit, E-Wallet, QRIS, dan lainnya</p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {["BCA", "Mandiri", "BNI", "BRI", "Permata", "GoPay", "ShopeePay", "QRIS"].map((m) => (
+                    <span key={m} className="px-2 py-1 bg-white border border-slate-200 rounded-md text-[10px] font-semibold text-slate-600">
+                      {m}
                     </span>
-                    <Link href="/dashboard/wallet" className="text-[10px] text-emerald-600 font-semibold hover:underline">
-                      Top Up →
-                    </Link>
-                  </div>
+                  ))}
                 </div>
-                <AlertCircle className="w-4 h-4 text-red-300" />
               </div>
-            )}
-
-            <button
-              onClick={() => setUseWallet(false)}
-              className={`w-full p-4 rounded-xl border-2 text-left transition-all ${!useWallet ? "border-emerald-500 bg-emerald-50" : "border-slate-200 hover:border-emerald-200"}`}
-            >
-              <div className="flex items-start gap-3">
-                <CreditCard className={`w-5 h-5 mt-0.5 shrink-0 ${!useWallet ? "text-emerald-600" : "text-slate-400"}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">Transfer Bank / Virtual Account</p>
-                  <p className="text-xs text-slate-500 mb-2">Bayar melalui bank pilihan Anda</p>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {["BCA", "Mandiri", "BNI", "BRI", "Permata"].map((bank) => (
-                      <span key={bank} className="px-2 py-1 bg-slate-100 border border-slate-200 rounded-md text-[10px] font-semibold text-slate-600">
-                        {bank}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <CheckCircle className={`w-4 h-4 mt-0.5 shrink-0 ${!useWallet ? "text-emerald-600" : "text-slate-300"}`} />
-              </div>
-            </button>
+              <CheckCircle className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600" />
+            </div>
           </div>
-        )}
+        </div>
 
-        {/* Notes */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
           <label className="text-sm font-semibold">Catatan (Opsional)</label>
           <textarea
@@ -740,7 +642,6 @@ function StepPayment({
         </div>
       </div>
 
-      {/* RIGHT — Sticky Summary */}
       <div className="lg:col-span-1">
         <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -759,7 +660,7 @@ function StepPayment({
             <div className="py-4 space-y-2 text-sm border-b border-slate-100">
               <div className="flex justify-between">
                 <span className="text-slate-500">Harga per orang</span>
-                <span className="font-medium">{formatRupiah(pkg.price)}</span>
+                <span className="font-medium">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Jumlah jemaah</span>
@@ -781,24 +682,12 @@ function StepPayment({
                   </div>
                 </>
               )}
-              <div className="flex justify-between">
-                <span className="text-slate-500">Biaya layanan</span>
-                <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">PPN 11%</span>
-                <span className="font-medium">{formatRupiah(feeBreakdown.tax)}</span>
-              </div>
             </div>
 
             <div className="bg-emerald-50 rounded-xl p-4 mt-4 mb-4">
               <div className="flex justify-between items-center">
-                <span className="text-xs text-emerald-700 font-medium">Total Pembayaran</span>
-                <span className="text-lg font-bold text-emerald-800">{formatRupiah(totalPrice + feeBreakdown.total)}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm mt-1">
-                <span className="text-slate-500">Bayar sekarang</span>
-                <span className="font-bold text-emerald-700">{formatRupiah(amountToPayNow)}</span>
+                <span className="text-xs text-emerald-700 font-medium">Bayar sekarang</span>
+                <span className="text-lg font-bold text-emerald-800">{formatRupiah(amountToPayNow)}</span>
               </div>
             </div>
 
@@ -828,8 +717,8 @@ function StepPayment({
 
 function StepReview({
   pkg, travel, pilgrimCount, pilgrims, totalPrice, dpAmount, remainingAmount,
-  dpPercentage, paymentType, useWallet, setUseWallet, amountToPayNow,
-  feeBreakdown, submitting, result, handleSubmit, setStep,
+  dpPercentage, paymentType, amountToPayNow,
+  submitting, result, handleSubmit, setStep,
 }: {
   pkg: Package
   travel: Tenant | null
@@ -840,10 +729,7 @@ function StepReview({
   remainingAmount: number
   dpPercentage: number
   paymentType: "full" | "dp"
-  useWallet: boolean
-  setUseWallet: (v: boolean) => void
   amountToPayNow: number
-  feeBreakdown: ReturnType<typeof calculateTotalFee>
   submitting: boolean
   result: { success: boolean; bookingId?: string; error?: string } | null
   handleSubmit: () => void
@@ -852,14 +738,13 @@ function StepReview({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-5">
-        {/* Fee Breakdown */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
           <h3 className="font-semibold text-sm flex items-center gap-2">
-            <Shield className="w-4 h-4 text-emerald-600" /> Rincian Biaya
+            <Shield className="w-4 h-4 text-emerald-600" /> Rincian Pembayaran
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-500">Harga paket ({pilgrimCount} x {formatRupiah(pkg.price)})</span>
+              <span className="text-slate-500">Harga paket ({pilgrimCount} x {formatRupiah(Number(pkg.price))})</span>
               <span className="font-medium">{formatRupiah(totalPrice)}</span>
             </div>
             {paymentType === "dp" && (
@@ -868,32 +753,16 @@ function StepReview({
                 <span className="font-semibold">-{formatRupiah(dpAmount)}</span>
               </div>
             )}
-            <div className="flex justify-between">
-              <span className="text-slate-500">Biaya layanan platform</span>
-              <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Biaya layanan</span>
-              <span className="font-medium">{formatRupiah(feeBreakdown.serviceFee)}</span>
-            </div>
-            <div className="border-t border-dashed border-slate-200 pt-2 flex justify-between text-sm">
-              <span className="text-slate-500">Subtotal</span>
-              <span className="font-medium">{formatRupiah(feeBreakdown.subtotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">PPN 11%</span>
-              <span className="font-medium">{formatRupiah(feeBreakdown.tax)}</span>
+            <div className="border-t border-dashed border-slate-200 pt-2 flex justify-between">
+              <span className="text-slate-500">Sisa pelunasan</span>
+              <span className="font-medium">{formatRupiah(remainingAmount)}</span>
             </div>
           </div>
 
-          <div className="bg-emerald-50 rounded-xl p-4 space-y-2">
+          <div className="bg-emerald-50 rounded-xl p-4">
             <div className="flex justify-between items-center">
-              <span className="font-semibold text-sm">Total</span>
-              <span className="text-xl font-bold text-emerald-800">{formatRupiah(totalPrice + feeBreakdown.total)}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-slate-500">Bayar sekarang</span>
-              <span className="font-bold text-emerald-700">{formatRupiah(amountToPayNow)}</span>
+              <span className="font-semibold text-sm">Bayar sekarang</span>
+              <span className="text-xl font-bold text-emerald-800">{formatRupiah(amountToPayNow)}</span>
             </div>
           </div>
 
@@ -907,15 +776,12 @@ function StepReview({
             </div>
           )}
 
-          <button
-            onClick={() => setUseWallet(!useWallet)}
-            className="text-xs text-emerald-600 hover:underline cursor-pointer"
-          >
-            {useWallet ? "Ganti metode pembayaran" : "Gunakan dompet digital"}
-          </button>
+          <p className="text-[10px] text-slate-400 flex items-start gap-1">
+            <CreditCard className="w-3 h-3 mt-0.5 shrink-0" />
+            Anda akan diarahkan ke halaman pembayaran Midtrans yang mendukung Virtual Account, Kartu Kredit, E-Wallet, dan QRIS.
+          </p>
         </div>
 
-        {/* Pilgrim Summary */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <h3 className="font-semibold text-sm mb-3">Data Jemaah</h3>
           <div className="space-y-2">
@@ -936,7 +802,6 @@ function StepReview({
           </p>
         </div>
 
-        {/* Error */}
         {result && !result.success && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3 text-sm text-red-700">
             <AlertCircle className="w-5 h-5 shrink-0" />
@@ -950,14 +815,13 @@ function StepReview({
             <Link href={`/package/${pkg.slug}`}>
               <Button variant="ghost" size="sm" className="text-xs">Batal</Button>
             </Link>
-            <Button onClick={handleSubmit} disabled={submitting || (useWallet && amountToPayNow > 0)} className="gap-2 px-6 h-12">
-              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Bayar"}
+            <Button onClick={handleSubmit} disabled={submitting} className="gap-2 px-6 h-12">
+              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Lanjut Bayar"}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* RIGHT — Sticky Summary */}
       <div className="lg:col-span-1">
         <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -976,7 +840,7 @@ function StepReview({
             <div className="py-4 space-y-2 text-sm border-b border-slate-100">
               <div className="flex justify-between">
                 <span className="text-slate-500">Harga per orang</span>
-                <span className="font-medium">{formatRupiah(pkg.price)}</span>
+                <span className="font-medium">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Jumlah jemaah</span>
@@ -998,24 +862,12 @@ function StepReview({
                   </div>
                 </>
               )}
-              <div className="flex justify-between">
-                <span className="text-slate-500">Biaya layanan</span>
-                <span className="font-medium">{formatRupiah(feeBreakdown.totalPlatformFee)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">PPN 11%</span>
-                <span className="font-medium">{formatRupiah(feeBreakdown.tax)}</span>
-              </div>
             </div>
 
             <div className="bg-emerald-50 rounded-xl p-4 mt-4 mb-4">
               <div className="flex justify-between items-center">
-                <span className="text-xs text-emerald-700 font-medium">Total Pembayaran</span>
-                <span className="text-lg font-bold text-emerald-800">{formatRupiah(totalPrice + feeBreakdown.total)}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm mt-1">
-                <span className="text-slate-500">Bayar sekarang</span>
-                <span className="font-bold text-emerald-700">{formatRupiah(amountToPayNow)}</span>
+                <span className="text-xs text-emerald-700 font-medium">Bayar sekarang</span>
+                <span className="text-lg font-bold text-emerald-800">{formatRupiah(amountToPayNow)}</span>
               </div>
             </div>
 
@@ -1029,13 +881,13 @@ function StepReview({
             <div className="hidden lg:block">
               <Button
                 onClick={handleSubmit}
-                disabled={submitting || (useWallet && amountToPayNow > 0)}
+                disabled={submitting}
                 className="w-full h-12 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
               >
                 {submitting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Mengarahkan ke pembayaran...</>
                 ) : (
-                  <>Bayar <ChevronRight className="w-4 h-4" /></>
+                  <>Lanjut Bayar <ChevronRight className="w-4 h-4" /></>
                 )}
               </Button>
             </div>
@@ -1067,8 +919,8 @@ function SecurityBadges() {
       </div>
       <ul className="space-y-1.5 text-[11px] text-slate-500">
         <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> Terenkripsi SSL 256-bit</li>
-        <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> Dana disimpan di rekening berjalan</li>
-                    <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> PPIU Kemenhaj Terverifikasi</li>
+        <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> Transaksi diproses oleh Midtrans</li>
+        <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> PPIU Kemenhaj Terverifikasi</li>
       </ul>
     </div>
   )

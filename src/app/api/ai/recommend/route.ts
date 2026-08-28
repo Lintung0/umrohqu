@@ -16,7 +16,7 @@ Paket ${i + 1}: "${p.name}" (ID: ${p.id})
 - Harga: Rp ${(p.price || 0).toLocaleString("id-ID")} / orang
 - Harga Asli (sebelum diskon): ${p.original_price ? "Rp " + p.original_price.toLocaleString("id-ID") : "-"}
 - Tipe: ${p.type || "-"}
-- Durasi: ${p.duration_days || 0} hari
+- Durasi: ${p.duration_nights || 0} hari
 - Bulan Keberangkatan: ${p.departure_month || "-"} ${p.departure_year || ""}
 - Maskapai: ${p.airline || "-"}
 - Hotel Makkah: ${p.hotel_makkah || "-"} (${p.hotel_makkah_stars || 0} bintang)
@@ -28,7 +28,7 @@ Paket ${i + 1}: "${p.name}" (ID: ${p.id})
 }
 
 function calcScore(pkg: any) {
-  const pricePerDay = pkg.price / (pkg.duration_days || 1)
+  const pricePerDay = pkg.price / (pkg.duration_nights || 1)
   const makkahStars = pkg.hotel_makkah_stars || 0
   const madinahStars = pkg.hotel_madinah_stars || 0
   const avgHotel = (makkahStars + madinahStars) / 2
@@ -55,7 +55,7 @@ function generateFallbackResponse(packages: any[], message: string, history: any
   const generalSummary = () => {
     let text = intro
     packages.forEach((pkg, i) => {
-      text += `📦 **${pkg.name}** — ${formatRupiah(pkg.price)} (${pkg.duration_days} hari, ≈ ${formatRupiah(Math.round(scores[i].pricePerDay))}/hari)\n`
+      text += `📦 **${pkg.name}** — ${formatRupiah(pkg.price)} (${pkg.duration_nights} hari, ≈ ${formatRupiah(Math.round(scores[i].pricePerDay))}/hari)\n`
       text += `   Hotel: ${"⭐".repeat(pkg.hotel_makkah_stars || 0)} Makkah + ${"⭐".repeat(pkg.hotel_madinah_stars || 0)} Madinah\n`
       text += `   Maskapai: ${pkg.airline || "-"} | Fasilitas: ${(pkg.facilities || []).length} item\n\n`
     })
@@ -88,7 +88,7 @@ function generateFallbackResponse(packages: any[], message: string, history: any
     let text = intro
     text += `💰 **Paket termurah:** **${packages[cheapest].name}**\n`
     text += `   Harga: ${formatRupiah(packages[cheapest].price)} (≈ ${formatRupiah(Math.round(scores[cheapest].pricePerDay))}/hari)\n`
-    text += `   Durasi: ${packages[cheapest].duration_days} hari\n`
+    text += `   Durasi: ${packages[cheapest].duration_nights} hari\n`
     text += `   Hotel: ${"⭐".repeat(packages[cheapest].hotel_makkah_stars || 0)} Makkah | ${"⭐".repeat(packages[cheapest].hotel_madinah_stars || 0)} Madinah\n`
     text += `   Maskapai: ${packages[cheapest].airline || "-"}\n\n`
     if (packages.length >= 2) {
@@ -109,12 +109,12 @@ function generateFallbackResponse(packages: any[], message: string, history: any
   }
 
   if (msg.includes("durasi") || msg.includes("hari") || msg.includes("lama") || msg.includes("cepat")) {
-    const byDuration = [...packages].sort((a, b) => (b.duration_days || 0) - (a.duration_days || 0))
+    const byDuration = [...packages].sort((a, b) => (b.duration_nights || 0) - (a.duration_nights || 0))
     let text = intro
-    text += `📅 **Paket terlama:** **${byDuration[0].name}** — ${byDuration[0].duration_days} hari\n`
-    text += `📅 **Paket terpendek:** **${byDuration[byDuration.length - 1].name}** — ${byDuration[byDuration.length - 1].duration_days} hari\n\n`
+    text += `📅 **Paket terlama:** **${byDuration[0].name}** — ${byDuration[0].duration_nights} hari\n`
+    text += `📅 **Paket terpendek:** **${byDuration[byDuration.length - 1].name}** — ${byDuration[byDuration.length - 1].duration_nights} hari\n\n`
     byDuration.forEach((p, i) => {
-      text += `• ${p.name}: ${p.duration_days} hari — ${formatRupiah(Math.round(scores[packages.indexOf(p)].pricePerDay))}/hari\n`
+      text += `• ${p.name}: ${p.duration_nights} hari — ${formatRupiah(Math.round(scores[packages.indexOf(p)].pricePerDay))}/hari\n`
     })
     text += `\n💡 Makin lama biasanya lebih hemat per hari, tapi pertimbangkan jadwal libur Anda.`
     return text

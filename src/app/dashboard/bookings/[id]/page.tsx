@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, Wallet, Sparkles } from "lucide-react"
+import { ArrowLeft, Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, Sparkles } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -14,7 +14,6 @@ interface BookingDetail {
   status: string
   pilgrim_count: number
   price: number
-  fee: number
   total: number
   paid_amount: number
   remaining_balance: number
@@ -28,9 +27,6 @@ interface BookingDetail {
   dp_amount: number | null
   remaining_amount: number | null
   remaining_due_date: string | null
-  platform_fee?: number
-  service_fee?: number
-  tax_amount?: number
   booking_source?: string
   package: { name: string; slug: string; departure_city: string | null; duration_nights: number | null; airline?: string | null; hotel_makkah?: string | null; hotel_makkah_stars?: number | null; hotel_madinah?: string | null; hotel_madinah_stars?: number | null } | null
   participants: { id: string; full_name: string; national_id: string | null; passport_number: string | null; gender: string | null; phone: string | null; relation: string }[]
@@ -299,27 +295,6 @@ export default function BookingDetailPage() {
               <span className="text-muted-foreground">{t("booking.package")} ({booking.pilgrim_count})</span>
               <span>{formatRupiah(booking.price)}</span>
             </div>
-            {booking.platform_fee ? (
-              <>
-                <div className="flex justify-between pl-3">
-                  <span className="text-muted-foreground text-xs">{t("booking.platform_fee")}</span>
-                  <span className="text-xs">{formatRupiah(booking.platform_fee)}</span>
-                </div>
-                <div className="flex justify-between pl-3">
-                  <span className="text-muted-foreground text-xs">Biaya layanan</span>
-                  <span className="text-xs">{formatRupiah(booking.service_fee || 0)}</span>
-                </div>
-                <div className="flex justify-between pl-3">
-                  <span className="text-muted-foreground text-xs">{t("booking.tax", { percent: 11 })}</span>
-                  <span className="text-xs">{formatRupiah(booking.tax_amount || 0)}</span>
-                </div>
-              </>
-            ) : (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("travel_dashboard.fee")}</span>
-                <span>{formatRupiah(booking.fee)}</span>
-              </div>
-            )}
             {booking.payment_type === "dp" && (
               <>
                 <div className="border-t border-border pt-2 flex justify-between text-emerald-600">
@@ -571,8 +546,8 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
         body: JSON.stringify({ bookingId }),
       })
       const data = await res.json()
-      if (res.ok && data.xendit?.invoice_url) {
-        window.location.href = data.xendit.invoice_url
+      if (res.ok && data.snap) {
+        window.location.href = data.snap.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.snap.token}`
       } else {
         toast.error(data.error || t("common.error"))
       }
@@ -618,29 +593,7 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
 
 function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string; remainingAmount: number }) {
   const { t } = useTranslation()
-  const supabase = createClient()
-  const [walletBalance, setWalletBalance] = useState<number | null>(null)
-  const [useWallet, setUseWallet] = useState(true)
-  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-
-  useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: wallet } = await supabase
-          .from("wallets")
-          .select("balance")
-          .eq("user_id", user.id)
-          .single()
-        setWalletBalance(wallet?.balance || 0)
-      }
-      setLoading(false)
-    }
-    load()
-  }, [supabase])
-
-  const walletSufficient = walletBalance !== null && walletBalance >= remainingAmount
 
   const handlePay = async () => {
     setSubmitting(true)
@@ -648,16 +601,14 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
       const res = await fetch("/api/booking/pay-remaining", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId, useWallet }),
+        body: JSON.stringify({ bookingId }),
       })
       const data = await res.json()
-      if (res.ok) {
-        if (data.xendit?.invoice_url) {
-          window.location.href = data.xendit.invoice_url
-        } else {
-          toast.success(t("booking.booking_success"))
-          setTimeout(() => window.location.reload(), 1000)
-        }
+      if (res.ok && data.snap) {
+        window.location.href = data.snap.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.snap.token}`
+      } else if (res.ok) {
+        toast.success(t("booking.booking_success"))
+        setTimeout(() => window.location.reload(), 1000)
       } else {
         toast.error(data.error || t("common.error"))
       }
@@ -667,43 +618,20 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
     setSubmitting(false)
   }
 
-  if (loading) {
-    return <div className="h-12 bg-muted rounded-xl animate-pulse" />
-  }
-
   return (
     <div className="space-y-3">
-      {walletBalance !== null && (
-        <button
-          onClick={() => setUseWallet(true)}
-          className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all cursor-pointer ${useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
-        >
-          <Wallet className={`w-5 h-5 ${useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
-          <div className="flex-1">
-            <p className="text-sm font-semibold">{t("booking.wallet")}</p>
-            <p className={`text-xs ${walletSufficient ? "text-emerald-600" : "text-red-500"}`}>
-              {t("booking.balance")}: {walletBalance !== null ? formatRupiah(walletBalance) : "-"}
-              {!walletSufficient && ` (${formatRupiah(remainingAmount - (walletBalance || 0))} ${t("booking.insufficient")})`}
-            </p>
-          </div>
-          <CheckCircle className={`w-4 h-4 ${useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
-        </button>
-      )}
-      <button
-        onClick={() => setUseWallet(false)}
-        className={`w-full p-3 rounded-xl border-2 text-left flex items-center gap-3 transition-all cursor-pointer ${!useWallet ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-200"}`}
-      >
-        <CreditCard className={`w-5 h-5 ${!useWallet ? "text-emerald-600" : "text-muted-foreground"}`} />
+      <div className="w-full p-3 rounded-xl border-2 border-emerald-200 bg-emerald-50/50 flex items-center gap-3">
+        <CreditCard className="w-5 h-5 text-emerald-600" />
         <div className="flex-1">
           <p className="text-sm font-semibold">{t("booking.bank_transfer")}</p>
           <p className="text-xs text-muted-foreground">{t("booking.bank_transfer_desc")}</p>
         </div>
-        <CheckCircle className={`w-4 h-4 ${!useWallet ? "text-emerald-600" : "text-muted-foreground/30"}`} />
-      </button>
+        <CheckCircle className="w-4 h-4 text-emerald-600" />
+      </div>
 
       <button
         onClick={handlePay}
-        disabled={submitting || (useWallet && !walletSufficient)}
+        disabled={submitting}
         className="w-full bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-emerald-200 active:scale-[0.98] cursor-pointer"
       >
         {submitting ? (

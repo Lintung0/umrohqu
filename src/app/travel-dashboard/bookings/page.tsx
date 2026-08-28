@@ -43,7 +43,7 @@ export default function TravelBookingsPage() {
 
       const { data } = await supabase
         .from("bookings")
-        .select("id, status, pilgrim_count, price, fee, total, booking_channel, created_at, package:packages(name), customer:users(full_name, email)")
+        .select("id, status, pilgrim_count, price, total, booking_channel, created_at, package:packages(name), customer:users(full_name, email)")
         .eq("tenant_id", profile.tenant_id)
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
@@ -56,13 +56,11 @@ export default function TravelBookingsPage() {
 
   async function updateBookingStatus(bookingId: string, newStatus: string) {
     const updateData: Record<string, any> = { status: newStatus }
-    if (newStatus === "confirmed") updateData.payment_status = "paid"
-    if (newStatus === "cancelled") updateData.payment_status = "cancelled"
     const { error } = await supabase.from("bookings").update(updateData).eq("id", bookingId)
     if (error) {
       toast.error(t("travel_dashboard.status_update_failed"))
     } else {
-      setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: newStatus, ...(updateData.payment_status ? { payment_status: updateData.payment_status } : {}) } : b))
+      setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status: newStatus } : b))
       toast.success(t("travel_dashboard.status_updated"))
     }
   }
@@ -146,7 +144,6 @@ export default function TravelBookingsPage() {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.package")}</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.amount")}</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("booking.total")}</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.fee")}</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("booking.status")}</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.channel")}</th>
                 <th className="text-right px-4 py-3 font-medium text-muted-foreground">{t("travel_dashboard.action")}</th>
@@ -155,7 +152,7 @@ export default function TravelBookingsPage() {
             <tbody className="divide-y divide-border">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">{t("travel_dashboard.no_bookings")}</td>
+                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">{t("travel_dashboard.no_bookings")}</td>
                 </tr>
               ) : filtered.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
@@ -166,7 +163,6 @@ export default function TravelBookingsPage() {
                   <td className="px-4 py-3 max-w-[180px] truncate text-muted-foreground">{booking.package?.name}</td>
                   <td className="px-4 py-3">{booking.pilgrim_count}</td>
                   <td className="px-4 py-3 font-semibold">{formatRupiah(booking.total)}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{formatRupiah(booking.fee)}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status, "booking")}`}>
                       {getStatusLabel(booking.status, "booking")}

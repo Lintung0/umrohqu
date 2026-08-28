@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { startOfMonth, endOfMonth, subMonths, subDays } from "date-fns";
+import { getFeeConfig } from "@/lib/business-logic/fee-config";
+import { calculateTotalFee } from "@/lib/business-logic/fees";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +13,7 @@ export async function GET() {
     // 1. Fetch Bookings
     const { data: bookings, error: bookingsError } = await supabase
       .from("bookings")
-      .select("total, fee, status, created_at");
+      .select("total, price, pilgrim_count, status, booking_source, created_at");
 
     if (bookingsError) {
       throw bookingsError;
@@ -26,15 +28,6 @@ export async function GET() {
       throw tenantsError;
     }
 
-    // 3. Fetch Biddings
-    const { data: biddings, error: biddingsError } = await supabase
-      .from("biddings")
-      .select("bid_value, status, created_at");
-
-    if (biddingsError) {
-      throw biddingsError;
-    }
-
     const today = new Date();
     const startOfThisMonth = startOfMonth(today);
     const endOfThisMonth = endOfMonth(today);
@@ -42,7 +35,6 @@ export async function GET() {
     const endOfLastMonth = endOfMonth(subMonths(today, 1));
 
     // --- GMV calculations ---
-    // Paid bookings are 'confirmed' or 'completed'
     const paidBookings = (bookings || []).filter(
       (b) => b.status === "confirmed" || b.status === "completed",
     );
@@ -53,7 +45,6 @@ export async function GET() {
     );
     const totalGmv = totalGmvRaw === 0 ? 1 : totalGmvRaw;
 
-    // GMV this month
     const gmvThisMonthRaw = paidBookings
       .filter((b) => {
         const date = new Date(b.created_at);
@@ -62,7 +53,6 @@ export async function GET() {
       .reduce((sum, b) => sum + Number(b.total || 0), 0);
     const gmvThisMonth = gmvThisMonthRaw === 0 ? 1 : gmvThisMonthRaw;
 
-    // GMV last month
     const gmvLastMonthRaw = paidBookings
       .filter((b) => {
         const date = new Date(b.created_at);
@@ -75,37 +65,54 @@ export async function GET() {
       ((gmvThisMonth - gmvLastMonth) / gmvLastMonth) * 100;
 
     // --- Revenue calculations ---
-    // Net income = Service Fee + Setup Fee + Bidding
-    // Service Fee = sum of fee from paid bookings
+    // Platform commission per paid booking = total fee (portal fee + service fee + tax)
+    const feeConfig = await getFeeConfig(supabase);
+
+    const commissionOf = (b: {
+      price: number;
+      pilgrim_count: number;
+      booking_source?: string;
+    }) => {
+      const channel =
+        b.booking_source === "subdomain"
+          ? "subdomain"
+          : b.booking_source === "custom_domain"
+            ? "custom_domain"
+            : "portal";
+      return calculateTotalFee(
+        Number(b.price || 0),
+        Number(b.pilgrim_count || 0),
+        channel,
+        feeConfig,
+      ).total;
+    };
+
     const serviceFeeRaw = paidBookings.reduce(
-      (sum, b) => sum + Number(b.fee || 0),
+      (sum, b) => sum + commissionOf(b),
       0,
     );
     const serviceFee = serviceFeeRaw === 0 ? 1 : serviceFeeRaw;
 
-    // Setup Fee = verified tenants * 1,000,000 IDR (constant)
-    const verifiedTenantsCount = (tenants || []).filter(
-      (t) => t.status === "active",
-    ).length;
-    const setupFeeRaw = verifiedTenantsCount * 1000000;
-    const setupFee = setupFeeRaw === 0 ? 1 : setupFeeRaw;
-
-    // Bidding = sum of bid_value from biddings where status != 'cancelled'
-    const biddingRaw = (biddings || [])
-      .filter((b) => b.status !== "cancelled")
-      .reduce((sum, b) => sum + Number(b.bid_value || 0), 0);
-    const bidding = biddingRaw === 0 ? 1 : biddingRaw;
-
-    const totalRevenueRaw = serviceFeeRaw + setupFeeRaw + biddingRaw;
-    const totalRevenue = totalRevenueRaw === 0 ? 1 : totalRevenueRaw;
-
-    // Revenue this month
     const serviceFeeThisMonth = paidBookings
       .filter((b) => {
         const d = new Date(b.created_at);
         return d >= startOfThisMonth && d <= endOfThisMonth;
       })
-      .reduce((sum, b) => sum + Number(b.fee || 0), 0);
+      .reduce((sum, b) => sum + commissionOf(b), 0);
+
+    const serviceFeeLastMonth = paidBookings
+      .filter((b) => {
+        const d = new Date(b.created_at);
+        return d >= startOfLastMonth && d <= endOfLastMonth;
+      })
+      .reduce((sum, b) => sum + commissionOf(b), 0);
+
+    // Setup Fee = active tenants * 1,000,000 IDR (constant)
+    const verifiedTenantsCount = (tenants || []).filter(
+      (t) => t.status === "active",
+    ).length;
+    const setupFeeRaw = verifiedTenantsCount * 1000000;
+    const setupFee = setupFeeRaw === 0 ? 1 : setupFeeRaw;
 
     const setupFeeThisMonth =
       (tenants || []).filter((t) => {
@@ -117,30 +124,6 @@ export async function GET() {
         );
       }).length * 1000000;
 
-    const biddingThisMonth = (biddings || [])
-      .filter((b) => {
-        const d = new Date(b.created_at);
-        return (
-          b.status !== "cancelled" &&
-          d >= startOfThisMonth &&
-          d <= endOfThisMonth
-        );
-      })
-      .reduce((sum, b) => sum + Number(b.bid_value || 0), 0);
-
-    const revenueThisMonthRaw =
-      serviceFeeThisMonth + setupFeeThisMonth + biddingThisMonth;
-    const revenueThisMonth =
-      revenueThisMonthRaw === 0 ? 1 : revenueThisMonthRaw;
-
-    // Revenue last month
-    const serviceFeeLastMonth = paidBookings
-      .filter((b) => {
-        const d = new Date(b.created_at);
-        return d >= startOfLastMonth && d <= endOfLastMonth;
-      })
-      .reduce((sum, b) => sum + Number(b.fee || 0), 0);
-
     const setupFeeLastMonth =
       (tenants || []).filter((t) => {
         const d = new Date(t.created_at);
@@ -151,16 +134,18 @@ export async function GET() {
         );
       }).length * 1000000;
 
-    const biddingLastMonth = (biddings || [])
-      .filter((b) => {
-        const d = new Date(b.created_at);
-        return (
-          b.status !== "cancelled" &&
-          d >= startOfLastMonth &&
-          d <= endOfLastMonth
-        );
-      })
-      .reduce((sum, b) => sum + Number(b.bid_value || 0), 0);
+    // Bidding scheme dropped — treated as 0
+    const bidding = 1;
+    const biddingThisMonth = 0;
+    const biddingLastMonth = 0;
+
+    const totalRevenueRaw = serviceFeeRaw + setupFeeRaw;
+    const totalRevenue = totalRevenueRaw === 0 ? 1 : totalRevenueRaw;
+
+    const revenueThisMonthRaw =
+      serviceFeeThisMonth + setupFeeThisMonth + biddingThisMonth;
+    const revenueThisMonth =
+      revenueThisMonthRaw === 0 ? 1 : revenueThisMonthRaw;
 
     const revenueLastMonthRaw =
       serviceFeeLastMonth + setupFeeLastMonth + biddingLastMonth;
@@ -175,9 +160,7 @@ export async function GET() {
     const totalTransactions =
       totalTransactionsRaw === 0 ? 1 : totalTransactionsRaw;
 
-    const paidTransactionsRaw = (bookings || []).filter(
-      (b) => b.status === "confirmed" || b.status === "completed",
-    ).length;
+    const paidTransactionsRaw = paidBookings.length;
     const paidTransactions =
       paidTransactionsRaw === 0 ? 1 : paidTransactionsRaw;
 
@@ -187,7 +170,6 @@ export async function GET() {
     const pendingTransactions =
       pendingTransactionsRaw === 0 ? 1 : pendingTransactionsRaw;
 
-    // Transactions since yesterday (last 24 hours)
     const startOfYesterday = subDays(today, 1);
     const newTransactionsSinceYesterdayRaw = (bookings || []).filter(
       (b) => new Date(b.created_at) >= startOfYesterday,
@@ -208,7 +190,6 @@ export async function GET() {
     ).length;
     const pendingMitra = pendingMitraRaw === 0 ? 1 : pendingMitraRaw;
 
-    // Mitra added since last week (last 7 days)
     const startOfLastWeek = subDays(today, 7);
     const newMitraLastWeekRaw = (tenants || []).filter(
       (t) =>

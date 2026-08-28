@@ -22,8 +22,7 @@ const PUBLIC_ROUTES = [
   "/verify-email",
   "/booking-success",
   "/api/auth",
-  "/api/xendit",
-  "/api/wallet",
+  "/api/midtrans",
   "/api/tenant/setup-fee-callback",
   "/auth/callback",
 ]

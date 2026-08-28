@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Building2, Palette, DollarSign, Target, Tag, BarChart3, LifeBuoy, ClipboardCheck, Headphones, FileText, CreditCard, Wallet, Receipt, TrendingUp, LogOut, Shield, Menu, X, Home } from "lucide-react"
+import { LayoutDashboard, Building2, Palette, DollarSign, BarChart3, LifeBuoy, ClipboardCheck, CreditCard, Wallet, Receipt, LogOut, Shield, Menu, X, Home } from "lucide-react"
 import { type AdminRole } from "@/lib/types"
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -15,15 +15,10 @@ const ADMIN_NAV = [
   { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["admin"], category: "transaksi" },
   { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["admin", "finance"], category: "transaksi" },
   { href: "/admin/service-fees", label: "Biaya Layanan", icon: Receipt, roles: ["admin", "finance"], category: "transaksi" },
-  { href: "/admin/bidding", label: "Kelola Bidding", icon: Target, roles: ["admin"], category: "transaksi" },
-  { href: "/admin/invoices", label: "Faktur", icon: FileText, roles: ["admin", "finance"], category: "transaksi" },
   { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["admin", "finance"], category: "transaksi" },
-  { href: "/admin/promos", label: "Promo & Voucher", icon: Tag, roles: ["admin", "finance"], category: "pemasaran" },
   { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["admin"], category: "pemasaran" },
   { href: "/admin/onboarding", label: "Pendaftaran", icon: ClipboardCheck, roles: ["admin", "operational"], category: "pemasaran" },
-  { href: "/admin/tickets", label: "Tiket Kendala", icon: Headphones, roles: ["admin", "operational"], category: "bantuan" },
   { href: "/admin/reports", label: "Laporan Sistem", icon: BarChart3, roles: ["admin"], category: "bantuan" },
-  { href: "/admin/billing-reports", label: "Laporan Keuangan", icon: TrendingUp, roles: ["admin", "finance"], category: "bantuan" },
   { href: "/admin/help", label: "Bantuan Pengguna", icon: LifeBuoy, roles: ["admin", "operational"], category: "bantuan" },
 ]
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
-import { getInvoice } from "@/lib/services/xendit"
+import { getTransactionStatus, isSuccessStatus, isPendingStatus, stablePaymentType } from "@/lib/services/midtrans"
+import { creditTravelCommission } from "@/lib/business-logic/deposits"
 import { z } from "zod"
 
 const schema = z.object({
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, xendit_invoice_id, payment_type, remaining_amount, total")
+      .select("id, status, gateway_invoice_id, dp_type, remaining_amount, total, tenant_id, price, pilgrim_count, booking_source, package_id")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -35,52 +36,63 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 
-    const isRemaining = booking.xendit_invoice_id?.startsWith("booking-remaining-") || false
-    const canVerify = booking.status === "pending_payment" || (booking.status === "processing" && isRemaining && (booking.remaining_amount || 0) > 0)
+    const canVerify = booking.status === "pending_payment"
 
     if (!canVerify) {
       return NextResponse.json({ status: booking.status })
     }
 
-    if (!booking.xendit_invoice_id) {
-      return NextResponse.json({ error: "Belum ada invoice" }, { status: 400 })
+    if (!booking.gateway_invoice_id) {
+      return NextResponse.json({ error: "Belum ada transaksi gateway" }, { status: 400 })
     }
 
-    const invoice = await getInvoice(booking.xendit_invoice_id)
+    const txn = await getTransactionStatus(booking.gateway_invoice_id)
 
-    if (invoice.status !== "PAID") {
-      return NextResponse.json({ status: isRemaining ? "processing" : "pending_payment", xendit_status: invoice.status })
+    if (!isSuccessStatus(txn.transaction_status)) {
+      return NextResponse.json({
+        status: isPendingStatus(txn.transaction_status) ? "pending_payment" : booking.status,
+        midtrans_status: txn.transaction_status,
+      })
     }
 
-    const newStatus = isRemaining ? "confirmed" : "processing"
-    const updateData: Record<string, any> = {
-      status: newStatus,
-      payment_status: "paid",
-      updated_at: new Date().toISOString(),
-    }
-    if (isRemaining) {
-      updateData.remaining_amount = 0
-      updateData.total = Number(booking.total) + Number(booking.remaining_amount)
-    }
+    // Pembayaran berhasil
+    await admin
+      .from("bookings")
+      .update({ status: "confirmed", updated_at: new Date().toISOString() })
+      .eq("id", bookingId)
 
-    await admin.from("bookings").update(updateData).eq("id", bookingId)
+    const paidAt = txn.transaction_time
+      ? new Date(txn.transaction_time).toISOString()
+      : new Date().toISOString()
 
-    // Sinkronkan record transaksi ke paid (jika webhook Xendit terlewat)
-    const now = new Date().toISOString()
     await admin
       .from("payments")
-      .update({ status: "paid", paid_at: now, updated_at: now })
+      .update({
+        status: "paid",
+        paid_at: paidAt,
+        payment_type: stablePaymentType(txn.payment_type) as never,
+        payment_provider: txn.va_numbers?.[0]?.bank || txn.bank || txn.payment_type,
+        va_number: txn.va_numbers?.[0]?.va_number || txn.payment_code || "",
+        gateway_reference: txn.transaction_id || booking.gateway_invoice_id,
+        updated_at: new Date().toISOString(),
+      })
       .eq("booking_id", bookingId)
-      .eq("gateway", "xendit")
-      .eq("status", "pending")
 
-    await admin
-      .from("invoices")
-      .update({ status: "paid", paid_at: now, updated_at: now })
-      .eq("booking_id", bookingId)
-      .eq("status", "issued")
+    await creditTravelCommission(admin, {
+      tenantId: booking.tenant_id,
+      bookingId: bookingId,
+      packagePrice: Number(booking.price || 0),
+      pilgrimCount: Number(booking.pilgrim_count || 0),
+      channel:
+        booking.booking_source === "subdomain"
+          ? "subdomain"
+          : booking.booking_source === "custom_domain"
+            ? "custom_domain"
+            : "portal",
+      actorUserId: user.id,
+    })
 
-    return NextResponse.json({ status: newStatus, just_verified: true })
+    return NextResponse.json({ status: "confirmed", just_verified: true })
   } catch (err) {
     console.error("Verify payment error:", err)
     return NextResponse.json({ error: "Gagal memverifikasi pembayaran" }, { status: 500 })

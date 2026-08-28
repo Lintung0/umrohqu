@@ -66,19 +66,17 @@ export default function AdminOverviewPage() {
   const [stats, setStats] = useState({ travelCount: 0, bookingCount: 0, totalRevenue: 0, pendingTravel: 0 })
   const [recentBookings, setRecentBookings] = useState<any[]>([])
   const [pendingTravels, setPendingTravels] = useState<any[]>([])
-  const [recentTickets, setRecentTickets] = useState<any[]>([])
   const [chartData, setChartData] = useState<{ month: string; gmv: number }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [travelRes, bookingRes, allBookingsRes, pendingTravelRes, ticketsRes] = await Promise.all([
+        const [travelRes, bookingRes, allBookingsRes, pendingTravelRes] = await Promise.all([
           supabase.from("tenants").select("id, status").is("deleted_at", null),
           supabase.from("bookings").select("id, status, total, pilgrim_count, package:packages(name), customer:users(full_name), created_at").is("deleted_at", null).order("created_at", { ascending: false }).limit(5),
           supabase.from("bookings").select("id, total, status").is("deleted_at", null),
           supabase.from("tenants").select("id, name, status, created_at").eq("status", "pending").is("deleted_at", null).order("created_at", { ascending: false }).limit(4),
-          supabase.from("support_tickets").select("id, subject, status, priority, created_at, user:users(full_name)").order("created_at", { ascending: false }).limit(4),
         ])
 
         const tenants = travelRes.data || []
@@ -96,7 +94,6 @@ export default function AdminOverviewPage() {
         })
         setRecentBookings(bookingRes.data || [])
         setPendingTravels(pendingTravelRes.data || [])
-        setRecentTickets(ticketsRes.data || [])
 
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
         const revenueByMonth = new Map<string, number>()
@@ -263,7 +260,7 @@ export default function AdminOverviewPage() {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-border overflow-hidden">
           <div className="flex items-center justify-between p-5 border-b border-border">
             <h2 className="font-semibold">Pesan Terbaru</h2>
-            <Link href="/admin/invoices" className="text-sm text-primary hover:underline">Lihat Semua</Link>
+            <Link href="/admin/payments" className="text-sm text-primary hover:underline">Lihat Semua</Link>
           </div>
           <div className="divide-y divide-border">
             {recentBookings.length === 0 ? (
@@ -281,30 +278,6 @@ export default function AdminOverviewPage() {
                   {getStatusLabel(b.status, "booking")}
                 </span>
                 <p className="text-sm font-semibold shrink-0">{formatRupiah(b.total)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Support Tickets */}
-        <div className="bg-white rounded-2xl border border-border overflow-hidden">
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="font-semibold text-sm">Tiket Terbaru</h2>
-            <Link href="/admin/tickets" className="text-xs text-primary hover:underline">Lihat Semua</Link>
-          </div>
-          <div className="divide-y divide-border">
-            {recentTickets.length === 0 ? (
-              <p className="p-6 text-center text-muted-foreground text-sm">Tidak ada tiket aktif</p>
-            ) : recentTickets.map((t: any) => (
-              <div key={t.id} className="p-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-medium line-clamp-1">{t.subject}</p>
-                  <span className="text-xs px-2 py-0.5 rounded-full shrink-0"
-                    style={{ background: `${STATUS_COLORS[t.status] || "#888"}15`, color: STATUS_COLORS[t.status] || "#888" }}>
-                    {t.status === "open" ? "Baru" : t.status === "in_progress" ? "Diproses" : "Selesai"}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{t.user?.full_name || "Pengguna"}</p>
               </div>
             ))}
           </div>

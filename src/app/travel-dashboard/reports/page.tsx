@@ -10,7 +10,6 @@ interface BookingRow {
   status: string
   pilgrim_count: number
   price: number
-  fee: number
   total: number
   booking_channel: string
   created_at: string
@@ -22,6 +21,7 @@ export default function TravelReportsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
+  const [depositBalance, setDepositBalance] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -36,9 +36,18 @@ export default function TravelReportsPage() {
 
       const { data } = await supabase
         .from("bookings")
-        .select("status, pilgrim_count, price, fee, total, booking_channel, created_at, package:packages(name)")
+        .select("status, pilgrim_count, price, total, booking_channel, created_at, package:packages(name)")
         .eq("tenant_id", profile.tenant_id)
         .is("deleted_at", null)
+
+      const [depositRes] = await Promise.all([
+        supabase
+          .from("travel_deposits")
+          .select("balance")
+          .eq("travel_id", profile.tenant_id)
+          .maybeSingle(),
+      ])
+      setDepositBalance(Number(depositRes.data?.balance || 0))
 
       setBookings((data as any) || [])
       setLoading(false)
@@ -48,7 +57,6 @@ export default function TravelReportsPage() {
 
   const paidBookings = bookings.filter((b) => b.status === "confirmed" || b.status === "completed")
   const totalRevenue = paidBookings.reduce((s, b) => s + (b.price || 0), 0)
-  const totalFees = paidBookings.reduce((s, b) => s + (b.fee || 0), 0)
   const totalBookings = bookings.length
   const totalPilgrims = bookings.filter((b) => b.status !== "cancelled").reduce((s, b) => s + (b.pilgrim_count || 0), 0)
   const avgBooking = totalBookings > 0 ? totalRevenue / totalBookings : 0
@@ -79,7 +87,7 @@ export default function TravelReportsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
           { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
-          { icon: BarChart3, label: "Total Biaya", value: formatRupiah(totalFees), color: "bg-blue-100 text-blue-700" },
+          { icon: BarChart3, label: "Saldo Deposit (Komisi)", value: formatRupiah(depositBalance), color: "bg-blue-100 text-blue-700" },
           { icon: Package, label: "Total Booking", value: totalBookings, color: "bg-purple-100 text-purple-700" },
           { icon: Users, label: "Total Jamaah", value: totalPilgrims, color: "bg-amber-100 text-amber-700" },
           { icon: TrendingUp, label: "Rata-rata/Booking", value: formatRupiah(avgBooking), color: "bg-pink-100 text-pink-700" },

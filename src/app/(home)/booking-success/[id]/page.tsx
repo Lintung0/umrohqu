@@ -16,7 +16,7 @@ export default function BookingSuccessPage() {
     const supabase = createClient()
     let { data } = await supabase
       .from("bookings")
-      .select("id, status, payment_status")
+      .select("id, status")
       .eq("id", params.id)
       .single()
 
@@ -35,7 +35,16 @@ export default function BookingSuccessPage() {
       } catch {}
     }
 
-    if (data?.payment_status === "paid" || data?.status === "confirmed" || data?.status === "completed") {
+    // Trigger verification dengan Midtrans (fallback jika webhook belum sampai)
+    try {
+      await fetch("/api/booking/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: params.id }),
+      })
+    } catch {}
+
+    if (data?.status === "confirmed" || data?.status === "completed") {
       setStatus("success")
       return true
     }

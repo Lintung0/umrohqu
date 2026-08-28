@@ -73,8 +73,6 @@ export default function TravelBookingDetailPage() {
   const updateStatus = async (newStatus: string) => {
     setUpdating(true)
     const updateData: Record<string, any> = { status: newStatus }
-    if (newStatus === "confirmed") updateData.payment_status = "paid"
-    if (newStatus === "cancelled") updateData.payment_status = "cancelled"
     const { error } = await supabase.from("bookings").update(updateData).eq("id", id)
     if (error) {
       toast.error(t("travel_dashboard.status_update_failed"))
