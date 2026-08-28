@@ -81,6 +81,7 @@ export interface Package {
   original_price?: number | null
   image_url?: string | null
   video_url?: string | null
+  images?: string[] | null
   hotel_info?: Record<string, unknown> | null
   hotel_makkah?: string | null
   hotel_makkah_stars?: number | null

@@ -14,8 +14,11 @@ export async function enrichPackagesWithCovers(
     .order("sort_order", { ascending: true })
   const coverMap = new Map<string, string>()
   const videoMap = new Map<string, string>()
+  const imagesMap = new Map<string, string[]>()
   data?.forEach((g: { package_id: string; image_url: string; sort_order: number; media_type?: string }) => {
     if (!g.image_url) return
+    if (!imagesMap.has(g.package_id)) imagesMap.set(g.package_id, [])
+    imagesMap.get(g.package_id)!.push(g.image_url)
     if (g.media_type === "video") {
       if (!videoMap.has(g.package_id)) videoMap.set(g.package_id, g.image_url)
     } else if (!coverMap.has(g.package_id)) {
@@ -24,6 +27,7 @@ export async function enrichPackagesWithCovers(
   })
   return pkgs.map((p) => {
     const next = { ...p } as any
+    if (imagesMap.has(p.id)) next.images = imagesMap.get(p.id)
     if (coverMap.has(p.id)) next.image_url = coverMap.get(p.id)
     if (videoMap.has(p.id)) {
       next.video_url = videoMap.get(p.id)

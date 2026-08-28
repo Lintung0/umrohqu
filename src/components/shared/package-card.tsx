@@ -36,7 +36,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const { addToCompare, isFull, comparePackages } = useCompare()
   const router = useRouter()
   const supabase = createClient()
-  const [imgSrc, setImgSrc] = useState(getSafeImage(pkg.image_url))
+  const [imgSrc, setImgSrc] = useState(getSafeImage((pkg.images && pkg.images[0]) || pkg.image_url))
   const [imgError, setImgError] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
