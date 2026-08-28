@@ -246,5 +246,4 @@ export default function PackageSection() {
         </div>
       </section>
     );
-  );
 }
