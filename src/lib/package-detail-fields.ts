@@ -65,8 +65,8 @@ export async function enrichPackagesWithDetail(
     },
   )
 
-  const enriched = await enrichPackagesWithCovers(supabase, pkgs)
-  return pkgs.map((p) => {
+  const enriched = (await enrichPackagesWithCovers(supabase, pkgs)) || []
+  return enriched.map((p) => {
     if (!p) return p
     const next = { ...p } as any
     if (airlineMap.has(p.id)) next.airline = airlineMap.get(p.id)
