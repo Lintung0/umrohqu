@@ -150,7 +150,7 @@ export default function PackageSection() {
 
   if (loading) {
     return (
-      <section className="py-20 px-6 md:px-12">
+      <section className="py-12 px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 space-y-2">
             <div className="h-8 w-72 bg-muted rounded animate-pulse" />
@@ -173,7 +173,7 @@ export default function PackageSection() {
   }
 
   return (
-    <section className="py-20 px-6 md:px-12">
+    <section className="py-12 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-10">
           <div>
