@@ -228,7 +228,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
 
         <div className="flex flex-col flex-1 p-3.5">
-          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-1.5">
+          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 mb-3">
             {pkg.name}
           </h3>
 
@@ -239,7 +239,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 e.stopPropagation()
                 router.push(`/travel/${travel.slug}`)
               }}
-              className="inline-flex items-center gap-1.5 mb-2 w-fit pointer-events-auto cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-md"
+              className="inline-flex items-center gap-1.5 mb-3 w-fit pointer-events-auto cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-md"
             >
               {travel.logo_url ? (
                 <Image
@@ -256,7 +256,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
                 </div>
               )}
-              <span className="text-[11px] text-slate-500 hover:text-emerald-600 transition-colors truncate max-w-[160px]">
+              <span className="text-[11px] text-slate-600 hover:text-emerald-600 transition-colors truncate max-w-[160px] font-medium">
                 {travel.name}
               </span>
             </button>
@@ -311,8 +311,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
               </div>
               {Number(pkg.cashback_amount) > 0 && (
-                <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
-                  <BadgePercent className="w-3 h-3" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
+                  <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                 </span>
               )}
             </div>
@@ -402,8 +402,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   <span className="text-[10px] text-gray-400 font-normal">{t("card.per_person")}</span>
                 </p>
                 {Number(pkg.cashback_amount) > 0 && (
-                  <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
-                    <BadgePercent className="w-3 h-3" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                  <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
+                    <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                   </span>
                 )}
               </div>
@@ -474,7 +474,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       </div>
 
       <div className="flex flex-col flex-1 p-3.5">
-        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] mb-1.5">
+        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 mb-3">
           {pkg.name}
         </h3>
 
@@ -482,7 +482,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <Link
             href={`/travel/${travel.slug}`}
             onClick={handleTravelClick}
-            className="inline-flex items-center gap-1 mb-2 w-fit pointer-events-auto"
+            className="inline-flex items-center gap-1 mb-3 w-fit pointer-events-auto"
           >
             {travel.logo_url ? (
               <Image
@@ -499,7 +499,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
               </div>
             )}
-            <span className="text-gray-500 font-medium truncate hover:text-emerald-600 transition-colors text-[11px]">
+            <span className="text-gray-600 font-medium truncate hover:text-emerald-600 transition-colors text-[11px]">
               {travel.name}
             </span>
           </Link>
@@ -556,8 +556,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
             </div>
             {Number(pkg.cashback_amount) > 0 && (
-              <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
-                <BadgePercent className="w-3 h-3" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+              <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
+                <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
               </span>
             )}
           </div>
