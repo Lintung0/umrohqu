@@ -10,6 +10,7 @@ import {
   XCircle, BadgeCheck, Zap, Calendar, Scale, Loader2, ChevronLeft, ChevronRight,
   Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
   Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package, Maximize2, X, Timer,
+  BadgePercent,
 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { decodeUnicodeEscapes } from "@/lib/utils"
@@ -29,6 +30,7 @@ interface PackageDetail {
   description: string | null
   price: number
   original_price: number | null
+  cashback_amount?: number | null
   currency: string
   quota: number
   quota_taken: number | null
@@ -160,9 +162,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const displayPkg = livePkg || pkg
   const seat = getSeatAvailability(displayPkg.available, displayPkg.quota, displayPkg.quota_taken)
   const soldOut = getPackageAvailable(displayPkg) <= 0
-  const discount = displayPkg.original_price
-    ? Math.round(((displayPkg.original_price - displayPkg.price) / displayPkg.original_price) * 100)
-    : 0
 
   const ratingBreakdown = [5, 4, 3, 2, 1].map((star) => ({
     star,
@@ -777,9 +776,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     {pkg.type}
                   </span>
                 )}
-                {discount > 0 && (
-                  <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-md">-{discount}%</span>
-                )}
                 {avgRating > 0 && (
                   <span className="flex items-center gap-1 text-xs font-semibold text-amber-600 ml-auto">
                     <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {avgRating.toFixed(1)}
@@ -791,12 +787,16 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               <h1 className="text-lg font-bold leading-tight line-clamp-2 mb-2">{pkg.name}</h1>
 
               <div className="flex items-end justify-between gap-2 mb-1">
-                <div className="flex items-baseline gap-1.5">
-                  {pkg.original_price && (
-                    <span className="text-sm text-muted-foreground line-through mr-1">{formatRupiah(pkg.original_price)}</span>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-baseline gap-1.5">
+                    <p className="text-2xl font-extrabold text-primary">{formatRupiah(pkg.price)}</p>
+                    <span className="text-xs text-muted-foreground">/ orang</span>
+                  </div>
+                  {Number(pkg.cashback_amount) > 0 && (
+                    <span className="inline-flex items-center gap-1 w-fit text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
+                      <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                    </span>
                   )}
-                  <p className="text-2xl font-extrabold text-primary">{formatRupiah(pkg.price)}</p>
-                  <span className="text-xs text-muted-foreground">/ orang</span>
                 </div>
               </div>
 

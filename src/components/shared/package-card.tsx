@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, Calendar, Scale, Heart, Loader2, Star, Timer } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, Calendar, Scale, Heart, Loader2, Star, Timer, BadgePercent } from "lucide-react"
 import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -310,6 +310,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
                 <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
               </div>
+              {Number(pkg.cashback_amount) > 0 && (
+                <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
+                  <BadgePercent className="w-3 h-3" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -396,6 +401,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   {formatRupiah(pkg.price)}
                   <span className="text-[10px] text-gray-400 font-normal">{t("card.per_person")}</span>
                 </p>
+                {Number(pkg.cashback_amount) > 0 && (
+                  <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
+                    <BadgePercent className="w-3 h-3" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -545,6 +555,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               <p className="text-lg font-extrabold text-emerald-700">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
             </div>
+            {Number(pkg.cashback_amount) > 0 && (
+              <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
+                <BadgePercent className="w-3 h-3" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+              </span>
+            )}
           </div>
         </div>
       </div>

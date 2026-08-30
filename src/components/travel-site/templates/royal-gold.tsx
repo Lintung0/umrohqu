@@ -168,11 +168,13 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
         </div>
         <div className="flex items-end justify-between pt-3 border-t" style={{ borderColor: `${gold}22` }}>
           <div>
-            {pkg.original_price && <p className="text-[11px] line-through" style={{ color: `${gold}55` }}>{formatRupiah(pkg.original_price)}</p>}
             <div className="flex items-baseline gap-1">
               <p className="text-lg font-bold" style={{ color: gold }}>{formatRupiah(pkg.price)}</p>
               <p className="text-[10px]" style={{ color: `${gold}55` }}>/org</p>
             </div>
+            {Number(pkg.cashback_amount) > 0 && (
+              <p className="text-[11px] font-semibold mt-0.5" style={{ color: "#059669" }}>+ Cashback {formatRupiah(Number(pkg.cashback_amount))}</p>
+            )}
           </div>
           <span className="inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:shadow-lg" style={{ background: gold, color: primary }}>
             Lihat <ArrowRight className="w-3 h-3" />

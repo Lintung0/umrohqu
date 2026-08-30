@@ -79,6 +79,7 @@ export interface Package {
   departure_cities?: string[] | null
   departure_month?: string | null
   original_price?: number | null
+  cashback_amount?: number | null
   image_url?: string | null
   video_url?: string | null
   images?: string[] | null

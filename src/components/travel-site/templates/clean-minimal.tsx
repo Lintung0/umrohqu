@@ -166,8 +166,10 @@ function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
         </div>
         <div className="flex items-end justify-between pt-3 border-t border-border/40">
           <div>
-            {pkg.original_price && <p className="text-[11px] text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>}
             <p className="text-lg font-bold text-gray-900">{formatRupiah(pkg.price)}</p>
+            {Number(pkg.cashback_amount) > 0 && (
+              <p className="text-[11px] font-semibold text-emerald-600 mt-0.5">+ Cashback {formatRupiah(Number(pkg.cashback_amount))}</p>
+            )}
           </div>
           <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-border/60 text-gray-700 hover:bg-gray-50 transition-colors group/btn">
             Detail <ArrowRight className="w-3 h-3 transition-transform group-hover/btn:translate-x-0.5" />

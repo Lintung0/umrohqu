@@ -161,11 +161,13 @@ function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: strin
         </div>
         <div className="flex items-end justify-between pt-3 border-t border-border/50">
           <div>
-            {pkg.original_price && <p className="text-[11px] text-muted-foreground line-through">{formatRupiah(pkg.original_price)}</p>}
             <div className="flex items-baseline gap-1">
               <p className="text-lg font-bold" style={{ color: primary }}>{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-muted-foreground">/org</p>
             </div>
+            {Number(pkg.cashback_amount) > 0 && (
+              <p className="text-[11px] font-semibold text-emerald-600 mt-0.5">+ Cashback {formatRupiah(Number(pkg.cashback_amount))}</p>
+            )}
           </div>
           <span className="inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-medium text-white transition-all duration-200 hover:shadow-lg" style={{ background: `linear-gradient(135deg, ${primary}, ${primary}cc)` }}>
             Lihat <ArrowRight className="w-3 h-3" />

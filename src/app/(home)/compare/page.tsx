@@ -195,9 +195,6 @@ function renderValue(key: string, pkg: Package, highlight?: "best" | "worst") {
     case "price":
       return (
         <div className={hlClass}>
-          {pkg.original_price ? (
-            <p className="text-xs text-muted-foreground line-through">{formatRupiah(Number(pkg.original_price) || 0)}</p>
-          ) : null}
           <p className="font-bold text-primary">{formatRupiah(Number(pkg.price) || 0)}</p>
           <p className="text-[11px] text-muted-foreground">/ orang</p>
         </div>

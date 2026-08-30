@@ -645,7 +645,7 @@ function SearchContent() {
               <>
                 <div key={currentPage} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
                   {paginated.map((pkg) => (
-                    <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} showTravel={false} />
+                    <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} showTravel={true} />
                   ))}
                 </div>
 
