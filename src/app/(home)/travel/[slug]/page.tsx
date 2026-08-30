@@ -287,16 +287,6 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                 >
                   <Package className="w-4 h-4 text-emerald-700" /> Lihat Paket
                 </a>
-                {tenantData.phone && (
-                  <a
-                    href={`https://wa.me/${tenantData.phone.replace(/[^0-9]/g, "")}?text=Assalamualaikum,%20saya%20tertarik%20dengan%20paket%20umroh%20${encodeURIComponent(tenantData.name)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-emerald-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-900/30"
-                  >
-                    <MessageCircle className="w-4 h-4" /> Chat WhatsApp
-                  </a>
-                )}
               </div>
             </div>
 
