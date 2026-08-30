@@ -292,13 +292,15 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             </>
           </div>
 
+<div className="flex items-center gap-1 mb-2 h-4">
           {avgRating !== null && (
-            <div className="flex items-center gap-1 mb-2">
+            <>
               <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
               <span className="text-xs font-semibold text-slate-700">{avgRating}</span>
               <span className="text-[11px] text-slate-400">({reviewCount})</span>
-            </div>
+            </>
           )}
+        </div>
 
           <div className="mb-3">
             <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
@@ -524,13 +526,15 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        {avgRating !== null && (
-          <div className="flex items-center gap-1 mb-2">
-            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span className="text-xs font-semibold text-gray-700">{avgRating}</span>
-            <span className="text-[11px] text-gray-400">({reviewCount} ulasan)</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1 mb-2 h-4">
+          {avgRating !== null && (
+            <>
+              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span className="text-xs font-semibold text-gray-700">{avgRating}</span>
+              <span className="text-[11px] text-gray-400">({reviewCount} ulasan)</span>
+            </>
+          )}
+        </div>
 
         <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
 
