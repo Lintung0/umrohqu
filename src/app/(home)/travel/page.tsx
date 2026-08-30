@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, Package, BadgeCheck, Search, X, ArrowRight, Sparkles, ShieldCheck, Building2 } from "lucide-react"
+import { MapPin, Package, BadgeCheck, Search, X, ArrowRight, Sparkles, Building2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 interface TravelRow {
@@ -35,7 +35,6 @@ export default function TravelListPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [cityFilter, setCityFilter] = useState("semua")
-  const [verifiedOnly, setVerifiedOnly] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -87,7 +86,6 @@ export default function TravelListPage() {
   )
 
   const filtered = travels.filter((t) => {
-    if (verifiedOnly && !t.is_verified) return false
     if (cityFilter !== "semua" && t.city !== cityFilter) return false
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
@@ -206,20 +204,6 @@ export default function TravelListPage() {
                 </button>
               ))}
             </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setVerifiedOnly(!verifiedOnly)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                  verifiedOnly
-                    ? "bg-emerald-500/30 border-emerald-300 text-white"
-                    : "bg-white/10 border-white/15 text-emerald-50 hover:bg-white/20"
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Terverifikasi
-              </button>
-            </div>
           </div>
         </div>
 
@@ -235,7 +219,7 @@ export default function TravelListPage() {
             </div>
             <p className="text-sm text-gray-500">Tidak ada travel yang cocok dengan filter ini.</p>
             <button
-              onClick={() => { setSearchQuery(""); setCityFilter("semua"); setVerifiedOnly(false) }}
+              onClick={() => { setSearchQuery(""); setCityFilter("semua") }}
               className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl transition-colors"
             >
               Atur Ulang Filter
@@ -257,11 +241,6 @@ export default function TravelListPage() {
                   <div className="absolute inset-x-0 -bottom-6 flex justify-center" aria-hidden>
                     <div className="w-28 h-12 bg-white/20 rounded-full blur-xl" />
                   </div>
-                  {travel.is_featured && (
-                    <span className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 bg-amber-400 text-emerald-950 text-[10px] font-bold px-2 py-1 rounded-full shadow-md">
-                      <Sparkles className="w-3 h-3" /> Unggulan
-                    </span>
-                  )}
                 </div>
 
                 {/* Body */}
