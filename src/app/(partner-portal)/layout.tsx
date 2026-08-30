@@ -41,7 +41,7 @@ export default function PartnerPortalLayout({
         {/* Footer */}
         <div className="mt-auto pt-12 pb-4 text-center">
           <p className="text-xs text-white/20">
-            &copy; 2026 UmrahQu. All rights reserved.
+            &copy; 2026 UmrahQu. Seluruh hak cipta.
           </p>
         </div>
       </div>

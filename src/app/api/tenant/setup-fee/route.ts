@@ -32,7 +32,7 @@ export async function GET() {
     return NextResponse.json({ tenant })
   } catch (err) {
     console.error("Setup fee error:", err)
-    return NextResponse.json({ error: "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: "Terjadi kesalahan internal" }, { status: 500 })
   }
 }
 

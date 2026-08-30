@@ -112,7 +112,7 @@ export default function RoyalGoldTemplate({ tenant, packages, themeConfig }: Tem
                 <p className="text-xs" style={{ color: `${gold}66` }}>{tenant.city}</p>
               </div>
             </div>
-            <p className="text-xs" style={{ color: `${gold}44` }}>&copy; {new Date().getFullYear()} {tenant.name}. All rights reserved.</p>
+            <p className="text-xs" style={{ color: `${gold}44` }}>&copy; {new Date().getFullYear()} {tenant.name}. Seluruh hak cipta.</p>
           </div>
         </div>
       </footer>

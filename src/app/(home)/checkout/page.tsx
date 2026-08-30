@@ -195,7 +195,7 @@ function CheckoutContent() {
           <span>/</span>
           <Link href={`/package/${pkg.slug}`} className="hover:text-emerald-600 truncate hidden sm:inline">{pkg.name}</Link>
           <span className="hidden sm:inline">/</span>
-          <span className="text-slate-900 font-medium">Checkout</span>
+          <span className="text-slate-900 font-medium">Pembayaran</span>
         </div>
       </div>
 
@@ -638,7 +638,7 @@ function StepPayment({
 
         <div className="lg:hidden flex justify-between">
           <Button variant="outline" onClick={() => setStep(0)}>← Kembali</Button>
-          <Button onClick={() => setStep(2)} className="gap-2 px-6 h-12">Review <ChevronRight className="w-4 h-4" /></Button>
+          <Button onClick={() => setStep(2)} className="gap-2 px-6 h-12">Tinjau <ChevronRight className="w-4 h-4" /></Button>
         </div>
       </div>
 

@@ -106,7 +106,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (insertErr) {
-      return NextResponse.json({ error: "Gagal membuat booking: " + insertErr.message }, { status: 500 })
+      console.error("Booking insert error:", insertErr)
+      return NextResponse.json({ error: "Gagal membuat booking" }, { status: 500 })
     }
 
     // 3. Insert booking_participants

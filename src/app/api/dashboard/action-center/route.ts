@@ -52,7 +52,7 @@ export async function GET() {
   } catch (error: any) {
     console.error("Action Center API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch action center stats" },
+      { error: error.message || "Gagal memuat statistik pusat tindakan" },
       { status: 500 },
     );
   }

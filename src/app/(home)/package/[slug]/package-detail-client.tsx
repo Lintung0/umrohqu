@@ -848,7 +848,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         toast.success("Paket berhasil ditambahkan ke perbandingan")
                       }}
                     >
-                      <Scale className="w-4 h-4" /> Bandingkan Paket
+                      <Scale className="w-4 h-4" /> Bandingkan
                     </Button>
                   </>
                 )}

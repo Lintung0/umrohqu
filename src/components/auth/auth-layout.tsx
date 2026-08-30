@@ -49,7 +49,7 @@ export function AuthLayout({
         </div>
 
         <div className="relative z-10 text-sm text-white/30">
-          &copy; 2026 UmrahQu. All rights reserved.
+          &copy; 2026 UmrahQu. Seluruh hak cipta.
         </div>
       </div>
 

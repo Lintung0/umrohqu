@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const { country } = body
 
     if (!country || !getAseanCountryByCode(country)) {
-      return NextResponse.json({ error: "Invalid country code" }, { status: 400 })
+      return NextResponse.json({ error: "Kode negara tidak valid" }, { status: 400 })
     }
 
     const supabase = await createClient()
@@ -50,6 +50,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, country })
   } catch {
-    return NextResponse.json({ error: "Failed to save country" }, { status: 500 })
+    return NextResponse.json({ error: "Gagal menyimpan negara" }, { status: 500 })
   }
 }

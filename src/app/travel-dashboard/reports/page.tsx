@@ -128,7 +128,7 @@ export default function TravelReportsPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-border p-5">
-          <h2 className="font-semibold mb-4">Top Booking</h2>
+          <h2 className="font-semibold mb-4">Pemesanan Teratas</h2>
           <div className="space-y-3">
             {topBookings.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">Belum ada booking</p>

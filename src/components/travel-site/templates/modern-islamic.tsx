@@ -107,7 +107,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
                 <p className="text-xs text-muted-foreground">{tenant.city}</p>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {tenant.name}. All rights reserved.</p>
+            <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {tenant.name}. Seluruh hak cipta.</p>
           </div>
         </div>
       </footer>

@@ -227,7 +227,7 @@ export async function GET() {
   } catch (error: any) {
     console.error("Dashboard Stats API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch dashboard stats" },
+      { error: error.message || "Gagal memuat statistik dashboard" },
       { status: 500 },
     );
   }
