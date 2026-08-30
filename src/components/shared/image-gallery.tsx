@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import useEmblaCarousel from "embla-carousel-react"
-import { ChevronLeft, ChevronRight, Maximize2, Play, X } from "lucide-react"
+import { PhotoProvider, PhotoView } from "react-photo-view"
+import "react-photo-view/dist/react-photo-view.css"
+import { ChevronLeft, ChevronRight, Maximize2, Play } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function isYouTubeUrl(url: string): boolean {
@@ -30,7 +32,6 @@ interface ImageGalleryProps {
 export default function ImageGallery({ images, items, alt = "Gallery", title }: ImageGalleryProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [lightbox, setLightbox] = useState<number | null>(null)
 
   const galleryItems: GalleryItem[] = items || images.map((url) => ({ url, type: "image" as const }))
 
@@ -65,7 +66,11 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
   if (!images.length) return null
 
   return (
-    <>
+    <PhotoProvider
+      loop={galleryItems.filter((i) => i.type !== "video").length > 1}
+      speed={() => 300}
+      bannerVisible
+    >
       {/* WRAPPER CONTAINER ULTIMATE — lokal overflow agar foto/titik tidak bocor keluar garis */}
       <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-900 shadow-sm">
         {/* Main carousel */}
@@ -75,7 +80,6 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
               <div
                 key={i}
                 className={`flex-[0_0_100%] min-w-0 relative aspect-video max-h-[360px] w-full overflow-hidden ${item.type !== "video" ? "cursor-pointer" : ""}`}
-                onClick={() => item.type !== "video" && setLightbox(i)}
               >
                 {item.type === "video" && isYouTubeUrl(item.url) ? (
                   <div className="relative w-full h-full bg-black flex items-center justify-center">
@@ -99,23 +103,28 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
                     />
                   </div>
                 ) : (
-                  <Image
+                  <PhotoView
                     src={item.url}
-                    alt={`${alt} ${i + 1}`}
-                    fill
-                    className="object-cover w-full h-full"
-                    sizes="100vw"
-                    unoptimized
-                  />
-                )}
-                {item.type !== "video" && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setLightbox(i) }}
-                    className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors"
-                    aria-label="Perbesar foto"
+                    overlay={<span className="text-sm text-white/80">{alt} {i + 1}</span>}
                   >
-                    <Maximize2 className="w-3.5 h-3.5" />
-                  </button>
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={item.url}
+                        alt={`${alt} ${i + 1}`}
+                        fill
+                        className="object-cover w-full h-full"
+                        sizes="100vw"
+                        unoptimized
+                      />
+                      <button
+                        className="absolute top-3 right-3 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors z-20 cursor-zoom-in"
+                        aria-label="Perbesar foto"
+                        type="button"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </PhotoView>
                 )}
                 {item.type === "video" && (
                   <div className="absolute top-3 right-3 px-2 py-1 bg-black/50 rounded text-xs text-white font-medium flex items-center gap-1 pointer-events-none">
@@ -172,74 +181,6 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
           {selectedIndex + 1} / {galleryItems.length}
         </div>
       </div>
-
-      {/* Lightbox */}
-      {lightbox !== null && (
-        <div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}
-        >
-          <button
-            onClick={() => setLightbox(null)}
-            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white z-10"
-            aria-label="Tutup"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setLightbox((lightbox - 1 + galleryItems.length) % galleryItems.length)
-            }}
-            className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white z-10"
-            aria-label="Sebelumnya"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-
-          {galleryItems[lightbox]?.type === "video" && isYouTubeUrl(galleryItems[lightbox]?.url || "") ? (
-            <iframe
-              src={getYouTubeEmbedUrl(galleryItems[lightbox].url)}
-              className="w-[90vw] max-w-[1200px] aspect-video rounded-lg"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : galleryItems[lightbox]?.type === "video" ? (
-            <video
-              src={galleryItems[lightbox].url}
-              controls
-              playsInline
-              autoPlay
-              className="max-h-[85vh] max-w-full object-contain rounded-lg"
-            />
-          ) : (
-            <Image
-              src={galleryItems[lightbox]?.url || ""}
-              alt={`${alt} ${lightbox + 1}`}
-              width={1200}
-              height={800}
-              className="max-h-[85vh] max-w-full object-contain rounded-lg"
-              unoptimized
-            />
-          )}
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setLightbox((lightbox + 1) % galleryItems.length)
-            }}
-            className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white z-10"
-            aria-label="Berikutnya"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-
-          <div className="absolute bottom-4 text-white text-sm z-10">
-            {lightbox + 1} / {galleryItems.length}
-          </div>
-        </div>
-      )}
-    </>
+    </PhotoProvider>
   )
 }
