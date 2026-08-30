@@ -228,7 +228,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
 
         <div className="flex flex-col flex-1 p-3.5">
-          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 mb-3">
+          <h3 className="font-semibold text-sm leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 mb-3 min-h-[2.4rem]">
             {pkg.name}
           </h3>
 
@@ -476,7 +476,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       </div>
 
       <div className="flex flex-col flex-1 p-3.5">
-        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 mb-3">
+        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 mb-3 min-h-[2.4rem]">
           {pkg.name}
         </h3>
 
