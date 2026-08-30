@@ -28,16 +28,46 @@ export default function TravelListPage() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase
-      .from("tenants")
-      .select("id, slug, name, logo_url, description, founded_year, is_verified, is_featured, packages_count")
-      .is("deleted_at", null)
-      .order("is_featured", { ascending: false })
-      .order("is_verified", { ascending: false })
-      .then(({ data }) => {
-        setTravels((data as TravelRow[]) || [])
-        setLoading(false)
-      })
+    let cancelled = false
+
+    async function load() {
+      const { data: tenantRows, error } = await supabase
+        .from("tenants")
+        .select("id, slug, name, logo_url, description, founded_year, is_verified, is_featured")
+        .is("deleted_at", null)
+        .order("is_featured", { ascending: false })
+        .order("is_verified", { ascending: false })
+
+      if (error) {
+        console.error("Error fetching travels:", error)
+        if (!cancelled) setTravels([])
+        if (!cancelled) setLoading(false)
+        return
+      }
+
+      const rows = ((tenantRows as TravelRow[]) || []).map((t) => ({ ...t, packages_count: 0 }))
+
+      const { data: pkgRows } = await supabase
+        .from("packages")
+        .select("tenant_id")
+        .in("status", ["active", "ongoing"])
+
+      if (!cancelled && pkgRows) {
+        const counts = new Map<string, number>()
+        ;(pkgRows as { tenant_id: string }[]).forEach((p) => {
+          counts.set(p.tenant_id, (counts.get(p.tenant_id) || 0) + 1)
+        })
+        rows.forEach((r) => {
+          r.packages_count = counts.get(r.id) || 0
+        })
+      }
+
+      if (!cancelled) setTravels(rows)
+      if (!cancelled) setLoading(false)
+    }
+
+    load()
+    return () => { cancelled = true }
   }, [])
 
   const cities = ["semua", ...Array.from(new Set(travels.map((t) => t.city).filter(Boolean) as string[])).sort()]
