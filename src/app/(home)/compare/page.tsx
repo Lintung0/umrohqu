@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { X, Check, Minus, Scale, Award, Sparkles, TrendingDown, Star } from "lucide-react"
+import { X, Check, Minus, Scale, Award, Sparkles, TrendingDown, Star, Plus, Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { formatRupiah } from "@/lib/utils"
@@ -262,7 +262,137 @@ function compareRows(pkgs: Package[], key: string, _scores: ReturnType<typeof ca
   })
 }
 
-function CompareView() {
+function PackagePickerModal({ onClose, onSelect }: {
+  onClose: () => void
+  onSelect: () => void
+}) {
+  const { comparePackages, addToCompare, compareCount } = useCompare()
+  const [query, setQuery] = useState("")
+  const [packages, setPackages] = useState<Package[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    let active = true
+    const fetchPackages = async () => {
+      const { data, error } = await supabase
+        .from("packages")
+        .select("*")
+        .in("status", ["active", "ongoing"])
+        .neq("type", "haji")
+        .is("deleted_at", null)
+        .limit(60)
+      if (active && !error && data) {
+        const enriched = await enrichPackagesWithDetail(supabase, data as Package[])
+        if (active) setPackages(enriched || [])
+      }
+      if (active) setLoading(false)
+    }
+    fetchPackages()
+    return () => { active = false }
+  }, [])
+
+  const selectedIds = new Set(comparePackages.map((p) => p.id))
+  const q = query.toLowerCase().trim()
+  const filtered = packages.filter((pkg) => {
+    if (q === "") return true
+    const haystack = [pkg.name, pkg.description, pkg.departure_city, pkg.airline]
+      .filter(Boolean).join(" ").toLowerCase()
+    return haystack.includes(q)
+  })
+
+  const slotsLeft = MAX_COMPARE - compareCount
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div>
+            <h3 className="font-semibold">Pilih Paket</h3>
+            <p className="text-xs text-muted-foreground">Pilih paket untuk dibandingkan ({slotsLeft} slot tersisa)</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-4 border-b border-border">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Cari nama paket, kota, atau maskapai..."
+              className="w-full h-10 pl-9 pr-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-shadow"
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-10">Tidak ada paket ditemukan</p>
+          ) : (
+            filtered.map((pkg) => {
+              const isSelected = selectedIds.has(pkg.id)
+              const noSlot = slotsLeft <= 0
+              return (
+                <button
+                  key={pkg.id}
+                  disabled={isSelected || noSlot}
+                  onClick={() => {
+                    addToCompare(pkg)
+                    onSelect()
+                  }}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl border transition-colors text-left ${
+                    isSelected
+                      ? "border-emerald-200 bg-emerald-50/50 cursor-default"
+                      : noSlot
+                        ? "border-border opacity-50 cursor-not-allowed"
+                        : "border-border hover:border-primary/40 hover:bg-muted/30"
+                  }`}
+                >
+                  <div className="relative w-16 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">
+                    <Image
+                      src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
+                      alt={pkg.name || "Paket"} fill className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold leading-snug line-clamp-1">{pkg.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                      {pkg.departure_city || "-"} · {pkg.airline || "-"} · {pkg.duration_nights || "-"} Hari
+                    </p>
+                    <p className="text-xs font-bold text-primary mt-0.5">{formatRupiah(Number(pkg.price) || 0)}</p>
+                  </div>
+                  {isSelected ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 shrink-0">
+                      <Check className="w-3.5 h-3.5" /> Terpilih
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary shrink-0">
+                      <Plus className="w-3.5 h-3.5" /> Tambah
+                    </span>
+                  )}
+                </button>
+              )
+            })
+          )}
+        </div>
+
+        <div className="p-3 border-t border-border text-center text-xs text-muted-foreground">
+          {compareCount}/{MAX_COMPARE} paket dibandingkan
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
   const { comparePackages, removeFromCompare } = useCompare()
 
   const scores = useMemo(() => comparePackages.map(calcScore), [comparePackages])
@@ -362,9 +492,21 @@ function CompareView() {
                 />
               </CarouselItem>
             ))}
+            {emptySlots > 0 && (
+              <CarouselItem>
+                <button
+                  onClick={onOpenPicker}
+                  className="w-full min-h-[320px] rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-white flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                >
+                  <Plus className="w-8 h-8" />
+                  <span className="text-sm font-semibold">Tambah Paket</span>
+                  <span className="text-xs">pilih dari daftar paket</span>
+                </button>
+              </CarouselItem>
+            )}
           </CarouselContent>
         </Carousel>
-        <MobileDotIndicator total={comparePackages.length} api={carouselApi} />
+        <MobileDotIndicator total={comparePackages.length + (emptySlots > 0 ? 1 : 0)} api={carouselApi} />
       </div>
 
       {/* DESKTOP: Grid table view */}
@@ -372,32 +514,47 @@ function CompareView() {
         <div className="min-w-[640px]">
           <div className="grid gap-4 mb-6 grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))]">
             <div />
-            {comparePackages.map((pkg, i) => {
-              const isBest = comparePackages.length > 1 && scores[i].valueScore === maxScore && maxScore > 0
+            {Array.from({ length: MAX_COMPARE }).map((_, slotIdx) => {
+              const pkg = comparePackages[slotIdx]
+              if (pkg) {
+                const i = slotIdx
+                const isBest = comparePackages.length > 1 && scores[i].valueScore === maxScore && maxScore > 0
+                return (
+                  <div key={pkg.id} className={`bg-white border-2 rounded-2xl overflow-hidden ${isBest ? "border-emerald-400 shadow-md shadow-emerald-100" : "border-primary/30"}`}>
+                    <div className="relative h-28">
+                      <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover" />
+                      <button onClick={() => removeFromCompare(pkg.id)} className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                      <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                        <PackageStatusBadge status={pkg.status} />
+                        {isBest && (
+                          <div className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                            <Award className="w-3 h-3" /> Pilihan Terbaik
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-xs font-semibold leading-snug line-clamp-2">{pkg.name}</p>
+                      <div className="text-[11px] text-muted-foreground mt-1">
+                        Rp {Math.round(scores[i].pricePerDay / 1000)}rb / hari
+                      </div>
+                      <SmartBadges scores={scores} index={i} />
+                    </div>
+                  </div>
+                )
+              }
               return (
-                <div key={pkg.id} className={`bg-white border-2 rounded-2xl overflow-hidden ${isBest ? "border-emerald-400 shadow-md shadow-emerald-100" : "border-primary/30"}`}>
-                  <div className="relative h-28">
-                    <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover" />
-                    <button onClick={() => removeFromCompare(pkg.id)} className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                    <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                      <PackageStatusBadge status={pkg.status} />
-                      {isBest && (
-                        <div className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
-                          <Award className="w-3 h-3" /> Pilihan Terbaik
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <p className="text-xs font-semibold leading-snug line-clamp-2">{pkg.name}</p>
-                    <div className="text-[11px] text-muted-foreground mt-1">
-                      Rp {Math.round(scores[i].pricePerDay / 1000)}rb / hari
-                    </div>
-                    <SmartBadges scores={scores} index={i} />
-                  </div>
-                </div>
+                <button
+                  key={`add-slot-${slotIdx}`}
+                  onClick={onOpenPicker}
+                  className="rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-white flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors py-10"
+                >
+                  <Plus className="w-6 h-6" />
+                  <span className="text-xs font-semibold">Tambah Paket</span>
+                  <span className="text-[10px]">pilih dari daftar paket</span>
+                </button>
               )
             })}
           </div>
@@ -440,6 +597,7 @@ function CompareContent() {
   const packagesParam = useMemo(() => searchParams.getAll("packages"), [searchParams])
 
   const [loading, setLoading] = useState(true)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   useEffect(() => {
     if (packagesParam.length === 0) return
@@ -493,16 +651,22 @@ function CompareContent() {
         {compareCount > 0 && (
           <div className="flex items-center justify-between mb-6">
             <span className="text-sm text-muted-foreground">{compareCount}/{MAX_COMPARE} paket dipilih</span>
-            <button
-              onClick={clearCompare}
-              className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
-            >
-              Atur Ulang
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={clearCompare}
+                className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
+              >
+                Atur Ulang
+              </button>
+            </div>
           </div>
         )}
-        <CompareView />
+        <CompareView onOpenPicker={() => setPickerOpen(true)} />
       </div>
+
+      {pickerOpen && (
+        <PackagePickerModal onClose={() => setPickerOpen(false)} onSelect={() => setPickerOpen(false)} />
+      )}
 
       <AiChatPanel packages={comparePackages} />
     </main>
