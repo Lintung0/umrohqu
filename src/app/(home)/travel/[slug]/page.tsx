@@ -344,9 +344,6 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               <div className="rounded-2xl bg-gradient-to-br from-white to-emerald-50/60 border border-gray-100 p-5 sm:p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-emerald-500/60 via-emerald-400/60 to-amber-300/60" aria-hidden />
                 <p className="text-gray-600 leading-relaxed">
-                  <span className="float-left mr-2.5 text-5xl font-serif font-bold leading-[0.85] text-transparent bg-clip-text bg-gradient-to-b from-emerald-600 to-emerald-400 select-none">
-                    {tenantData.name.charAt(0)}
-                  </span>
                   {tenantData.description || "Biro perjalanan umroh & haji terpercaya."}
                 </p>
               </div>
