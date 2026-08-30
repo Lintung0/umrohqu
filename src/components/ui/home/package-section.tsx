@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase/client";
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils";
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields";
 import PackageCard from "@/components/shared/package-card";
-import type { Package } from "@/lib/types";
+import type { Package, Tenant } from "@/lib/types";
 
 const PAGE_SIZE = 6;
 
@@ -29,8 +29,25 @@ export default function PackageSection() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [compared, setCompared] = useState<string[]>([]);
+  const [tenants, setTenants] = useState<Map<string, Tenant>>(new Map());
   const packagesRef = useRef<Package[]>([]);
   const initialLoadDone = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadTenants() {
+      const { data: tnts, error } = await supabase
+        .from("tenants")
+        .select("*")
+        .is("deleted_at", null);
+      if (error || !tnts || cancelled) return;
+      const map = new Map<string, Tenant>();
+      tnts.forEach((t) => map.set(t.id, t as Tenant));
+      setTenants(map);
+    }
+    loadTenants();
+    return () => { cancelled = true };
+  }, []);
 
   const fetchPackages = useCallback(async (pageNum: number, showLoading = false) => {
     const isInitial = pageNum === 1 && showLoading;
@@ -208,7 +225,7 @@ export default function PackageSection() {
               className="card-animate"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <PackageCard pkg={pkg} showTravel={false} />
+              <PackageCard pkg={pkg} travel={tenants.get(pkg.tenant_id)} showTravel={true} />
             </div>
           ))}
         </div>
