@@ -219,9 +219,6 @@ export default function TravelListPage() {
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Terverifikasi
               </button>
-              <span className="text-emerald-100/70 text-xs">
-                <span className="font-semibold text-white">{filtered.length}</span> travel partner ditemukan
-              </span>
             </div>
           </div>
         </div>
