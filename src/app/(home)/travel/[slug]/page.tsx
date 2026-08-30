@@ -330,23 +330,6 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
         </div>
       </section>
 
-      {/* Glass stat strip */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-8 relative z-10">
-        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/70 border border-gray-100 px-4 sm:px-6 py-4 grid grid-cols-2 sm:grid-cols-4 divide-x divide-gray-100">
-          {[
-            { value: `${salePackages.length + otherPackages.length}`, label: "Total Paket" },
-            { value: totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+` : `${totalAvailable}`, label: totalJamaah > 0 ? "Jamaah" : "Kursi Tersedia" },
-            { value: tenantData.founded_year || "-", label: "Berdiri Sejak" },
-            { value: tenantData.is_verified ? "Aktif" : "Proses", label: "Status Verifikasi" },
-          ].map((m, i) => (
-            <div key={m.label} className={`text-center ${i > 0 ? "hidden sm:block" : ""}`}>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900 tabular-nums">{m.value}</p>
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">{m.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
 
         {/* Tentang — editorial */}
@@ -357,14 +340,11 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                 <span className="h-6 w-1 rounded-full bg-gradient-to-b from-emerald-500 to-emerald-600" />
                 <h2 className="text-lg font-bold tracking-tight">Tentang Kami</h2>
               </div>
-              <blockquote className="relative border-l-2 border-emerald-500/60 pl-4 text-gray-600 font-serif text-lg leading-relaxed">
-                &ldquo;{tenantData.description || "Biro perjalanan umroh & haji terpercaya."}&rdquo;
-              </blockquote>
 
-              <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="rounded-xl bg-white border border-gray-100 px-3 py-3 text-center shadow-sm">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Lokasi</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-0.5">{tenantData.city || "-"}</p>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Jamaah Berangkat</p>
+                  <p className="text-sm font-semibold text-gray-800 mt-0.5">{totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+` : "0"}</p>
                 </div>
                 <div className="rounded-xl bg-white border border-gray-100 px-3 py-3 text-center shadow-sm">
                   <p className="text-[10px] text-gray-400 uppercase tracking-wide">Beroperasi</p>
