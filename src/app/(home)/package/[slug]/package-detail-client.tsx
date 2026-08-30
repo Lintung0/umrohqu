@@ -859,8 +859,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             {/* Travel */}
             {pkg.travel && (
               <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3">
-                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Diselenggarakan oleh</p>
-                <div className="flex items-center gap-3">
+                <Link href={`/travel/${pkg.travel.slug}`} className="group flex items-center gap-3">
                   {pkg.travel.logo_url ? (
                     <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={48} height={48} unoptimized className="rounded-xl object-cover ring-2 ring-white shadow-sm" />
                   ) : (
@@ -875,12 +874,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     </div>
                     {pkg.travel.city && <p className="text-[11px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-3 h-3" />{pkg.travel.city}</p>}
                   </div>
-                  <Link href={`/travel/${pkg.travel.slug}`} className="shrink-0">
-                    <Button variant="ghost" size="sm" className="text-xs text-primary hover:bg-primary/5 gap-1">
-                      Profil <ChevronRight className="w-3 h-3" />
-                    </Button>
-                  </Link>
-                </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
+                </Link>
                 {pkg.travel.phone && (
                   <a href={`https://wa.me/${pkg.travel.phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="mt-3 block">
                     <Button className="w-full h-11 text-xs font-bold gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all">
