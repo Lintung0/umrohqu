@@ -341,22 +341,43 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                 <h2 className="text-lg font-bold tracking-tight">Tentang Kami</h2>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="rounded-xl bg-white border border-gray-100 px-3 py-3 text-center shadow-sm">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Jamaah Berangkat</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-0.5">{totalJamaah > 0 ? `${totalJamaah.toLocaleString("id-ID")}+` : "0"}</p>
+              <div className="rounded-2xl bg-gradient-to-br from-white to-emerald-50/60 border border-gray-100 p-5 sm:p-6 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-emerald-500/60 via-emerald-400/60 to-amber-300/60" aria-hidden />
+                <p className="text-gray-600 leading-relaxed">
+                  <span className="float-left mr-2.5 text-5xl font-serif font-bold leading-[0.85] text-transparent bg-clip-text bg-gradient-to-b from-emerald-600 to-emerald-400 select-none">
+                    {tenantData.name.charAt(0)}
+                  </span>
+                  {tenantData.description || "Biro perjalanan umroh & haji terpercaya."}
+                </p>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-xl bg-white border border-gray-100 px-3.5 py-3.5 shadow-sm flex items-center gap-2.5">
+                  <span className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                    <Building2 className="w-4.5 h-4.5 text-emerald-600" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Beroperasi</p>
+                    <p className="text-sm font-semibold text-gray-800 truncate">Sejak {tenantData.founded_year || "-"}</p>
+                  </div>
                 </div>
-                <div className="rounded-xl bg-white border border-gray-100 px-3 py-3 text-center shadow-sm">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Beroperasi</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-0.5">Sejak {tenantData.founded_year || "-"}</p>
+                <div className="rounded-xl bg-white border border-gray-100 px-3.5 py-3.5 shadow-sm flex items-center gap-2.5">
+                  <span className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                    <BadgeCheck className="w-4.5 h-4.5 text-emerald-600" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Verifikasi</p>
+                    <p className="text-sm font-semibold text-emerald-700 truncate">{tenantData.is_verified ? "Terverifikasi" : "Proses"}</p>
+                  </div>
                 </div>
-                <div className="rounded-xl bg-white border border-gray-100 px-3 py-3 text-center shadow-sm">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Verifikasi</p>
-                  <p className="text-sm font-semibold text-emerald-700 mt-0.5">{tenantData.is_verified ? "Terverifikasi" : "Proses"}</p>
-                </div>
-                <div className="rounded-xl bg-white border border-gray-100 px-3 py-3 text-center shadow-sm">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wide">Kuota Tersedia</p>
-                  <p className="text-sm font-semibold text-gray-800 mt-0.5">{totalAvailable} kursi</p>
+                <div className="rounded-xl bg-white border border-gray-100 px-3.5 py-3.5 shadow-sm flex items-center gap-2.5">
+                  <span className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                    <Users className="w-4.5 h-4.5 text-amber-600" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Kuota Tersedia</p>
+                    <p className="text-sm font-semibold text-gray-800 truncate">{totalAvailable} kursi</p>
+                  </div>
                 </div>
               </div>
 
