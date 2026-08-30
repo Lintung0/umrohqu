@@ -221,7 +221,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 type="button"
                 aria-label="Bandingkan paket"
               >
-                <Scale className="w-3.5 h-3.5 text-emerald-600" />
+                <Scale className="w-4 h-4 text-emerald-600" />
               </button>
             )}
           </div>
@@ -368,7 +368,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   type="button"
                   aria-label="Bandingkan paket"
                 >
-                  <Scale className="w-3.5 h-3.5 text-emerald-600" />
+                  <Scale className="w-4 h-4 text-emerald-600" />
                 </button>
               )}
             </div>
@@ -466,7 +466,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               type="button"
               aria-label="Bandingkan paket"
             >
-              <Scale className="w-3.5 h-3.5 text-emerald-600" />
+              <Scale className="w-4 h-4 text-emerald-600" />
             </button>
           )}
         </div>
