@@ -469,12 +469,6 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
             </button>
           ))}
         </div>
-
-        <div className="mt-8">
-          <Link href="/search">
-            <Button>Cari Paket</Button>
-          </Link>
-        </div>
       </div>
     )
   }
