@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         pilgrim_count: pilgrimCount,
         price: pkg.price,
         total: payNow,
-        dp_type: paymentType === "dp" ? "percentage" : "full",
+        dp_type: paymentType === "dp" ? "dp" : "full",
         dp_percentage: paymentType === "dp" ? dpPercentage : null,
         dp_amount: paymentType === "dp" ? dpAmount : 0,
         remaining_amount: paymentType === "dp" ? remainingAmount : 0,

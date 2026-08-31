@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 
-    if (booking.dp_type !== "percentage") {
+    if (booking.dp_type !== "dp") {
       return NextResponse.json({ error: "Bukan booking DP" }, { status: 400 })
     }
 

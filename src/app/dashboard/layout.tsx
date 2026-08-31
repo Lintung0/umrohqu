@@ -30,10 +30,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       console.log("[DEBUG DASHBOARD LAYOUT] Profile query:", { role: profile?.role, error: profileErr?.message })
 
-      if (profile?.role === "customer") {
+      if (profile?.role === "customer" || profile?.role === "admin") {
         setAuthorized(true)
       } else {
-        console.log("[DEBUG DASHBOARD LAYOUT] Role mismatch — expected customer, got:", profile?.role)
+        console.log("[DEBUG DASHBOARD LAYOUT] Role mismatch — expected customer/admin, got:", profile?.role)
         setAuthorized(false)
       }
       setLoading(false)
