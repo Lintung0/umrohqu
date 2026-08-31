@@ -451,13 +451,30 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
 
   if (comparePackages.length === 0) {
     return (
-      <div className="text-center py-16">
+      <div className="text-center py-10">
         <Scale className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
         <h3 className="font-semibold text-lg mb-2">Belum ada paket dibandingkan</h3>
-        <p className="text-sm text-muted-foreground mb-6">Klik icon bandingkan di kartu paket untuk membandingkan hingga {MAX_COMPARE} paket</p>
-        <Link href="/search">
-          <Button>Cari Paket</Button>
-        </Link>
+        <p className="text-sm text-muted-foreground mb-8">Pilih hingga {MAX_COMPARE} paket umroh untuk menemukan yang terbaik versi Anda</p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+          {Array.from({ length: MAX_COMPARE }).map((_, slotIdx) => (
+            <button
+              key={`empty-add-slot-${slotIdx}`}
+              onClick={onOpenPicker}
+              className="rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-white flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors min-h-[140px]"
+            >
+              <Plus className="w-8 h-8" />
+              <span className="text-sm font-semibold">Tambah Paket</span>
+              <span className="text-xs">pilih dari daftar paket</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-8">
+          <Link href="/search">
+            <Button>Cari Paket</Button>
+          </Link>
+        </div>
       </div>
     )
   }
