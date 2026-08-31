@@ -262,14 +262,17 @@ function compareRows(pkgs: Package[], key: string, _scores: ReturnType<typeof ca
   })
 }
 
-function PackagePickerModal({ onClose, onSelect }: {
+function PackagePickerModal({ onClose }: {
   onClose: () => void
-  onSelect: () => void
 }) {
   const { comparePackages, addToCompare, compareCount } = useCompare()
   const [query, setQuery] = useState("")
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (compareCount >= MAX_COMPARE) onClose()
+  }, [compareCount, onClose])
 
   useEffect(() => {
     const supabase = createClient()
@@ -346,7 +349,6 @@ function PackagePickerModal({ onClose, onSelect }: {
                   disabled={isSelected || noSlot}
                   onClick={() => {
                     addToCompare(pkg)
-                    onSelect()
                   }}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-xl border transition-colors text-left ${
                     isSelected
@@ -676,7 +678,7 @@ function CompareContent() {
       </div>
 
       {pickerOpen && (
-        <PackagePickerModal onClose={() => setPickerOpen(false)} onSelect={() => setPickerOpen(false)} />
+        <PackagePickerModal onClose={() => setPickerOpen(false)} />
       )}
 
       <AiChatPanel packages={comparePackages} />
