@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { getTransactionStatus, isSuccessStatus, isPendingStatus, stablePaymentType } from "@/lib/services/midtrans"
-import { creditTravelCommission } from "@/lib/business-logic/deposits"
 import { z } from "zod"
 
 const schema = z.object({
@@ -55,10 +54,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Pembayaran berhasil
+    // Pembayaran berhasil — masuk antrian verifikasi travel (DO NOT auto-confirm)
     await admin
       .from("bookings")
-      .update({ status: "confirmed", updated_at: new Date().toISOString() })
+      .update({ status: "processing", updated_at: new Date().toISOString() })
       .eq("id", bookingId)
 
     const paidAt = txn.transaction_time
@@ -78,21 +77,7 @@ export async function POST(request: NextRequest) {
       })
       .eq("booking_id", bookingId)
 
-    await creditTravelCommission(admin, {
-      tenantId: booking.tenant_id,
-      bookingId: bookingId,
-      packagePrice: Number(booking.price || 0),
-      pilgrimCount: Number(booking.pilgrim_count || 0),
-      channel:
-        booking.booking_source === "subdomain"
-          ? "subdomain"
-          : booking.booking_source === "custom_domain"
-            ? "custom_domain"
-            : "portal",
-      actorUserId: user.id,
-    })
-
-    return NextResponse.json({ status: "confirmed", just_verified: true })
+    return NextResponse.json({ status: "processing", just_verified: true })
   } catch (err) {
     console.error("Verify payment error:", err)
     return NextResponse.json({ error: "Gagal memverifikasi pembayaran" }, { status: 500 })

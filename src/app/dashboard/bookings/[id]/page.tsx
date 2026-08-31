@@ -406,8 +406,41 @@ function PaymentStatusSection({
   const effectiveRemaining = remainingBalance > 0 ? remainingBalance : (remainingAmount || 0)
   const effectivePaid = paidAmount > 0 ? paidAmount : (total - effectiveRemaining)
 
-  // ── KONDISI 1: Lunas & Dikonfirmasi ──
+  // ── KONDISI 1: Dikonfirmasi Travel ──
+  // DP yang sudah diverifikasi travel tapi sisa pelunasan belum dibayar
+  // → ditampilkan dengan tombol pelunasan sisa.
   if (status === "confirmed" || status === "completed") {
+    const needsPelunasan = paymentType === "dp" && effectiveRemaining > 0
+
+    if (needsPelunasan) {
+      return (
+        <div className="bg-white rounded-2xl border border-emerald-200 p-6 space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+              <CheckCircle className="w-6 h-6 text-emerald-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-emerald-800">Dikonfirmasi Travel</h3>
+              <p className="text-sm text-emerald-600">DP telah diverifikasi. Selesaikan pelunasan sebelum keberangkatan.</p>
+            </div>
+          </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-amber-800">Sisa Pelunasan</span>
+              <span className="text-lg font-bold text-amber-700">{formatRupiah(effectiveRemaining)}</span>
+            </div>
+            {remainingDueDate && (
+              <p className="text-xs text-amber-600 flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Wajib dilunasi maksimal {new Date(remainingDueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} sebelum keberangkatan.
+              </p>
+            )}
+          </div>
+          <PayRemainingSection bookingId={bookingId} remainingAmount={effectiveRemaining} />
+        </div>
+      )
+    }
+
     return (
       <div className="bg-white rounded-2xl border border-emerald-200 p-6 space-y-4">
         <div className="flex items-center gap-4">
@@ -450,9 +483,7 @@ function PaymentStatusSection({
   // ── KONDISI 2: Sudah Bayar, Menunggu Konfirmasi Travel Agent ──
   // status === 'processing'
   if (status === "processing") {
-    // Check if this is a DP booking that still needs pelunasan
     const needsPelunasan = paymentType === "dp" && effectiveRemaining > 0
-
     return (
       <div className="bg-white rounded-2xl border border-border p-6 space-y-4">
         <div className="flex items-center gap-4">
@@ -460,28 +491,23 @@ function PaymentStatusSection({
             <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
           </div>
           <div>
-            <h3 className="font-bold text-purple-800">Menunggu Konfirmasi</h3>
-            <p className="text-sm text-purple-600">Travel partner sedang memverifikasi</p>
+            <h3 className="font-bold text-purple-800">Menunggu Konfirmasi Travel</h3>
+            <p className="text-sm text-purple-600">Pembayaran telah kami terima. Travel partner sedang memverifikasi dana masuk — setelah diverifikasi, booking Anda dikonfirmasi dan sisa pelunasan dapat dibayarkan.</p>
           </div>
         </div>
-
-        {/* DP Pelunasan (if applicable) */}
         {needsPelunasan && (
-          <>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-amber-800">Sisa Pelunasan</span>
-                <span className="text-lg font-bold text-amber-700">{formatRupiah(effectiveRemaining)}</span>
-              </div>
-              {remainingDueDate && (
-                <p className="text-xs text-amber-600 flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  Wajib dilunasi maksimal {new Date(remainingDueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} sebelum keberangkatan.
-                </p>
-              )}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-amber-800">Sisa Pelunasan</span>
+              <span className="text-lg font-bold text-amber-700">{formatRupiah(effectiveRemaining)}</span>
             </div>
-            <PayRemainingSection bookingId={bookingId} remainingAmount={effectiveRemaining} />
-          </>
+            {remainingDueDate && (
+              <p className="text-xs text-amber-600 flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Dapat dilunasi setelah booking dikonfirmasi travel (maksimal {new Date(remainingDueDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}).
+              </p>
+            )}
+          </div>
         )}
       </div>
     )

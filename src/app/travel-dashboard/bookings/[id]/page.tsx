@@ -73,6 +73,24 @@ export default function TravelBookingDetailPage() {
   const updateStatus = async (newStatus: string) => {
     setUpdating(true)
     const updateData: Record<string, any> = { status: newStatus }
+    if (newStatus === "confirmed" || newStatus === "cancelled") {
+      const action = newStatus === "confirmed" ? "confirm" : "cancel"
+      const res = await fetch("/api/booking/travel-confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: id, action }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error || t("travel_dashboard.status_update_failed"))
+      } else {
+        setBooking((prev) => prev ? { ...prev, ...updateData } : prev)
+        toast.success(t("travel_dashboard.status_updated"))
+      }
+      setUpdating(false)
+      return
+    }
+
     const { error } = await supabase.from("bookings").update(updateData).eq("id", id)
     if (error) {
       toast.error(t("travel_dashboard.status_update_failed"))

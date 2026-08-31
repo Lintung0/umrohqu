@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Bukan booking DP" }, { status: 400 })
     }
 
-    if (booking.status === "confirmed") {
-      return NextResponse.json({ error: "Booking sudah lunas" }, { status: 400 })
+    if (booking.status === "cancelled") {
+      return NextResponse.json({ error: "Booking dibatalkan" }, { status: 400 })
     }
 
     const remaining = Number(booking.remaining_amount)

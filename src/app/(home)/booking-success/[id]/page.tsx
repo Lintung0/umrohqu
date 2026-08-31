@@ -48,6 +48,11 @@ export default function BookingSuccessPage() {
       setStatus("success")
       return true
     }
+    // Pembayaran sukses kini masuk antrian verifikasi travel (bukan auto-confirm)
+    if (data?.status === "processing") {
+      setStatus("processing")
+      return true
+    }
     return false
   }, [params.id])
 
@@ -124,17 +129,17 @@ export default function BookingSuccessPage() {
     )
   }
 
-  // ── Processing (webhook belum sampai) ──
+  // ── Processing (webhook belum sampai / menunggu verifikasi travel) ──
   if (status === "processing") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-3xl border border-slate-200 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
-          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto">
-            <Loader2 className="w-7 h-7 text-blue-600 animate-spin" />
+          <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto">
+            <Loader2 className="w-7 h-7 text-purple-600 animate-spin" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900">Pembayaran Diproses</h1>
-            <p className="text-sm text-slate-500 mt-1">Menunggu konfirmasi dari sistem pembayaran.</p>
+            <h1 className="text-lg font-bold text-slate-900">Pembayaran Diterima</h1>
+            <p className="text-sm text-slate-500 mt-1">Pembayaran telah kami terima. Travel partner sedang memverifikasi dana — booking akan dikonfirmasi setelah diverifikasi.</p>
           </div>
           <Link href={`/dashboard/bookings/${params.id}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
             Lihat Pesan <ArrowRight className="w-3.5 h-3.5" />

@@ -30,8 +30,7 @@ function FinishContent() {
         body: JSON.stringify({ bookingId }),
       })
       const data = await res.json()
-      if (data.status === "confirmed") return true
-      return false
+      return data.status as string | undefined
     },
     [],
   )
@@ -53,20 +52,20 @@ function FinishContent() {
 
     ;(async () => {
       try {
-        const confirmed = await verify(bookingId)
+        const verifiedStatus = await verify(bookingId)
 
-        if (confirmed || isSuccessFromMidtrans) {
-          setView({ kind: "success", title: "Pembayaran Berhasil", description: "Booking Anda telah dikonfirmasi. Mengarahkan ke halaman booking...", bookingId })
-          setTimeout(() => router.push(`/dashboard/bookings/${bookingId}`), 1800)
+        if (verifiedStatus === "confirmed" || (isSuccessFromMidtrans && verifiedStatus === "processing")) {
+          setView({ kind: "success", title: "Pembayaran Berhasil", description: "Pembayaran Anda telah kami terima. Travel partner akan memverifikasi dan mengonfirmasi booking Anda. Mengarahkan ke halaman booking...", bookingId })
+          setTimeout(() => router.push(`/dashboard/bookings/${bookingId}`), 2200)
           return
         }
 
-        if (isCanceledFromMidtrans || manualStatus === "unfinish") {
-          setView({ kind: "canceled", title: "Pembayaran Belum Selesai", description: "Pembayaran tidak diselesaikan atau gagal. Anda dapat melihat status booking atau mencoba membayar kembali.", bookingId })
+        if (verifiedStatus === "cancelled" || isCanceledFromMidtrans) {
+          setView({ kind: "canceled", title: "Booking Dibatalkan", description: "Pembayaran tidak diselesaikan atau gagal. Anda dapat melihat status booking atau mencoba membayar kembali.", bookingId })
           return
         }
 
-        if (isSuccessFromMidtrans === false && PENDING_STATUSES.includes(midtransStatus || "")) {
+        if (isSuccessFromMidtrans && verifiedStatus !== "processing" && PENDING_STATUSES.includes(midtransStatus || "")) {
           setView({ kind: "pending", title: "Pembayaran Sedang Diproses", description: "Konfirmasi dari penyedia pembayaran mungkin butuh beberapa saat. Status booking kami perbarui otomatis.", bookingId })
           return
         }

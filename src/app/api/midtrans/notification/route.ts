@@ -5,7 +5,6 @@ import {
   isPendingStatus,
   stablePaymentType,
 } from "@/lib/services/midtrans"
-import { creditTravelCommission } from "@/lib/business-logic/deposits"
 
 export const dynamic = "force-dynamic"
 
@@ -61,41 +60,21 @@ export async function POST(request: NextRequest) {
 
     if (isSuccessStatus(rawStatus)) {
       if (isRemaining) {
-        // Pelunasan sisa DP → booking lunas
-        if (booking.status !== "confirmed") {
-          await admin
-            .from("bookings")
-            .update({
-              status: "confirmed",
-              remaining_amount: 0,
-              total: Number(booking.total || 0) + Number(booking.remaining_amount || 0),
-              updated_at: paidAt,
-            })
-            .eq("id", bookingId)
-        }
-      } else if (booking.status === "pending_payment") {
-        // Pembayaran awal → booking confirmed
+        // Pelunasan sisa DP — booking lunas; status mengikuti verifikasi travel (jika sudah confirmed, tetap confirmed)
         await admin
           .from("bookings")
-          .update({ status: "confirmed", updated_at: paidAt })
+          .update({
+            remaining_amount: 0,
+            total: Number(booking.total || 0) + Number(booking.remaining_amount || 0),
+            updated_at: paidAt,
+          })
           .eq("id", bookingId)
-
-        // Kredit komisi ke travel_deposits (Direct Merchant: setoran net travel)
-        const channel =
-          booking.booking_source === "subdomain"
-            ? "subdomain"
-            : booking.booking_source === "custom_domain"
-              ? "custom_domain"
-              : "portal"
-
-        await creditTravelCommission(admin, {
-          tenantId: booking.tenant_id,
-          bookingId,
-          packagePrice: Number(booking.price || 0),
-          pilgrimCount: Number(booking.pilgrim_count || 0),
-          channel,
-          actorUserId: null,
-        })
+      } else if (booking.status === "pending_payment") {
+        // Pembayaran awal sukses → booking masuk antrian verifikasi travel (DO NOT auto-confirm)
+        await admin
+          .from("bookings")
+          .update({ status: "processing", updated_at: paidAt })
+          .eq("id", bookingId)
       }
 
       if (payment) {
