@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { calculateTotalFee } from "@/lib/business-logic/fees"
 import { getFeeConfig } from "@/lib/business-logic/fee-config"
+import { appUrl } from "@/lib/utils"
 import { z } from "zod"
 
 const pilgrimSchema = z.object({
@@ -155,6 +156,7 @@ export async function POST(request: NextRequest) {
     try {
       const { createSnapTransaction } = await import("@/lib/services/midtrans")
       const orderId = `booking-${booking.id}`
+      const finishBase = appUrl(`checkout/finish?booking_id=${booking.id}`)
       snap = await createSnapTransaction({
         orderId,
         grossAmount: payNow,
@@ -168,6 +170,9 @@ export async function POST(request: NextRequest) {
             quantity: 1,
           },
         ],
+        finishUrl: finishBase,
+        unfinishUrl: appUrl(`checkout/finish?booking_id=${booking.id}&status=unfinish`),
+        errorUrl: appUrl(`checkout/finish?booking_id=${booking.id}&status=error`),
       })
 
       await admin

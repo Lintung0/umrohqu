@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
+import { appUrl } from "@/lib/utils"
 import { z } from "zod"
 
 const schema = z.object({
@@ -72,6 +73,9 @@ export async function POST(request: NextRequest) {
         grossAmount: remaining,
         customerEmail: user.email,
         customerName: user.user_metadata?.full_name || user.email,
+        finishUrl: appUrl(`checkout/finish?booking_id=${bookingId}`),
+        unfinishUrl: appUrl(`checkout/finish?booking_id=${bookingId}&status=unfinish`),
+        errorUrl: appUrl(`checkout/finish?booking_id=${bookingId}&status=error`),
       })
 
       await admin

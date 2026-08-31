@@ -26,6 +26,9 @@ export async function createSnapTransaction(params: {
   customerPhone?: string
   items?: { id: string; name: string; price: number; quantity: number }[]
   enabledPayments?: string[]
+  finishUrl?: string
+  unfinishUrl?: string
+  errorUrl?: string
 }): Promise<MidtransSnapToken> {
   const payload: Record<string, unknown> = {
     transaction_details: {
@@ -48,6 +51,13 @@ export async function createSnapTransaction(params: {
   }
   if (params.enabledPayments && params.enabledPayments.length > 0) {
     payload.enabled_payments = params.enabledPayments
+  }
+  if (params.finishUrl || params.unfinishUrl || params.errorUrl) {
+    payload.callbacks = {
+      finish: params.finishUrl,
+      unfinish: params.unfinishUrl,
+      error: params.errorUrl,
+    }
   }
 
   const res = await fetch(`${snapUrl()}/transactions`, {
