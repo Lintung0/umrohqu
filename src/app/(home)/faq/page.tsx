@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { Search, ChevronDown, ChevronUp, HelpCircle, ExternalLink } from "lucide-react"
+import { Search, ChevronDown, ChevronUp, HelpCircle } from "lucide-react"
 
 interface FAQItem {
   id: string
@@ -168,27 +167,6 @@ export default function FAQPage() {
           )}
         </div>
 
-        <div className="mt-12 bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-4">
-          <div>
-            <p className="font-semibold text-emerald-800">Belum menemukan jawaban?</p>
-            <p className="text-sm text-emerald-700 mt-1">Hubungi kami via WhatsApp di <strong>{process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "+62 812-3456-7890"}</strong></p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-emerald-300 text-emerald-700 rounded-xl text-sm font-medium hover:bg-emerald-50 transition-colors"
-            >
-              Daftar sebagai Jamaah
-            </Link>
-            <Link
-              href="/register/travel"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Daftar sebagai Travel
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   )
