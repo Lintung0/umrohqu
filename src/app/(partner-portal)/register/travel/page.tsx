@@ -164,6 +164,13 @@ function InputField({ label, icon: Icon, error, children }: {
 
 export default function RegisterTravelPage() {
   const router = useRouter()
+  const handleCancel = () => {
+    if (typeof window !== "undefined" && document.referrer) {
+      router.back()
+    } else {
+      router.push("/")
+    }
+  }
   const [step, setStep] = useState<Step>(1)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -628,10 +635,14 @@ export default function RegisterTravelPage() {
               Kembali
             </button>
           ) : (
-            <Link className="text-sm font-bold text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1" href="/">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="text-sm font-bold text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1"
+            >
               <ArrowLeft className="w-3.5 h-3.5" />
               Batal
-            </Link>
+            </button>
           )}
           {step < 4 ? (
             <button
