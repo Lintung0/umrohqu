@@ -246,14 +246,16 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               <div className="flex items-center gap-5 mb-5">
                 {tenantData.logo_url ? (
                   <div className="relative shrink-0">
-                    <Image
-                      src={tenantData.logo_url}
-                      alt={tenantData.name}
-                      width={84}
-                      height={84}
-                      className="rounded-2xl ring-4 ring-white/30 shadow-2xl object-cover"
-                      unoptimized
-                    />
+                    <div className="w-20 h-20 rounded-2xl bg-white ring-4 ring-white/30 shadow-2xl overflow-hidden flex items-center justify-center">
+                      <Image
+                        src={tenantData.logo_url}
+                        alt={tenantData.name}
+                        width={84}
+                        height={84}
+                        className="w-full h-full object-contain"
+                        unoptimized
+                      />
+                    </div>
                     {tenantData.is_verified && (
                       <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center ring-[3px] ring-white/50 shadow-lg">
                         <BadgeCheck className="w-4 h-4 text-white" />
@@ -261,7 +263,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                     )}
                   </div>
                 ) : (
-                  <div className="w-[84px] h-[84px] rounded-3xl flex items-center justify-center text-4xl font-bold text-white ring-4 ring-white/30 shadow-2xl shrink-0" style={{ background: `${primaryColor}dd` }}>
+                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold text-white ring-4 ring-white/30 shadow-2xl shrink-0" style={{ background: `${primaryColor}dd` }}>
                     {tenantData.name.charAt(0)}
                   </div>
                 )}

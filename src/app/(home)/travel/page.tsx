@@ -247,14 +247,16 @@ export default function TravelListPage() {
                 <div className="p-5 pt-0">
                   <div className="flex items-end gap-3">
                     <div className="relative shrink-0 -mt-8">
-                      <Image
-                        src={travel.logo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials(travel.name))}&background=2A7D4F&color=fff&size=120&bold=true`}
-                        alt={travel.name}
-                        width={56}
-                        height={56}
-                        className="rounded-2xl object-cover border-4 border-white shadow-md bg-white"
-                        unoptimized
-                      />
+                      <div className="w-14 h-14 rounded-2xl bg-white border-4 border-white shadow-md overflow-hidden flex items-center justify-center">
+                        <Image
+                          src={travel.logo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(initials(travel.name))}&background=2A7D4F&color=fff&size=120&bold=true`}
+                          alt={travel.name}
+                          width={56}
+                          height={56}
+                          className="w-full h-full object-contain"
+                          unoptimized
+                        />
+                      </div>
                       {travel.is_verified && (
                         <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center ring-2 ring-white">
                           <BadgeCheck className="w-3 h-3" />
