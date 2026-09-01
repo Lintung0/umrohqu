@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface CenterPopupProps {
@@ -9,9 +9,10 @@ interface CenterPopupProps {
   message: string
   onClose?: () => void
   duration?: number
+  variant?: "success" | "warning"
 }
 
-export function CenterPopup({ show, message, onClose, duration = 1500 }: CenterPopupProps) {
+export function CenterPopup({ show, message, onClose, duration = 1500, variant = "success" }: CenterPopupProps) {
   const [visible, setVisible] = useState(false)
   const [animatingOut, setAnimatingOut] = useState(false)
 
@@ -32,6 +33,8 @@ export function CenterPopup({ show, message, onClose, duration = 1500 }: CenterP
 
   if (!visible) return null
 
+  const isWarning = variant === "warning"
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
       <div
@@ -42,8 +45,12 @@ export function CenterPopup({ show, message, onClose, duration = 1500 }: CenterP
             : "opacity-100 scale-100 animate-in zoom-in-95 duration-200"
         )}
       >
-        <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
-          <CheckCircle className="w-8 h-8 text-emerald-600" />
+        <div className={cn("w-14 h-14 rounded-full flex items-center justify-center", isWarning ? "bg-amber-100" : "bg-emerald-100")}>
+          {isWarning ? (
+            <AlertTriangle className="w-8 h-8 text-amber-600" />
+          ) : (
+            <CheckCircle className="w-8 h-8 text-emerald-600" />
+          )}
         </div>
         <p className="text-sm font-semibold text-gray-800 text-center max-w-[200px]">{message}</p>
       </div>

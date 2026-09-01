@@ -40,7 +40,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [imgError, setImgError] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
-  const [popup, setPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" })
+  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning" }>({ show: false, message: "", variant: "success" })
   const [avgRating, setAvgRating] = useState<number | null>(null)
   const [reviewCount, setReviewCount] = useState(0)
 
@@ -107,8 +107,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
   }
 
-  const showPopup = useCallback((message: string) => {
-    setPopup({ show: true, message })
+  const showPopup = useCallback((message: string, variant: "success" | "warning" = "success") => {
+    setPopup({ show: true, message, variant })
   }, [])
 
   function handleCompare(e: React.MouseEvent) {
@@ -116,7 +116,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     e.stopPropagation()
     if (comparePackages.some((p) => p.id === pkg.id)) return
     if (isFull) {
-      showPopup("Maksimal 3 paket untuk dibandingkan")
+      showPopup("Maksimal 3 paket untuk dibandingkan", "warning")
       return
     }
     addToCompare(pkg)
@@ -321,7 +321,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        <CenterPopup show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "" })} />
+        <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "", variant: "success" })} />
       </Link>
     )
   }
@@ -413,7 +413,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        <CenterPopup show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "" })} />
+        <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "", variant: "success" })} />
       </Link>
     )
   }
@@ -568,7 +568,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
       </div>
 
-      <CenterPopup show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "" })} />
+      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "", variant: "success" })} />
     </Link>
   )
 }
