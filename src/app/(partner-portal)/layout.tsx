@@ -29,7 +29,7 @@ export default function PartnerPortalLayout({
       <div className="relative z-10 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col items-center flex-1">
 
         {/* Logo */}
-        <div className="mb-8 [&_a>img]:brightness-0 [&_a>img]:invert [&_a>img]:h-8 [&_a>img]:opacity-80 hover:[&_a>img]:opacity-100 transition-opacity">
+        <div className="mb-8">
           <Logo variant="light" />
         </div>
 

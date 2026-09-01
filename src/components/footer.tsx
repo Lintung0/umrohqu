@@ -51,7 +51,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-10 py-6">
           {/* Brand + Contact */}
           <div className="col-span-1 md:col-span-4 space-y-5">
-            <div className="[&>a>img]:brightness-0 [&>a>img]:invert">
+            <div>
               <Logo variant="light" />
             </div>
             <p className="text-sm text-white/50 leading-relaxed max-w-sm">
