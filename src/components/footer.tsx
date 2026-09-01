@@ -52,7 +52,7 @@ const Footer = () => {
           {/* Brand + Contact */}
           <div className="col-span-1 md:col-span-4 space-y-5">
             <div className="[&>a>img]:brightness-0 [&>a>img]:invert">
-              <Logo />
+              <Logo variant="light" />
             </div>
             <p className="text-sm text-white/50 leading-relaxed max-w-sm">
               {t.footer.description}

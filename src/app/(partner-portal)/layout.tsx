@@ -1,5 +1,4 @@
 import Logo from "@/components/logo"
-import Link from "next/link"
 
 export const metadata = {
   title: "UmrahQu - Daftar Travel Partner",
@@ -30,10 +29,8 @@ export default function PartnerPortalLayout({
       <div className="relative z-10 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col items-center flex-1">
 
         {/* Logo */}
-        <div className="mb-8">
-          <Link href="/" className="block [&>img]:brightness-0 [&>img]:invert [&>img]:h-8 [&>img]:opacity-80 hover:[&>img]:opacity-100 transition-opacity">
-            <Logo />
-          </Link>
+        <div className="mb-8 [&_a>img]:brightness-0 [&_a>img]:invert [&_a>img]:h-8 [&_a>img]:opacity-80 hover:[&_a>img]:opacity-100 transition-opacity">
+          <Logo variant="light" />
         </div>
 
         {children}
