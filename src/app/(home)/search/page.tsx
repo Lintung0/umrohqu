@@ -53,6 +53,13 @@ function SearchContent() {
   const type = searchParams.get("type") ?? "semua"
   const duration = searchParams.get("duration") ?? ""
   const sortBy = searchParams.get("sort") ?? "relevance"
+
+  const SORT_LABELS: Record<string, string> = {
+    relevance: "Relevansi",
+    "price-asc": "Harga Terendah",
+    "price-desc": "Harga Tertinggi",
+    duration: "Durasi Terpendek",
+  }
   const searchQuery = searchParams.get("search") ?? ""
   const parsedMin = parseInt(searchParams.get("priceMin") ?? "", 10)
   const parsedMax = parseInt(searchParams.get("priceMax") ?? "", 10)
@@ -554,7 +561,7 @@ function SearchContent() {
                 aria-label="Urutkan hasil pencarian"
                 className="h-10 w-36 sm:w-40 text-sm bg-white border-slate-200 text-slate-700 shadow-sm rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
               >
-                <SelectValue />
+                <SelectValue>{SORT_LABELS[sortBy] ?? sortBy}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="relevance">Relevansi</SelectItem>
