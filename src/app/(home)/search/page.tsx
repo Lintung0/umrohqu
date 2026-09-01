@@ -59,6 +59,7 @@ function SearchContent() {
     "price-asc": "Harga Terendah",
     "price-desc": "Harga Tertinggi",
     duration: "Durasi Terpendek",
+    "duration-desc": "Durasi Terpanjang",
   }
   const searchQuery = searchParams.get("search") ?? ""
   const parsedMin = parseInt(searchParams.get("priceMin") ?? "", 10)
@@ -357,6 +358,7 @@ function SearchContent() {
       if (sortBy === "price-asc") return a.price - b.price
       if (sortBy === "price-desc") return b.price - a.price
       if (sortBy === "duration") return (a.duration_nights ?? 0) - (b.duration_nights ?? 0)
+      if (sortBy === "duration-desc") return (b.duration_nights ?? 0) - (a.duration_nights ?? 0)
       const scoreA = rankingScores.get(a.tenant_id) ?? 0
       const scoreB = rankingScores.get(b.tenant_id) ?? 0
       return scoreB - scoreA
@@ -568,6 +570,7 @@ function SearchContent() {
                 <SelectItem value="price-asc">Harga Terendah</SelectItem>
                 <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
                 <SelectItem value="duration">Durasi Terpendek</SelectItem>
+                <SelectItem value="duration-desc">Durasi Terpanjang</SelectItem>
               </SelectContent>
             </Select>
           </div>
