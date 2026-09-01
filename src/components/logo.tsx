@@ -8,28 +8,30 @@ const Logo = ({
   type?: "full" | "icon";
   variant?: "dark" | "light";
 }) => {
-  if (type === "icon") {
-    return (
-      <Image
-        width={48}
-        height={48}
-        alt="Logo UmrahQu"
-        src="/logo-icon.png"
-        className="shrink-0 object-contain"
-        style={{ width: "48px", height: "auto" }}
-      />
-    );
-  }
-  return (
-    <Link href="/" className="group flex items-center gap-2.5">
+  const circleClass =
+    variant === "light"
+      ? "bg-white/10 ring-white/20"
+      : "bg-gradient-to-br from-emerald-600 to-emerald-700 ring-emerald-100 shadow-sm";
+
+  const badge = (
+    <span className={`flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full ring transition-colors ${circleClass}`}>
       <Image
         width={44}
         height={44}
         alt="Logo UmrahQu"
         src="/logo-icon.png"
-        className="shrink-0 object-contain transition-transform duration-200 group-hover:scale-105"
-        style={{ width: "44px", height: "auto" }}
+        className="shrink-0 object-contain brightness-0 invert"
+        style={{ width: "82%", height: "auto" }}
       />
+    </span>
+  );
+
+  if (type === "icon") {
+    return badge;
+  }
+  return (
+    <Link href="/" className="group flex items-center gap-2.5">
+      {badge}
       <span
         className={`text-[22px] sm:text-2xl font-extrabold tracking-tight leading-none bg-clip-text text-transparent drop-shadow-sm ${
           variant === "light"
