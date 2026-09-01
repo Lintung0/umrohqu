@@ -251,7 +251,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                       alt={tenantData.name}
                       width={84}
                       height={84}
-                      className="rounded-3xl ring-4 ring-white/30 shadow-2xl object-cover"
+                      className="rounded-2xl ring-4 ring-white/30 shadow-2xl object-cover"
                       unoptimized
                     />
                     {tenantData.is_verified && (

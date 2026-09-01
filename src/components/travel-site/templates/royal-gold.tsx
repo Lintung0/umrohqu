@@ -32,7 +32,7 @@ export default function RoyalGoldTemplate({ tenant, packages, themeConfig }: Tem
           </div>
           {tenant.logo_url ? (
             <div className="relative w-28 h-28 mx-auto mb-6">
-              <Image src={tenant.logo_url} alt={tenant.name} fill className="rounded-full object-cover shadow-2xl" style={{ border: `2px solid ${gold}` }} />
+              <Image src={tenant.logo_url} alt={tenant.name} fill className="rounded-2xl object-cover shadow-2xl" style={{ border: `2px solid ${gold}` }} />
               <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg" style={{ background: gold }}>
                 <Crown className="w-4 h-4" style={{ color: primary }} />
               </div>
@@ -101,7 +101,7 @@ export default function RoyalGoldTemplate({ tenant, packages, themeConfig }: Tem
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               {tenant.logo_url ? (
-                <Image src={tenant.logo_url} alt={tenant.name} width={40} height={40} className="rounded-full" />
+                <Image src={tenant.logo_url} alt={tenant.name} width={40} height={40} className="rounded-2xl" />
               ) : (
                 <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: gold, color: primary }}>
                   {tenant.name.charAt(0)}

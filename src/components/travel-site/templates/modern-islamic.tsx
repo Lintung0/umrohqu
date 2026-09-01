@@ -27,7 +27,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           {tenant.logo_url ? (
             <div className="relative w-24 h-24 mx-auto mb-6">
-              <Image src={tenant.logo_url} alt={tenant.name} fill className="rounded-full object-cover ring-4 ring-white/20 shadow-xl" />
+              <Image src={tenant.logo_url} alt={tenant.name} fill className="rounded-2xl object-cover ring-4 ring-white/20 shadow-xl" />
               <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center" style={{ background: secondary }}>
                 <Star className="w-3.5 h-3.5 text-white" fill="white" />
               </div>
@@ -96,7 +96,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               {tenant.logo_url ? (
-                <Image src={tenant.logo_url} alt={tenant.name} width={36} height={36} className="rounded-full" />
+                <Image src={tenant.logo_url} alt={tenant.name} width={36} height={36} className="rounded-2xl" />
               ) : (
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: primary }}>
                   {tenant.name.charAt(0)}

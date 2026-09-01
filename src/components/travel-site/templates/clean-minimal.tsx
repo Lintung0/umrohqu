@@ -24,7 +24,7 @@ export default function CleanMinimalTemplate({ tenant, packages, themeConfig }: 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {tenant.logo_url ? (
-              <Image src={tenant.logo_url} alt={tenant.name} width={32} height={32} className="rounded-lg" />
+              <Image src={tenant.logo_url} alt={tenant.name} width={32} height={32} className="rounded-2xl" />
             ) : (
               <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white" style={{ background: primary }}>
                 {tenant.name.charAt(0)}
@@ -109,7 +109,7 @@ export default function CleanMinimalTemplate({ tenant, packages, themeConfig }: 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               {tenant.logo_url ? (
-                <Image src={tenant.logo_url} alt={tenant.name} width={28} height={28} className="rounded-md" />
+                <Image src={tenant.logo_url} alt={tenant.name} width={28} height={28} className="rounded-2xl" />
               ) : (
                 <div className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold text-white" style={{ background: primary }}>
                   {tenant.name.charAt(0)}

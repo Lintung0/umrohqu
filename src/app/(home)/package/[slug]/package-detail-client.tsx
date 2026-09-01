@@ -861,7 +861,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3">
                 <Link href={`/travel/${pkg.travel.slug}`} className="group flex items-center gap-3">
                   {pkg.travel.logo_url ? (
-                    <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={48} height={48} unoptimized className="rounded-xl object-cover ring-2 ring-white shadow-sm" />
+                    <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={48} height={48} unoptimized className="rounded-2xl object-cover ring-2 ring-white shadow-sm" />
                   ) : (
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shrink-0">
                       <span className="text-base font-bold text-white">{pkg.travel.name.charAt(0)}</span>
