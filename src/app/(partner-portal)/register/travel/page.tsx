@@ -7,7 +7,7 @@ import { z } from "zod"
 import {
   Building2, Mail, User, MapPin, FileText, Shield,
   AlertCircle, CheckCircle, ArrowRight, ArrowLeft, Loader2, Globe,
-  BadgeCheck, ChevronRight
+  BadgeCheck, ChevronRight, Users
 } from "lucide-react"
 import Logo from "@/components/logo"
 import { PasswordInput } from "@/components/auth/password-input"
@@ -23,6 +23,8 @@ interface Form {
   logo_url: string
   city: string
   travel_phone: string
+  founded_year: string
+  quota: string
   ppiu_number: string
   sk_ppiu_doc_url: string
   nib: string
@@ -40,7 +42,7 @@ interface Form {
 }
 
 const INITIAL_FORM: Form = {
-  travel_name: "", slug: "", description: "", logo_url: "", city: "", travel_phone: "",
+  travel_name: "", slug: "", description: "", logo_url: "", city: "", travel_phone: "", founded_year: "", quota: "",
   ppiu_number: "", sk_ppiu_doc_url: "", nib: "", nib_doc_url: "", npwp: "", akreditasi_ppiu: "",
   name: "", email: "", admin_phone: "", password: "", confirm_password: "",
   full_address: "", province: "", postal_code: "",
@@ -51,6 +53,8 @@ const STEP_ICONS = [Building2, Shield, User, MapPin]
 
 const STEP1_SCHEMA = z.object({
   travel_name: z.string().min(3, "Nama travel minimal 3 karakter"),
+  founded_year: z.string().regex(/^(19|20)\d{2}$/, "Masukkan tahun beroperasi yang valid (contoh: 2015)"),
+  quota: z.string().regex(/^\d+$/, "Kuota tersedia harus berupa angka").refine((v) => Number(v) > 0, "Kuota tersedia minimal 1 kursi"),
 })
 
 const STEP2_SCHEMA = z.object({
@@ -351,7 +355,7 @@ export default function RegisterTravelPage() {
                   )}
                 </InputField>
 
-                <InputField label="Deskripsi Singkat Agensi" icon={FileText}>
+                <InputField label="Biografi Travel" icon={FileText}>
                   <textarea
                     value={form.description}
                     onChange={(e) => set("description")(e.target.value)}
@@ -360,6 +364,38 @@ export default function RegisterTravelPage() {
                     className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium transition-all resize-none"
                   />
                 </InputField>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InputField label="Beroperasi Sejak *" icon={Building2} error={errors.founded_year}>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={form.founded_year}
+                      onChange={(e) => set("founded_year")(e.target.value.replace(/[^\d]/g, ""))}
+                      placeholder="Contoh: 2015"
+                      className={`w-full px-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium transition-all ${
+                        errors.founded_year ? "border-red-400" : "border-gray-200 focus:border-emerald-500"
+                      }`}
+                    />
+                  </InputField>
+
+                  <InputField label="Kuota Tersedia *" icon={Users} error={errors.quota}>
+                    <div className="relative flex items-center">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={form.quota}
+                        onChange={(e) => set("quota")(e.target.value.replace(/[^\d]/g, ""))}
+                        placeholder="Contoh: 83"
+                        className={`w-full px-4 py-3.5 bg-gray-50 border rounded-xl text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium transition-all ${
+                          errors.quota ? "border-red-400" : "border-gray-200 focus:border-emerald-500"
+                        }`}
+                      />
+                      <span className="absolute right-3 text-xs font-bold text-gray-400">kursi</span>
+                    </div>
+                  </InputField>
+                </div>
 
                 <InputField label="Logo Resmi Travel" icon={Building2}>
                   {form.logo_url ? (

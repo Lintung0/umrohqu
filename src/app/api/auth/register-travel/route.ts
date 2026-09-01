@@ -10,6 +10,8 @@ const registerTravelSchema = z.object({
   logo_url: z.string().url().optional().or(z.literal("")),
   city: z.string().optional(),
   travel_phone: z.string().optional(),
+  founded_year: z.string().regex(/^(19|20)\d{2}$/, "Tahun beroperasi tidak valid"),
+  quota: z.string().regex(/^\d+$/, "Kuota tersedia harus berupa angka").refine((v) => Number(v) > 0, "Kuota tersedia minimal 1 kursi"),
 
   // Step 2: Legalitas
   ppiu_number: z.string().min(1, "Nomor Izin PPIU wajib diisi"),
@@ -54,8 +56,8 @@ export async function POST(request: Request) {
     }
 
     const {
-      travel_name, slug: rawSlug, description, logo_url, city, travel_phone,
-      ppiu_number, sk_ppiu_doc_url, nib, nib_doc_url, npwp, akreditasi_ppiu,
+      travel_name, slug: rawSlug, description, logo_url, city, travel_phone, founded_year, quota,
+      ppiu_number, sk_ppiu_doc_url, nib, nib_doc_url, npwp,
       name, email, admin_phone, password,
       full_address, province, postal_code,
     } = parsed.data
@@ -81,20 +83,10 @@ export async function POST(request: Request) {
       .insert({
         name: travel_name,
         slug,
-        contact_email: lowerEmail,
-        contact_phone: travel_phone || null,
         description: description || null,
         logo_url: logo_url || null,
-        city: city || null,
-        ppiu_number,
-        sk_ppiu_doc_url,
-        nib,
-        nib_doc_url,
-        npwp: npwp || null,
-        akreditasi_ppiu: akreditasi_ppiu || null,
-        full_address,
-        province,
-        postal_code: postal_code || null,
+        founded_year: founded_year || null,
+        quota: parseInt(quota, 10) || null,
         status: "pending",
       })
       .select("id")
@@ -103,6 +95,44 @@ export async function POST(request: Request) {
     if (tenantError || !tenant) {
       return NextResponse.json(
         { error: "Gagal membuat travel: " + (tenantError?.message || "unknown") },
+        { status: 500 }
+      )
+    }
+
+    // Store contact info (email, phone, address) — separate table
+    const { error: contactError } = await admin.from("tenant_contacts").insert({
+      tenant_id: tenant.id,
+      email: lowerEmail,
+      phone: travel_phone || null,
+      street_address: full_address || null,
+      city: city || null,
+      province: province || null,
+      postal_code: postal_code || null,
+      is_primary: true,
+    })
+
+    if (contactError) {
+      await admin.from("tenants").update({ deleted_at: new Date().toISOString() }).eq("id", tenant.id)
+      return NextResponse.json(
+        { error: "Gagal menyimpan kontak travel: " + contactError.message },
+        { status: 500 }
+      )
+    }
+
+    // Store legal info (PPIU, NIB, NPWP) — separate table
+    const { error: legalError } = await admin.from("tenant_legals").insert({
+      tenant_id: tenant.id,
+      ppiu_number,
+      nib_number: nib,
+      npwp: npwp || null,
+      sk_ppiu_doc_url,
+      nib_doc_url,
+    })
+
+    if (legalError) {
+      await admin.from("tenants").update({ deleted_at: new Date().toISOString() }).eq("id", tenant.id)
+      return NextResponse.json(
+        { error: "Gagal menyimpan legalitas travel: " + legalError.message },
         { status: 500 }
       )
     }
