@@ -38,6 +38,25 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
 
+  // Keyboard navigation: ← / → pindah slide (aktif saat galeri punya fokus)
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const el = containerRef
+    if (!el || !emblaApi) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault()
+        emblaApi.scrollPrev()
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault()
+        emblaApi.scrollNext()
+      }
+    }
+    el.addEventListener("keydown", onKeyDown)
+    return () => el.removeEventListener("keydown", onKeyDown)
+  }, [containerRef, emblaApi])
+
   useEffect(() => {
     if (!emblaApi) return
     const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap())
@@ -72,7 +91,11 @@ export default function ImageGallery({ images, items, alt = "Gallery", title }: 
       bannerVisible
     >
       {/* WRAPPER CONTAINER ULTIMATE — lokal overflow agar foto/titik tidak bocor keluar garis */}
-      <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-900 shadow-sm">
+      <div
+        ref={setContainerRef}
+        tabIndex={0}
+        className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-900 shadow-sm focus:outline-none"
+      >
         {/* Main carousel */}
         <div ref={emblaRef} className="overflow-hidden">
           <div className="flex">
