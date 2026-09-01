@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
@@ -14,11 +13,10 @@ interface BookingRow {
   status: string
   pilgrim_count: number
   price: number
-  fee: number
   total: number
   booking_channel: string
   created_at: string
-  package: { name: string; slug: string; image_url: string | null } | null
+  package: { name: string; slug: string } | null
 }
 
 export default function BookingsPage() {
@@ -36,7 +34,7 @@ export default function BookingsPage() {
       if (user) {
         const { data } = await supabase
           .from("bookings")
-          .select("id, status, pilgrim_count, price, fee, total, booking_channel, created_at, package:packages(name, slug)")
+          .select("id, status, pilgrim_count, price, total, booking_channel, created_at, package:packages(name, slug)")
           .eq("customer_id", user.id)
           .is("deleted_at", null)
           .order("created_at", { ascending: false })
@@ -106,19 +104,9 @@ export default function BookingsPage() {
               href={`/dashboard/bookings/${booking.id}`}
               className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors first:rounded-t-xl last:rounded-b-xl"
             >
-              {booking.package?.image_url ? (
-                <Image
-                  src={booking.package.image_url}
-                  alt={booking.package.name}
-                  width={56}
-                  height={56}
-                  className="rounded-lg object-cover shrink-0"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-muted-foreground/50" />
-                </div>
-              )}
+              <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center">
+                <BookOpen className="w-5 h-5 text-muted-foreground/50" />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate text-sm">{booking.package?.name || t("booking.package")}</p>
                 <div className="flex items-center gap-2 mt-1">

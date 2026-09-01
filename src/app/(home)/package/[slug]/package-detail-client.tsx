@@ -793,8 +793,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     <span className="text-xs text-muted-foreground">/ orang</span>
                   </div>
                   {Number(pkg.cashback_amount) > 0 && (
-                    <span className="inline-flex items-center gap-1 w-fit text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
-                      <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                    <span className="inline-flex items-center gap-1 w-fit text-xs font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2.5 py-1 shadow-sm">
+                      <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                     </span>
                   )}
                 </div>
