@@ -27,7 +27,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 
-    return NextResponse.json({ data: booking })
+    const { data: refund } = await admin
+      .from("booking_refunds")
+      .select("id, amount, status, method, reference, note, completed_at")
+      .eq("booking_id", bookingId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    return NextResponse.json({ data: { ...booking, refund: refund || null } })
   } catch (err) {
     console.error("Booking detail API error:", err)
     return NextResponse.json({ error: "Gagal memuat detail booking" }, { status: 500 })

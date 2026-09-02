@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, tenant_id, price, pilgrim_count, booking_source")
+      .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id")
       .eq("id", bookingId)
       .single()
 
@@ -60,6 +60,22 @@ export async function POST(request: NextRequest) {
         .from("bookings")
         .update({ status: "cancelled", updated_at: new Date().toISOString() })
         .eq("id", bookingId)
+
+      // Kembalikan kursi paket yang sempat dipesan
+      const { data: pkg } = await admin
+        .from("packages")
+        .select("quota_taken")
+        .eq("id", booking.package_id)
+        .single()
+      if (pkg) {
+        await admin
+          .from("packages")
+          .update({
+            quota_taken: Math.max(0, (pkg.quota_taken ?? 0) - booking.pilgrim_count),
+          })
+          .eq("id", booking.package_id)
+      }
+
       return NextResponse.json({ success: true, status: "cancelled" })
     }
 

@@ -15,19 +15,19 @@ export async function GET() {
 
     if (tenantsError) throw tenantsError;
 
-    // 2. Komplain & Refund Request - bookings cancelled + notes
+    // 2. Komplain & Refund Request - bookings cancelled/refunded + alasan
     const { data: refundBookings } = await supabase
       .from("bookings")
-      .select("id, total, status, notes, created_at, customer:users(full_name), package:packages(name)")
-      .eq("status", "cancelled")
-      .not("notes", "is", null);
+      .select("id, total, status, cancel_reason, notes, created_at, customer:users(full_name), package:packages(name)")
+      .in("status", ["cancelled", "refunded"])
+      .or("cancel_reason.is.not.null,notes.is.not.null");
 
     const refundList = (refundBookings || []).map((r: any) => ({
       id: r.id,
       customer_name: r.customer?.full_name || "-",
       package_name: r.package?.name || "-",
       amount: r.total || 0,
-      reason: r.notes || "-",
+      reason: r.cancel_reason || r.notes || "-",
       date: r.created_at,
     }));
 

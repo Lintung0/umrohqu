@@ -8,6 +8,15 @@ import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import Link from "next/link"
 import { useTranslation } from "@/lib/i18n"
+import { Ban, X } from "lucide-react"
+
+const CANCEL_REASONS = [
+  "Perubahan jadwal pribadi",
+  "Masalah biaya / dana",
+  "Dapat paket lain yang lebih baik",
+  "Keberangkatan kurang sesuai",
+  "Lainnya",
+]
 
 interface BookingDetail {
   id: string
@@ -28,6 +37,9 @@ interface BookingDetail {
   remaining_amount: number | null
   remaining_due_date: string | null
   booking_source?: string
+  payment_status?: string
+  cancel_reason?: string | null
+  refund: { id: string; amount: number; status: string; method: string | null; completed_at: string | null } | null
   package: { name: string; slug: string; departure_city: string | null; duration_nights: number | null; airline?: string | null; hotel_makkah?: string | null; hotel_makkah_stars?: number | null; hotel_madinah?: string | null; hotel_madinah_stars?: number | null } | null
   participants: { id: string; full_name: string; national_id: string | null; passport_number: string | null; gender: string | null; phone: string | null; relation: string }[]
 }
@@ -48,6 +60,7 @@ export default function BookingDetailPage() {
   const [loading, setLoading] = useState(true)
   const [authChecked, setAuthChecked] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [showCancelModal, setShowCancelModal] = useState(false)
 
   // Track auth state with onAuthStateChange — handles hydration delay after Xendit redirect
   useEffect(() => {
@@ -360,6 +373,13 @@ export default function BookingDetailPage() {
         )}
       </div>
 
+      <CancelStatusCard
+        bookingId={booking.id}
+        status={booking.status}
+        cancelReason={booking.cancel_reason}
+        refund={booking.refund}
+      />
+
       {/* ── Payment Status Sections (3 conditions) ── */}
       <PaymentStatusSection
         bookingId={booking.id}
@@ -376,6 +396,195 @@ export default function BookingDetailPage() {
         paymentMethod={booking.payment_method}
         createdAt={booking.created_at}
       />
+    </div>
+  )
+}
+
+// ─── Cancel Status Card + Modal ──────────────────────────────────────────────
+
+function CancelStatusCard({
+  bookingId,
+  status,
+  cancelReason,
+  refund,
+}: {
+  bookingId: string
+  status: string
+  cancelReason?: string | null
+  refund: { id: string; amount: number; status: string; method: string | null; completed_at: string | null } | null
+}) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+
+  if (status === "refunded" || status === "cancelled") {
+    const refundStatus =
+      refund?.status === "completed"
+        ? "Refund selesai — dana telah dikembalikan oleh travel."
+        : refund?.status === "processing"
+          ? "Refund sedang diproses oleh travel."
+          : status === "refunded"
+            ? "Refund akan diproses oleh travel."
+            : null
+
+    return (
+      <div className="bg-white rounded-2xl border border-border p-6 space-y-3">
+        <div className="flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${status === "refunded" ? "bg-slate-50" : "bg-red-50"}`}>
+            {status === "refunded"
+              ? <CreditCard className={`w-6 h-6 ${refund?.status === "completed" ? "text-emerald-600" : "text-slate-500"}`} />
+              : <XCircle className="w-6 h-6 text-red-600" />}
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900">
+              {status === "refunded" ? "Pembayaran Dikembalikan" : t("booking.status_cancelled")}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {status === "refunded" ? "Dana dikembalikan via travel partner." : "Pesanan dibatalkan."}
+            </p>
+          </div>
+        </div>
+        {cancelReason && (
+          <div className="bg-slate-50 rounded-xl p-3 text-sm">
+            <p className="text-xs text-muted-foreground mb-1">Alasan kamu</p>
+            <p className="font-medium text-slate-800">{cancelReason}</p>
+          </div>
+        )}
+        {refundStatus && (
+          <p className={`text-sm flex items-center gap-2 ${refund?.status === "completed" ? "text-emerald-600" : "text-amber-600"}`}>
+            {refund?.status === "completed" ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+            {refundStatus}
+          </p>
+        )}
+      </div>
+    )
+  }
+
+  if (!["pending_payment", "processing", "confirmed"].includes(status)) return null
+
+  return (
+    <>
+      <div className="bg-white rounded-2xl border border-red-100 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
+            <Ban className="w-6 h-6 text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900">Batalkan Pesanan</h3>
+            <p className="text-sm text-muted-foreground">
+              {status === "pending_payment" ? "Pesanan akan dibatalkan tanpa pengembalian dana (belum dibayar)." : "Dana akan dikembalikan oleh travel."}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setOpen(true)}
+          className="px-4 py-2.5 rounded-xl text-sm font-semibold border-2 border-red-200 text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+        >
+          Batalkan Pesanan
+        </button>
+      </div>
+      {open && <CancelBookingModal bookingId={bookingId} onClose={() => setOpen(false)} />}
+    </>
+  )
+}
+
+function CancelBookingModal({ bookingId, onClose }: { bookingId: string; onClose: () => void }) {
+  const { t } = useTranslation()
+  const router = useRouter()
+  const [selected, setSelected] = useState<string | null>(null)
+  const [customReason, setCustomReason] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async () => {
+    const reason = selected === "Lainnya" ? customReason.trim() : selected
+    if (!reason) {
+      toast.error("Pilih alasan pembatalan terlebih dahulu")
+      return
+    }
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/booking/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, reason }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success("Pesanan berhasil dibatalkan")
+        onClose()
+        setTimeout(() => window.location.reload(), 600)
+      } else {
+        toast.error(data.error || "Gagal membatalkan pesanan")
+      }
+    } catch {
+      toast.error(t("checkout.network_error"))
+    }
+    setSubmitting(false)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h3 className="font-bold text-lg text-slate-900">Batalkan Pesanan</h3>
+            <p className="text-sm text-muted-foreground">Yakin ingin membatalkan pesanan ini? Dana akan dikembalikan oleh travel.</p>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          {CANCEL_REASONS.map((reason) => (
+            <label
+              key={reason}
+              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                selected === reason ? "border-red-300 bg-red-50" : "border-border hover:bg-muted/50"
+              }`}
+            >
+              <input
+                type="radio"
+                name="cancel-reason"
+                checked={selected === reason}
+                onChange={() => setSelected(reason)}
+                className="accent-red-600"
+              />
+              <span className="text-sm font-medium text-slate-800">{reason}</span>
+            </label>
+          ))}
+        </div>
+
+        {selected === "Lainnya" && (
+          <textarea
+            value={customReason}
+            onChange={(e) => setCustomReason(e.target.value)}
+            placeholder="Tulis alasanmu di sini…"
+            rows={3}
+            className="mt-3 w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-red-300 resize-none"
+          />
+        )}
+
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={onClose}
+            disabled={submitting}
+            className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-muted text-muted-foreground hover:bg-muted/70 transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            Ya, Batalkan
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
