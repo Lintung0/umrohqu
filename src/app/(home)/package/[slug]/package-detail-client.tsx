@@ -861,11 +861,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                             style={{ width: `${departedPercent}%` }}
                           />
                         </div>
-                        <p className="mt-2 text-[10px] text-emerald-200/60 text-center">
-                          <span className="inline-flex items-center gap-1">
-                            <Zap className="w-3 h-3" /> Data diperbarui secara real-time
-                          </span>
-                        </p>
                       </div>
                     )}
                   </div>
