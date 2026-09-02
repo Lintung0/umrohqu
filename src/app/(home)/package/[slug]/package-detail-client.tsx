@@ -162,6 +162,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const displayPkg = livePkg || pkg
   const seat = getSeatAvailability(displayPkg.available, displayPkg.quota, displayPkg.quota_taken)
   const soldOut = getPackageAvailable(displayPkg) <= 0
+  const blocked = displayPkg.status === "ongoing" || soldOut
 
   const ratingBreakdown = [5, 4, 3, 2, 1].map((star) => ({
     star,
@@ -823,10 +824,12 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
               {/* CTA */}
               <div className="mt-4 space-y-2.5">
-                {soldOut ? (
+                {blocked ? (
                   <div className="w-full h-12 flex items-center justify-center gap-2 rounded-lg bg-gray-100 border border-gray-200 text-gray-500 text-sm font-semibold">
                     <Timer className="w-4 h-4" />
-                    Paket ini penuh — sedang berlangsung
+                    {displayPkg.status === "ongoing"
+                      ? "Paket ini sedang berlangsung — sudah tidak bisa dipesan"
+                      : "Paket ini sudah penuh — tidak bisa dipesan"}
                   </div>
                 ) : (
                   <>
@@ -912,7 +915,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       </div>
 
       {/* Sticky Mobile CTA */}
-      {showStickyCta && !soldOut && (
+      {showStickyCta && !blocked && (
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 px-3 pt-3 pb-safe z-50 lg:hidden">
           <div className="max-w-lg mx-auto flex items-center gap-3">
             <div className="flex-1 min-w-0">
@@ -925,11 +928,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           </div>
         </div>
       )}
-      {showStickyCta && soldOut && (
+      {showStickyCta && blocked && (
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 px-3 pt-3 pb-safe z-50 lg:hidden">
           <div className="max-w-lg mx-auto flex items-center justify-center gap-2 py-2 text-gray-500 text-sm font-semibold">
             <Timer className="w-4 h-4" />
-            Paket ini penuh — sedang berlangsung
+            {displayPkg.status === "ongoing"
+              ? "Paket ini sedang berlangsung — tidak bisa dipesan"
+              : "Paket ini sudah penuh — tidak bisa dipesan"}
           </div>
         </div>
       )}

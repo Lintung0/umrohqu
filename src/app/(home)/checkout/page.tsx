@@ -9,6 +9,7 @@ import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import { Loader2, CreditCard, Users, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User, Phone, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
+import { getPackageAvailable } from "@/lib/utils"
 import type { Package, Tenant } from "@/lib/types"
 
 const DP_OPTIONS = [30, 40, 50]
@@ -63,6 +64,12 @@ function CheckoutContent() {
 
         if (pkgError || !pkgData) {
           setError("Paket tidak ditemukan.")
+          setLoading(false)
+          return
+        }
+
+        if (pkgData.status === "ongoing" || getPackageAvailable(pkgData as any) <= 0) {
+          setError("Paket ini tidak bisa dipesan karena sedang berlangsung atau kursi sudah penuh.")
           setLoading(false)
           return
         }
