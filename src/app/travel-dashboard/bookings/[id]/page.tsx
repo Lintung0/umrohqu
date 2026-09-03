@@ -35,6 +35,7 @@ interface BookingDetail extends Booking {
     method: string | null
     reference: string | null
     reason: string | null
+    note: string | null
   }[]
 }
 
@@ -51,6 +52,7 @@ export default function TravelBookingDetailPage() {
     processing: { label: t("booking.status_processing"), color: "text-purple-600", bg: "bg-purple-50 border-purple-200", icon: <Loader2 className="w-4 h-4 animate-spin" /> },
     completed: { label: t("booking.status_completed"), color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200", icon: <CheckCircle className="w-4 h-4" /> },
     cancelled: { label: t("booking.status_cancelled"), color: "text-red-600", bg: "bg-red-50 border-red-200", icon: <XCircle className="w-4 h-4" /> },
+    cancellation_pending: { label: "Menunggu Persetujuan", color: "text-amber-600", bg: "bg-amber-50 border-amber-200", icon: <Clock className="w-4 h-4" /> },
     refunded: { label: "Perlu Refund", color: "text-amber-600", bg: "bg-amber-50 border-amber-200", icon: <XCircle className="w-4 h-4" /> },
   }
 
@@ -67,7 +69,7 @@ export default function TravelBookingDetailPage() {
           packages(name, slug, duration_nights, price, departure_city),
           users(full_name, email, phone),
           booking_participants(*),
-          booking_refunds(id, amount, status, method, reference, reason)
+          booking_refunds(id, amount, status, method, reference, reason, note)
         `)
         .eq("id", id)
         .single()
@@ -303,8 +305,8 @@ export default function TravelBookingDetailPage() {
             </div>
           </div>
 
-          {/* Manual refund */}
-          {booking.status === "refunded" && (
+          {/* Manual refund / approval */}
+          {(booking.status === "refunded" || booking.status === "cancellation_pending") && (
             <RefundCard
               bookingId={booking.id}
               amount={Number(booking.total || 0)}
@@ -331,6 +333,7 @@ function RefundCard({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [reason, setReason] = useState("")
   const [amountInput, setAmountInput] = useState(String(amount))
   const [method, setMethod] = useState("Transfer Bank")
   const [reference, setReference] = useState("")
@@ -339,98 +342,135 @@ function RefundCard({
 
   const refund = detail.booking_refunds?.[0]
 
-  const processRefund = async () => {
+  const callRefundApi = async (action: string, payload?: Record<string, unknown>) => {
+    const res = await fetch("/api/booking/refund", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId, action, ...payload }),
+    })
+    return { ok: res.ok, data: await res.json() }
+  }
+
+  const handleApprove = async () => {
     setSubmitting(true)
-    try {
-      const res = await fetch("/api/booking/refund", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookingId,
-          action: "process",
-          amount: Number(amountInput) || amount,
-          method,
-          reference,
-          note,
-        }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        toast.success("Refund dicatat, menunggu transfer")
-        setOpen(false)
-        window.location.reload()
-      } else {
-        toast.error(data.error || "Gagal proses refund")
-      }
-    } catch {
-      toast.error(t("checkout.network_error"))
-    }
+    const { ok, data } = await callRefundApi("approve")
+    if (ok) { toast.success("Pembatalan disetujui"); window.location.reload() }
+    else toast.error(data.error || "Gagal menyetujui")
     setSubmitting(false)
   }
 
-  const completeRefund = async () => {
+  const handleReject = async () => {
     setSubmitting(true)
-    try {
-      const res = await fetch("/api/booking/refund", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId, action: "complete" }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        toast.success("Refund ditandai selesai")
-        window.location.reload()
-      } else {
-        toast.error(data.error || "Gagal tandai refund")
-      }
-    } catch {
-      toast.error(t("checkout.network_error"))
-    }
+    const { ok, data } = await callRefundApi("reject", { note: reason || "Ditolak oleh travel" })
+    if (ok) { toast.success("Pembatalan ditolak"); window.location.reload() }
+    else toast.error(data.error || "Gagal menolak")
     setSubmitting(false)
   }
+
+  const handleProcess = async () => {
+    setSubmitting(true)
+    const { ok, data } = await callRefundApi("process", {
+      amount: Number(amountInput) || amount,
+      method,
+      reference,
+      note,
+    })
+    if (ok) { toast.success("Refund dicatat"); window.location.reload() }
+    else toast.error(data.error || "Gagal mencatat refund")
+    setSubmitting(false)
+  }
+
+  const handleComplete = async () => {
+    setSubmitting(true)
+    const { ok, data } = await callRefundApi("complete")
+    if (ok) { toast.success("Refund selesai"); window.location.reload() }
+    else toast.error(data.error || "Gagal menandai selesai")
+    setSubmitting(false)
+  }
+
+  const refundReason = refund?.reason || detail.cancel_reason
+  const isPending = refund?.status === "pending"
+  const isProcessing = refund?.status === "processing"
+  const isCompleted = refund?.status === "completed"
+  const hasMethod = isProcessing && refund?.method
 
   return (
-    <div className="bg-white rounded-2xl border border-amber-200 p-6 space-y-4">
-      <h2 className="font-semibold flex items-center gap-2 text-amber-800">
-        <RotateCcw className="w-4 h-4" />
-        Refund Manual
-      </h2>
+    <div className={`rounded-2xl border p-6 space-y-4 ${
+      isPending
+        ? "bg-white border-amber-300"
+        : isCompleted
+          ? "bg-white border-emerald-200"
+          : "bg-white border-amber-200"
+    }`}>
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        {isPending
+          ? <Clock className="w-4 h-4 text-amber-600" />
+          : isCompleted
+            ? <CheckCircle className="w-4 h-4 text-emerald-600" />
+            : <RotateCcw className="w-4 h-4 text-amber-600" />
+        }
+        <h2 className={`font-semibold ${
+          isPending ? "text-amber-800" : isCompleted ? "text-emerald-800" : "text-amber-800"
+        }`}>
+          {isPending ? "Permintaan Pembatalan" : isCompleted ? "Refund Selesai" : "Refund Manual"}
+        </h2>
+      </div>
 
-      {detail.cancel_reason && (
+      {/* Alasan */}
+      {refundReason && (
         <div className="bg-slate-50 rounded-xl p-3 text-sm">
           <p className="text-xs text-muted-foreground mb-1">Alasan customer</p>
-          <p className="font-medium text-slate-800">{detail.cancel_reason}</p>
+          <p className="font-medium text-slate-800">{refundReason}</p>
         </div>
       )}
 
+      {/* Nominal */}
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Dana dikembalikan</span>
           <span className="font-bold text-amber-700">{formatRupiah(amount)}</span>
         </div>
-        {refund?.status === "processing" && (
+        {hasMethod && (
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">Metode</span>
-            <span className="font-medium">{refund.method || "-"}</span>
+            <span className="font-medium">{refund.method}{refund.reference ? ` • ${refund.reference}` : ""}</span>
           </div>
         )}
       </div>
 
-      {refund?.status === "completed" ? (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-700">
-          <CheckCircle className="w-4 h-4" />
-          Refund selesai — dana telah dikembalikan kepada customer.
-        </div>
-      ) : refund?.status === "processing" ? (
-        <button
-          onClick={completeRefund}
-          disabled={submitting}
-          className="w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-          Tandai Refund Selesai
-        </button>
-      ) : (
+      {/* ── Kondisi 1: Menunggu persetujuan ── */}
+      {isPending && (
+        <>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Catatan penolakan (opsional)…"
+            rows={2}
+            className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300 resize-none"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={handleReject}
+              disabled={submitting}
+              className="w-full px-4 py-2.5 rounded-xl text-sm font-semibold border-2 border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              Tolak
+            </button>
+            <button
+              onClick={handleApprove}
+              disabled={submitting}
+              className="w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+              Setujui
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ── Kondisi 2: Disetujui, belum catat manual ── */}
+      {isProcessing && !hasMethod && (
         <>
           <button
             onClick={() => setOpen(true)}
@@ -440,17 +480,40 @@ function RefundCard({
             Proses Refund (Manual)
           </button>
           <p className="text-[11px] text-muted-foreground text-center">
-            Customer telah membatalkan booking ini. Lakukan transfer dana secara manual ke customer, lalu catat prosesnya di sini.
+            Lakukan transfer dana secara manual ke customer, lalu catat detailnya di sini.
           </p>
         </>
       )}
 
+      {/* ── Kondisi 3: Sudah catat, menunggu ditandai selesai ── */}
+      {isProcessing && hasMethod && (
+        <>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+            Transfer sudah dicatat. Tandai selesai jika sudah mengirim dana ke customer.
+          </div>
+          <button
+            onClick={handleComplete}
+            disabled={submitting}
+            className="w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+            Tandai Refund Selesai
+          </button>
+        </>
+      )}
+
+      {/* ── Kondisi 4: Selesai ── */}
+      {isCompleted && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-700">
+          <CheckCircle className="w-4 h-4" />
+          Dana telah dikembalikan kepada customer.
+        </div>
+      )}
+
+      {/* Modal Proses Refund Manual */}
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setOpen(false)}>
-          <div
-            className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h3 className="font-bold text-lg text-slate-900">Proses Refund</h3>
@@ -464,20 +527,13 @@ function RefundCard({
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1">Nominal</label>
-                <input
-                  type="number"
-                  value={amountInput}
-                  onChange={(e) => setAmountInput(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300"
-                />
+                <input type="number" value={amountInput} onChange={(e) => setAmountInput(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1">Metode</label>
-                <select
-                  value={method}
-                  onChange={(e) => setMethod(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300 bg-white"
-                >
+                <select value={method} onChange={(e) => setMethod(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300 bg-white">
                   <option>Transfer Bank</option>
                   <option>E-Wallet</option>
                   <option>QRIS</option>
@@ -486,39 +542,25 @@ function RefundCard({
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1">Nomor / Ref Transaksi</label>
-                <input
-                  type="text"
-                  value={reference}
-                  onChange={(e) => setReference(e.target.value)}
+                <input type="text" value={reference} onChange={(e) => setReference(e.target.value)}
                   placeholder="mis. INV123 / No transfer"
-                  className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300"
-                />
+                  className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1">Catatan (opsional)</label>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  rows={2}
+                <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
                   placeholder="Catatan proses refund…"
-                  className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300 resize-none"
-                />
+                  className="w-full p-3 rounded-xl border border-border text-sm outline-none focus:border-amber-300 resize-none" />
               </div>
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setOpen(false)}
-                disabled={submitting}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-muted text-muted-foreground hover:bg-muted/70 transition-colors disabled:opacity-50 cursor-pointer"
-              >
+              <button onClick={() => setOpen(false)} disabled={submitting}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-muted text-muted-foreground hover:bg-muted/70 transition-colors disabled:opacity-50 cursor-pointer">
                 Batal
               </button>
-              <button
-                onClick={processRefund}
-                disabled={submitting}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
-              >
+              <button onClick={handleProcess} disabled={submitting}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer">
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                 Simpan
               </button>

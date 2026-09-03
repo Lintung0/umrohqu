@@ -9,6 +9,9 @@ const schema = z.object({
 
 const CANCELLABLE = ["pending_payment", "processing", "confirmed"]
 
+// Customer mengajukan pembatalan. KEPUTUSAN ada di travel:
+//  - disetujui  -> booking.status = refunded/cancelled + quota dikembalikan (route refund approve)
+//  - ditolak    -> booking kembali ke status sebelumnya
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -41,65 +44,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak dapat dibatalkan pada status ini" }, { status: 400 })
     }
 
-    const paidAmount = Number(booking.total || 0)
-    const hasPayment = booking.status !== "pending_payment" && paidAmount > 0
+    // Pastikan belum ada permintaan batal yang sedang berjalan/diproses
+    const { data: existing } = await admin
+      .from("booking_refunds")
+      .select("id")
+      .eq("booking_id", bookingId)
+      .in("status", ["pending", "processing"])
+      .maybeSingle()
 
-    // 1. Update booking status
-    await admin
-      .from("bookings")
-      .update({
-        status: hasPayment ? "refunded" : "cancelled",
-        payment_status: hasPayment ? "refunded" : (booking.payment_status || "pending"),
-        cancel_reason: reason,
-        updated_at: new Date().toISOString(),
+    if (existing) {
+      return NextResponse.json({ error: "Sudah ada permintaan pembatalan yang menunggu persetujuan" }, { status: 400 })
+    }
+
+    // Simpan status sebelumnya agar bisa dikembalikan jika ditolak
+    const { data: refund } = await admin
+      .from("booking_refunds")
+      .insert({
+        booking_id: bookingId,
+        amount: Number(booking.total || 0),
+        reason,
+        status: "pending",
+        requested_by: user.id,
+        previous_status: booking.status,
       })
-      .eq("id", bookingId)
-
-    // 2. Kembalikan kursi paket
-    const { data: pkg } = await admin
-      .from("packages")
-      .select("quota_taken")
-      .eq("id", booking.package_id)
+      .select("id, amount, status")
       .single()
 
-    if (pkg) {
-      await admin
-        .from("packages")
-        .update({
-          quota_taken: Math.max(0, (pkg.quota_taken ?? 0) - booking.pilgrim_count),
-        })
-        .eq("id", booking.package_id)
+    if (!refund) {
+      return NextResponse.json({ error: "Gagal mengajukan pembatalan" }, { status: 500 })
     }
 
-    // 3. Catat refund untuk diproses manual oleh travel
-    let refund = null
-    if (hasPayment) {
-      const { data: refundRow } = await admin
-        .from("booking_refunds")
-        .insert({
-          booking_id: bookingId,
-          amount: paidAmount,
-          reason,
-          status: "pending",
-          requested_by: user.id,
-        })
-        .select("id, amount, status")
-        .single()
-      refund = refundRow
+    // Status booking jadi 'cancellation_pending' sampai travel memutuskan
+    await admin
+      .from("bookings")
+      .update({ status: "cancellation_pending", updated_at: new Date().toISOString() })
+      .eq("id", bookingId)
 
-      // Tandai transaksi pembayaran yang sudah lunas sebagai refunded
-      await admin
-        .from("payments")
-        .update({ status: "refunded", updated_at: new Date().toISOString() })
-        .eq("booking_id", bookingId)
-        .eq("status", "paid")
-    }
-
-    return NextResponse.json({
-      success: true,
-      status: hasPayment ? "refunded" : "cancelled",
-      refund,
-    })
+    return NextResponse.json({ success: true, status: "cancellation_pending", refund })
   } catch (err) {
     console.error("Cancel booking error:", err)
     const message = err instanceof Error ? err.message : "Terjadi kesalahan server"

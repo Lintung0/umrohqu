@@ -39,7 +39,7 @@ interface BookingDetail {
   booking_source?: string
   payment_status?: string
   cancel_reason?: string | null
-  refund: { id: string; amount: number; status: string; method: string | null; completed_at: string | null } | null
+  refund: { id: string; amount: number; reason?: string | null; status: string; method: string | null; completed_at: string | null } | null
   package: { name: string; slug: string; departure_city: string | null; duration_nights: number | null; airline?: string | null; hotel_makkah?: string | null; hotel_makkah_stars?: number | null; hotel_madinah?: string | null; hotel_madinah_stars?: number | null } | null
   participants: { id: string; full_name: string; national_id: string | null; passport_number: string | null; gender: string | null; phone: string | null; relation: string }[]
 }
@@ -411,10 +411,40 @@ function CancelStatusCard({
   bookingId: string
   status: string
   cancelReason?: string | null
-  refund: { id: string; amount: number; status: string; method: string | null; completed_at: string | null } | null
+  refund: { id: string; amount: number; reason?: string | null; status: string; method: string | null; completed_at: string | null } | null
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+
+  // ── Menunggu persetujuan travel ──
+  if (status === "cancellation_pending") {
+    return (
+      <div className="bg-white rounded-2xl border border-amber-200 p-6 space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center shrink-0">
+            <Clock className="w-6 h-6 text-amber-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-amber-800">Menunggu Persetujuan Travel</h3>
+            <p className="text-sm text-amber-600">
+              Permintaan pembatalanmu sudah terkirim. Travel akan menyetujui atau menolak — danamu akan dikembalikan jika disetujui.
+            </p>
+          </div>
+        </div>
+        {refund?.reason ? (
+          <div className="bg-amber-50 rounded-xl p-3 text-sm">
+            <p className="text-xs text-muted-foreground mb-1">Alasan kamu</p>
+            <p className="font-medium text-amber-900">{refund.reason}</p>
+          </div>
+        ) : cancelReason ? (
+          <div className="bg-amber-50 rounded-xl p-3 text-sm">
+            <p className="text-xs text-muted-foreground mb-1">Alasan kamu</p>
+            <p className="font-medium text-amber-900">{cancelReason}</p>
+          </div>
+        ) : null}
+      </div>
+    )
+  }
 
   if (status === "refunded" || status === "cancelled") {
     const refundStatus =

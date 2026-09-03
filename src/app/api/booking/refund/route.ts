@@ -4,15 +4,18 @@ import { z } from "zod"
 
 const schema = z.object({
   bookingId: z.string().uuid(),
-  action: z.enum(["process", "complete"]),
+  action: z.enum(["approve", "reject", "process", "complete"]),
   amount: z.number().positive().optional(),
   method: z.string().optional(),
   reference: z.string().optional(),
   note: z.string().optional(),
 })
 
-// Travel staff memproses refund SECARA MANUAL (transfer/e-wallet ke customer),
-// lalu menandai refund selesai. Dana dikembalikan di luar sistem pembayaran.
+// Alur pembatalan (customer mengajukan → travel menyetujui/menolak → refund manual):
+//  - approve  : setujui pembatalan → booking refunded/cancelled + quota dikembalikan + refund 'processing'
+//  - reject   : tolak pembatalan → booking kembali ke status sebelumnya + refund 'rejected'
+//  - process  : catat detail refund manual (nominal/metode/ref) → refund 'processing'
+//  - complete : tandai transfer dana selesai → refund 'completed'
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, tenant_id, total")
+      .select("id, status, payment_status, tenant_id, package_id, pilgrim_count, total")
       .eq("id", bookingId)
       .single()
 
@@ -54,19 +57,93 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking bukan milik travel Anda" }, { status: 403 })
     }
 
-    if (booking.status !== "refunded") {
-      return NextResponse.json({ error: "Booking tidak dalam status refund" }, { status: 400 })
-    }
-
     const { data: refundRow } = await admin
       .from("booking_refunds")
-      .select("id, status")
+      .select("id, status, reason, previous_status, amount")
       .eq("booking_id", bookingId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle()
 
     const refundId = refundRow?.id
+
+    if (action === "approve") {
+      if (!refundId || refundRow.status !== "pending") {
+        return NextResponse.json({ error: "Tidak ada permintaan pembatalan yang menunggu" }, { status: 400 })
+      }
+      if (booking.status !== "cancellation_pending") {
+        return NextResponse.json({ error: "Booking tidak dalam status menunggu persetujuan" }, { status: 400 })
+      }
+
+      const hasPayment = Number(booking.total || 0) > 0
+
+      // 1. Status booking + payment
+      await admin
+        .from("bookings")
+        .update({
+          status: hasPayment ? "refunded" : "cancelled",
+          payment_status: hasPayment ? "refunded" : (booking.payment_status || "pending"),
+          cancel_reason: refundRow.reason || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", bookingId)
+
+      // 2. Kembalikan kursi paket
+      const { data: pkg } = await admin
+        .from("packages")
+        .select("quota_taken")
+        .eq("id", booking.package_id)
+        .single()
+      if (pkg) {
+        await admin
+          .from("packages")
+          .update({ quota_taken: Math.max(0, (pkg.quota_taken ?? 0) - booking.pilgrim_count) })
+          .eq("id", booking.package_id)
+      }
+
+      // 3. Optimistis: siap proses refund manual
+      await admin
+        .from("booking_refunds")
+        .update({
+          status: "processing",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", refundId)
+
+      return NextResponse.json({ success: true, status: "refunded", refundId })
+    }
+
+    if (action === "reject") {
+      if (!refundId || refundRow.status !== "pending") {
+        return NextResponse.json({ error: "Tidak ada permintaan pembatalan yang menunggu" }, { status: 400 })
+      }
+      if (booking.status !== "cancellation_pending") {
+        return NextResponse.json({ error: "Booking tidak dalam status menunggu persetujuan" }, { status: 400 })
+      }
+
+      // Kembalikan ke status sebelum permintaan
+      const previous = refundRow.previous_status || "pending_payment"
+      await admin
+        .from("bookings")
+        .update({ status: previous, updated_at: new Date().toISOString() })
+        .eq("id", bookingId)
+
+      await admin
+        .from("booking_refunds")
+        .update({
+          status: "rejected",
+          note: note || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", refundId)
+
+      return NextResponse.json({ success: true, status: previous, refundId })
+    }
+
+    // process / complete membutuhkan booking sudah refunded
+    if (booking.status !== "refunded") {
+      return NextResponse.json({ error: "Booking tidak dalam status refund" }, { status: 400 })
+    }
 
     if (action === "complete") {
       if (!refundId) {
