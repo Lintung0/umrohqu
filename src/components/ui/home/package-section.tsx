@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Clock, Loader2, Search } from "lucide-react";
+import { Calendar, Clock, Loader2, Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils";
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields";
@@ -190,19 +190,21 @@ export default function PackageSection() {
   }
 
   return (
-    <section className="py-12 px-6 md:px-12">
+    <section className="py-16 px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-end justify-between mb-12">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">
               {t.package.title}
             </h2>
+            <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
           </div>
           <Link
             href="/search"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-900 transition-colors group"
           >
             {t.common.view_all}
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
 
@@ -240,11 +242,11 @@ export default function PackageSection() {
         )}
 
           {hasMore && packages.length > 0 && (
-            <div className="mt-10 text-center">
+            <div className="mt-12 text-center">
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-sm font-semibold border-2 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group inline-flex items-center gap-2 px-9 py-3.5 rounded-2xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 {loadingMore ? (
                   <>
@@ -254,7 +256,7 @@ export default function PackageSection() {
                 ) : (
                   <>
                     Muat Lebih Banyak
-                    <span className="text-xs text-muted-foreground">({packages.length} paket)</span>
+                    <span className="text-xs text-emerald-100/80">({packages.length} paket)</span>
                   </>
                 )}
               </button>

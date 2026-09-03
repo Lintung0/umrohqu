@@ -64,19 +64,26 @@ export function WhyUsSection() {
   return (
     <section className="py-16 px-6 md:px-12 bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-10">
-          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Mengapa UmrahQu</p>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t.landing.why_us_title}</h2>
-          <p className="text-gray-500 mt-2 text-sm max-w-xl">{t.landing.why_us_desc}</p>
+        <div className="mb-12">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold tracking-wide mb-3">
+            Mengapa UmrahQu
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">{t.landing.why_us_title}</h2>
+          <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
+          <p className="text-gray-500 mt-4 text-sm max-w-xl leading-relaxed">{t.landing.why_us_desc}</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {WHY_US.map((item) => (
-            <div key={item.title} className="flex gap-4 p-5 rounded-xl border border-gray-100 bg-gray-50">
-              <div className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0">
-                <item.icon className="w-4.5 h-4.5 text-emerald-600" />
+            <div
+              key={item.title}
+              className="group relative flex gap-4 p-6 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-emerald-100 transition-all duration-300"
+            >
+              <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/30 transition-transform duration-300 group-hover:scale-110">
+                <item.icon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
+                <h3 className="font-semibold text-[15px] text-gray-900 mb-1.5">{item.title}</h3>
                 <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
               </div>
             </div>
@@ -129,15 +136,20 @@ export function TravelAgenciesSection() {
   }))
 
   return (
-    <section className="py-14 px-6 bg-gray-50 border-t border-gray-100">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+    <section className="relative py-16 px-6 md:px-12 overflow-hidden border-t border-gray-100">
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-gray-50" />
+      <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-emerald-100/50 blur-3xl" aria-hidden="true" />
+      <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-amber-100/40 blur-3xl" aria-hidden="true" />
+      <div className="relative max-w-7xl mx-auto">
+        <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Travel Partner</p>
-            <h2 className="text-xl font-bold">{t.landing.travel_section_title}</h2>
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold tracking-wide mb-3">
+              Travel Partner
+            </span>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{t.landing.travel_section_title}</h2>
           </div>
-          <Link href="/travel" className="text-sm font-medium text-emerald-700 hover:text-emerald-800 transition-colors flex items-center gap-1">
-            Lihat semua <ArrowRight className="w-3.5 h-3.5" />
+          <Link href="/travel" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-800 transition-colors group">
+            Lihat semua <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
 
@@ -146,8 +158,6 @@ export function TravelAgenciesSection() {
           speed="slow"
           pauseOnHover
         />
-
-
       </div>
     </section>
   )
@@ -206,32 +216,42 @@ export function TestimonialSection() {
   }, [])
 
   return (
-    <section className="py-16 px-6 md:px-12 bg-white border-t border-gray-100">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-10">
-          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Ulasan Jamaah</p>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t.landing.testimonial_title}</h2>
-          <p className="text-gray-500 mt-2 text-sm">{t.landing.testimonial_desc}</p>
+    <section className="relative py-16 px-6 md:px-12 bg-white border-t border-gray-100 overflow-hidden">
+      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-64 rounded-full bg-emerald-50/60 blur-3xl" aria-hidden="true" />
+      <div className="relative max-w-7xl mx-auto">
+        <div className="mb-12 text-center">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold tracking-wide mb-3">
+            Ulasan Jamaah
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">{t.landing.testimonial_title}</h2>
+          <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
+          <p className="text-gray-500 mt-4 text-sm">{t.landing.testimonial_desc}</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((item) => (
-            <div key={item.id} className="flex flex-col gap-3 p-5 rounded-xl border border-gray-200 bg-white">
+            <div
+              key={item.id}
+              className="group relative flex flex-col gap-4 p-6 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            >
+              <span className="absolute -top-1 right-4 text-6xl font-serif text-emerald-200/70 leading-none select-none" aria-hidden="true">"</span>
               <div className="flex gap-0.5">
                 {Array.from({ length: item.rating }).map((_, i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400 drop-shadow-[0_1px_2px_rgba(251,191,36,0.4)]" />
                 ))}
               </div>
               <p className="text-sm text-gray-600 leading-relaxed flex-1">"{item.comment}"</p>
-              <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
-                <Image
-                  src={item.avatar}
-                  alt={item.name}
-                  width={36}
-                  height={36}
-                  className="rounded-full"
-                />
+              <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                <div className="p-[2px] rounded-full bg-gradient-to-br from-emerald-500 to-amber-400">
+                  <Image
+                    src={item.avatar}
+                    alt={item.name}
+                    width={40}
+                    height={40}
+                    className="rounded-full ring-2 ring-white"
+                  />
+                </div>
                 <div>
-                  <p className="text-sm font-semibold">{item.name}</p>
+                  <p className="text-sm font-semibold text-gray-900">{item.name}</p>
                   <p className="text-xs text-gray-400">{item.city} · {item.package}</p>
                 </div>
               </div>
@@ -263,16 +283,19 @@ export function TrustSection() {
   ]
 
   return (
-    <section className="py-10 px-6 md:px-12 bg-gray-50 border-t border-gray-100">
+    <section className="py-12 px-6 md:px-12 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {items.map((item) => (
-            <div key={item.title} className="flex items-center gap-3 p-4 rounded-xl bg-white border border-gray-200">
-              <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                <item.icon className="w-4 h-4 text-emerald-600" />
+            <div
+              key={item.title}
+              className="group flex items-center gap-3.5 p-5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-emerald-100 hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center shrink-0 group-hover:from-emerald-500 group-hover:to-emerald-700 transition-colors duration-300">
+                <item.icon className="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors duration-300" />
               </div>
               <div>
-                <h3 className="font-semibold text-xs">{item.title}</h3>
+                <h3 className="font-semibold text-sm text-gray-900">{item.title}</h3>
                 <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">{item.desc}</p>
               </div>
             </div>
