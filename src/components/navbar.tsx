@@ -163,23 +163,23 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center gap-2 pl-1 p-0.5 rounded-full border border-emerald-200/70 bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 transition-all duration-200 cursor-pointer shadow-sm shadow-emerald-500/20"
+                  className="flex items-center gap-1 pl-1 pr-1.5 py-1 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 transition-all duration-200 cursor-pointer shadow-sm shadow-emerald-500/20"
                 >
                   <Image
                     src={user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.user_metadata?.full_name || user.email || "U")}&background=0E5C4E&color=fff&size=80&bold=true`}
                     alt={user.user_metadata?.full_name || "User"}
-                    width={30}
-                    height={30}
-                    className="rounded-full ring-2 ring-white"
+                    width={32}
+                    height={32}
+                    className="shrink-0 rounded-full ring-2 ring-white"
                   />
-                  <ChevronDown className={cn("w-3.5 h-3.5 text-white pr-2 transition-transform duration-200", menuOpen && "rotate-180")} />
+                  <ChevronDown className={cn("h-4 w-4 shrink-0 text-white/90 transition-transform duration-200", menuOpen && "rotate-180")} />
                 </button>
 
                 {menuOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                    <div className="absolute right-0 top-full mt-2 w-60 bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/50 z-50 py-2 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-emerald-100 rounded-2xl shadow-xl shadow-emerald-900/10 z-50 py-2 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-emerald-50 bg-gradient-to-br from-emerald-50/80 to-white">
                         <p className="font-semibold text-sm text-slate-900 truncate">{user.user_metadata?.full_name || "User"}</p>
                         <p className="text-xs text-slate-500 truncate">{user.email}</p>
                       </div>
@@ -193,7 +193,7 @@ const Navbar = () => {
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 border-t border-slate-50 transition-colors cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
                         {t.nav.logout}
