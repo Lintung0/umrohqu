@@ -441,16 +441,16 @@ function SearchContent() {
     <main className="min-h-screen bg-slate-50">
 
       {/* ── Sticky search toolbar ── */}
-      <div className="sticky top-16 z-40 bg-slate-50/80 backdrop-blur-sm">
+      <div className="sticky top-16 z-40 bg-slate-50/80 backdrop-blur-md border-b border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
             <button
               onClick={() => setShowMobileFilter(true)}
               aria-label="Buka filter pencarian"
-              className="lg:hidden relative w-11 h-11 shrink-0 flex items-center justify-center bg-white border border-slate-200 text-slate-700 rounded-full shadow-sm hover:border-emerald-300 hover:text-emerald-700 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+              className="lg:hidden relative w-11 h-11 shrink-0 flex items-center justify-center bg-white border border-slate-200 text-slate-700 rounded-full shadow-sm hover:border-emerald-300 hover:text-emerald-700 hover:shadow-md transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
             >
               <SlidersHorizontal className="w-5 h-5" />
-              {hasActiveFilters && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400" />}
+              {hasActiveFilters && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-amber-200" />}
             </button>
             <div className="relative flex-1" ref={suggestionsContainerRef}>
               <div className="relative">
@@ -462,7 +462,7 @@ function SearchContent() {
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
                   onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true) }}
                   aria-label="Cari paket umroh"
-                  className={`w-full pl-5 ${searchInput ? "pr-10" : "pr-4"} h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all`}
+                  className={`w-full pl-5 ${searchInput ? "pr-10" : "pr-4"} h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all`}
                 />
                 {searchInput && !loadingCitySuggestions && (
                   <button
@@ -492,9 +492,9 @@ function SearchContent() {
                     <li
                       key={i}
                       onClick={() => handleSelectCitySuggestion(s)}
-                      className="flex cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors"
+                      className="flex cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-emerald-50/60 transition-colors"
                     >
-                      <MapPin size={14} className="shrink-0 text-slate-400" />
+                      <MapPin size={14} className="shrink-0 text-emerald-500" />
                       <div className="min-w-0 flex-1">
                         <span className="font-medium text-slate-900">{s.name}</span>
                         {s.country && (
@@ -509,7 +509,7 @@ function SearchContent() {
             <button
               onClick={handleSearchSubmit}
               aria-label="Cari paket umroh"
-              className="w-11 h-11 shrink-0 flex items-center justify-center bg-amber-400 hover:bg-amber-500 text-emerald-950 rounded-full shadow-md shadow-amber-400/20 hover:shadow-lg hover:shadow-amber-400/30 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70"
+              className="w-11 h-11 shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70"
             >
               <Search className="w-5 h-5" />
             </button>
@@ -548,8 +548,8 @@ function SearchContent() {
                   aria-pressed={isActive}
                   className={`shrink-0 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
                     isActive
-                      ? "bg-emerald-600 text-white shadow-sm"
-                      : "bg-transparent text-slate-600 hover:bg-slate-100"
+                      ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-600/25"
+                      : "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
                   {q.label}
@@ -580,9 +580,9 @@ function SearchContent() {
         {activeFilterChips.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-5">
             {activeFilterChips.map((chip, i) => (
-              <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+              <span key={i} className="inline-flex items-center gap-1.5 pl-3 pr-0 py-1 bg-white text-emerald-800 text-xs font-medium rounded-full border border-emerald-200 shadow-sm">
                 {chip.label}
-                <button onClick={chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="-m-1.5 p-1.5 flex items-center justify-center min-w-8 min-h-8 hover:text-emerald-900 cursor-pointer">
+                <button onClick={chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="-my-1 p-1.5 flex items-center justify-center min-w-8 min-h-8 text-emerald-500 hover:text-emerald-900 hover:bg-emerald-50 rounded-full transition-colors cursor-pointer">
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -643,11 +643,13 @@ function SearchContent() {
           {/* Package Grid */}
           <div ref={resultsRef} className="lg:col-span-3 min-w-0 scroll-mt-28">
             {filtered.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-xl border border-slate-200/70 shadow-sm">
-                <SearchX className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+              <div className="text-center py-16 px-6 bg-white rounded-2xl border border-slate-200/70 shadow-sm">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                  <SearchX className="w-8 h-8 text-emerald-500" />
+                </div>
                 <h3 className="font-semibold text-lg mb-2 text-slate-900">Paket tidak ditemukan</h3>
                 <p className="text-sm text-slate-500 mb-6">Coba ubah kata kunci atau filter pencarian Anda</p>
-                <button onClick={clearFilters} className="px-5 py-2.5 text-sm font-semibold rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer">
+                <button onClick={clearFilters} className="px-6 py-2.5 text-sm font-semibold rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/30 hover:shadow-xl hover:shadow-emerald-600/40 hover:-translate-y-0.5 transition-all cursor-pointer">
                   Lihat Semua Paket
                 </button>
               </div>

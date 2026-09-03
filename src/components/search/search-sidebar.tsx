@@ -150,12 +150,15 @@ export default function SearchSidebar({
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between gap-2 px-4 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500">
-          <span className="inline-flex items-center gap-2 text-white text-sm font-bold">
-            <SlidersHorizontal className="w-4 h-4" /> Filter Pencarian
+        <div className="relative flex items-center justify-between gap-2 px-4 py-3.5 bg-gradient-to-r from-emerald-700 via-emerald-600 to-emerald-500">
+          <div className="absolute inset-0 opacity-[0.07]"
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)", backgroundSize: "16px 16px" }}
+            aria-hidden="true" />
+          <span className="relative inline-flex items-center gap-2 text-white text-sm font-bold">
+            <SlidersHorizontal className="w-4 h-4 text-amber-300" /> Filter Pencarian
           </span>
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="text-xs text-white/90 hover:text-white hover:underline flex items-center gap-1 cursor-pointer font-medium">
+            <button onClick={clearFilters} className="relative text-xs text-white/90 hover:text-white hover:underline flex items-center gap-1 cursor-pointer font-medium">
               <RotateCcw className="w-3 h-3" /> Atur Ulang
             </button>
           )}
