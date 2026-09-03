@@ -12,33 +12,6 @@ function cn(...classes: (string | false | undefined)[]) {
   return classes.filter(Boolean).join(" ")
 }
 
-function tileClasses(index: number, total: number): string {
-  const isLast = index === total - 1
-
-  let base = "col-span-1"
-  if (total === 1) base = "col-span-2"
-  else if (total % 2 === 1 && isLast) base = "col-span-2"
-
-  let md = ""
-  if (total === 1) {
-    md = "md:col-span-4"
-  } else if (total === 2) {
-    md = "md:col-span-2 md:row-span-2"
-  } else if (total === 3) {
-    if (index === 0) md = "md:col-span-2 md:row-span-2"
-    else md = "md:col-span-2 md:row-span-1"
-  } else if (total === 4) {
-    md = ""
-  } else if (total >= 5) {
-    if (index === 0) md = "md:col-span-2 md:row-span-2"
-    else if (total === 6) md = isLast ? "md:col-span-4" : ""
-    else if (total === 7) md = index >= 5 ? "md:col-span-2" : ""
-    else if (total === 8) md = isLast ? "md:col-span-2" : ""
-  }
-
-  return `${base} ${md}`.trim()
-}
-
 export default function TravelGalleryMosaic({ images, alt }: { images: string[]; alt?: string }) {
   const totalPages = Math.max(1, Math.ceil(images.length / PER_PAGE))
   const [page, setPage] = useState(0)
@@ -49,17 +22,12 @@ export default function TravelGalleryMosaic({ images, alt }: { images: string[];
   return (
     <div>
       <PhotoProvider>
-        <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[120px] sm:auto-rows-[150px] md:auto-rows-[170px] gap-2 md:gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3">
           {pageImages.map((url, i) => {
             const absIndex = start + i
             return (
               <PhotoView key={`${absIndex}-${url}`} src={url}>
-                <div
-                  className={cn(
-                    "group relative overflow-hidden rounded-2xl bg-gray-100 cursor-zoom-in",
-                    tileClasses(i, pageImages.length),
-                  )}
-                >
+                <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 cursor-zoom-in">
                   <Image
                     src={url}
                     alt={`${alt || "Dokumentasi"} ${absIndex + 1}`}

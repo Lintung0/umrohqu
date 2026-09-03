@@ -1,14 +1,15 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, Clock, Users, Plane, BadgeCheck, Shield, Package, ChevronRight, Phone, Mail, MessageCircle, Zap, Building2, Globe, FileCheck, Award, ArrowRight, Star } from "lucide-react"
-import { formatRupiah, getSeatAvailability, getPackageAvailable } from "@/lib/utils"
+import { MapPin, Users, BadgeCheck, Shield, Package, ChevronRight, Phone, Mail, MessageCircle, Zap, Building2, Globe, FileCheck, Award, ArrowRight, Star } from "lucide-react"
+import { getPackageAvailable } from "@/lib/utils"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import { enrichTenantsWithDetail } from "@/lib/tenant-detail-fields"
 import type { Package as PackageType, Tenant } from "@/lib/types"
 import { createAdminClient } from "@/lib/supabase/server"
 import TravelGalleryMosaic from "@/components/shared/travel-gallery-mosaic"
 import { PackageDocumentationSection } from "@/components/shared/package-documentation"
+import PackageCardShared from "@/components/shared/package-card"
 
 export const dynamic = "force-dynamic"
 
@@ -47,97 +48,8 @@ interface PackageRow {
 }
 
 function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
-  const seat = getSeatAvailability(undefined, pkg.quota ?? 0, pkg.quota_taken)
-  const soldOut = seat.available <= 0
-
-  const isDoc = typeof href === "string" && href !== `/package/${pkg.slug}`
-
-  const content = (
-    <div className="flex flex-col h-full">
-      <div className="relative h-44 sm:h-48 shrink-0 overflow-hidden">
-        <Image
-          src={pkg.image_url || "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=80&fm=webp&auto=format"}
-          alt={pkg.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-700"
-          unoptimized
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        <div className="absolute top-3 left-3 flex gap-1.5">
-          {pkg.duration_nights && (
-            <span className="bg-black/55 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
-              <Clock className="w-2.5 h-2.5" />
-              {pkg.duration_nights} Hari
-            </span>
-          )}
-          {soldOut && (
-            <span className="bg-red-600/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
-              <Clock className="w-2.5 h-2.5" />
-              Penuh
-            </span>
-          )}
-        </div>
-        {pkg.airline && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-1 text-[10px] font-semibold text-white bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-full">
-            <Plane className="w-2.5 h-2.5" /> {pkg.airline}
-          </div>
-        )}
-      </div>
-
-      <div className="flex-1 p-4 flex flex-col">
-        <h3 className="font-semibold text-sm leading-snug group-hover:text-emerald-700 transition-colors mb-2.5">{pkg.name}</h3>
-        <div className="space-y-1.5 mb-3">
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities.join(", ") : null) || "-"}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <Users className="w-3 h-3 text-emerald-600 shrink-0" />
-            {soldOut ? "Kursi habis" : `Sisa ${seat.available} kursi`}
-          </div>
-        </div>
-
-        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
-          <div className={`h-full rounded-full transition-all duration-700 ${soldOut ? "bg-gray-400" : seat.color}`} style={{ width: `${soldOut ? 100 : seat.percent}%` }} />
-        </div>
-
-        <div className="flex items-end justify-between mt-auto pt-3 border-t border-gray-100">
-          <div>
-            <p className="text-base font-bold text-emerald-700">{formatRupiah(pkg.price)}<span className="text-[10px] text-gray-400 font-normal">/org</span></p>
-          </div>
-          {!soldOut ? (
-            <span className={`inline-flex items-center gap-1 text-xs font-semibold group-hover:gap-1.5 transition-all ${isDoc ? "text-blue-600" : "text-emerald-700"}`}>
-              {isDoc ? "Lihat Dokumentasi" : "Lihat Paket"} <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-400">
-              <Clock className="w-3.5 h-3.5" /> Berlangsung
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-
-  if (isDoc) {
-    return (
-      <a
-        href={href as string}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50 hover:-translate-y-0.5 transition-all duration-300 group"
-      >
-        {content}
-      </a>
-    )
-  }
   return (
-    <Link
-      href={`/package/${pkg.slug}`}
-      className="block bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-100/60 hover:-translate-y-0.5 transition-all duration-300 group"
-    >
-      {content}
-    </Link>
+    <PackageCardShared pkg={pkg as unknown as PackageType} showTravel={false} />
   )
 }
 
@@ -229,9 +141,6 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               ← Semua Travel Partner
             </Link>
             <div className="hidden sm:flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-black/25 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
-                <Shield className="w-3 h-3 text-emerald-300" /> PPIU Resmi
-              </span>
               {tenantData.is_featured && (
                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-100 bg-amber-500/25 backdrop-blur-sm px-3 py-1.5 rounded-full border border-amber-300/30">
                   <Star className="w-3 h-3 text-amber-300 fill-amber-300" /> Unggulan
@@ -382,10 +291,6 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
 
               {/* Legalitas inline */}
               <div className="mt-6 flex flex-wrap gap-2.5">
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200/80 rounded-full px-3.5 py-1.5">
-                  <Shield className="w-3.5 h-3.5 text-emerald-600" />
-                  PPIU {tenantData.ppiu_number ? `No. ${tenantData.ppiu_number}` : "Resmi"}
-                </span>
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-800 bg-blue-50 border border-blue-200/80 rounded-full px-3.5 py-1.5">
                   <Award className="w-3.5 h-3.5 text-blue-600" />
                   {tenantData.accredited_at
@@ -486,7 +391,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               <p className="text-xs text-gray-400 mt-1">Nantikan pembaruan dari {tenantData.name}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {salePackages.map((pkg) => (
                 <PackageCard key={pkg.id} pkg={pkg} />
               ))}

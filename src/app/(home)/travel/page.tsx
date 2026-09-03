@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { MapPin, Package, BadgeCheck, Search, X, ArrowRight, Sparkles, Building2 } from "lucide-react"
@@ -34,7 +34,6 @@ export default function TravelListPage() {
   const [travels, setTravels] = useState<TravelRow[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [cityFilter, setCityFilter] = useState("semua")
 
   useEffect(() => {
     const supabase = createClient()
@@ -80,18 +79,11 @@ export default function TravelListPage() {
     return () => { cancelled = true }
   }, [])
 
-  const cities = useMemo(
-    () => ["semua", ...Array.from(new Set(travels.map((t) => t.city).filter(Boolean) as string[])).sort()],
-    [travels],
-  )
-
   const filtered = travels.filter((t) => {
-    if (cityFilter !== "semua" && t.city !== cityFilter) return false
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       return (
         t.name.toLowerCase().includes(q) ||
-        t.city?.toLowerCase().includes(q) ||
         t.description?.toLowerCase().includes(q)
       )
     }
@@ -163,7 +155,7 @@ export default function TravelListPage() {
               <Search className="w-5 h-5 text-emerald-700 shrink-0" />
               <input
                 type="text"
-                placeholder="Cari nama travel atau kota..."
+                placeholder="Cari nama travel..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 min-w-0 px-3 py-2.5 bg-transparent text-sm focus:outline-none placeholder:text-gray-400"
@@ -186,25 +178,6 @@ export default function TravelListPage() {
               )}
             </div>
           </div>
-
-          {/* Filter chips */}
-          <div className="mt-8 flex flex-col items-center gap-4">
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {cities.map((city) => (
-                <button
-                  key={city}
-                  onClick={() => setCityFilter(city)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all capitalize ${
-                    cityFilter === city
-                      ? "bg-amber-400 text-emerald-950 shadow-md shadow-amber-400/30"
-                      : "bg-white/10 border border-white/15 text-emerald-50 hover:bg-white/20"
-                  }`}
-                >
-                  {city === "semua" ? "Semua Kota" : city}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         <div className="relative h-6 bg-gradient-to-b from-transparent to-gray-50" aria-hidden />
@@ -219,7 +192,7 @@ export default function TravelListPage() {
             </div>
             <p className="text-sm text-gray-500">Tidak ada travel yang cocok dengan filter ini.</p>
             <button
-              onClick={() => { setSearchQuery(""); setCityFilter("semua") }}
+              onClick={() => setSearchQuery("")}
               className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl transition-colors"
             >
               Atur Ulang Filter
