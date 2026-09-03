@@ -35,7 +35,7 @@ export default function LogoMarquee({ items, speed = "normal", className, pauseO
         {duplicated.map((item, i) => (
           <div
             key={`${item.name}-${i}`}
-            className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-gray-50 border border-gray-100 hover:border-primary/20 hover:bg-primary/5 transition-colors shrink-0"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white border border-gray-100 shadow-sm hover:border-primary/30 hover:shadow-md hover:bg-white hover:-translate-y-0.5 transition-all duration-200 shrink-0"
           >
             {item.logo ? (
               <Image
@@ -43,15 +43,15 @@ export default function LogoMarquee({ items, speed = "normal", className, pauseO
                 alt={item.name}
                 width={28}
                 height={28}
-                className="rounded-full object-contain"
+                className="rounded-full object-contain ring-1 ring-emerald-100"
                 unoptimized
               />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-[10px] font-bold text-primary">{item.name.charAt(0)}</span>
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-white">{item.name.charAt(0)}</span>
               </div>
             )}
-            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">{item.name}</span>
+            <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">{item.name}</span>
           </div>
         ))}
       </div>

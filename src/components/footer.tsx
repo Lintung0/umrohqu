@@ -45,6 +45,8 @@ const Footer = () => {
       <div className="absolute inset-0 text-white -z-10">
         <IslamicPattern opacity={0.02} />
       </div>
+      {/* Gold top accent line */}
+      <div className="relative h-px w-full bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
 
       <div className="relative max-w-7xl mx-auto pt-16 pb-20 lg:pb-8 px-4 sm:px-6 lg:px-8">
         {/* Main columns */}
@@ -65,14 +67,14 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="WhatsApp"
-                  className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors"
+                  className="p-2 rounded-lg bg-white/8 border border-white/10 hover:border-amber-400/50 hover:bg-white/15 hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <Image src="/icons/whatsapp.svg" alt="WhatsApp" width={18} height={18} className="brightness-0 invert" />
                 </Link>
                 <Link
                   href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@umrahqu.com"}`}
                   aria-label="Email"
-                  className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors"
+                  className="p-2 rounded-lg bg-white/8 border border-white/10 hover:border-amber-400/50 hover:bg-white/15 hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <Image src="/icons/gmail.svg" alt="Email" width={18} height={18} className="brightness-0 invert" />
                 </Link>
@@ -83,13 +85,13 @@ const Footer = () => {
           {/* Link columns */}
           {footerLinks.map((section) => (
             <div key={section.title} className="col-span-1 md:col-span-2 space-y-4">
-              <h3 className={columnHeadingClass}>{section.title}</h3>
+              <h3 className={`${columnHeadingClass} relative pb-2 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-8 after:rounded-full after:bg-gradient-to-r after:from-amber-400 after:to-emerald-400`}>{section.title}</h3>
               <ul className="flex flex-col gap-2">
                 {section.items.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-sm text-white/50 hover:text-white transition-colors"
+                      className="text-sm text-white/50 hover:text-amber-300 transition-colors"
                     >
                       {item.label}
                     </Link>
@@ -101,7 +103,7 @@ const Footer = () => {
 
           {/* Follow Us */}
           <div className="col-span-1 md:col-span-2 space-y-4">
-            <h3 className={columnHeadingClass}>{t.footer.follow_us}</h3>
+            <h3 className={`${columnHeadingClass} relative pb-2 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-8 after:rounded-full after:bg-gradient-to-r after:from-amber-400 after:to-emerald-400`}>{t.footer.follow_us}</h3>
             <div className="flex items-center gap-3">
               {socialLinks.map((s) => (
                 <Link
@@ -110,7 +112,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="p-2 rounded-lg bg-white/8 hover:bg-white/12 transition-colors"
+                  className="p-2 rounded-lg bg-white/8 border border-white/10 hover:border-amber-400/50 hover:bg-white/15 hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <Image src={s.icon} alt={s.label} width={18} height={18} className="brightness-0 invert" />
                 </Link>
@@ -127,7 +129,7 @@ const Footer = () => {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
               <span className="text-xs text-white/25">
-                {t.footer.made_with} <span className="text-amber-400/50">&hearts;</span> {t.footer.for_umrah}
+                {t.footer.made_with} <span className="text-amber-400">&hearts;</span> {t.footer.for_umrah}
               </span>
             </div>
           </div>

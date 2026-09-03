@@ -109,7 +109,7 @@ const Navbar = () => {
     : t.nav.dashboard
 
   return (
-    <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
+    <header className="w-full sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-emerald-100/60 shadow-[0_4px_30px_-12px_rgba(6,78,59,0.15)]">
       <div className="relative flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16">
 
         {/* ── Left: Logo ── */}
@@ -118,14 +118,15 @@ const Navbar = () => {
         </div>
 
         {/* ── Center: Nav links ── */}
-        <nav className="hidden md:flex items-center justify-center gap-6 text-sm font-medium text-slate-700 absolute left-1/2 -translate-x-1/2">
+        <nav className="hidden md:flex items-center justify-center gap-8 text-sm font-medium text-slate-700 absolute left-1/2 -translate-x-1/2">
           {NAV_LINKS_KEYS.map((key) => (
             <Link
               key={key}
               href={NAV_HREFS[key]}
-              className="whitespace-nowrap hover:text-emerald-600 transition-colors"
+              className="relative whitespace-nowrap py-1.5 text-slate-600 hover:text-emerald-700 transition-colors group"
             >
               {t.nav[key]}
+              <span className="absolute inset-x-0 -bottom-0.5 h-0.5 origin-left scale-x-0 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400 transition-transform duration-300 group-hover:scale-x-100" />
             </Link>
           ))}
         </nav>
@@ -136,13 +137,13 @@ const Navbar = () => {
             {/* Compare */}
             <Link
               href="/compare"
-              className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+              className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
               title={t.nav.compare || "Bandingkan"}
             >
               <Scale className="w-4 h-4" />
               <span className="hidden lg:inline">{t.nav.compare || "Bandingkan"}</span>
               {compareCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[10px] font-bold leading-none">
+                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-[10px] font-bold leading-none shadow-md shadow-emerald-500/40">
                   {compareCount}
                 </span>
               )}
@@ -162,16 +163,16 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-200 cursor-pointer"
+                  className="flex items-center gap-2 pl-1 p-0.5 rounded-full border border-emerald-200/70 bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 transition-all duration-200 cursor-pointer shadow-sm shadow-emerald-500/20"
                 >
                   <Image
                     src={user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.user_metadata?.full_name || user.email || "U")}&background=0E5C4E&color=fff&size=80&bold=true`}
                     alt={user.user_metadata?.full_name || "User"}
-                    width={32}
-                    height={32}
-                    className="rounded-full ring-2 ring-emerald-100"
+                    width={30}
+                    height={30}
+                    className="rounded-full ring-2 ring-white"
                   />
-                  <ChevronDown className={cn("w-3.5 h-3.5 text-slate-400 transition-transform duration-200", menuOpen && "rotate-180")} />
+                  <ChevronDown className={cn("w-3.5 h-3.5 text-white pr-2 transition-transform duration-200", menuOpen && "rotate-180")} />
                 </button>
 
                 {menuOpen && (
@@ -205,13 +206,13 @@ const Navbar = () => {
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
+                  className="px-4 py-2 text-sm font-semibold rounded-xl border border-emerald-200 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200"
                 >
                   {t.nav.login}
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 text-sm font-semibold rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-600/30 transition-all duration-200"
+                  className="px-5 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-600 to-amber-500 text-white shadow-lg shadow-emerald-600/30 hover:shadow-xl hover:shadow-emerald-600/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
                 >
                   {t.nav.register}
                 </Link>
@@ -279,7 +280,7 @@ const Navbar = () => {
                   <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1 py-2.5 text-center text-sm font-semibold rounded-xl border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors">
                     {t.nav.login}
                   </Link>
-                  <Link href="/register" onClick={() => setMobileOpen(false)} className="flex-1 py-2.5 text-center text-sm font-semibold rounded-xl bg-emerald-600 text-white shadow-md transition-colors">
+                  <Link href="/register" onClick={() => setMobileOpen(false)} className="flex-1 py-2.5 text-center text-sm font-semibold rounded-xl bg-gradient-to-r from-emerald-600 to-amber-500 text-white shadow-md shadow-emerald-600/30 transition-all hover:-translate-y-0.5">
                     {t.nav.register}
                   </Link>
                 </div>
