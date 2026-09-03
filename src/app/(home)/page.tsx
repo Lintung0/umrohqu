@@ -139,7 +139,7 @@ export default function Home() {
           <div className="relative">
             {/* Ambient gold glow behind the headline */}
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[520px] h-[220px] rounded-full bg-amber-400/20 blur-[110px] pointer-events-none" aria-hidden="true" />
-            <h1 className="relative text-3xl sm:text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold tracking-tight mb-12 leading-[1.1] drop-shadow-lg text-balance">
+            <h1 className="relative text-2xl sm:text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold tracking-tight mb-12 leading-none drop-shadow-lg whitespace-nowrap">
               Cari, Bandingkan &amp; Pesan{" "}
               <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-100 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(251,191,36,0.25)]">
                 Paket Umrah

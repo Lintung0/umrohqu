@@ -65,9 +65,6 @@ export function WhyUsSection() {
     <section className="py-16 px-6 md:px-12 bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto">
         <div className="mb-12">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold tracking-wide mb-3">
-            Mengapa UmrahQu
-          </span>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">{t.landing.why_us_title}</h2>
           <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
           <p className="text-gray-500 mt-4 text-sm max-w-xl leading-relaxed">{t.landing.why_us_desc}</p>
@@ -143,9 +140,6 @@ export function TravelAgenciesSection() {
       <div className="relative max-w-7xl mx-auto">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold tracking-wide mb-3">
-              Travel Partner
-            </span>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{t.landing.travel_section_title}</h2>
           </div>
           <Link href="/travel" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-800 transition-colors group">
@@ -220,9 +214,6 @@ export function TestimonialSection() {
       <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-64 rounded-full bg-emerald-50/60 blur-3xl" aria-hidden="true" />
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-12 text-center">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold tracking-wide mb-3">
-            Ulasan Jamaah
-          </span>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">{t.landing.testimonial_title}</h2>
           <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
           <p className="text-gray-500 mt-4 text-sm">{t.landing.testimonial_desc}</p>
