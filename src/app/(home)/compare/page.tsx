@@ -109,8 +109,9 @@ function MobileCompareSlide({ pkg, index, scores, maxScore, rowHighlights, remov
   const facilities = getFacilitiesList(pkg.facilities)
 
   return (
-    <div className="bg-white border-2 rounded-2xl overflow-hidden shadow-sm mx-1">
+    <div className="bg-white border-2 rounded-2xl overflow-hidden shadow-md mx-1">
       <div className="relative h-40">
+        {isBest && <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 z-10" />}
         <Image
           src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
           alt={pkg.name || "Paket"} fill className="object-cover"
@@ -124,7 +125,7 @@ function MobileCompareSlide({ pkg, index, scores, maxScore, rowHighlights, remov
         <div className="absolute top-2 left-2 flex flex-wrap gap-1">
           <PackageStatusBadge status={pkg.status} />
           {isBest && (
-            <div className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+            <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md shadow-amber-500/40 flex items-center gap-1">
               <Award className="w-3 h-3" /> Pilihan Terbaik
             </div>
           )}
@@ -160,7 +161,7 @@ function MobileCompareSlide({ pkg, index, scores, maxScore, rowHighlights, remov
       </div>
       <div className="px-4 pb-4 pt-2 border-t border-border">
         <Link href={`/package/${pkg.slug}`}>
-          <Button className="w-full text-xs h-9">Pilih Paket Ini</Button>
+          <Button className="w-full text-xs h-9 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white shadow-md shadow-emerald-600/25">Pilih Paket Ini</Button>
         </Link>
       </div>
     </div>
@@ -190,28 +191,42 @@ function MobileDotIndicator({ total, api }: { total: number; api: CarouselApi })
 }
 
 function renderValue(key: string, pkg: Package, highlight?: "best" | "worst") {
-  const hlClass = highlight === "best" ? "ring-2 ring-emerald-400/40 bg-emerald-50/50 rounded-lg p-1.5 -m-1.5" : ""
+  const hlWrap = (node: React.ReactNode) => {
+    if (!highlight) return node
+    if (highlight === "best") {
+      return (
+        <div className="relative rounded-lg bg-emerald-100/70 border border-emerald-400/60 ring-2 ring-emerald-400/40 px-2.5 py-2 mt-1 block">
+          <span className="inline-flex items-center gap-1 absolute -top-2 left-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm z-10">
+            <Award className="w-2 h-2" /> Terbaik
+          </span>
+          {node}
+        </div>
+      )
+    }
+    return <div className="rounded-lg opacity-70">{node}</div>
+  }
+
   switch (key) {
     case "price":
-      return (
-        <div className={hlClass}>
+      return hlWrap(
+        <div>
           <p className="font-bold text-primary">{formatRupiah(Number(pkg.price) || 0)}</p>
           <p className="text-[11px] text-muted-foreground">/ orang</p>
         </div>
       )
     case "hotel_makkah_stars":
-      return <span className={hlClass}>{"★".repeat(Math.max(0, Number(pkg.hotel_makkah_stars) || 0))}</span>
+      return hlWrap(<span className="text-amber-500">{"★".repeat(Math.max(0, Number(pkg.hotel_makkah_stars) || 0))}</span>)
     case "hotel_madinah_stars":
-      return <span className={hlClass}>{"★".repeat(Math.max(0, Number(pkg.hotel_madinah_stars) || 0))}</span>
+      return hlWrap(<span className="text-amber-500">{"★".repeat(Math.max(0, Number(pkg.hotel_madinah_stars) || 0))}</span>)
     case "duration":
-      return <span className={hlClass}>{pkg.duration_nights || "-"} Hari</span>
+      return hlWrap(<span>{pkg.duration_nights || "-"} Hari</span>)
     case "type":
-      return <span className={`capitalize font-medium ${hlClass}`}>{pkg.type || "-"}</span>
+      return hlWrap(<span className={`capitalize font-medium`}>{pkg.type || "-"}</span>)
     case "facilities": {
       const facList = getFacilitiesList(pkg.facilities)
-      if (facList.length === 0) return <span className={hlClass}>-</span>
-      return (
-        <ul className={`space-y-1 ${hlClass}`}>
+      if (facList.length === 0) return hlWrap(<span>-</span>)
+      return hlWrap(
+        <ul className="space-y-1">
           {facList.map((f, i) => (
             <li key={i} className="flex items-center gap-1.5 text-xs">
               <Check className="w-3 h-3 text-primary shrink-0" />{f}
@@ -222,7 +237,7 @@ function renderValue(key: string, pkg: Package, highlight?: "best" | "worst") {
     }
     default: {
       const value = pkg[key as keyof Package]
-      return <span className={hlClass}>{String(value ?? "-")}</span>
+      return hlWrap(<span>{String(value ?? "-")}</span>)
     }
   }
 }
@@ -453,9 +468,11 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
 
   if (comparePackages.length === 0) {
     return (
-      <div className="text-center py-10">
-        <Scale className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-        <h3 className="font-semibold text-lg mb-2">Belum ada paket dibandingkan</h3>
+      <div className="text-center py-6">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-600/30">
+          <Scale className="w-8 h-8 text-white" />
+        </div>
+        <h3 className="font-semibold text-lg mb-2 text-zinc-800">Belum ada paket dibandingkan</h3>
         <p className="text-sm text-muted-foreground mb-8">Pilih hingga {MAX_COMPARE} paket umroh untuk menemukan yang terbaik versi Anda</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
@@ -463,11 +480,13 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
             <button
               key={`empty-add-slot-${slotIdx}`}
               onClick={onOpenPicker}
-              className="rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-white flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors min-h-[140px]"
+              className="group rounded-2xl border-2 border-dashed border-emerald-300/70 bg-white flex flex-col items-center justify-center gap-2 text-emerald-700 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-1 transition-all duration-300 min-h-[140px]"
             >
-              <Plus className="w-8 h-8" />
+              <span className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                <Plus className="w-7 h-7" />
+              </span>
               <span className="text-sm font-semibold">Tambah Paket</span>
-              <span className="text-xs">pilih dari daftar paket</span>
+              <span className="text-xs text-muted-foreground">pilih dari daftar paket</span>
             </button>
           ))}
         </div>
@@ -480,14 +499,21 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
   return (
     <div className="pb-4">
       {insightLines.length > 0 && (
-        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-2xl p-4 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span className="text-sm font-semibold text-emerald-800">Perbandingan Cerdas</span>
+        <div className="relative overflow-hidden bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 mb-6 shadow-lg shadow-emerald-700/20">
+          <div className="absolute inset-0 opacity-[0.05]"
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)", backgroundSize: "16px 16px" }}
+            aria-hidden="true" />
+          <div className="relative flex items-center gap-2 mb-2">
+            <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-amber-300" />
+            </span>
+            <span className="text-sm font-bold text-white">Perbandingan Cerdas</span>
           </div>
-          <ul className="space-y-1.5">
+          <ul className="relative space-y-1.5 mt-2">
             {insightLines.map((line, i) => (
-              <li key={i} className="text-xs leading-relaxed text-emerald-700">{line}</li>
+              <li key={i} className="text-xs leading-relaxed text-emerald-50/90 flex items-start gap-2">
+                <Check className="w-3.5 h-3.5 text-amber-300 shrink-0 mt-0.5" />{line}
+              </li>
             ))}
           </ul>
         </div>
@@ -509,11 +535,13 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
               <CarouselItem>
                 <button
                   onClick={onOpenPicker}
-                  className="w-full min-h-[320px] rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-white flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  className="group w-full min-h-[320px] rounded-2xl border-2 border-dashed border-emerald-300/70 bg-white flex flex-col items-center justify-center gap-2 text-emerald-700 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-100 transition-all duration-300"
                 >
-                  <Plus className="w-8 h-8" />
+                  <span className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                    <Plus className="w-7 h-7" />
+                  </span>
                   <span className="text-sm font-semibold">Tambah Paket</span>
-                  <span className="text-xs">pilih dari daftar paket</span>
+                  <span className="text-xs text-muted-foreground">pilih dari daftar paket</span>
                 </button>
               </CarouselItem>
             )}
@@ -533,8 +561,11 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
                 const i = slotIdx
                 const isBest = comparePackages.length > 1 && scores[i].valueScore === maxScore && maxScore > 0
                 return (
-                  <div key={pkg.id} className={`bg-white border-2 rounded-2xl overflow-hidden ${isBest ? "border-emerald-400 shadow-md shadow-emerald-100" : "border-primary/30"}`}>
-                    <div className="relative h-28">
+                  <div key={pkg.id} className={`bg-white border-2 rounded-2xl overflow-hidden transition-shadow ${isBest ? "border-emerald-500 shadow-lg shadow-emerald-200/60" : "border-primary/30 shadow-sm"}`}>
+                    <div className={`relative h-28 ${isBest ? "" : ""}`}>
+                      {isBest && (
+                        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 z-10" />
+                      )}
                       <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover" />
                       <button onClick={() => removeFromCompare(pkg.id)} className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors">
                         <X className="w-3.5 h-3.5" />
@@ -542,7 +573,7 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
                       <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                         <PackageStatusBadge status={pkg.status} />
                         {isBest && (
-                          <div className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                          <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md shadow-amber-500/40 flex items-center gap-1">
                             <Award className="w-3 h-3" /> Pilihan Terbaik
                           </div>
                         )}
@@ -562,11 +593,13 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
                 <button
                   key={`add-slot-${slotIdx}`}
                   onClick={onOpenPicker}
-                  className="rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-white flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors py-10"
+                  className="group rounded-2xl border-2 border-dashed border-emerald-300/70 bg-white flex flex-col items-center justify-center gap-2 text-emerald-700 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-100 transition-all py-10"
                 >
-                  <Plus className="w-6 h-6" />
+                  <span className="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                    <Plus className="w-6 h-6" />
+                  </span>
                   <span className="text-xs font-semibold">Tambah Paket</span>
-                  <span className="text-[10px]">pilih dari daftar paket</span>
+                  <span className="text-[10px] text-muted-foreground">pilih dari daftar paket</span>
                 </button>
               )
             })}
@@ -593,7 +626,7 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
             <div />
             {comparePackages.map((pkg) => (
               <Link key={pkg.id} href={`/package/${pkg.slug}`}>
-                <Button className="w-full text-xs h-9">Pilih Paket Ini</Button>
+                <Button className="w-full text-xs h-9 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white shadow-md shadow-emerald-600/25">Pilih Paket Ini</Button>
               </Link>
             ))}
           </div>
@@ -650,13 +683,22 @@ function CompareContent() {
 
   return (
     <main className="min-h-screen bg-zinc-50/50">
-      <div className="bg-white border-b border-border px-4 sm:px-6 py-4 sm:py-5">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <Scale className="w-5 h-5 text-primary" />
-            Bandingkan Paket
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-700 border-b border-emerald-900/40 px-4 sm:px-6 py-6 sm:py-8">
+        {/* Islamic pattern */}
+        <div className="absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)", backgroundSize: "20px 20px" }}
+          aria-hidden="true" />
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-amber-400/15 blur-3xl" aria-hidden />
+        <div className="relative max-w-6xl mx-auto">
+          <div className="flex items-center gap-3">
+            <span className="w-11 h-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shadow-lg">
+              <Scale className="w-5 h-5 text-amber-300" />
+            </span>
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight">Bandingkan Paket</h1>
+              <p className="text-xs sm:text-sm text-emerald-100/80 mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>
+            </div>
+          </div>
         </div>
       </div>
 
