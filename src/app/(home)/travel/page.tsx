@@ -161,9 +161,6 @@ export default function TravelListPage() {
                 UmrahQu
               </span>
             </h1>
-            <p className="text-emerald-100/80 text-sm sm:text-base mt-3 max-w-xl mx-auto leading-relaxed text-balance">
-              Temukan travel partner terpercaya untuk perjalanan umrah Anda — sudah kami kurasi dan verifikasi.
-            </p>
           </div>
 
           {/* Search bar glassmorphism */}
