@@ -34,23 +34,23 @@ export default function DashboardSidebar() {
 
   const sidebarContent = (
     <>
-      <div className="h-16 px-5 border-b border-border flex items-center">
-        <div className="flex items-center gap-3 min-w-0">
-          <Image
-            src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || "U")}&background=2A7D4F&color=fff&size=80&bold=true`}
-            alt="Avatar"
-            width={40}
-            height={40}
-            className="rounded-full"
-          />
-          <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">{user?.user_metadata?.full_name || "Jamaah"}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-          </div>
+      <div className="relative h-16 px-5 border-b border-emerald-800/50 flex items-center gap-3">
+        <div className="absolute -top-6 right-0 w-24 h-24 rounded-full bg-amber-400/10 blur-2xl pointer-events-none" aria-hidden />
+        <Image
+          src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || "U")}&background=2A7D4F&color=fff&size=80&bold=true`}
+          alt="Avatar"
+          width={40}
+          height={40}
+          className="rounded-full ring-2 ring-emerald-400/40"
+        />
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-white truncate">{user?.user_metadata?.full_name || "Jamaah"}</p>
+          <p className="text-xs text-emerald-200/70 truncate">{user?.email}</p>
         </div>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-1.5">
+        <p className="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300/60">Menu Utama</p>
         {NAV_ITEMS.map((item) => {
           const isActive = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href)
           return (
@@ -58,30 +58,35 @@ export default function DashboardSidebar() {
               key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors ${
-                isActive ? "bg-emerald-50 text-emerald-700 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              className={`relative flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-all ${
+                isActive
+                  ? "bg-gradient-to-r from-emerald-500/90 to-emerald-600/90 text-white font-medium shadow-md shadow-emerald-950/40"
+                  : "text-emerald-100/70 hover:text-white hover:bg-white/10"
               }`}
             >
-              <item.icon className="w-4 h-4 shrink-0" />
+              {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-amber-400" />}
+              <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${isActive ? "bg-white/15" : ""}`}>
+                <item.icon className="w-4 h-4" />
+              </span>
               {item.label}
             </Link>
           )
         })}
       </nav>
 
-      <div className="p-3 border-t border-border space-y-0.5">
+      <div className="p-3 border-t border-emerald-800/50 space-y-1">
         <Link
           href="/"
-          className="flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 text-sm text-emerald-100/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
         >
-          <Home className="w-4 h-4" />
+          <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"><Home className="w-4 h-4" /></span>
           Beranda
         </Link>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-emerald-100/70 hover:text-red-300 hover:bg-red-500/15 rounded-xl transition-colors"
         >
-          <LogOut className="w-4 h-4" />
+          <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"><LogOut className="w-4 h-4" /></span>
           Keluar
         </button>
       </div>
@@ -105,15 +110,15 @@ export default function DashboardSidebar() {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-30 bg-black/50" onClick={() => setMobileOpen(false)}>
-          <aside className="w-64 h-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="lg:hidden fixed inset-0 z-30 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)}>
+          <aside className="w-64 h-full bg-gradient-to-b from-emerald-950 to-emerald-900 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             {sidebarContent}
           </aside>
         </div>
       )}
 
       {/* Desktop sidebar */}
-      <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-white border-r border-border min-h-screen sticky top-0">
+      <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-gradient-to-b from-emerald-950 to-emerald-900 border-r border-emerald-900/50 min-h-screen sticky top-0">
         {sidebarContent}
       </aside>
     </>
