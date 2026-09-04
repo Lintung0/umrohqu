@@ -16,10 +16,10 @@ interface StatCardProps {
 
 export default function StatCard({ icon: Icon, label, value, subtitle, color, href, variant = "bordered", gradient, trend }: StatCardProps) {
   const content = (
-    <div className={`group rounded-2xl p-5 shadow-sm transition-all duration-300 ${
+    <div className={`rounded-xl p-5 transition-shadow ${
       variant === "gradient"
-        ? `bg-gradient-to-br ${gradient || "from-emerald-500 to-emerald-700"} text-white hover:shadow-xl hover:shadow-emerald-600/20 hover:-translate-y-0.5`
-        : "bg-white border border-slate-200 hover:shadow-lg hover:shadow-emerald-100/40 hover:border-emerald-200 hover:-translate-y-0.5"
+        ? `bg-gradient-to-br ${gradient || "from-emerald-500 to-emerald-700"} text-white hover:shadow-lg`
+        : "bg-white border border-border shadow-sm hover:shadow-md"
     }`}>
       <div className="flex items-start justify-between">
         <div className="space-y-2">
@@ -27,13 +27,13 @@ export default function StatCard({ icon: Icon, label, value, subtitle, color, hr
           <p className="text-2xl font-bold tracking-tight">{value}</p>
         </div>
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-          variant === "gradient" ? "bg-white/20" : color || "bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-600 group-hover:from-emerald-500 group-hover:to-emerald-700 group-hover:text-white transition-colors"
+          variant === "gradient" ? "bg-white/20" : color || "bg-emerald-100 text-emerald-600"
         }`}>
           <Icon className="w-5 h-5" />
         </div>
       </div>
       {(trend || subtitle) && (
-        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
           {trend && (
             <span className={`inline-flex items-center gap-1 text-xs font-medium ${
               trend.value >= 0

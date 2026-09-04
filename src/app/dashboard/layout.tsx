@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.06),transparent_60%)] bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
       <main className="flex-1 min-w-0">{children}</main>
     </div>
