@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Search, ChevronDown, ChevronUp, HelpCircle } from "lucide-react"
+import { Search, ChevronDown, HelpCircle, Sparkles, MessageCircle } from "lucide-react"
+import Link from "next/link"
 
 interface FAQItem {
   id: string
@@ -94,24 +95,59 @@ export default function FAQPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white py-20 px-6">
-        <div className="max-w-3xl mx-auto text-center space-y-4">
-          <HelpCircle className="w-12 h-12 mx-auto opacity-80" />
-          <h1 className="text-3xl font-bold">Pertanyaan Umum</h1>
-          <p className="text-emerald-100">Temukan jawaban atas pertanyaan yang sering ditanyakan</p>
+      {/* Hero */}
+      <div className="relative overflow-hidden bg-emerald-950 text-white py-20 px-6">
+        {/* Makkah background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/images/hero-makkah.jpg')" }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/90 via-emerald-900/80 to-emerald-800/75" aria-hidden />
+        {/* Islamic star pattern */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.05] pointer-events-none" aria-hidden="true">
+          <defs>
+            <pattern id="faq-islamic-star" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+              <polygon points="30,2 35,22 55,22 40,34 46,54 30,42 14,54 20,34 5,22 25,22" fill="none" stroke="#d4a017" strokeWidth="0.8" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#faq-islamic-star)" />
+        </svg>
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-80 h-40 rounded-full bg-amber-400/20 blur-[90px]" aria-hidden />
+
+        <div className="relative max-w-3xl mx-auto text-center space-y-5">
+          <span className="inline-flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-400/30 text-emerald-100 text-xs font-medium px-4 py-1.5 rounded-full backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
+            Pusat Bantuan UmrahQu
+          </span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight drop-shadow-lg">
+            Pertanyaan{" "}
+            <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-100 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(251,191,36,0.25)]">
+              Umum
+            </span>
+          </h1>
+          <p className="text-emerald-100/85 text-sm sm:text-base max-w-xl mx-auto leading-relaxed text-balance">
+            Temukan jawaban atas pertanyaan yang sering ditanyakan
+          </p>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto p-6 -mt-8">
+        {/* Search bar glassmorphism */}
         <div className="relative mb-6">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari pertanyaan..."
-            className="w-full pl-12 pr-4 py-3 bg-white border border-border rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
-          />
+          <div className="absolute inset-0 bg-white/40 rounded-2xl blur-sm" aria-hidden />
+          <div className="relative flex items-center bg-white rounded-2xl shadow-[0_16px_40px_-12px_rgba(6,78,59,0.25)] ring-1 ring-emerald-100/60 border border-white/60">
+            <span className="w-11 h-11 flex items-center justify-center ml-1.5 my-1.5 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 shrink-0">
+              <Search className="w-5 h-5 text-emerald-600" />
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari pertanyaan..."
+              className="flex-1 min-w-0 bg-transparent pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            />
+          </div>
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
@@ -119,8 +155,10 @@ export default function FAQPage() {
             <button
               key={cat}
               onClick={() => setCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                category === cat ? "bg-emerald-600 text-white" : "bg-white border border-border text-muted-foreground hover:text-foreground"
+              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                category === cat
+                  ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-600/25"
+                  : "bg-white border border-slate-200 text-muted-foreground hover:text-emerald-700 hover:border-emerald-300 hover:shadow-sm"
               }`}
             >
               {cat}
@@ -130,35 +168,36 @@ export default function FAQPage() {
 
         <div className="space-y-3">
           {filtered.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-border p-12 text-center">
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                <HelpCircle className="w-7 h-7 text-emerald-500" />
+              </div>
               <p className="text-muted-foreground">Tidak ada pertanyaan ditemukan</p>
               <button
                 onClick={() => { setSearch(""); setCategory("Semua") }}
-                className="text-sm text-emerald-600 hover:underline mt-2"
+                className="mt-3 px-5 py-2 text-sm font-semibold rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-600/25 transition-all hover:-translate-y-0.5"
               >
                 Atur Ulang Filter
               </button>
             </div>
           ) : (
             filtered.map((faq) => (
-              <div key={faq.id} className="bg-white rounded-2xl border border-border overflow-hidden transition-shadow hover:shadow-sm">
+              <div key={faq.id} className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg hover:shadow-emerald-100/50 hover:border-emerald-200 transition-all duration-300">
                 <button
                   onClick={() => setOpenId(openId === faq.id ? null : faq.id)}
-                  className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center justify-between gap-3 p-5 text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 shrink-0">{faq.category}</span>
-                    <span className="font-medium text-sm">{faq.question}</span>
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 shrink-0 border border-emerald-100">{faq.category}</span>
+                    <span className="font-medium text-sm text-slate-800 group-hover:text-emerald-700 transition-colors">{faq.question}</span>
                   </div>
-                  {openId === faq.id ? (
-                    <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 ml-2" />
-                  )}
+                  <span className={`w-7 h-7 shrink-0 flex items-center justify-center rounded-full transition-all duration-300 ${openId === faq.id ? "bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rotate-180" : "bg-slate-100 text-slate-500 group-hover:bg-emerald-50 group-hover:text-emerald-600"}`}>
+                    <ChevronDown className="w-4 h-4" />
+                  </span>
                 </button>
                 {openId === faq.id && (
                   <div
-                    className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border pt-4"
+                    className="px-5 pb-5 pl-[4.5rem] text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4"
                     dangerouslySetInnerHTML={{ __html: faq.answer }}
                   />
                 )}
