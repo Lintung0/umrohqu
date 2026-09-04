@@ -6,12 +6,13 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Logo from "./logo"
 import { CompactLanguageSwitcher } from "@/components/shared/compact-language-switcher"
-import { LayoutDashboard, LogOut, ChevronDown, Menu, X, Scale } from "lucide-react"
+import { LayoutDashboard, LogOut, ChevronDown, Menu, X, Scale, Bell } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import { useCompare } from "@/lib/compare-context"
+import NotificationBell from "@/components/shared/notification-bell"
 
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
   admin: "/admin",
@@ -137,17 +138,20 @@ const Navbar = () => {
             {/* Compare */}
             <Link
               href="/compare"
-              className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+              className="relative flex items-center justify-center w-10 h-10 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
               title={t.nav.compare || "Bandingkan"}
+              aria-label="Bandingkan"
             >
-              <Scale className="w-4 h-4" />
-              <span className="hidden lg:inline">{t.nav.compare || "Bandingkan"}</span>
+              <Scale className="w-5 h-5" />
               {compareCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-[10px] font-bold leading-none shadow-md shadow-emerald-500/40">
-                  {compareCount}
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-[10px] font-bold leading-none shadow-md shadow-emerald-500/40 ring-2 ring-white">
+                  {compareCount > 99 ? "99+" : compareCount}
                 </span>
               )}
             </Link>
+
+            {/* Notifications */}
+            <NotificationBell />
 
             <div className="w-px h-5 bg-slate-200 mx-0.5" />
 
@@ -270,6 +274,9 @@ const Navbar = () => {
                 <>
                   <Link href={dashboardPath} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
                     <LayoutDashboard className="w-4 h-4 text-emerald-600" /> {dashboardLabel}
+                  </Link>
+                  <Link href="/dashboard/notifications" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
+                    <Bell className="w-4 h-4 text-emerald-600" /> Notifikasi
                   </Link>
                   <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
                     <LogOut className="w-4 h-4" /> {t.nav.logout}

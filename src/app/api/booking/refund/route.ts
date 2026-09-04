@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, payment_status, tenant_id, package_id, pilgrim_count, total")
+      .select("id, status, payment_status, tenant_id, customer_id, package_id, pilgrim_count, total")
       .eq("id", bookingId)
       .single()
 
@@ -110,6 +110,24 @@ export async function POST(request: NextRequest) {
         })
         .eq("id", refundId)
 
+      // Notifikasi ke customer
+      try {
+        const { createNotification } = await import("@/lib/notify/create-notification")
+        await createNotification({
+          userId: booking.customer_id,
+          tenantId: booking.tenant_id,
+          title: hasPayment ? "Pembatalan disetujui, refund diproses" : "Pembatalan disetujui",
+          body: hasPayment
+            ? "Permintaan pembatalan Anda telah disetujui travel. Dana refund sedang dalam proses pengembalian."
+            : "Permintaan pembatalan Anda telah disetujui oleh travel.",
+          templateKey: "refund_approved",
+          linkUrl: `/dashboard/bookings/${booking.id}`,
+          payload: { booking_id: booking.id },
+        })
+      } catch (notifErr) {
+        console.error("[notify refund approve]", notifErr)
+      }
+
       return NextResponse.json({ success: true, status: "refunded", refundId })
     }
 
@@ -136,6 +154,24 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         })
         .eq("id", refundId)
+
+      // Notifikasi ke customer
+      try {
+        const { createNotification } = await import("@/lib/notify/create-notification")
+        await createNotification({
+          userId: booking.customer_id,
+          tenantId: booking.tenant_id,
+          title: "Permintaan pembatalan ditolak",
+          body: note
+            ? `Travel menolak permintaan pembatalan Anda: ${note}`
+            : "Travel menolak permintaan pembatalan Anda. Pesanan kembali aktif.",
+          templateKey: "refund_rejected",
+          linkUrl: `/dashboard/bookings/${booking.id}`,
+          payload: { booking_id: booking.id },
+        })
+      } catch (notifErr) {
+        console.error("[notify refund reject]", notifErr)
+      }
 
       return NextResponse.json({ success: true, status: previous, refundId })
     }

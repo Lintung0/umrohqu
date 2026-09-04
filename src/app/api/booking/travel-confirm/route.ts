@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id")
+      .select("id, status, tenant_id, customer_id, price, pilgrim_count, booking_source, package_id")
       .eq("id", bookingId)
       .single()
 
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       // Kembalikan kursi paket yang sempat dipesan
       const { data: pkg } = await admin
         .from("packages")
-        .select("quota_taken")
+        .select("quota_taken, name")
         .eq("id", booking.package_id)
         .single()
       if (pkg) {
@@ -74,6 +74,23 @@ export async function POST(request: NextRequest) {
             quota_taken: Math.max(0, (pkg.quota_taken ?? 0) - booking.pilgrim_count),
           })
           .eq("id", booking.package_id)
+      }
+
+      try {
+        const { createNotification } = await import("@/lib/notify/create-notification")
+        await createNotification({
+          userId: booking.customer_id,
+          tenantId: booking.tenant_id,
+          title: "Pemesanan dibatalkan",
+          body: pkg?.name
+            ? `Pemesanan untuk ${pkg.name} telah dibatalkan oleh pihak travel.`
+            : "Pemesanan Anda telah dibatalkan oleh pihak travel.",
+          templateKey: "booking_cancelled",
+          linkUrl: `/dashboard/bookings/${booking.id}`,
+          payload: { booking_id: booking.id },
+        })
+      } catch (notifErr) {
+        console.error("[notify travel cancel]", notifErr)
       }
 
       return NextResponse.json({ success: true, status: "cancelled" })
@@ -100,6 +117,28 @@ export async function POST(request: NextRequest) {
       channel,
       actorUserId: user.id,
     })
+
+    try {
+      const { createNotification } = await import("@/lib/notify/create-notification")
+      const { data: pkgName } = await admin
+        .from("packages")
+        .select("name")
+        .eq("id", booking.package_id)
+        .maybeSingle()
+      await createNotification({
+        userId: booking.customer_id,
+        tenantId: booking.tenant_id,
+        title: "Pemesanan dikonfirmasi",
+        body: pkgName?.name
+          ? `Selamat! Pemesanan untuk ${pkgName.name} telah dikonfirmasi oleh travel.`
+          : "Pemesanan Anda telah dikonfirmasi oleh travel.",
+        templateKey: "booking_confirmed",
+        linkUrl: `/dashboard/bookings/${booking.id}`,
+        payload: { booking_id: booking.id },
+      })
+    } catch (notifErr) {
+      console.error("[notify travel confirm]", notifErr)
+    }
 
     return NextResponse.json({ success: true, status: "confirmed", credited })
   } catch (err) {

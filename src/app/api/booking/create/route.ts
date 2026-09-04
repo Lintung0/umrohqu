@@ -133,7 +133,43 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", packageId)
 
-    // 5. Catat transaksi payments wajib ada di database
+    // 5. Notifikasi: pemesanan berhasil + cek kelengkapan data diri
+    try {
+      const { createNotification } = await import("@/lib/notify/create-notification")
+      const bookingCode = booking.id.slice(0, 8).toUpperCase()
+      await createNotification({
+        userId: user.id,
+        tenantId: pkg.tenant_id,
+        title: "Pemesanan berhasil dibuat",
+        body: `Booking #${bookingCode} — ${pkg.name} (${pilgrimCount} jamaah). Mohon selesaikan pembayaran sesuai nominal DP.`,
+        templateKey: "booking_created",
+        linkUrl: `/dashboard/bookings/${booking.id}`,
+        payload: { booking_id: booking.id, package_name: pkg.name },
+      })
+
+      const { data: userRow } = await admin
+        .from("users")
+        .select("profile")
+        .eq("id", user.id)
+        .maybeSingle()
+      const profile = (userRow?.profile || {}) as Record<string, unknown>
+      const hasIdentity = Boolean(profile.nik) && Boolean(profile.passport_number)
+      if (!hasIdentity) {
+        await createNotification({
+          userId: user.id,
+          tenantId: pkg.tenant_id,
+          title: "Lengkapi data diri Anda",
+          body: "Selesaikan informasi data diri (NIK & paspor) agar proses pemesanan dan pemberangkatan lebih lancar.",
+          templateKey: "data_diri_incomplete",
+          linkUrl: "/dashboard/data-diri",
+          payload: { booking_id: booking.id },
+        })
+      }
+    } catch (notifErr) {
+      console.error("[notify booking create]", notifErr)
+    }
+
+    // 6. Catat transaksi payments wajib ada di database
     const { data: payment, error: payErr } = await admin
       .from("payments")
       .insert({

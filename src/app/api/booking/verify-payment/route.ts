@@ -60,6 +60,21 @@ export async function POST(request: NextRequest) {
       .update({ status: "processing", updated_at: new Date().toISOString() })
       .eq("id", bookingId)
 
+    try {
+      const { createNotification } = await import("@/lib/notify/create-notification")
+      await createNotification({
+        userId: user.id,
+        tenantId: booking.tenant_id,
+        title: "Pembayaran berhasil diterima",
+        body: "Pembayaran Anda telah kami terima. Booking sedang menunggu verifikasi travel.",
+        templateKey: "booking_paid",
+        linkUrl: `/dashboard/bookings/${booking.id}`,
+        payload: { booking_id: booking.id },
+      })
+    } catch (notifErr) {
+      console.error("[notify verify payment]", notifErr)
+    }
+
     const paidAt = txn.transaction_time
       ? new Date(txn.transaction_time).toISOString()
       : new Date().toISOString()
