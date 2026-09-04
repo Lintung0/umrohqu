@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { BookOpen, ChevronRight } from "lucide-react"
+import { BookOpen, ChevronRight, CalendarCheck2 } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import { BOOKING_STATUSES, formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 
@@ -65,9 +65,26 @@ export default function BookingsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("booking.title")}</h1>
-        <p className="text-muted-foreground mt-1">Lacak semua pemesanan paket umroh Anda</p>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 via-emerald-800 to-emerald-950 text-white p-6 sm:p-8">
+        <svg className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none" aria-hidden="true">
+          <defs>
+            <pattern id="bk-islamic" x="0" y="0" width="44" height="44" patternUnits="userSpaceOnUse">
+              <polygon points="22,2 26,17 41,17 29,27 33,42 22,32 11,42 15,27 3,17 18,17" fill="none" stroke="#d4a017" strokeWidth="0.8" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#bk-islamic)" />
+        </svg>
+        <div className="absolute -top-16 -right-10 w-64 h-64 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" aria-hidden />
+        <div className="relative flex items-center gap-4">
+          <span className="w-14 h-14 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
+            <CalendarCheck2 className="w-7 h-7 text-amber-300" />
+          </span>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-emerald-100/80 mb-1">Pemesanan Anda</p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-lg">{t("booking.title")}</h1>
+            <p className="text-emerald-100/80 mt-1 text-sm sm:text-base">Lacak semua pemesanan paket umroh Anda</p>
+          </div>
+        </div>
       </div>
 
       {/* Filter Pills */}
@@ -76,10 +93,10 @@ export default function BookingsPage() {
           <button
             key={s.value}
             onClick={() => setFilter(s.value)}
-            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+            className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               filter === s.value
-                ? "bg-emerald-600 text-white shadow-sm"
-                : "bg-white border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-600/25"
+                : "bg-white border border-slate-200 text-muted-foreground hover:text-emerald-700 hover:border-emerald-300 hover:shadow-sm"
             }`}
           >
             {s.label}
@@ -89,28 +106,30 @@ export default function BookingsPage() {
 
       {/* Bookings List */}
       {filtered.length === 0 ? (
-        <div className="bg-white border border-border rounded-xl p-12 text-center shadow-sm">
-          <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+            <BookOpen className="w-7 h-7 text-emerald-500" />
+          </div>
           <p className="font-medium text-muted-foreground">{t("booking.no_bookings")}</p>
-          <Link href="/search" className="text-sm text-emerald-600 hover:text-emerald-700 mt-2 inline-flex items-center gap-1">
+          <Link href="/search" className="mt-3 px-5 py-2 text-sm font-semibold rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-600/25 transition-all hover:-translate-y-0.5 inline-flex items-center gap-1">
             {t("package.search_title")} <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
       ) : (
-        <div className="bg-white border border-border rounded-xl shadow-sm divide-y divide-border">
+        <div className="space-y-3">
           {filtered.map((booking) => (
             <Link
               key={booking.id}
               href={`/dashboard/bookings/${booking.id}`}
-              className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors first:rounded-t-xl last:rounded-b-xl"
+              className="group flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-100/50 hover:border-emerald-300"
             >
-              <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-muted-foreground/50" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 shrink-0 flex items-center justify-center group-hover:from-emerald-500 group-hover:to-emerald-700 transition-colors">
+                <BookOpen className="w-5 h-5 text-emerald-600 group-hover:text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate text-sm">{booking.package?.name || t("booking.package")}</p>
+                <p className="font-medium truncate text-sm group-hover:text-emerald-700 transition-colors">{booking.package?.name || t("booking.package")}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(booking.status, "booking")}`}>
+                  <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-medium ${getStatusColor(booking.status, "booking")}`}>
                     {getStatusLabel(booking.status, "booking")}
                   </span>
                   <span className="text-xs text-muted-foreground">
@@ -119,9 +138,9 @@ export default function BookingsPage() {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-sm font-bold">{formatRupiah(booking.total)}</p>
+                <p className="text-sm font-bold text-slate-800">{formatRupiah(booking.total)}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 group-hover:text-emerald-600 transition-all group-hover:translate-x-0.5" />
             </Link>
           ))}
         </div>
