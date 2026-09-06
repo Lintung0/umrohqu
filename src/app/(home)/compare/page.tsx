@@ -499,20 +499,21 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
   return (
     <div className="pb-4">
       {insightLines.length > 0 && (
-        <div className="relative overflow-hidden bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 mb-6 shadow-lg shadow-emerald-700/20">
+        <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 mb-6 border border-white/60 bg-white/45 backdrop-blur-xl shadow-sm shadow-emerald-900/5"
+          style={{ backgroundImage: "linear-gradient(135deg, rgba(209,250,229,0.35), rgba(255,255,255,0.55))" }}>
           <div className="absolute inset-0 opacity-[0.05]"
-            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)", backgroundSize: "16px 16px" }}
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)", backgroundSize: "16px 16px" }}
             aria-hidden="true" />
           <div className="relative flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-amber-300" />
+            <span className="w-8 h-8 rounded-lg bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
             </span>
-            <span className="text-sm font-bold text-white">Perbandingan Cerdas</span>
+            <span className="text-sm font-bold text-zinc-800">Perbandingan Cerdas</span>
           </div>
           <ul className="relative space-y-1.5 mt-2">
             {insightLines.map((line, i) => (
-              <li key={i} className="text-xs leading-relaxed text-emerald-50/90 flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 text-amber-300 shrink-0 mt-0.5" />{line}
+              <li key={i} className="text-xs leading-relaxed text-zinc-600 flex items-start gap-2">
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />{line}
               </li>
             ))}
           </ul>
@@ -683,20 +684,17 @@ function CompareContent() {
 
   return (
     <main className="min-h-screen bg-zinc-50/50">
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-700 border-b border-emerald-900/40 px-4 sm:px-6 py-6 sm:py-8">
-        {/* Islamic pattern */}
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)", backgroundSize: "20px 20px" }}
-          aria-hidden="true" />
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-amber-400/15 blur-3xl" aria-hidden />
+      <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/60 to-emerald-100/40 border-b border-emerald-100/60 px-4 sm:px-6 py-6 sm:py-8">
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-200/20 blur-3xl" aria-hidden />
+        <div className="absolute -bottom-20 -left-16 w-72 h-72 rounded-full bg-amber-100/30 blur-3xl" aria-hidden />
         <div className="relative max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
-            <span className="w-11 h-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shadow-lg">
-              <Scale className="w-5 h-5 text-amber-300" />
+            <span className="w-11 h-11 rounded-2xl bg-white border border-emerald-200/70 flex items-center justify-center shadow-sm">
+              <Scale className="w-5 h-5 text-emerald-600" />
             </span>
             <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-white tracking-tight">Bandingkan Paket</h1>
-              <p className="text-xs sm:text-sm text-emerald-100/80 mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>
+              <h1 className="text-lg sm:text-2xl font-bold text-zinc-900 tracking-tight">Bandingkan Paket</h1>
+              <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>
             </div>
           </div>
         </div>
