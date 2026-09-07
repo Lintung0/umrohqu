@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Home, Menu, X, UserRound } from "lucide-react"
+import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Home, Menu, X, UserRound, Bell } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Image from "next/image"
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/bookings", label: "Pesan Saya", icon: BookOpen },
   { href: "/dashboard/wishlist", label: "Daftar Keinginan", icon: Heart },
   { href: "/dashboard/data-diri", label: "Data Diri", icon: UserRound },
+  { href: "/dashboard/notifications", label: "Notifikasi", icon: Bell },
   { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
 ]
 
@@ -21,11 +22,25 @@ export default function DashboardSidebar() {
   const router = useRouter()
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
-  }, [])
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+      if (user) {
+        const loadUnread = async () => {
+          const { count } = await supabase
+            .from("notifications")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .eq("is_read", false)
+          setUnreadCount(count || 0)
+        }
+        loadUnread()
+      }
+    })
+  }, [pathname])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -65,6 +80,11 @@ export default function DashboardSidebar() {
             >
               <item.icon className="w-4 h-4 shrink-0" />
               {item.label}
+              {item.href === "/dashboard/notifications" && unreadCount > 0 && (
+                <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
           )
         })}

@@ -14,6 +14,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 import type { Booking, Package } from "@/lib/types"
 import { useTranslation } from "@/lib/i18n"
+import CustomerDataDiriCard from "@/components/travel/customer-data-diri-card"
 
 interface Participant {
   full_name: string
@@ -289,6 +290,11 @@ export default function TravelBookingDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Data Diri Lengkap Jamaah (hanya setelah dikonfirmasi) */}
+          {["confirmed", "completed"].includes(booking.status) && (
+            <CustomerDataDiriCard bookingId={booking.id} />
+          )}
 
           {/* Payment summary */}
           <div className="bg-white rounded-2xl border border-border p-6">
