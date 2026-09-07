@@ -518,7 +518,7 @@ function SearchContent() {
       </div>
 
       {/* ── Content ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 sm:pb-10">
 
         {/* Quick Category Pills + Sort */}
         <div className="space-y-3 mb-5 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
