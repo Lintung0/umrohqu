@@ -31,7 +31,7 @@ interface BookingDetail {
   created_at: string
   paid_at: string | null
   payment_method: string | null
-  payment_type: string | null
+  dp_type: string | null
   dp_percentage: number | null
   dp_amount: number | null
   remaining_amount: number | null
@@ -141,7 +141,7 @@ export default function BookingDetailPage() {
       // Step 4: Verify Xendit payment status if applicable
       if (bookingData.gateway_invoice_id) {
         const shouldVerify = bookingData.status === "pending_payment" ||
-          (bookingData.status === "processing" && bookingData.payment_type === "dp" && (bookingData.remaining_amount || 0) > 0 && bookingData.gateway_invoice_id?.startsWith("booking-remaining-"))
+          (bookingData.status === "processing" && bookingData.dp_type === "dp" && (bookingData.remaining_amount || 0) > 0 && bookingData.gateway_invoice_id?.startsWith("booking-remaining-"))
         if (shouldVerify) {
           try {
             const res = await fetch("/api/booking/verify-payment", {
@@ -308,7 +308,7 @@ export default function BookingDetailPage() {
               <span className="text-muted-foreground">{t("booking.package")} ({booking.pilgrim_count})</span>
               <span>{formatRupiah(booking.price)}</span>
             </div>
-            {booking.payment_type === "dp" && (
+            {booking.dp_type === "dp" && (
               <>
                 <div className="border-t border-border pt-2 flex justify-between text-emerald-600">
                   <span className="font-medium flex items-center gap-1">
@@ -387,7 +387,7 @@ export default function BookingDetailPage() {
         total={booking.total}
         paidAmount={booking.paid_amount}
         remainingBalance={booking.remaining_balance}
-        paymentType={booking.payment_type}
+        paymentType={booking.dp_type}
         dpAmount={booking.dp_amount}
         dpPercentage={booking.dp_percentage}
         remainingAmount={booking.remaining_amount}
