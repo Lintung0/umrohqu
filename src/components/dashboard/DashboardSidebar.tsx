@@ -119,15 +119,24 @@ export default function DashboardSidebar() {
           </div>
           <p className="font-bold text-sm">UmrahQu</p>
         </Link>
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-xl hover:bg-muted">
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-1">
+          <Link
+            href="/"
+            aria-label="Kembali ke beranda"
+            className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Home className="w-5 h-5" />
+          </Link>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-xl hover:bg-muted" aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}>
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-30 bg-black/50" onClick={() => setMobileOpen(false)}>
-          <aside className="w-64 h-full bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="lg:hidden fixed inset-0 z-30 bg-black/50 flex justify-end animate-in fade-in-0 duration-300" onClick={() => setMobileOpen(false)}>
+          <aside className="w-72 sm:w-80 h-full bg-white shadow-xl animate-in slide-in-from-right duration-300" onClick={(e) => e.stopPropagation()}>
             {sidebarContent}
           </aside>
         </div>
