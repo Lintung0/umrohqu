@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { calculateTotalFee } from "@/lib/business-logic/fees"
 import { getFeeConfig } from "@/lib/business-logic/fee-config"
 import { appUrl } from "@/lib/utils"
+import { isDataDiriComplete, type DataDiriAddress, type DataDiriProfile } from "@/lib/data-diri"
 import { z } from "zod"
 
 const pilgrimSchema = z.object({
@@ -147,19 +148,23 @@ export async function POST(request: NextRequest) {
         payload: { booking_id: booking.id, package_name: pkg.name },
       })
 
-      const { data: userRow } = await admin
-        .from("users")
-        .select("profile")
-        .eq("id", user.id)
-        .maybeSingle()
-      const profile = (userRow?.profile || {}) as Record<string, unknown>
-      const hasIdentity = Boolean(profile.nik) && Boolean(profile.passport_number)
-      if (!hasIdentity) {
+      const [{ data: userRow }, { data: addrRow }] = await Promise.all([
+        admin.from("users").select("profile").eq("id", user.id).maybeSingle(),
+        admin.from("user_addresses").select("*").eq("user_id", user.id).maybeSingle(),
+      ])
+      const profile = (userRow?.profile || {}) as DataDiriProfile
+      const address = {
+        street: addrRow?.street || null,
+        city: addrRow?.city || null,
+        province: addrRow?.province || null,
+        postal_code: addrRow?.postal_code || null,
+      } as DataDiriAddress
+      if (!isDataDiriComplete(profile, address)) {
         await createNotification({
           userId: user.id,
           tenantId: pkg.tenant_id,
           title: "Lengkapi data diri Anda",
-          body: "Selesaikan informasi data diri (NIK & paspor) agar proses pemesanan dan pemberangkatan lebih lancar.",
+          body: "Selesaikan informasi data jamaah (paspor, tempat lahir, kontak darurat, alamat) agar pengajuan visa dan pemberangkatan lebih lancar.",
           templateKey: "data_diri_incomplete",
           linkUrl: "/dashboard/data-diri",
           payload: { booking_id: booking.id },

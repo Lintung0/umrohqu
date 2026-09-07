@@ -18,17 +18,11 @@ import {
 import { getMissingDataDiriFields } from "@/lib/data-diri"
 
 interface ProfileData {
-  nik?: string
   passport_number?: string
   passport_expiry?: string
-  passport_place?: string
-  passport_issue_date?: string
   birth_date?: string
   birth_place?: string
   gender?: string
-  mother_name?: string
-  marital_status?: string
-  occupation?: string
   emergency_contact_name?: string
   emergency_contact_phone?: string
 }
@@ -48,13 +42,6 @@ const GENDER_OPTIONS = [
   { value: "perempuan", label: "Perempuan" },
 ]
 
-const MARITAL_OPTIONS = [
-  { value: "belum-menikah", label: "Belum Menikah" },
-  { value: "menikah", label: "Menikah" },
-  { value: "cerai-hidup", label: "Cerai Hidup" },
-  { value: "cerai-mati", label: "Cerai Mati" },
-]
-
 export default function DataDiriPage() {
   const supabase = createClient()
   const router = useRouter()
@@ -65,17 +52,11 @@ export default function DataDiriPage() {
 
   const [fullName, setFullName] = useState("")
   const [phone, setPhone] = useState("")
-  const [nik, setNik] = useState("")
   const [passportNumber, setPassportNumber] = useState("")
   const [passportExpiry, setPassportExpiry] = useState("")
-  const [passportPlace, setPassportPlace] = useState("")
-  const [passportIssueDate, setPassportIssueDate] = useState("")
   const [birthDate, setBirthDate] = useState("")
   const [birthPlace, setBirthPlace] = useState("")
   const [gender, setGender] = useState("")
-  const [motherName, setMotherName] = useState("")
-  const [maritalStatus, setMaritalStatus] = useState("")
-  const [occupation, setOccupation] = useState("")
   const [emergencyName, setEmergencyName] = useState("")
   const [emergencyPhone, setEmergencyPhone] = useState("")
 
@@ -103,17 +84,11 @@ export default function DataDiriPage() {
       ])
 
       const profile = (userRow?.profile as ProfileData) || {}
-      setNik(profile.nik || "")
       setPassportNumber(profile.passport_number || "")
       setPassportExpiry(profile.passport_expiry || "")
-      setPassportPlace(profile.passport_place || "")
-      setPassportIssueDate(profile.passport_issue_date || "")
       setBirthDate(profile.birth_date || "")
       setBirthPlace(profile.birth_place || "")
       setGender(profile.gender || "")
-      setMotherName(profile.mother_name || "")
-      setMaritalStatus(profile.marital_status || "")
-      setOccupation(profile.occupation || "")
       setEmergencyName(profile.emergency_contact_name || "")
       setEmergencyPhone(profile.emergency_contact_phone || "")
 
@@ -136,17 +111,11 @@ export default function DataDiriPage() {
     setSaving(true)
 
     const profile: ProfileData = {
-      nik,
       passport_number: passportNumber,
       passport_expiry: passportExpiry,
-      passport_place: passportPlace,
-      passport_issue_date: passportIssueDate,
       birth_date: birthDate,
       birth_place: birthPlace,
       gender,
-      mother_name: motherName,
-      marital_status: maritalStatus,
-      occupation,
       emergency_contact_name: emergencyName,
       emergency_contact_phone: emergencyPhone,
     }
@@ -208,15 +177,11 @@ export default function DataDiriPage() {
 
   const missingFields = getMissingDataDiriFields(
     {
-      nik,
       gender,
       birth_date: birthDate,
       birth_place: birthPlace,
-      mother_name: motherName,
       passport_number: passportNumber,
       passport_expiry: passportExpiry,
-      passport_place: passportPlace,
-      passport_issue_date: passportIssueDate,
       emergency_contact_name: emergencyName,
       emergency_contact_phone: emergencyPhone,
     },
@@ -228,7 +193,7 @@ export default function DataDiriPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Data Diri</h1>
-        <p className="text-muted-foreground mt-1">Lengkapi informasi diri secara lengkap agar proses pemesanan lebih cepat</p>
+        <p className="text-muted-foreground mt-1">Lengkapi data jamaah tahap 2 agar pengajuan visa & keberangkatan Anda berjalan lancar.</p>
       </div>
 
       {/* Kelengkapan */}
@@ -254,15 +219,14 @@ export default function DataDiriPage() {
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
-        {/* Identitas */}
+        {/* Identitas Jamaah */}
         <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-gradient-to-br from-emerald-50/60 to-white">
             <span className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
               <UserRound className="w-4 h-4 text-white" />
             </span>
             <div>
-              <h2 className="font-semibold text-sm">Identitas</h2>
-              <p className="text-xs text-muted-foreground">Data pribadi & dokumen perjalanan</p>
+              <h2 className="font-semibold text-sm">Identitas Jamaah</h2>
             </div>
           </div>
           <div className="p-5 space-y-4">
@@ -274,10 +238,6 @@ export default function DataDiriPage() {
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Telepon</Label>
                 <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08xxx" className={inputClass} />
-              </div>
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">NIK</Label>
-                <Input type="text" value={nik} onChange={(e) => setNik(e.target.value)} placeholder="16 digit" className={inputClass} />
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Jenis Kelamin</Label>
@@ -303,39 +263,13 @@ export default function DataDiriPage() {
               </div>
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Tempat Lahir</Label>
-                <Input type="text" value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} placeholder="Mis. Malang" className={inputClass} />
-              </div>
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Nama Ibu Kandung</Label>
-                <Input type="text" value={motherName} onChange={(e) => setMotherName(e.target.value)} placeholder="Sesuai akta/KK" className={inputClass} />
-              </div>
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Status Kawin</Label>
-                <Select
-                  value={maritalStatus || undefined}
-                  onValueChange={(v: string | null) => setMaritalStatus(v || "")}
-                >
-                  <SelectTrigger className={inputClass}>
-                    <SelectValue placeholder="Pilih status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MARITAL_OPTIONS.map((m) => (
-                      <SelectItem key={m.value} value={m.value}>
-                        {m.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground">Pekerjaan</Label>
-                <Input type="text" value={occupation} onChange={(e) => setOccupation(e.target.value)} placeholder="Mis. Wiraswasta" className={inputClass} />
+                <Input type="text" value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} placeholder="Contoh: Jakarta" className={inputClass} />
               </div>
             </div>
 
             <div className="pt-2 border-t border-slate-100 flex items-center gap-2 text-xs text-muted-foreground px-1">
               <IdCard className="w-3.5 h-3.5" />
-              Gunakan data yang sesuai dengan KTP / paspor Anda
+              Gunakan data yang sesuai dengan paspor Anda
             </div>
 
             <div className="space-y-4">
@@ -352,13 +286,22 @@ export default function DataDiriPage() {
                   <Label className="text-xs font-medium text-muted-foreground">Masa Berlaku Paspor</Label>
                   <Input type="date" value={passportExpiry} onChange={(e) => setPassportExpiry(e.target.value)} className={inputClass} />
                 </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <PhoneCall className="w-4 h-4 text-emerald-600" />
+                <h3 className="font-semibold text-sm">Kontak Darurat</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs font-medium text-muted-foreground">Tempat Terbit Paspor</Label>
-                  <Input type="text" value={passportPlace} onChange={(e) => setPassportPlace(e.target.value)} placeholder="Mis. Kantor Imigrasi Malang" className={inputClass} />
+                  <Label className="text-xs font-medium text-muted-foreground">Nama Keluarga</Label>
+                  <Input type="text" value={emergencyName} onChange={(e) => setEmergencyName(e.target.value)} placeholder="Nama keluarga / kerabat" className={inputClass} />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium text-muted-foreground">Tanggal Terbit Paspor</Label>
-                  <Input type="date" value={passportIssueDate} onChange={(e) => setPassportIssueDate(e.target.value)} className={inputClass} />
+                  <Label className="text-xs font-medium text-muted-foreground">Nomor Telepon</Label>
+                  <Input type="tel" value={emergencyPhone} onChange={(e) => setEmergencyPhone(e.target.value)} placeholder="08xxx" className={inputClass} />
                 </div>
               </div>
             </div>
@@ -404,29 +347,6 @@ export default function DataDiriPage() {
             <div>
               <Label className="text-xs font-medium text-muted-foreground">Kode Pos</Label>
               <Input type="text" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className={inputClass} />
-            </div>
-          </div>
-        </div>
-
-        {/* Kontak Darurat */}
-        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-gradient-to-br from-emerald-50/60 to-white">
-            <span className="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
-              <PhoneCall className="w-4 h-4 text-white" />
-            </span>
-            <div>
-              <h2 className="font-semibold text-sm">Kontak Darurat</h2>
-              <p className="text-xs text-muted-foreground">Keluarga yang bisa dihubungi saat keberangkatan</p>
-            </div>
-          </div>
-          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs font-medium text-muted-foreground">Nama Keluarga</Label>
-              <Input type="text" value={emergencyName} onChange={(e) => setEmergencyName(e.target.value)} placeholder="Nama keluarga / kerabat" className={inputClass} />
-            </div>
-            <div>
-              <Label className="text-xs font-medium text-muted-foreground">Nomor Telepon</Label>
-              <Input type="tel" value={emergencyPhone} onChange={(e) => setEmergencyPhone(e.target.value)} placeholder="08xxx" className={inputClass} />
             </div>
           </div>
         </div>

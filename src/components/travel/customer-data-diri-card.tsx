@@ -12,16 +12,8 @@ interface DataDiriResult {
   }
 }
 
-const MARITAL_LABELS: Record<string, string> = {
-  "belum-menikah": "Belum Menikah",
-  menikah: "Menikah",
-  "cerai-hidup": "Cerai Hidup",
-  "cerai-mati": "Cerai Mati",
-}
-
-function label(v: string | null | undefined, map?: Record<string, string>) {
+function label(v: string | null | undefined) {
   if (!v?.trim()) return "-"
-  if (map && map[v]) return map[v]
   return v.charAt(0).toUpperCase() + v.slice(1)
 }
 
@@ -119,16 +111,10 @@ export default function CustomerDataDiriCard({ bookingId }: { bookingId: string 
               <Field label="Nama" value={data.data.full_name} />
               <Field label="Telepon" value={data.data.phone} />
               <Field label="Email" value={data.data.email} />
-              <Field label="NIK" value={data.data.nik} mono />
               <Field label="Jenis Kelamin" value={label(data.data.gender)} />
               <Field label="Tempat, Tanggal Lahir" value={`${label(data.data.birth_place)}, ${fmtDate(data.data.birth_date)}`} />
-              <Field label="Nama Ibu Kandung" value={data.data.mother_name} />
-              <Field label="Status Kawin" value={label(data.data.marital_status, MARITAL_LABELS)} />
-              <Field label="Pekerjaan" value={data.data.occupation} />
               <Field label="No. Paspor" value={data.data.passport_number} mono />
               <Field label="Masa Berlaku Paspor" value={fmtDate(data.data.passport_expiry)} />
-              <Field label="Tempat Terbit Paspor" value={data.data.passport_place} />
-              <Field label="Tanggal Terbit Paspor" value={fmtDate(data.data.passport_issue_date)} />
               <Field label="Alamat" value={addressLine} />
               <Field label="Kontak Darurat" value={`${label(data.data.emergency_contact_name)} • ${label(data.data.emergency_contact_phone)}`} icon={<PhoneCall className="w-3 h-3 inline mr-1" />} />
             </dl>
