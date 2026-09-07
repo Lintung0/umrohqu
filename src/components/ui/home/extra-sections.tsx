@@ -62,18 +62,18 @@ export function WhyUsSection() {
   ]
 
   return (
-    <section className="py-16 px-6 md:px-12 bg-white border-t border-gray-100">
+    <section className="py-14 sm:py-16 px-4 sm:px-6 md:px-12 bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-12">
+        <div className="mb-8 sm:mb-12">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">{t.landing.why_us_title}</h2>
           <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
           <p className="text-gray-500 mt-4 text-sm max-w-xl leading-relaxed">{t.landing.why_us_desc}</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {WHY_US.map((item) => (
             <div
               key={item.title}
-              className="group relative flex gap-4 p-6 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-emerald-100 transition-all duration-300"
+              className="group relative flex gap-3.5 sm:gap-4 p-5 sm:p-6 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-emerald-100 transition-all duration-300"
             >
               <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/30 transition-transform duration-300 group-hover:scale-110">
@@ -111,7 +111,7 @@ export function TravelAgenciesSection() {
 
   if (loading) {
     return (
-      <section className="py-14 px-6 bg-gray-50 border-t border-gray-100">
+      <section className="py-14 px-4 sm:px-6 md:px-12 bg-gray-50 border-t border-gray-100">
         <div className="max-w-7xl mx-auto">
           <div className="h-5 w-48 bg-gray-200 rounded animate-pulse mb-6 mx-auto" />
           <div className="flex gap-4 overflow-hidden">
@@ -133,12 +133,12 @@ export function TravelAgenciesSection() {
   }))
 
   return (
-    <section className="relative py-16 px-6 md:px-12 overflow-hidden border-t border-gray-100">
+    <section className="relative py-14 sm:py-16 px-4 sm:px-6 md:px-12 overflow-hidden border-t border-gray-100">
       <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-gray-50" />
       <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-emerald-100/50 blur-3xl" aria-hidden="true" />
       <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-amber-100/40 blur-3xl" aria-hidden="true" />
       <div className="relative max-w-7xl mx-auto">
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between gap-4 mb-8 sm:mb-10">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{t.landing.travel_section_title}</h2>
           </div>
@@ -210,19 +210,19 @@ export function TestimonialSection() {
   }, [])
 
   return (
-    <section className="relative py-16 px-6 md:px-12 bg-white border-t border-gray-100 overflow-hidden">
+    <section className="relative py-14 sm:py-16 px-4 sm:px-6 md:px-12 bg-white border-t border-gray-100 overflow-hidden">
       <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-64 rounded-full bg-emerald-50/60 blur-3xl" aria-hidden="true" />
       <div className="relative max-w-7xl mx-auto">
-        <div className="mb-12 text-center">
+        <div className="mb-8 sm:mb-12 text-center">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">{t.landing.testimonial_title}</h2>
           <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
           <p className="text-gray-500 mt-4 text-sm">{t.landing.testimonial_desc}</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {testimonials.map((item) => (
             <div
               key={item.id}
-              className="group relative flex flex-col gap-4 p-6 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              className="group relative flex flex-col gap-4 p-5 sm:p-6 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
               <span className="absolute -top-1 right-4 text-6xl font-serif text-emerald-200/70 leading-none select-none" aria-hidden="true">"</span>
               <div className="flex gap-0.5">
@@ -274,15 +274,15 @@ export function TrustSection() {
   ]
 
   return (
-    <section className="py-12 px-6 md:px-12 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100">
+    <section className="py-12 px-4 sm:px-6 md:px-12 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {items.map((item) => (
             <div
               key={item.title}
-              className="group flex items-center gap-3.5 p-5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-emerald-100 hover:-translate-y-0.5 transition-all duration-300"
+              className="group flex flex-col items-start sm:flex-row sm:items-center gap-2.5 sm:gap-3.5 p-4 sm:p-5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-emerald-100 hover:-translate-y-0.5 transition-all duration-300"
             >
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center shrink-0 group-hover:from-emerald-500 group-hover:to-emerald-700 transition-colors duration-300">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center shrink-0 group-hover:from-emerald-500 group-hover:to-emerald-700 transition-colors duration-300">
                 <item.icon className="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors duration-300" />
               </div>
               <div>
@@ -300,7 +300,7 @@ export function TrustSection() {
 export function CTASection() {
   const { t } = useTranslation()
   return (
-    <section className="relative overflow-hidden py-16 px-6 md:px-12">
+    <section className="relative overflow-hidden py-14 sm:py-16 px-4 sm:px-6 md:px-12">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-slate-900" />
       <div className="absolute inset-0 text-white">
         <IslamicPattern opacity={0.03} />
@@ -323,7 +323,7 @@ export function CTASection() {
             {t.hero.search}
           </Link>
         </div>
-        <div className="flex items-center justify-center gap-6 mt-8 text-xs text-white/40">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-8 text-xs text-white/40">
           {["Gratis daftar", "Tanpa biaya tambahan", "Pembayaran aman"].map((item) => (
             <div key={item} className="flex items-center gap-1.5">
               <CheckCircle className="w-3.5 h-3.5 text-emerald-400/70" />
@@ -375,7 +375,7 @@ export function StatsSection() {
   ]
 
   return (
-    <section className="relative overflow-hidden py-14 px-6">
+    <section className="relative overflow-hidden py-14 px-4 sm:px-6">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-slate-900" />
       <div className="absolute inset-0 text-white">
         <IslamicPattern opacity={0.03} />

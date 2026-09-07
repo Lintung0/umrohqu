@@ -49,8 +49,8 @@ function HeroSearch() {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-xl p-3.5 sm:p-4 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] ring-1 ring-white/40 border border-white/20 text-gray-800 text-left max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
-        <div className="sm:col-span-4">
+      <div className="grid grid-cols-2 sm:grid-cols-12 gap-2.5 items-end">
+        <div className="col-span-2 sm:col-span-4">
           <label className="block text-[11px] font-bold text-emerald-900/50 uppercase tracking-wider mb-1.5 px-1">Travel / Paket</label>
           <div className="relative group">
             <Building2 className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 transition-colors group-focus-within:text-emerald-600" />
@@ -59,11 +59,11 @@ function HeroSearch() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Cari travel atau paket..."
-              className="w-full pl-8 pr-2.5 py-2.5 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all group-focus-within:bg-white"
+              className="w-full h-11 pl-8 pr-2.5 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all group-focus-within:bg-white"
             />
           </div>
         </div>
-        <div className="sm:col-span-3">
+        <div className="col-span-1 sm:col-span-3">
           <label className="block text-[11px] font-bold text-emerald-900/50 uppercase tracking-wider mb-1.5 px-1">Keberangkatan</label>
           <CityAutocomplete
             value={departureCity}
@@ -71,17 +71,17 @@ function HeroSearch() {
             placeholder="Kota asal..."
             countryFilter={country}
             iconClassName="text-emerald-500"
-            className="w-full pl-8 pr-2.5 py-2.5 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all"
+            className="w-full h-11 pl-8 pr-2.5 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all"
           />
         </div>
-        <div className="sm:col-span-3">
+        <div className="col-span-1 sm:col-span-3">
           <label className="block text-[11px] font-bold text-emerald-900/50 uppercase tracking-wider mb-1.5 px-1">Waktu</label>
           <div className="relative">
             <Calendar className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none" />
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-full pl-8 pr-7 py-2.5 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all appearance-none cursor-pointer"
+              className="w-full h-11 pl-8 pr-7 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all appearance-none cursor-pointer"
             >
               <option value="">Semua Bulan</option>
               {MONTHS.map((m) => (
@@ -91,7 +91,7 @@ function HeroSearch() {
             <ChevronDown className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
         </div>
-        <div className="sm:col-span-2">
+        <div className="col-span-2 sm:col-span-2">
           <button
             type="submit"
             className="w-full h-11 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/40 transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
@@ -139,7 +139,7 @@ export default function Home() {
           <div className="relative">
             {/* Ambient gold glow behind the headline */}
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[520px] h-[220px] rounded-full bg-amber-400/20 blur-[110px] pointer-events-none" aria-hidden="true" />
-            <h1 className="relative text-2xl sm:text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold tracking-tight mb-12 leading-none drop-shadow-lg whitespace-nowrap">
+            <h1 className="relative text-2xl leading-[1.15] sm:text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold tracking-tight mb-8 sm:mb-12 drop-shadow-lg">
               Cari, Bandingkan &amp; Pesan{" "}
               <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-100 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(251,191,36,0.25)]">
                 Paket Umrah
@@ -149,7 +149,7 @@ export default function Home() {
 
           <HeroSearch />
 
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-xs text-emerald-100/70">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 mt-8 sm:mt-10 text-xs text-emerald-100/70">
             <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>200+ PPIU Resmi</span>
             <span className="w-px h-3 bg-emerald-500/40" />
             <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" /></span>500+ Paket Umroh</span>

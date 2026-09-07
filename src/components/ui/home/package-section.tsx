@@ -167,13 +167,13 @@ export default function PackageSection() {
 
   if (loading) {
     return (
-      <section className="py-12 px-6 md:px-12">
+      <section className="py-12 px-4 sm:px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-12 space-y-2">
+          <div className="mb-8 sm:mb-12 space-y-2">
             <div className="h-8 w-72 bg-muted rounded animate-pulse" />
             <div className="h-4 w-48 bg-muted rounded animate-pulse" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-2xl overflow-hidden bg-white border animate-shimmer-skeleton">
                 <div className="h-44" />
@@ -190,9 +190,9 @@ export default function PackageSection() {
   }
 
   return (
-    <section className="py-16 px-6 md:px-12 bg-white">
+    <section className="py-14 sm:py-16 px-4 sm:px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-end justify-between mb-12">
+        <div className="flex items-end justify-between mb-8 sm:mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">
               {t.package.title}
@@ -209,7 +209,7 @@ export default function PackageSection() {
         </div>
 
         {compared.length > 0 && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-4 rounded-2xl z-40 flex items-center gap-4 bg-primary text-white shadow-2xl shadow-primary/40">
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-1.25rem)] px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl z-40 flex items-center gap-2.5 sm:gap-4 bg-primary text-white shadow-2xl shadow-primary/40">
             <span className="text-sm font-medium">{compared.length} paket dipilih untuk dibandingkan</span>
             <Link href={`/compare?ids=${compared.join(",")}`} className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-gold to-gold-light text-emerald-deep">
               Bandingkan
@@ -220,7 +220,7 @@ export default function PackageSection() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {packages.map((pkg, index) => (
             <div
               key={pkg.id}
@@ -246,7 +246,7 @@ export default function PackageSection() {
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="group inline-flex items-center gap-2 px-9 py-3.5 rounded-2xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="group inline-flex w-full sm:w-auto justify-center items-center gap-2 px-6 sm:px-9 py-3.5 rounded-2xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 {loadingMore ? (
                   <>

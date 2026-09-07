@@ -48,6 +48,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [notifUnread, setNotifUnread] = useState(0)
   const router = useRouter()
   const { t } = useTranslation()
   const { compareCount } = useCompare()
@@ -92,6 +93,26 @@ const Navbar = () => {
       subscription.unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+    if (!user) {
+      setNotifUnread(0)
+      return
+    }
+    let cancelled = false
+    const supabase = createClient()
+    supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false)
+      .then(({ count }) => {
+        if (!cancelled) setNotifUnread(count || 0)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -277,6 +298,11 @@ const Navbar = () => {
                   </Link>
                   <Link href="/dashboard/notifications" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
                     <Bell className="w-4 h-4 text-emerald-600" /> Notifikasi
+                    {notifUnread > 0 && (
+                      <span className="ml-auto min-w-5 h-5 px-1.5 flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none">
+                        {notifUnread > 99 ? "99+" : notifUnread}
+                      </span>
+                    )}
                   </Link>
                   <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
                     <LogOut className="w-4 h-4" /> {t.nav.logout}
