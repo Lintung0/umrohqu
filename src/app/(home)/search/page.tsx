@@ -521,8 +521,8 @@ function SearchContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-10">
 
         {/* Quick Category Pills + Sort */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className="flex gap-2 overflow-x-auto flex-1 min-w-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="space-y-3 mb-5 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
+          <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-1 sm:min-w-0">
             {QUICK_CATEGORIES.map((q) => {
               const isActive = Object.entries(q.preset).every(([k, v]) => {
                 if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())
@@ -557,7 +557,7 @@ function SearchContent() {
               )
             })}
           </div>
-          <div className="shrink-0">
+          <div className="shrink-0 flex justify-end w-full sm:w-auto">
             <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
               <SelectTrigger
                 aria-label="Urutkan hasil pencarian"
@@ -614,8 +614,8 @@ function SearchContent() {
           {/* Mobile Filter Drawer */}
           {showMobileFilter && (
             <div className="lg:hidden fixed inset-0 z-50">
-              <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileFilter(false)} />
-              <div className="absolute right-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl overflow-y-auto p-4 pb-28">
+              <div className="absolute inset-0 bg-black/40 animate-in fade-in-0 duration-300" onClick={() => setShowMobileFilter(false)} />
+              <div className="absolute left-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl overflow-y-auto p-4 pb-28 animate-in slide-in-from-left duration-300">
                 <div className="flex items-center justify-between mb-4">
                   <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
                     <SlidersHorizontal className="w-3.5 h-3.5" /> Filter Pencarian
