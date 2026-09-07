@@ -343,7 +343,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-24 sm:pb-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-48 sm:pb-16">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
           <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
@@ -949,7 +949,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
       {/* Sticky Mobile CTA */}
       {showStickyCta && !blocked && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 px-3 pt-3 pb-safe z-50 lg:hidden">
+        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 px-3 pt-3 pb-3 z-50 lg:hidden">
           <div className="max-w-lg mx-auto flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-lg font-bold text-primary truncate">{formatRupiah(pkg.price)}</p>
@@ -962,7 +962,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         </div>
       )}
       {showStickyCta && blocked && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-3 pt-3 pb-safe bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 border-t border-emerald-800 text-white">
+        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 lg:hidden px-3 pt-3 pb-3 bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 border-t border-emerald-800 text-white">
           <div className="max-w-lg mx-auto flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
               <Timer className="w-4.5 h-4.5 text-emerald-950" />
@@ -985,7 +985,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-24 right-4 w-10 h-10 rounded-full bg-white border border-border shadow flex items-center justify-center text-muted-foreground hover:text-primary transition-all z-40"
+          className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom))] right-4 w-10 h-10 rounded-full bg-white border border-border shadow flex items-center justify-center text-muted-foreground hover:text-primary transition-all z-40"
         >
           <ArrowUp className="w-4 h-4" />
         </button>
