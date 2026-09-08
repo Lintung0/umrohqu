@@ -110,13 +110,15 @@ function MobileCompareSlide({ pkg, index, scores, maxScore, rowHighlights, remov
 
   return (
     <div className="bg-white border-2 rounded-2xl overflow-hidden shadow-md mx-1">
-      <div className="relative h-40">
-        {isBest && <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 z-10" />}
-        <Image
-          src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
-          alt={pkg.name || "Paket"} fill className="object-cover"
-        />
-        <button
+<div className="relative h-40">
+          {isBest && <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 z-10" />}
+          <Link href={`/package/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
+            <Image
+              src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
+              alt={pkg.name || "Paket"} fill className="object-cover transition-transform duration-300 hover:scale-105"
+            />
+          </Link>
+          <button
           onClick={() => removeFromCompare(pkg.id)}
           className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
         >
@@ -567,7 +569,9 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
                       {isBest && (
                         <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 z-10" />
                       )}
-                      <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover" />
+                      <Link href={`/package/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
+                        <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover transition-transform duration-300 hover:scale-105" />
+                      </Link>
                       <button onClick={() => removeFromCompare(pkg.id)} className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors">
                         <X className="w-3.5 h-3.5" />
                       </button>
