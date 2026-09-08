@@ -4,8 +4,9 @@ import { useState, useEffect, Suspense, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { X, Check, Minus, Scale, Award, Sparkles, TrendingDown, Star, Plus, Search, Loader2 } from "lucide-react"
+import { X, Check, Minus, Scale, Award, Sparkles, TrendingDown, Star, Plus, Search, Loader2, Heart, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
@@ -100,6 +101,86 @@ function SmartBadges({ scores, index }: { scores: ReturnType<typeof calcScore>[]
   )
 }
 
+function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm" | "md" }) {
+  const supabase = createClient()
+  const [isWishlisted, setIsWishlisted] = useState(false)
+  const [wishlistId, setWishlistId] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !active) return
+      const { data } = await supabase
+        .from("wishlists")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("package_id", pkg.id)
+        .maybeSingle()
+      if (active && data) {
+        setIsWishlisted(true)
+        setWishlistId(data.id)
+      }
+    })()
+    return () => { active = false }
+  }, [pkg.id])
+
+  async function toggleWishlist() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { window.location.href = "/login"; return }
+    setBusy(true)
+    if (isWishlisted && wishlistId) {
+      const { error } = await supabase.from("wishlists").delete().eq("id", wishlistId)
+      if (!error) {
+        setIsWishlisted(false)
+        setWishlistId(null)
+        toast.success("Dihapus dari wishlist", { position: "top-center" })
+      }
+    } else {
+      const { data, error } = await supabase
+        .from("wishlists")
+        .insert({ user_id: user.id, package_id: pkg.id })
+        .select("id")
+        .single()
+      if (!error && data) {
+        setIsWishlisted(true)
+        setWishlistId(data.id)
+        toast.success("Ditambahkan ke wishlist", { position: "top-center" })
+      }
+    }
+    setBusy(false)
+  }
+
+  function handleShare() {
+    const url = `${window.location.origin}/package/${pkg.slug}`
+    if (navigator.share) {
+      navigator.share({ title: pkg.name || "Paket Umrah", url })
+    } else {
+      navigator.clipboard.writeText(url)
+      toast.success("Link disalin ke clipboard")
+    }
+  }
+
+  const btnCls =
+    size === "sm"
+      ? "w-7 h-7 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center shadow-sm transition-colors"
+      : "w-9 h-9 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center shadow-sm transition-colors"
+
+  return (
+    <div className="absolute bottom-2 right-2 z-20 flex gap-1.5">
+      <button onClick={toggleWishlist} aria-label="Tambah atau hapus dari wishlist"
+        className={`${btnCls} ${isWishlisted ? "text-rose-500" : "text-gray-600 hover:text-rose-500"}`}>
+        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`} />}
+      </button>
+      <button onClick={handleShare} aria-label="Bagikan paket"
+        className={`${btnCls} text-gray-600 hover:text-primary`}>
+        <Share2 className="w-4 h-4" />
+      </button>
+    </div>
+  )
+}
+
 function MobileCompareSlide({ pkg, index, scores, maxScore, rowHighlights, removeFromCompare }: {
   pkg: Package; index: number; scores: ReturnType<typeof calcScore>[]; maxScore: number;
   rowHighlights: Record<string, ("best" | "worst" | undefined)[][]>;
@@ -132,6 +213,7 @@ function MobileCompareSlide({ pkg, index, scores, maxScore, rowHighlights, remov
             </div>
           )}
         </div>
+        <CompareFloatingActions pkg={pkg} />
       </div>
       <div className="p-4">
         <p className="text-sm font-semibold leading-snug line-clamp-2">{pkg.name}</p>
@@ -583,6 +665,7 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
                           </div>
                         )}
                       </div>
+                      <CompareFloatingActions pkg={pkg} size="sm" />
                     </div>
                     <div className="p-3">
                       <p className="text-xs font-semibold leading-snug line-clamp-2">{pkg.name}</p>

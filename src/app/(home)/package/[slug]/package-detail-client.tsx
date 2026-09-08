@@ -311,14 +311,14 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       await supabase.from("wishlists").delete().eq("id", wishlistId)
       setIsWishlisted(false)
       setWishlistId(null)
-      toast.success("Dihapus dari wishlist")
+      toast.success("Dihapus dari wishlist", { position: "top-center" })
     } else {
       const { data } = await supabase
         .from("wishlists")
         .insert({ user_id: user.id, package_id: pkg.id })
         .select("id")
         .single()
-      if (data) { setIsWishlisted(true); setWishlistId(data.id); toast.success(" Ditambahkan ke wishlist") }
+      if (data) { setIsWishlisted(true); setWishlistId(data.id); toast.success("Ditambahkan ke wishlist", { position: "top-center" }) }
     }
     setTogglingWishlist(false)
   }
