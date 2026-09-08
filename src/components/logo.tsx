@@ -1,17 +1,20 @@
+"use client"
 import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
 const Logo = ({
   type = "full",
-  variant = "dark",
+  variant,
   className,
 }: {
   type?: "full" | "icon";
   variant?: "dark" | "light";
   className?: string;
 }) => {
-  const invertClass = variant === "light" ? "brightness-0 invert" : "";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark" || variant === "light";
 
   if (type === "icon") {
     return (
@@ -20,7 +23,7 @@ const Logo = ({
         height={40}
         alt="Logo UmrahQu"
         src="/logo-icon.png"
-        className={cn("shrink-0 object-contain", invertClass, className)}
+        className={cn("shrink-0 object-contain", className)}
       />
     );
   }
@@ -28,12 +31,12 @@ const Logo = ({
   return (
     <Link href="/" className={cn("block leading-none", className)}>
       <Image
-        width={430}
-        height={128}
+        width={2560}
+        height={1498}
         alt="UmrahQu"
-        src="/logo.svg"
+        src={isDark ? "/newlogodark.jpg" : "/newlogolight.jpg"}
         priority
-        className={cn("h-10 w-auto object-contain", invertClass)}
+        className={cn("h-9 sm:h-10 w-auto object-contain")}
       />
     </Link>
   );

@@ -7,6 +7,7 @@ import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Home, Menu, X, User
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Image from "next/image"
+import Logo from "@/components/logo"
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ringkasan", icon: LayoutDashboard },
@@ -112,12 +113,9 @@ export default function DashboardSidebar() {
   return (
     <>
       {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-border h-16 px-4 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-card border-b border-border h-16 px-4 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">U</span>
-          </div>
-          <p className="font-bold text-sm">UmrahQu</p>
+          <Logo />
         </Link>
         <div className="flex items-center gap-1">
           <Link
@@ -136,14 +134,14 @@ export default function DashboardSidebar() {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-30 bg-black/50 flex justify-end animate-in fade-in-0 duration-300" onClick={() => setMobileOpen(false)}>
-          <aside className="w-72 sm:w-80 h-full bg-white shadow-xl animate-in slide-in-from-right duration-300" onClick={(e) => e.stopPropagation()}>
+          <aside className="w-72 sm:w-80 h-full bg-card shadow-xl animate-in slide-in-from-right duration-300" onClick={(e) => e.stopPropagation()}>
             {sidebarContent}
           </aside>
         </div>
       )}
 
       {/* Desktop sidebar */}
-      <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-white border-r border-border min-h-screen sticky top-0">
+      <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-card border-r border-border min-h-screen sticky top-0">
         {sidebarContent}
       </aside>
     </>

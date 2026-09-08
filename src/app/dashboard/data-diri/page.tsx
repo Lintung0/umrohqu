@@ -220,7 +220,7 @@ export default function DataDiriPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Identitas Jamaah */}
-        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-gradient-to-br from-emerald-50/60 to-white">
             <span className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
               <UserRound className="w-4 h-4 text-white" />
@@ -309,7 +309,7 @@ export default function DataDiriPage() {
         </div>
 
         {/* Alamat */}
-        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-gradient-to-br from-emerald-50/60 to-white">
             <span className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
               <MapPin className="w-4 h-4 text-white" />
@@ -352,7 +352,7 @@ export default function DataDiriPage() {
         </div>
 
         {/* Submit */}
-        <div className="flex items-center justify-between bg-white border border-border rounded-xl px-5 py-4 shadow-sm">
+        <div className="flex items-center justify-between bg-card border border-border rounded-xl px-5 py-4 shadow-sm">
           <div className="flex items-center gap-2">
             {saved && (
               <span className="inline-flex items-center gap-1 text-sm text-emerald-600 font-medium">

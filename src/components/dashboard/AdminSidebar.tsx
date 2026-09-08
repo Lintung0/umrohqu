@@ -6,6 +6,7 @@ import { LayoutDashboard, Building2, Palette, DollarSign, BarChart3, LifeBuoy, C
 import { type AdminRole } from "@/lib/types"
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
+import Logo from "@/components/logo"
 
 const ADMIN_NAV = [
   { href: "/admin", label: "Ringkasan", icon: LayoutDashboard, roles: ["admin", "finance", "operational"] as AdminRole[], category: "utama" },
@@ -74,15 +75,9 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="p-5 border-b border-border">
-        <Link href="/admin" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">U</span>
-          </div>
-          <div>
-            <p className="font-bold text-sm">UmrahQu</p>
-            <p className="text-[10px] text-muted-foreground">Admin Panel</p>
-          </div>
+      <div className="p-4 border-b border-border">
+        <Link href="/admin" className="block">
+          <Logo />
         </Link>
       </div>
 

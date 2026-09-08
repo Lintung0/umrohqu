@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+      <div className="flex min-h-screen bg-background items-center justify-center">
         <div className="text-center space-y-3">
           <div className="h-8 w-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-muted-foreground">Memuat sesi autentikasi...</p>
@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!authorized) {
     return (
-      <div className="flex min-h-screen bg-gray-50 items-center justify-center">
+      <div className="flex min-h-screen bg-background items-center justify-center">
         <div className="text-center space-y-3">
           <p className="text-muted-foreground font-medium">Akses ditolak</p>
           <p className="text-sm text-muted-foreground">Anda tidak memiliki akses ke halaman ini.</p>
@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-background">
       <DashboardSidebar />
       <main className="flex-1 min-w-0 pt-16 pb-20 lg:pt-0 lg:pb-0">{children}</main>
     </div>

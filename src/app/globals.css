@@ -154,12 +154,72 @@
   --code-border: oklch(0.922 0 0);
 }
 
+.dark {
+  --background: oklch(0.145 0.012 165);
+  --foreground: oklch(0.94 0.005 165);
+  --card: oklch(0.175 0.014 165);
+  --card-foreground: oklch(0.94 0.005 165);
+  --popover: oklch(0.175 0.014 165);
+  --popover-foreground: oklch(0.94 0.005 165);
+  --primary: oklch(0.64 0.12 163);
+  --primary-foreground: oklch(0.15 0.02 165);
+  --secondary: oklch(0.26 0.015 165);
+  --secondary-foreground: oklch(0.94 0.005 165);
+  --muted: oklch(0.235 0.012 165);
+  --muted-foreground: oklch(0.64 0.015 165);
+  --accent: oklch(0.26 0.015 165);
+  --accent-foreground: oklch(0.94 0.005 165);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.29 0.014 165);
+  --input: oklch(0.29 0.014 165);
+  --ring: oklch(0.64 0.12 163);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.627 0.265 303.9);
+  --chart-3: oklch(0.424 0.199 265.638);
+  --chart-4: oklch(0.575 0.245 27.325);
+  --chart-5: oklch(0.734 0.222 89.16);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.175 0.014 165);
+  --sidebar-foreground: oklch(0.94 0.005 165);
+  --sidebar-primary: oklch(0.64 0.12 163);
+  --sidebar-primary-foreground: oklch(0.15 0.02 165);
+  --sidebar-accent: oklch(0.26 0.015 165);
+  --sidebar-accent-foreground: oklch(0.94 0.005 165);
+  --sidebar-border: oklch(0.29 0.014 165);
+  --sidebar-ring: oklch(0.64 0.12 163);
+  --destructive-foreground: oklch(0.95 0 0);
+  --header: oklch(0.175 0.014 165);
+  --header-foreground: oklch(0.94 0.005 165);
+  --footer: oklch(0.10 0.01 165);
+  --footer-foreground: oklch(0.88 0 0);
+  --code: oklch(0.22 0 0);
+  --code-foreground: oklch(0.708 0 0);
+  --code-highlight: oklch(0.75 0 0);
+  --code-number: oklch(0.46 0 0);
+  --code-selection: oklch(0.30 0 0);
+  --code-border: oklch(0.29 0 0);
+  --color-auth-bg: #0E1712;
+  --color-auth-foreground: #EAF3EE;
+  --color-auth-card: #15201A;
+  --color-auth-primary: #3F9B6D;
+  --color-auth-primary-dark: #2A7D4F;
+  --color-auth-primary-light: #1B3226;
+  --color-auth-primary-muted: #7DB89A;
+  --color-auth-secondary-foreground: #D8Eadf;
+  --color-auth-muted-foreground: #93A89B;
+  --color-auth-border: #2A3A30;
+  --color-auth-error: #F87171;
+  --color-auth-error-light: #3B1D1D;
+  --color-auth-input-bg: #101C15;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground font-body antialiased overflow-x-clip;
+    transition: background-color 0.45s ease, color 0.45s ease;
   }
   html {
     @apply font-sans scroll-smooth;

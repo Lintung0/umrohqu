@@ -131,7 +131,7 @@ const Navbar = () => {
     : t.nav.dashboard
 
   return (
-    <header className="w-full sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-emerald-100/60 shadow-[0_4px_30px_-12px_rgba(6,78,59,0.15)]">
+    <header className="w-full sticky top-0 z-50 bg-card/85 backdrop-blur-xl border-b border-border/60 shadow-[0_4px_30px_-12px_rgba(6,78,59,0.15)]">
       <div className="relative flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16">
 
         {/* ── Left: Logo ── */}
@@ -203,7 +203,7 @@ const Navbar = () => {
                 {menuOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                    <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-emerald-100 rounded-2xl shadow-xl shadow-emerald-900/10 z-50 py-2 overflow-hidden">
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-2xl shadow-xl shadow-emerald-900/10 z-50 py-2 overflow-hidden">
                       <div className="px-4 py-3 border-b border-emerald-50 bg-gradient-to-br from-emerald-50/80 to-white">
                         <p className="font-semibold text-sm text-slate-900 truncate">{user.user_metadata?.full_name || "User"}</p>
                         <p className="text-xs text-slate-500 truncate">{user.email}</p>
@@ -257,7 +257,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100 shadow-lg animate-in slide-in-from-top-2 duration-200">
+        <div className="md:hidden bg-card border-t border-border shadow-lg animate-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-4 space-y-1">
             {NAV_LINKS_KEYS.map((key) => (
               <Link

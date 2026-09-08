@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { Mail, Phone, Calendar, Camera, Loader2, Check } from "lucide-react"
+import { Mail, Phone, Calendar, Camera, Loader2, Check, Sun, Moon } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
 import { useTranslation } from "@/lib/i18n"
@@ -12,6 +13,8 @@ import { Input } from "@/components/ui/input"
 export default function SettingsPage() {
   const { t } = useTranslation()
   const supabase = createClient()
+  const { theme, setTheme } = useTheme()
+  const isDark = theme === "dark"
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
@@ -75,7 +78,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile Card */}
-      <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
         <div className="flex items-center gap-5">
           <div className="relative">
             {avatarUrl ? (
@@ -110,8 +113,44 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Tampilan (Theme Toggle) */}
+      <div className="bg-card border border-border rounded-xl shadow-sm p-5">
+        <h2 className="font-semibold">Tampilan</h2>
+        <p className="text-xs text-muted-foreground mt-1 mb-4">Atur tema terang atau gelap untuk aplikasi</p>
+
+        <button
+          type="button"
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          className={`relative w-full max-w-xs h-14 rounded-full border border-border overflow-hidden transition-colors duration-500 ${
+            isDark
+              ? "bg-gradient-to-r from-slate-800 via-indigo-950 to-slate-900"
+              : "bg-gradient-to-r from-sky-200 via-sky-100 to-amber-100"
+          }`}
+          aria-label="Ganti tema terang/gelap"
+        >
+          <div
+            className={`absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-0.625rem)] rounded-full bg-white shadow-lg flex items-center justify-center transition-transform duration-500 ease-in-out ${
+              isDark ? "translate-x-full" : "translate-x-0"
+            }`}
+          >
+            {isDark ? (
+              <Moon className="w-6 h-6 text-indigo-500" />
+            ) : (
+              <Sun className="w-6 h-6 text-amber-500" style={{ animation: "spin 12s linear infinite" }} />
+            )}
+          </div>
+
+          <span className={`absolute left-1/4 -translate-x-1/2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs font-semibold transition-colors duration-500 ${isDark ? "text-slate-500" : "text-emerald-900"}`}>
+            <Sun className="w-4 h-4" /> Terang
+          </span>
+          <span className={`absolute left-3/4 -translate-x-1/2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs font-semibold transition-colors duration-500 ${isDark ? "text-slate-100" : "text-slate-500"}`}>
+            <Moon className="w-4 h-4" /> Gelap
+          </span>
+        </button>
+      </div>
+
       {/* Form */}
-      <form onSubmit={handleSave} className="bg-white border border-border rounded-xl shadow-sm divide-y divide-border">
+      <form onSubmit={handleSave} className="bg-card border border-border rounded-xl shadow-sm divide-y divide-border">
         <div className="p-5">
           <h2 className="font-semibold mb-4">Informasi Pribadi</h2>
           <div className="space-y-4">
