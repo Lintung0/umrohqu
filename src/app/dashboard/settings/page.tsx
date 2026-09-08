@@ -129,7 +129,7 @@ export default function SettingsPage() {
           aria-label="Ganti tema terang/gelap"
         >
           <div
-            className={`absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-0.625rem)] rounded-full bg-white shadow-lg flex items-center justify-center transition-transform duration-500 ease-in-out ${
+            className={`theme-knob absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-0.625rem)] rounded-full bg-white shadow-lg flex items-center justify-center transition-transform duration-500 ease-in-out ${
               isDark ? "translate-x-full" : "translate-x-0"
             }`}
           >
