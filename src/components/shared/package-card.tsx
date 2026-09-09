@@ -40,7 +40,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [imgError, setImgError] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
-  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning" }>({ show: false, message: "", variant: "success" })
+  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning"; actionLabel?: string; actionHref?: string }>({ show: false, message: "", variant: "success" })
   const [avgRating, setAvgRating] = useState<number | null>(null)
   const [reviewCount, setReviewCount] = useState(0)
 
@@ -107,8 +107,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
   }
 
-  const showPopup = useCallback((message: string, variant: "success" | "warning" = "success") => {
-    setPopup({ show: true, message, variant })
+  const showPopup = useCallback((message: string, variant: "success" | "warning" = "success", actionLabel?: string, actionHref?: string) => {
+    setPopup({ show: true, message, variant, actionLabel, actionHref })
   }, [])
 
   function handleCompare(e: React.MouseEvent) {
@@ -116,11 +116,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     e.stopPropagation()
     if (comparePackages.some((p) => p.id === pkg.id)) return
     if (isFull) {
-      showPopup("Maksimal 3 paket untuk dibandingkan", "warning")
+      showPopup("Maksimal 3 paket untuk dibandingkan", "warning", "Lihat Perbandingan", "/compare")
       return
     }
     addToCompare(pkg)
-    showPopup("Ditambahkan ke perbandingan")
+    showPopup("Ditambahkan ke perbandingan", "success", "Lihat Perbandingan", "/compare")
   }
 
   async function handleWishlist(e: React.MouseEvent) {
@@ -147,7 +147,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           await supabase.from("wishlists").delete().eq("id", existing.id)
         }
         setIsWishlisted(false)
-        showPopup("Dihapus dari wishlist")
+        showPopup("Dihapus dari wishlist", "success", "Lihat Wishlist", "/dashboard/wishlist")
       } else {
         const { data } = await supabase
           .from("wishlists")
@@ -156,7 +156,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           .single()
         if (data) {
           setIsWishlisted(true)
-          showPopup("Ditambahkan ke wishlist")
+          showPopup("Ditambahkan ke wishlist", "success", "Lihat Wishlist", "/dashboard/wishlist")
         }
       }
     } catch {
@@ -321,7 +321,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "", variant: "success" })} />
+        <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
       </Link>
     )
   }
@@ -413,7 +413,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "", variant: "success" })} />
+        <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
       </Link>
     )
   }
@@ -568,7 +568,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
       </div>
 
-      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "", variant: "success" })} />
+      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
     </Link>
   )
 }

@@ -141,7 +141,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistId, setWishlistId] = useState<string | null>(null)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
-  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning" }>({ show: false, message: "", variant: "success" })
+  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning"; actionLabel?: string; actionHref?: string }>({ show: false, message: "", variant: "success" })
   const [activeTab, setActiveTab] = useState("overview")
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [showStickyCta, setShowStickyCta] = useState(false)
@@ -313,14 +313,14 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       await supabase.from("wishlists").delete().eq("id", wishlistId)
       setIsWishlisted(false)
       setWishlistId(null)
-      setPopup({ show: true, message: "Dihapus dari wishlist", variant: "success" })
+      setPopup({ show: true, message: "Dihapus dari wishlist", variant: "success", actionLabel: "Lihat Wishlist", actionHref: "/dashboard/wishlist" })
     } else {
       const { data } = await supabase
         .from("wishlists")
         .insert({ user_id: user.id, package_id: pkg.id })
         .select("id")
         .single()
-      if (data) { setIsWishlisted(true); setWishlistId(data.id); setPopup({ show: true, message: "Ditambahkan ke wishlist", variant: "success" }) }
+      if (data) { setIsWishlisted(true); setWishlistId(data.id); setPopup({ show: true, message: "Ditambahkan ke wishlist", variant: "success", actionLabel: "Lihat Wishlist", actionHref: "/dashboard/wishlist" }) }
     }
     setTogglingWishlist(false)
   }
@@ -879,11 +879,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                       onClick={() => {
                         if (comparePackages.some((p) => p.id === pkg.id)) return
                         if (isFull) {
-                          setPopup({ show: true, message: "Maksimal 3 paket untuk dibandingkan", variant: "warning" })
+                          setPopup({ show: true, message: "Maksimal 3 paket untuk dibandingkan", variant: "warning", actionLabel: "Lihat Perbandingan", actionHref: "/compare" })
                           return
                         }
                         addToCompare(pkg as unknown as PackageType)
-                        setPopup({ show: true, message: "Paket berhasil ditambahkan ke perbandingan", variant: "success" })
+                        setPopup({ show: true, message: "Paket berhasil ditambahkan ke perbandingan", variant: "success", actionLabel: "Lihat Perbandingan", actionHref: "/compare" })
                       }}
                     >
                       <Scale className="w-4 h-4" /> Bandingkan
@@ -1016,7 +1016,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           />
         </div>
       )}
-      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "", variant: "success" })} />
+      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
     </main>
   )
 }

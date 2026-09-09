@@ -106,7 +106,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistId, setWishlistId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning" }>({ show: false, message: "", variant: "success" })
+  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning"; actionLabel?: string; actionHref?: string }>({ show: false, message: "", variant: "success" })
 
   useEffect(() => {
     let active = true
@@ -136,7 +136,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
       if (!error) {
         setIsWishlisted(false)
         setWishlistId(null)
-        setPopup({ show: true, message: "Dihapus dari wishlist", variant: "success" })
+        setPopup({ show: true, message: "Dihapus dari wishlist", variant: "success", actionLabel: "Lihat Wishlist", actionHref: "/dashboard/wishlist" })
       }
     } else {
       const { data, error } = await supabase
@@ -147,7 +147,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
       if (!error && data) {
         setIsWishlisted(true)
         setWishlistId(data.id)
-        setPopup({ show: true, message: "Ditambahkan ke wishlist", variant: "success" })
+        setPopup({ show: true, message: "Ditambahkan ke wishlist", variant: "success", actionLabel: "Lihat Wishlist", actionHref: "/dashboard/wishlist" })
       }
     }
     setBusy(false)
@@ -178,7 +178,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
         className={`${btnCls} text-gray-600 hover:text-primary`}>
         <Share2 className="w-4 h-4" />
       </button>
-      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} onClose={() => setPopup({ show: false, message: "", variant: "success" })} />
+      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
     </div>
   )
 }
