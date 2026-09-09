@@ -33,7 +33,7 @@ const Logo = ({
       <img
         alt="UmrahQu"
         src={isDark ? "/logo-dark.svg" : "/logo-light.svg"}
-        className="h-9 sm:h-10 w-auto object-contain"
+        className="h-6 sm:h-8 w-auto object-contain"
       />
     </Link>
   );
