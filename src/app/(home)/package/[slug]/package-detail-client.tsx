@@ -17,10 +17,9 @@ import { decodeUnicodeEscapes } from "@/lib/utils"
 import ImageGallery from "@/components/shared/image-gallery"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import { Button } from "@/components/ui/button"
-import { CenterPopup } from "@/components/ui/center-popup"
+import { toast } from "sonner"
 import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
 import { getSeatAvailability, getPackageAvailable } from "@/lib/utils"
-import { toast } from "sonner"
 import { useCompare } from "@/lib/compare-context"
 import type { Package as PackageType } from "@/lib/types"
 
@@ -141,7 +140,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistId, setWishlistId] = useState<string | null>(null)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
-  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning"; actionLabel?: string; actionHref?: string }>({ show: false, message: "", variant: "success" })
   const [activeTab, setActiveTab] = useState("overview")
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [showStickyCta, setShowStickyCta] = useState(false)
@@ -313,14 +311,14 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       await supabase.from("wishlists").delete().eq("id", wishlistId)
       setIsWishlisted(false)
       setWishlistId(null)
-      setPopup({ show: true, message: "Dihapus dari wishlist", variant: "success", actionLabel: "Lihat Wishlist", actionHref: "/dashboard/wishlist" })
+      toast.success("Dihapus dari wishlist", { action: { label: "Lihat Wishlist", onClick: () => router.push("/dashboard/wishlist") } })
     } else {
       const { data } = await supabase
         .from("wishlists")
         .insert({ user_id: user.id, package_id: pkg.id })
         .select("id")
         .single()
-      if (data) { setIsWishlisted(true); setWishlistId(data.id); setPopup({ show: true, message: "Ditambahkan ke wishlist", variant: "success", actionLabel: "Lihat Wishlist", actionHref: "/dashboard/wishlist" }) }
+      if (data) { setIsWishlisted(true); setWishlistId(data.id); toast.success("Ditambahkan ke wishlist", { action: { label: "Lihat Wishlist", onClick: () => router.push("/dashboard/wishlist") } }) }
     }
     setTogglingWishlist(false)
   }
@@ -879,11 +877,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                       onClick={() => {
                         if (comparePackages.some((p) => p.id === pkg.id)) return
                         if (isFull) {
-                          setPopup({ show: true, message: "Maksimal 3 paket untuk dibandingkan", variant: "warning", actionLabel: "Lihat Perbandingan", actionHref: "/compare" })
+                          toast.warning("Maksimal 3 paket untuk dibandingkan", { action: { label: "Lihat Perbandingan", onClick: () => router.push("/compare") } })
                           return
                         }
                         addToCompare(pkg as unknown as PackageType)
-                        setPopup({ show: true, message: "Paket berhasil ditambahkan ke perbandingan", variant: "success", actionLabel: "Lihat Perbandingan", actionHref: "/compare" })
+                        toast.success("Paket berhasil ditambahkan ke perbandingan", { action: { label: "Lihat Perbandingan", onClick: () => router.push("/compare") } })
                       }}
                     >
                       <Scale className="w-4 h-4" /> Bandingkan
@@ -1016,7 +1014,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           />
         </div>
       )}
-      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
     </main>
   )
 }

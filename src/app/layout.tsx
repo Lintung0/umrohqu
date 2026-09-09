@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   title: "UmrahQu - Teman Perjalanan Terbaikmu",
   description: "Teman Perjalanan Terbaikmu",
   icons: {
-    icon: "/favicon.png",
+    icon: "/logo-icon.svg",
   },
 };
 
@@ -42,7 +42,15 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
-        <Toaster />
+        <Toaster
+          position="top-right"
+          offset={80}
+          richColors
+          closeButton
+          expand
+          visibleToasts={3}
+          duration={3000}
+        />
         <MobileBottomNav />
       </body>
     </html>

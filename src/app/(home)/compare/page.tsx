@@ -6,7 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { X, Check, Minus, Scale, Award, Sparkles, TrendingDown, Star, Plus, Search, Loader2, Heart, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { CenterPopup } from "@/components/ui/center-popup"
+import { toast } from "sonner"
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
@@ -106,7 +106,6 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistId, setWishlistId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning"; actionLabel?: string; actionHref?: string }>({ show: false, message: "", variant: "success" })
 
   useEffect(() => {
     let active = true
@@ -136,7 +135,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
       if (!error) {
         setIsWishlisted(false)
         setWishlistId(null)
-        setPopup({ show: true, message: "Dihapus dari wishlist", variant: "success", actionLabel: "Lihat Wishlist", actionHref: "/dashboard/wishlist" })
+        toast.success("Dihapus dari wishlist", { action: { label: "Lihat Wishlist", onClick: () => { window.location.href = "/dashboard/wishlist" } } })
       }
     } else {
       const { data, error } = await supabase
@@ -147,7 +146,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
       if (!error && data) {
         setIsWishlisted(true)
         setWishlistId(data.id)
-        setPopup({ show: true, message: "Ditambahkan ke wishlist", variant: "success", actionLabel: "Lihat Wishlist", actionHref: "/dashboard/wishlist" })
+        toast.success("Ditambahkan ke wishlist", { action: { label: "Lihat Wishlist", onClick: () => { window.location.href = "/dashboard/wishlist" } } })
       }
     }
     setBusy(false)
@@ -159,7 +158,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
       navigator.share({ title: pkg.name || "Paket Umrah", url })
     } else {
       navigator.clipboard.writeText(url)
-      setPopup({ show: true, message: "Link disalin ke clipboard", variant: "success" })
+      toast.success("Link disalin ke clipboard")
     }
   }
 
@@ -178,7 +177,6 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
         className={`${btnCls} text-gray-600 hover:text-primary`}>
         <Share2 className="w-4 h-4" />
       </button>
-      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
     </div>
   )
 }

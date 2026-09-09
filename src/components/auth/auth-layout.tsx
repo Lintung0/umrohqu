@@ -17,9 +17,7 @@ export function AuthLayout({
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-gold/8 rounded-full blur-3xl" />
 
         <div className="relative z-10">
-          <div className="[&>a>img]:brightness-0 [&>a>img]:invert [&>a>img]:h-10">
-            <Logo />
-          </div>
+          <Logo variant="light" />
         </div>
 
         <div className="relative z-10 space-y-6 max-w-md">

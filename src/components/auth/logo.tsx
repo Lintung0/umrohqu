@@ -1,5 +1,4 @@
 "use client"
-import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 
@@ -9,12 +8,10 @@ export function Logo() {
 
   return (
     <Link href="/" className="block leading-none">
-      <Image
-        width={2560}
-        height={1498}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         alt="UmrahQu"
-        src={isDark ? "/newlogodark.jpg" : "/newlogolight.jpg"}
-        priority
+        src={isDark ? "/logo-dark.svg" : "/logo-light.svg"}
         className="h-10 w-auto object-contain"
       />
     </Link>

@@ -9,7 +9,7 @@ import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
 import { createClient } from "@/lib/supabase/client"
-import { CenterPopup } from "@/components/ui/center-popup"
+import { toast } from "sonner"
 import SeatAvailabilityBar from "./seat-availability-bar"
 import type { Package, Tenant } from "@/lib/types"
 
@@ -40,7 +40,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [imgError, setImgError] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [togglingWishlist, setTogglingWishlist] = useState(false)
-  const [popup, setPopup] = useState<{ show: boolean; message: string; variant: "success" | "warning"; actionLabel?: string; actionHref?: string }>({ show: false, message: "", variant: "success" })
   const [avgRating, setAvgRating] = useState<number | null>(null)
   const [reviewCount, setReviewCount] = useState(0)
 
@@ -108,8 +107,12 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   }
 
   const showPopup = useCallback((message: string, variant: "success" | "warning" = "success", actionLabel?: string, actionHref?: string) => {
-    setPopup({ show: true, message, variant, actionLabel, actionHref })
-  }, [])
+    if (variant === "warning") {
+      toast.warning(message, { action: actionLabel && actionHref ? { label: actionLabel, onClick: () => router.push(actionHref) } : undefined })
+    } else {
+      toast.success(message, { action: actionLabel && actionHref ? { label: actionLabel, onClick: () => router.push(actionHref) } : undefined })
+    }
+  }, [router])
 
   function handleCompare(e: React.MouseEvent) {
     e.preventDefault()
@@ -321,7 +324,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
       </Link>
     )
   }
@@ -413,7 +415,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           </div>
         </div>
 
-        <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
       </Link>
     )
   }
@@ -568,7 +569,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
       </div>
 
-      <CenterPopup variant={popup.variant} show={popup.show} message={popup.message} actionLabel={popup.actionLabel} actionHref={popup.actionHref} onClose={() => setPopup({ show: false, message: "", variant: "success", actionLabel: undefined, actionHref: undefined })} />
     </Link>
   )
 }
