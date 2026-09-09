@@ -53,19 +53,15 @@ export async function POST(request: NextRequest) {
 
     let paymentId: string | null = existingPayment?.id || null
     if (!paymentId) {
-      const { data: newPayment } = await admin
-        .from("payments")
-        .insert({
-          booking_id: booking.id,
-          tenant_id: booking.tenant_id,
-          status: "pending",
-          payment_gateway: "midtrans",
-          amount: payAmount,
-          currency: "IDR",
-        })
-        .select("id")
-        .single()
-      paymentId = newPayment?.id || null
+      const { data: newPaymentId } = await admin.rpc("create_payment", {
+        p_booking_id: booking.id,
+        p_tenant_id: booking.tenant_id,
+        p_status: "pending",
+        p_gateway: "midtrans",
+        p_amount: payAmount,
+        p_currency: "IDR",
+      })
+      paymentId = newPaymentId || null
     }
 
     let snap: { token: string; redirect_url: string } | null = null

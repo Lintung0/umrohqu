@@ -174,19 +174,15 @@ export async function POST(request: NextRequest) {
       console.error("[notify booking create]", notifErr)
     }
 
-    // 6. Catat transaksi payments wajib ada di database
-    const { data: payment, error: payErr } = await admin
-      .from("payments")
-      .insert({
-        booking_id: booking.id,
-        tenant_id: pkg.tenant_id,
-        status: "pending",
-        payment_gateway: "midtrans",
-        amount: payNow,
-        currency: "IDR",
-      })
-      .select("id")
-      .single()
+    // 6. Catat transaksi payments wajib ada di database — booking_id diisi otomatis oleh database (fungsi create_payment + trigger)
+    const { data: paymentId, error: payErr } = await admin.rpc("create_payment", {
+      p_booking_id: booking.id,
+      p_tenant_id: pkg.tenant_id,
+      p_status: "pending",
+      p_gateway: "midtrans",
+      p_amount: payNow,
+      p_currency: "IDR",
+    })
 
     if (payErr) {
       console.error("Payment insert error:", payErr)
@@ -221,11 +217,11 @@ export async function POST(request: NextRequest) {
         .update({ gateway_invoice_id: orderId })
         .eq("id", booking.id)
 
-      if (payment) {
+      if (paymentId) {
         await admin
           .from("payments")
           .update({ gateway_reference: orderId })
-          .eq("id", payment.id)
+          .eq("id", paymentId)
       }
     } catch (serr: any) {
       console.error("Midtrans Snap error:", serr.message)

@@ -50,19 +50,15 @@ export async function POST(request: NextRequest) {
 
     const orderId = `booking-remaining-${bookingId}`
 
-    // Pastikan record transaksi (payments) untuk pelunasan ini
-    const { data: payment } = await admin
-      .from("payments")
-      .insert({
-        booking_id: bookingId,
-        tenant_id: booking.tenant_id,
-        status: "pending",
-        payment_gateway: "midtrans",
-        amount: remaining,
-        currency: "IDR",
-      })
-      .select("id")
-      .single()
+    // Pastikan record transaksi (payments) untuk pelunasan ini — booking_id diisi otomatis oleh database
+    const { data: paymentId } = await admin.rpc("create_payment", {
+      p_booking_id: bookingId,
+      p_tenant_id: booking.tenant_id,
+      p_status: "pending",
+      p_gateway: "midtrans",
+      p_amount: remaining,
+      p_currency: "IDR",
+    })
 
     // Midtrans Snap untuk pelunasan sisa
     let snap: { token: string; redirect_url: string } | null = null
@@ -83,11 +79,11 @@ export async function POST(request: NextRequest) {
         .update({ gateway_invoice_id: orderId })
         .eq("id", bookingId)
 
-      if (payment) {
+      if (paymentId) {
         await admin
           .from("payments")
           .update({ gateway_reference: orderId })
-          .eq("id", payment.id)
+          .eq("id", paymentId)
       }
     } catch (merr: any) {
       console.error("Midtrans Snap remaining error:", merr.message)
