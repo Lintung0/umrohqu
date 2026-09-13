@@ -332,6 +332,13 @@
 .dark .border-emerald-300 {
   border-color: color-mix(in oklab, var(--primary) 30%, transparent);
 }
+.dark .border-emerald-50,
+.dark .border-slate-50,
+.dark .border-gray-50,
+.dark .border-zinc-50,
+.dark .border-neutral-50 {
+  border-color: color-mix(in oklab, var(--primary) 22%, transparent);
+}
 .dark .divide-gray-200,
 .dark .divide-gray-300,
 .dark .divide-slate-200,

@@ -204,7 +204,7 @@ const Navbar = () => {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
                     <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-2xl shadow-xl shadow-emerald-900/10 z-50 py-2 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-emerald-50 bg-gradient-to-br from-emerald-50/80 to-white">
+                      <div className="px-4 py-3 border-b border-emerald-50 bg-gradient-to-br from-emerald-50/80 to-white dark:border-emerald-500/20 dark:from-emerald-500/10 dark:to-card">
                         <p className="font-semibold text-sm text-slate-900 truncate">{user.user_metadata?.full_name || "User"}</p>
                         <p className="text-xs text-slate-500 truncate">{user.email}</p>
                       </div>
