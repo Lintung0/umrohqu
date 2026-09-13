@@ -475,7 +475,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         </div>
 
                         {/* Timeline */}
-                        <div className="relative ml-5 border-l-2 border-emerald-200 space-y-0">
+                        <div className="relative ml-5 pr-2 sm:pr-3 border-l-2 border-emerald-200 space-y-0">
                           {itineraryList.map((item, idx) => {
                             const isOpen = expandedItinerary === idx
                             const isLast = idx === itineraryList.length - 1
@@ -522,7 +522,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
                                   {/* Expandable description */}
                                   <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-3" : "max-h-0"}`}>
-                                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line border-t border-emerald-100 pt-3">
+                                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line break-words border-t border-emerald-100 pt-3">
                                       {item.description || ""}
                                     </p>
                                   </div>
