@@ -11,7 +11,7 @@ import Logo from "@/components/logo"
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Ringkasan", icon: LayoutDashboard },
-  { href: "/dashboard/bookings", label: "Pesan Saya", icon: BookOpen },
+  { href: "/dashboard/bookings", label: "Pesanan Saya", icon: BookOpen },
   { href: "/dashboard/wishlist", label: "Daftar Keinginan", icon: Heart },
   { href: "/dashboard/data-diri", label: "Data Diri", icon: UserRound },
   { href: "/dashboard/notifications", label: "Notifikasi", icon: Bell },
