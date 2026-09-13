@@ -12,7 +12,7 @@ export default function TravelDetailLoading() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
               <div className="h-48 bg-slate-100 animate-pulse" />

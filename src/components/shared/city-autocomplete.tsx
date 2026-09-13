@@ -141,7 +141,7 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
       </div>
 
       {open && suggestions.length > 0 && (
-        <ul className={`absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-lg border shadow-lg ${hasCustomStyle ? "border-white/20 bg-zinc-900" : "border-border bg-background"}`}>
+        <ul className={`absolute left-0 right-0 top-full z-50 mt-1 max-h-[60vh] md:max-h-56 overflow-auto rounded-lg border shadow-lg ${hasCustomStyle ? "border-white/20 bg-zinc-900" : "border-border bg-background"}`}>
           {suggestions.map((s, i) => (
             <li
               key={i}

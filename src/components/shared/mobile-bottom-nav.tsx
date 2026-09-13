@@ -45,7 +45,7 @@ export default function MobileBottomNav() {
                   {compareCount}
                 </span>
               )}
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[11px] font-medium">{item.label}</span>
             </Link>
           )
         })}
