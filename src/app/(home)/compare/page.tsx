@@ -7,7 +7,6 @@ import Image from "next/image"
 import { X, Check, Minus, Scale, Award, Sparkles, TrendingDown, Star, Plus, Search, Loader2, Heart, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
@@ -181,95 +180,113 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
   )
 }
 
-function MobileCompareSlide({ pkg, index, scores, maxScore, rowHighlights, removeFromCompare }: {
-  pkg: Package; index: number; scores: ReturnType<typeof calcScore>[]; maxScore: number;
+const PKG_PALETTE = [
+  { chip: "bg-emerald-600", border: "border-emerald-500" },
+  { chip: "bg-amber-600", border: "border-amber-500" },
+  { chip: "bg-purple-600", border: "border-purple-500" },
+]
+
+function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCompare, onOpenPicker }: {
+  pkgs: Package[]; scores: ReturnType<typeof calcScore>[]; maxScore: number;
   rowHighlights: Record<string, ("best" | "worst" | undefined)[][]>;
-  removeFromCompare: (id: string) => void;
+  removeFromCompare: (id: string) => void; onOpenPicker: () => void;
 }) {
-  const isBest = scores.length > 1 && scores[index].valueScore === maxScore && maxScore > 0
-  const facilities = getFacilitiesList(pkg.facilities)
+  const isBest = (i: number) => pkgs.length > 1 && scores[i].valueScore === maxScore && maxScore > 0
+  const emptySlots = MAX_COMPARE - pkgs.length
+  const letter = (i: number) => String.fromCharCode(65 + i)
 
   return (
-    <div className="bg-white border-2 rounded-2xl overflow-hidden shadow-md mx-1">
-<div className="relative h-40">
-          {isBest && <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 z-10" />}
-          <Link href={`/package/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
-            <Image
-              src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
-              alt={pkg.name || "Paket"} fill className="object-cover transition-transform duration-300 hover:scale-105"
-            />
-          </Link>
-          <button
-          onClick={() => removeFromCompare(pkg.id)}
-          className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
-        <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-          <PackageStatusBadge status={pkg.status} />
-          {isBest && (
-            <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md shadow-amber-500/40 flex items-center gap-1">
-              <Award className="w-3 h-3" /> Pilihan Terbaik
-            </div>
-          )}
-        </div>
-        <CompareFloatingActions pkg={pkg} />
-      </div>
-      <div className="p-4">
-        <p className="text-sm font-semibold leading-snug line-clamp-2">{pkg.name}</p>
-        <div className="text-xs text-muted-foreground mt-1">
-          Rp {Math.round(scores[index].pricePerDay / 1000)}rb / hari
-        </div>
-        <SmartBadges scores={scores} index={index} />
-      </div>
-      <div className="px-4 pb-2">
-        <div className="border-t border-border pt-3 space-y-2.5">
-          {ROW_LABELS.map((row, idx) => {
-            const hl = rowHighlights[row.key]?.[0]?.[index]
+    <div className="space-y-3">
+      {/* Sticky summary: semua paket selalu terlihat tanpa geser */}
+      <div className="sticky top-16 z-30 -mx-4 px-4 py-2.5 bg-background/95 backdrop-blur-md border-b border-border/70 shadow-sm">
+        <div className="flex gap-2">
+          {pkgs.map((pkg, i) => {
+            const pal = PKG_PALETTE[i] || PKG_PALETTE[0]
             return (
-              <div key={row.key} className={`grid grid-cols-[88px_1fr] gap-2 py-1.5 ${idx % 2 === 0 ? "bg-muted/30 -mx-2 px-2 rounded-lg" : ""}`}>
-                <span className="text-[11px] font-semibold text-muted-foreground">{row.label}</span>
-                <div className="text-[13px]">
-                  {row.key === "facilities" ? (
-                    facilities.length > 0
-                      ? <div className="flex flex-wrap gap-1">{facilities.map((f, i) => <span key={i} className="inline-flex items-center gap-1 text-[11px]"><Check className="w-2.5 h-2.5 text-primary shrink-0" />{f}</span>)}</div>
-                      : <span className="text-muted-foreground">-</span>
-                  ) : (
-                    renderValue(row.key, pkg, hl)
+              <div key={pkg.id} className={`relative flex-1 min-w-0 rounded-xl border-2 overflow-hidden ${isBest(i) ? pal.border : "border-border/70"}`}>
+                <div className="relative h-12">
+                  <Link href={`/package/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
+                    <Image
+                      src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
+                      alt={pkg.name || "Paket"} fill className="object-cover"
+                    />
+                  </Link>
+                  {isBest(i) && (
+                    <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400" />
                   )}
+                  <button
+                    onClick={() => removeFromCompare(pkg.id)}
+                    aria-label={`Hapus ${pkg.name || "paket"} dari perbandingan`}
+                    className="absolute top-1 right-1 w-5 h-5 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm text-gray-600"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="px-1.5 py-1.5">
+                  <p className="text-[10px] font-semibold truncate">{pkg.name}</p>
+                  <p className="text-[11px] font-bold text-primary">{formatRupiah(Number(pkg.price) || 0)}</p>
                 </div>
               </div>
             )
           })}
+          {emptySlots > 0 && (
+            <button
+              onClick={onOpenPicker}
+              className="flex-1 h-[70px] rounded-xl border-2 border-dashed border-emerald-400/60 flex flex-col items-center justify-center gap-0.5 text-emerald-700 hover:bg-emerald-50 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-[10px] font-semibold">Tambah</span>
+            </button>
+          )}
         </div>
+        <p className="text-center text-[10px] text-muted-foreground mt-1.5">Scroll ke bawah untuk membandingkan tiap aspek</p>
       </div>
-      <div className="px-4 pb-4 pt-2 border-t border-border">
-        <Link href={`/package/${pkg.slug}`}>
-          <Button className="w-full text-xs h-9 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white shadow-md shadow-emerald-600/25">Pilih Paket Ini</Button>
-        </Link>
-      </div>
-    </div>
-  )
-}
 
-function MobileDotIndicator({ total, api }: { total: number; api: CarouselApi }) {
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  useEffect(() => {
-    if (!api) return
-    const onSelect = () => setSelectedIndex(api.selectedScrollSnap())
-    api.on("select", onSelect)
-    onSelect()
-    return () => { api.off("select", onSelect) }
-  }, [api])
-  if (total <= 1) return null
-  return (
-    <div className="flex items-center justify-center gap-1.5 mt-3">
-      {Array.from({ length: total }).map((_, i) => (
-        <button
-          key={i} onClick={() => api?.scrollTo(i)}
-          className={`rounded-full transition-all duration-200 ${i === selectedIndex ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-muted-foreground/30"}`}
-        />
-      ))}
+      {/* Per atribut: nilai semua paket bertumpuk */}
+      <div className="space-y-2">
+        {ROW_LABELS.map((row, idx) => (
+          <div key={row.key} className={`rounded-2xl border border-border/60 p-3 ${idx % 2 === 0 ? "bg-muted/30" : "bg-card"}`}>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">{row.label}</p>
+            <div className="space-y-1">
+              {pkgs.map((pkg, i) => {
+                const pal = PKG_PALETTE[i] || PKG_PALETTE[0]
+                const hl = rowHighlights[row.key]?.[0]?.[i]
+                return (
+                  <div key={pkg.id} className="flex items-start gap-2">
+                    <span className={`mt-0.5 w-5 h-5 shrink-0 rounded-md ${pal.chip} text-white text-[10px] font-bold flex items-center justify-center`}>
+                      {letter(i)}
+                    </span>
+                    <div className="flex-1 min-w-0 text-[13px]">{renderValue(row.key, pkg, hl)}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Ringkasan pilihan */}
+      <div className="grid gap-2">
+        {pkgs.map((pkg, i) => {
+          const pal = PKG_PALETTE[i] || PKG_PALETTE[0]
+          return (
+            <div key={pkg.id} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-3">
+              <span className={`w-5 h-5 shrink-0 rounded-md ${pal.chip} text-white text-[10px] font-bold flex items-center justify-center`}>
+                {letter(i)}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold truncate">{pkg.name}</p>
+                <p className="text-[11px] text-muted-foreground">{formatRupiah(Number(pkg.price) || 0)} · {pkg.duration_nights || "-"} Hari</p>
+              </div>
+              <Link href={`/package/${pkg.slug}`}>
+                <Button className="h-9 text-xs px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white shadow-md shadow-emerald-600/25">
+                  Pilih Ini
+                </Button>
+              </Link>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -547,9 +564,6 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
     return lines
   }, [comparePackages, scores])
 
-  const emptySlots = MAX_COMPARE - comparePackages.length
-  const [carouselApi, setCarouselApi] = useState<CarouselApi>(undefined)
-
   if (comparePackages.length === 0) {
     return (
       <div className="text-center py-6">
@@ -604,35 +618,13 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
         </div>
       )}
 
-      {/* MOBILE: Carousel view */}
+      {/* MOBILE: Daftar atribut vertikal (tanpa geser) */}
       <div className="block sm:hidden">
-        <Carousel opts={{ loop: false, align: "start" }} setApi={setCarouselApi}>
-          <CarouselContent>
-            {comparePackages.map((pkg, i) => (
-              <CarouselItem key={pkg.id}>
-                <MobileCompareSlide
-                  pkg={pkg} index={i} scores={scores} maxScore={maxScore}
-                  rowHighlights={rowHighlights} removeFromCompare={removeFromCompare}
-                />
-              </CarouselItem>
-            ))}
-            {emptySlots > 0 && (
-              <CarouselItem>
-                <button
-                  onClick={onOpenPicker}
-                  className="group w-full min-h-[320px] rounded-2xl border-2 border-dashed border-emerald-300/70 bg-white flex flex-col items-center justify-center gap-2 text-emerald-700 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-100 transition-all duration-300"
-                >
-                  <span className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                    <Plus className="w-7 h-7" />
-                  </span>
-                  <span className="text-sm font-semibold">Tambah Paket</span>
-                  <span className="text-xs text-muted-foreground">pilih dari daftar paket</span>
-                </button>
-              </CarouselItem>
-            )}
-          </CarouselContent>
-        </Carousel>
-        <MobileDotIndicator total={comparePackages.length + (emptySlots > 0 ? 1 : 0)} api={carouselApi} />
+        <MobileCompareList
+          pkgs={comparePackages} scores={scores} maxScore={maxScore}
+          rowHighlights={rowHighlights} removeFromCompare={removeFromCompare}
+          onOpenPicker={onOpenPicker}
+        />
       </div>
 
       {/* DESKTOP: Grid table view */}
