@@ -151,9 +151,7 @@ export default function Home() {
 
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 mt-8 sm:mt-10 text-xs text-emerald-100/70">
             <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>200+ PPIU Resmi</span>
-            <span className="w-px h-3 bg-emerald-500/40" />
             <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" /></span>500+ Paket Umroh</span>
-            <span className="w-px h-3 bg-emerald-500/40" />
             <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>50.000+ Jamaah</span>
           </div>
         </div>
