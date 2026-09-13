@@ -583,8 +583,8 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
   return (
     <div className="pb-4">
       {insightLines.length > 0 && (
-        <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 mb-6 border border-white/60 bg-white/45 backdrop-blur-xl shadow-sm shadow-emerald-900/5"
-          style={{ backgroundImage: "linear-gradient(135deg, rgba(209,250,229,0.35), rgba(255,255,255,0.55))" }}>
+        <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 mb-6 border border-white/60 bg-white/45 backdrop-blur-xl shadow-sm shadow-emerald-900/5 dark:border-emerald-400/20 dark:bg-emerald-950/30"
+          style={{ backgroundImage: "var(--insight-card-bg)" }}>
           <div className="absolute inset-0 opacity-[0.05]"
             style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)", backgroundSize: "16px 16px" }}
             aria-hidden="true" />
@@ -592,11 +592,11 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
             <span className="w-8 h-8 rounded-lg bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-emerald-600" />
             </span>
-            <span className="text-sm font-bold text-zinc-800">Perbandingan Cerdas</span>
+            <span className="text-sm font-bold text-zinc-800 dark:text-zinc-50">Perbandingan Cerdas</span>
           </div>
           <ul className="relative space-y-1.5 mt-2">
             {insightLines.map((line, i) => (
-              <li key={i} className="text-xs leading-relaxed text-zinc-600 flex items-start gap-2">
+              <li key={i} className="text-xs leading-relaxed text-zinc-600 dark:text-emerald-100/80 flex items-start gap-2">
                 <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />{line}
               </li>
             ))}
@@ -771,12 +771,12 @@ function CompareContent() {
 
   return (
     <main className="min-h-screen bg-zinc-50/50">
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/60 to-emerald-100/40 border-b border-emerald-100/60 px-4 sm:px-6 py-6 sm:py-8">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-200/20 blur-3xl" aria-hidden />
-        <div className="absolute -bottom-20 -left-16 w-72 h-72 rounded-full bg-amber-100/30 blur-3xl" aria-hidden />
+      <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/60 to-emerald-100/40 border-b border-emerald-100/60 dark:from-card dark:via-emerald-500/10 dark:to-emerald-500/5 dark:border-emerald-500/20 px-4 sm:px-6 py-6 sm:py-8">
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-200/20 dark:bg-emerald-500/10 blur-3xl" aria-hidden />
+        <div className="absolute -bottom-20 -left-16 w-72 h-72 rounded-full bg-amber-100/30 dark:bg-amber-400/10 blur-3xl" aria-hidden />
         <div className="relative max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
-            <span className="w-11 h-11 rounded-2xl bg-white border border-emerald-200/70 flex items-center justify-center shadow-sm">
+            <span className="w-11 h-11 rounded-2xl bg-white dark:bg-emerald-900/50 border border-emerald-200/70 dark:border-emerald-400/30 flex items-center justify-center shadow-sm">
               <Scale className="w-5 h-5 text-emerald-600" />
             </span>
             <div>
