@@ -93,13 +93,10 @@ function LoginForm() {
 
   return (
     <>
-      <div className="mb-8">
+      <div className="mb-[12px]">
         <h1 className="m-0 text-[26px] font-bold leading-tight tracking-tight text-auth-foreground">
           {t.auth.login_title}
         </h1>
-        <p className="m-0 mt-2 text-[16px] leading-relaxed text-auth-muted-foreground">
-          {t.auth.login_subtitle}
-        </p>
       </div>
 
       {authError && (
