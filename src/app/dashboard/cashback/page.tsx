@@ -165,7 +165,7 @@ export default function CashbackPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Pencairan Cashback</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mt-1">
           Ajukan pencairan cashback dari paket umroh yang sudah kamu konfirmasi atau selesaikan.
         </p>
       </div>
@@ -180,8 +180,8 @@ export default function CashbackPage() {
                 : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
           }`}
         >
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
+          <div className="flex items-start gap-3.5">
+            <ShieldCheck className="mt-1 h-5 w-5 shrink-0" />
             <div>
               <p className="font-semibold">
                 {latestNotice.claim.status === "rejected"
@@ -192,7 +192,7 @@ export default function CashbackPage() {
                       ? "Cashback disetujui — siap dicairkan"
                       : "Pengajuan cashback menunggu review"}
               </p>
-              <p className="mt-0.5">
+              <p className="mt-1.5">
                 {latestNotice.claim.status === "rejected"
                   ? latestNotice.claim.failure_reason || "Silakan hubungi admin untuk detail alasan."
                   : latestNotice.claim.status === "paid"
@@ -213,30 +213,30 @@ export default function CashbackPage() {
           { label: "Disetujui", value: `${totals.approved || 0} pengajuan`, sub: "", icon: CheckCircle2 },
           { label: "Sudah Dicairkan", value: `${totals.paid || 0} pengajuan`, sub: "", icon: Wallet },
         ].map((st) => (
-          <div key={st.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <div key={st.label} className="rounded-xl border border-border bg-card p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-muted-foreground">{st.label}</p>
               <st.icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <p className="mt-1 text-xl font-bold">{st.value}</p>
-            {st.sub ? <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{st.sub}</p> : null}
+            <p className="mt-2 text-2xl font-bold">{st.value}</p>
+            {st.sub ? <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">{st.sub}</p> : null}
           </div>
         ))}
       </div>
 
       <section className="rounded-xl border border-border bg-card shadow-sm">
-        <div className="border-b border-border px-5 py-4">
+        <div className="border-b border-border px-6 py-5">
           <h2 className="font-semibold">Pesanan dengan Cashback</h2>
         </div>
         {rows.length === 0 ? (
-          <div className="px-5 py-12 text-center text-muted-foreground">
+          <div className="px-6 py-12 text-center text-muted-foreground">
             <Banknote className="mx-auto mb-2 h-8 w-8 opacity-50" />
             Belum ada pesanan yang berhak atas cashback. Pesan paket dengan badge Cashback untuk mulai.
           </div>
         ) : (
           <div className="divide-y divide-border">
             {rows.map((row) => (
-              <div key={row.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div key={row.id} className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <Link
                     href={`/package/${row.package_slug}`}
@@ -244,12 +244,12 @@ export default function CashbackPage() {
                   >
                     {row.package_name}
                   </Link>
-                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     {formatRupiah(row.cashback_amount)} cashback · dibuat{" "}
                     {new Date(row.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
                   {row.claim && (
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
                       <StatusBadge status={row.claim.status} />
                       {row.claim.status === "rejected" && row.claim.failure_reason && (
                         <span className="text-xs text-muted-foreground">Alasan: {row.claim.failure_reason}</span>
