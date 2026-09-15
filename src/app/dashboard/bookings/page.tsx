@@ -114,7 +114,6 @@ export default function BookingsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{t("booking.title")}</h1>
-        <p className="text-muted-foreground mt-1">Lacak semua pemesanan paket umroh Anda</p>
       </div>
 
       {/* Ringkasan Statistik */}

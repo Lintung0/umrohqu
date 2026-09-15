@@ -178,16 +178,16 @@ export default function DashboardOverview() {
 
       {/* Recent Bookings */}
       <div className="bg-white border border-border rounded-xl shadow-sm">
-        <div className="flex items-center justify-between p-5 pb-0">
+        <div className="flex items-center justify-between p-6 pb-0">
           <div>
             <h2 className="font-semibold">Pesan Terakhir</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">Aktivitas booking terbaru Anda</p>
+            <p className="text-sm text-muted-foreground mt-1">Aktivitas booking terbaru Anda</p>
           </div>
           <Link href="/dashboard/bookings" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
             Lihat Semua <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="p-5 pt-3">
+        <div className="p-6 pt-4">
           {recentBookings.length === 0 ? (
             <div className="text-center py-10">
               <Clock className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
@@ -202,19 +202,19 @@ export default function DashboardOverview() {
                 <Link
                   key={booking.id}
                   href={`/dashboard/bookings/${booking.id}`}
-                  className="flex items-center gap-4 py-3 first:pt-0 last:pb-0 hover:bg-muted/50 -mx-2 px-2 rounded-lg transition-colors"
+                  className="flex items-center gap-4 py-4 first:pt-0 last:pb-0 hover:bg-muted/50 -mx-2 px-2 rounded-lg transition-colors"
                 >
                   <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
                     <BookOpen className="w-4 h-4 text-emerald-600" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 space-y-1">
                     <p className="text-sm font-medium truncate">{booking.package?.name || "Paket Umroh"}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(booking.status, "booking")}`}>
+                    <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-medium ${getStatusColor(booking.status, "booking")}`}>
                       {getStatusLabel(booking.status, "booking")}
                     </span>
                   </div>
