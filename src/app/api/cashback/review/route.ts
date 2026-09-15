@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { createNotification } from "@/lib/notify/create-notification"
+import { isIrisEnabled } from "@/lib/services/midtrans"
 import { z } from "zod"
 
 const schema = z.object({
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const { data: claim } = await admin
       .from("cashbacks")
-      .select("id, jamaah_id, amount, status, account_number, account_holder_name")
+      .select("id, jamaah_id, amount, status, bank_code, account_number, account_holder_name")
       .eq("id", id)
       .single()
 
@@ -71,12 +72,43 @@ export async function POST(request: NextRequest) {
       if (claim.status !== "approved") {
         return NextResponse.json({ error: "Cashback harus disetujui terlebih dahulu" }, { status: 400 })
       }
-      update = {
-        status: "paid",
-        iris_reference_no: `IRIS-${Date.now().toString().slice(-10)}`,
-        iris_payout_status: "completed",
-        disbursed_at: now,
+      if (isIrisEnabled()) {
+        try {
+          const { createIrisPayout } = await import("@/lib/services/midtrans")
+          const payout = await createIrisPayout({
+            referenceNo: `BKG-CB-${claim.id.slice(0, 8).toUpperCase()}`,
+            bankCode: claim.bank_code,
+            accountNumber: claim.account_number,
+            accountHolderName: claim.account_holder_name,
+            amount: Number(claim.amount),
+            note: "Pencairan cashback UmrahQu",
+          })
+          update = {
+            status: "paid",
+            iris_reference_no: payout.reference_no,
+            iris_payout_status: payout.status,
+            disbursed_at: now,
+            failure_reason: null,
+          }
+        } catch (irisErr) {
+          update = {
+            status: "approved",
+            failure_reason: irisErr instanceof Error ? irisErr.message : "Gagal mengirim via IRIS",
+          }
+        }
+      } else {
+        // Tanpa MIDTRANS_IRIS_ENABLED: catat manual (placeholder ref)
+        update = {
+          status: "paid",
+          iris_reference_no: `IRIS-DEV-${Date.now().toString().slice(-10)}`,
+          iris_payout_status: "completed",
+          disbursed_at: now,
+          failure_reason: null,
+        }
       }
+    }
+
+    if (update.status === "paid") {
       const last4 = claim.account_number?.slice(-4) || "****"
       title = "Cashback Dicairkan"
       message = `Cashback ${formatRupiah(Number(claim.amount))} sudah dikirim ke rekening ****${last4} atas nama ${claim.account_holder_name || "-"}.`
@@ -92,15 +124,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    await createNotification({
-      userId: claim.jamaah_id as string,
-      title,
-      body: message,
-      templateKey,
-      linkUrl: "/dashboard/cashback",
-    })
+    if (title && message) {
+      await createNotification({
+        userId: claim.jamaah_id as string,
+        title,
+        body: message,
+        templateKey,
+        linkUrl: "/dashboard/cashback",
+      })
+    }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      status: update.status,
+      message: update.status === "approved"
+        ? "IRIS gagal mengirim payout; status tetap approved dan alasan tercatat."
+        : undefined,
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Terjadi kesalahan server"
     return NextResponse.json({ error: message }, { status: 500 })

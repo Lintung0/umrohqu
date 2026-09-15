@@ -110,3 +110,95 @@ export function stablePaymentType(raw: string): string {
   // e-wallets / others
   return raw.toLowerCase()
 }
+
+// ---------- IRIS Payouts (disbursement) ----------
+// Diaktifkan via env MIDTRANS_IRIS_ENABLED=true. Tanpa env tersebut,
+// pencairan dicatat manual (placeholder ref, tidak memanggil API eksternal).
+
+const MIDTRANS_IRIS_ENABLED = process.env.MIDTRANS_IRIS_ENABLED === "true"
+
+const IRIS_BANK_MAP: Record<string, string> = {
+  "014": "bca",
+  "008": "mandiri",
+  "002": "bri",
+  "009": "bni",
+  "451": "bsi",
+  "013": "permata",
+  "022": "cimbniaga",
+  "200": "btn",
+  "011": "danamon",
+  "016": "maybank",
+}
+
+export function isIrisEnabled(): boolean {
+  return MIDTRANS_IRIS_ENABLED && Boolean(MIDTRANS_SERVER_KEY)
+}
+
+export function irisBankCode(bankCode: string): string {
+  const code = IRIS_BANK_MAP[bankCode]
+  if (!code) throw new Error(`Kode bank ${bankCode} belum terdaftar untuk IRIS`)
+  return code
+}
+
+async function getIrisAccessToken(): Promise<string> {
+  const res = await fetch(`${baseUrl()}/iris/api/v1/access-token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: authHeader(),
+    },
+    body: JSON.stringify({ grant_type: "client_credentials" }),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`IRIS access token failed: ${text}`)
+  }
+  const json = await res.json()
+  return json.access_token as string
+}
+
+export interface IrisPayoutResult {
+  id: string
+  reference_no: string
+  status: string
+}
+
+export async function createIrisPayout(params: {
+  referenceNo: string
+  bankCode: string
+  accountNumber: string
+  accountHolderName: string
+  amount: number
+  note?: string
+}): Promise<IrisPayoutResult> {
+  const token = await getIrisAccessToken()
+  const res = await fetch(`${baseUrl()}/iris/api/v1/payouts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      reference_no: params.referenceNo,
+      disbursement_type: "cashout",
+      beneficiary_bank: irisBankCode(params.bankCode),
+      beneficiary_account: params.accountNumber,
+      beneficiary_name: params.accountHolderName,
+      amount: Math.round(params.amount),
+      notes: params.note || "Pencairan cashback UmrahQu",
+    }),
+  })
+
+  const json = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(`IRIS payout failed: ${JSON.stringify(json || res.status)}`)
+  }
+
+  return {
+    id: String(json.id || ""),
+    reference_no: String(json.reference_no || params.referenceNo),
+    status: String(json.status || "pending"),
+  }
+}

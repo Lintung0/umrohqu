@@ -171,6 +171,9 @@ export default function CashbackRequestsPage() {
                       {r.status === "rejected" && r.failure_reason && (
                         <p className="text-xs text-rose-600 dark:text-rose-400">Alasan: {r.failure_reason}</p>
                       )}
+                      {r.status === "approved" && r.failure_reason && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400">Gagal IRIS: {r.failure_reason}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${meta?.cls || ""}`}>

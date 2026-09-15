@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     // 1. Get package (harga SELALU dari database, bukan dari client)
     const { data: pkg, error: pkgErr } = await admin
       .from("packages")
-      .select("id, tenant_id, name, price, quota, quota_taken, slug")
+      .select("id, tenant_id, name, price, quota, quota_taken, slug, cashback_amount")
       .eq("id", packageId)
       .in("status", ["active", "ongoing"])
       .is("deleted_at", null)
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
         remaining_amount: paymentType === "dp" ? remainingAmount : 0,
         remaining_due_date: remainingDueDate,
         booking_source: feeChannel,
+        cashback_amount: Number(pkg.cashback_amount || 0),
         notes: notes || null,
       })
       .select("id, booking_code")

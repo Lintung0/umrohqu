@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, customer_id, package:packages(id, name, cashback_amount)")
+      .select("id, status, customer_id, cashback_amount")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -37,8 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 
-    const pkg = Array.isArray(booking.package) ? booking.package[0] : booking.package
-    const cashbackAmount = Number(pkg?.cashback_amount || 0)
+    const cashbackAmount = Number(booking.cashback_amount || 0)
     if (cashbackAmount <= 0) {
       return NextResponse.json({ error: "Paket ini tidak memiliki cashback" }, { status: 400 })
     }

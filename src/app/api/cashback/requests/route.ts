@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     const { data: bookings, error: bookingErr } = await admin
       .from("bookings")
-      .select("id, status, created_at, package:packages(name, slug, cashback_amount)")
+      .select("id, status, created_at, cashback_amount, package:packages(name, slug)")
       .eq("customer_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50)
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     const eligible = (bookings || [])
       .map((b: any) => {
         const pkg = Array.isArray(b.package) ? b.package[0] : b.package
-        const cashbackAmount = Number(pkg?.cashback_amount || 0)
+        const cashbackAmount = Number(b.cashback_amount || 0)
         return {
           id: b.id,
           package_name: pkg?.name || "Paket",
