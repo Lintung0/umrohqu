@@ -763,21 +763,23 @@ function CompareContent() {
 
   return (
     <main className="min-h-screen bg-zinc-50/50">
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/60 to-emerald-100/40 border-b border-emerald-100/60 dark:from-card dark:via-emerald-500/10 dark:to-emerald-500/5 dark:border-emerald-500/20 px-4 sm:px-6 py-6 sm:py-8">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-200/20 dark:bg-emerald-500/10 blur-3xl" aria-hidden />
-        <div className="absolute -bottom-20 -left-16 w-72 h-72 rounded-full bg-amber-100/30 dark:bg-amber-400/10 blur-3xl" aria-hidden />
-        <div className="relative max-w-6xl mx-auto">
-          <div className="flex items-center gap-3">
-            <span className="w-11 h-11 rounded-2xl bg-white dark:bg-emerald-900/50 border border-emerald-200/70 dark:border-emerald-400/30 flex items-center justify-center shadow-sm">
-              <Scale className="w-5 h-5 text-emerald-600" />
-            </span>
-            <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-zinc-900 tracking-tight">Bandingkan Paket</h1>
-              <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>
+      {compareCount > 0 && (
+        <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/60 to-emerald-100/40 border-b border-emerald-100/60 dark:from-card dark:via-emerald-500/10 dark:to-emerald-500/5 dark:border-emerald-500/20 px-4 sm:px-6 py-6 sm:py-8">
+          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-200/20 dark:bg-emerald-500/10 blur-3xl" aria-hidden />
+          <div className="absolute -bottom-20 -left-16 w-72 h-72 rounded-full bg-amber-100/30 dark:bg-amber-400/10 blur-3xl" aria-hidden />
+          <div className="relative max-w-6xl mx-auto">
+            <div className="flex items-center gap-3">
+              <span className="w-11 h-11 rounded-2xl bg-white dark:bg-emerald-900/50 border border-emerald-200/70 dark:border-emerald-400/30 flex items-center justify-center shadow-sm">
+                <Scale className="w-5 h-5 text-emerald-600" />
+              </span>
+              <div>
+                <h1 className="text-lg sm:text-2xl font-bold text-zinc-900 tracking-tight">Bandingkan Paket</h1>
+                <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         {compareCount > 0 && (

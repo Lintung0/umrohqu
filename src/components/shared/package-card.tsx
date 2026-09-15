@@ -231,7 +231,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         </div>
 
         <div className="flex flex-col flex-1 p-3.5">
-          <h3 className="font-semibold text-xl leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 mb-3 min-h-[3.5rem]">
+          <h3 title={pkg.name} className="font-semibold text-xl leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-1 mb-[1.375em]">
             {pkg.name}
           </h3>
 
@@ -380,7 +380,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
           <div className="flex-1 p-4 flex flex-col justify-between">
             <div>
-              <h3 className="font-semibold text-xl leading-snug group-hover:text-emerald-700 transition-colors mb-2 line-clamp-2 min-h-[3.5rem]">{pkg.name}</h3>
+              <h3 title={pkg.name} className="font-semibold text-xl leading-snug group-hover:text-emerald-700 transition-colors line-clamp-1 mb-[1.375em]">{pkg.name}</h3>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 mb-2">
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
