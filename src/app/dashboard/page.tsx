@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { BookOpen, Heart, Package, Clock, Search, ChevronRight, Calendar, Bell, User } from "lucide-react"
+import { BookOpen, Heart, Package, Clock, Search, ChevronRight, Calendar, Bell, UserRound } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
 import { getStatusColor, getStatusLabel, formatRupiah } from "@/lib/constants"
 
@@ -165,7 +165,7 @@ export default function DashboardOverview() {
         >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0 group-hover:bg-sky-200 transition-colors">
-              <User className="w-5 h-5 text-sky-600" />
+              <UserRound className="w-5 h-5 text-sky-600" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm">Data Diri</p>
