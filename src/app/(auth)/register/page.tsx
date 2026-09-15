@@ -3,7 +3,6 @@
 import { useState } from "react"
 import Link from "next/link"
 import { User, Mail, AlertCircle } from "lucide-react"
-import { Logo } from "@/components/auth/logo"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { Divider } from "@/components/auth/divider"
@@ -100,10 +99,6 @@ export default function RegisterPage() {
 
   return (
     <>
-      <div className="mb-7">
-        <Logo />
-      </div>
-
       <div className="mb-7">
         <h1 className="m-0 text-[26px] font-bold leading-tight tracking-tight text-auth-foreground">
           {t.auth.register_title}

@@ -127,11 +127,6 @@ const Footer = () => {
             <p className="text-xs text-white/25">
               &copy; 2026 UmrahQu — PT. Universal Big Data. {t.footer.rights}
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              <span className="text-xs text-white/25">
-                {t.footer.made_with} <span className="text-amber-400">&hearts;</span> {t.footer.for_umrah}
-              </span>
-            </div>
           </div>
         </div>
       </div>

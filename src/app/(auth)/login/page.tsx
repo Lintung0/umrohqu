@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Logo } from "@/components/auth/logo"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { Divider } from "@/components/auth/divider"
@@ -94,10 +93,6 @@ function LoginForm() {
 
   return (
     <>
-      <div className="mb-8">
-        <Logo />
-      </div>
-
       <div className="mb-8">
         <h1 className="m-0 text-[26px] font-bold leading-tight tracking-tight text-auth-foreground">
           {t.auth.login_title}
