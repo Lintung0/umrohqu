@@ -233,9 +233,7 @@ export default function SettingsPage() {
           <h2 className="font-semibold flex items-center gap-2">
             <Palette className="w-4 h-4 text-emerald-600" /> Tampilan Aplikasi
           </h2>
-          <p className="text-xs text-muted-foreground mt-1 mb-6">
-            Ketuk pemandangan berikut untuk berganti antara siang dan malam
-          </p>
+          <div className="mb-6" />
 
           <button
             type="button"
