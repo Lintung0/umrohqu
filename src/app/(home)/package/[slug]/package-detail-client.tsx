@@ -848,12 +848,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     {/* Realtime stats */}
                     {displayPkg.status === "ongoing" && (
                       <div className="relative mt-4 pt-3.5 border-t border-white/10">
-                        <div className="flex items-center justify-between text-[11px] text-emerald-100/80 mb-1.5">
+                        <div className="flex items-center text-[11px] text-emerald-100/80 mb-1.5">
                           <span className="inline-flex items-center gap-1.5">
                             <Users className="w-3.5 h-3.5 text-amber-300" />
                             {departedCount} dari {displayPkg.quota} jamaah berangkat
                           </span>
-                          <span className="font-bold text-amber-300">{currentAvailable} kursi tersisa</span>
                         </div>
                         <div className="h-1.5 bg-white/15 rounded-full overflow-hidden">
                           <div
