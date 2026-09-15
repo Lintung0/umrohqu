@@ -162,12 +162,9 @@ export default function CashbackPage() {
   const totalClaimable = rows.filter((r) => r.claim === null).reduce((s, r) => s + r.cashback_amount, 0)
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Pencairan Cashback</h1>
-        <p className="text-muted-foreground mt-1">
-          Ajukan pencairan cashback dari paket umroh yang sudah kamu konfirmasi atau selesaikan.
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight">Pencairan cashback</h1>
       </div>
 
       {latestNotice?.claim && (
