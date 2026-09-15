@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
         booking_source: feeChannel,
         notes: notes || null,
       })
-      .select("id")
+      .select("id, booking_code")
       .single()
 
     if (insertErr) {
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
     let snap: { token: string; redirect_url: string } | null = null
     try {
       const { createSnapTransaction } = await import("@/lib/services/midtrans")
-      const orderId = `booking-${booking.id}`
+      const orderId = booking.booking_code || `booking-${booking.id}`
       const finishBase = appUrl(`checkout/finish?booking_id=${booking.id}`)
       snap = await createSnapTransaction({
         orderId,

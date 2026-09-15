@@ -141,7 +141,7 @@ export default function BookingDetailPage() {
       // Step 4: Verify Xendit payment status if applicable
       if (bookingData.gateway_invoice_id) {
         const shouldVerify = bookingData.status === "pending_payment" ||
-          (bookingData.status === "processing" && bookingData.dp_type === "dp" && (bookingData.remaining_amount || 0) > 0 && bookingData.gateway_invoice_id?.startsWith("booking-remaining-"))
+          (bookingData.status === "processing" && bookingData.dp_type === "dp" && (bookingData.remaining_amount || 0) > 0 && (bookingData.gateway_invoice_id?.startsWith("booking-remaining-") || bookingData.gateway_invoice_id?.endsWith("-R")))
         if (shouldVerify) {
           try {
             const res = await fetch("/api/booking/verify-payment", {

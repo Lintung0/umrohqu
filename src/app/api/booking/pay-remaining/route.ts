@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error: bErr } = await admin
       .from("bookings")
-      .select("id, status, dp_type, remaining_amount, total, customer_id, tenant_id")
+      .select("id, status, dp_type, remaining_amount, total, customer_id, tenant_id, booking_code")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Sisa pembayaran sudah 0" }, { status: 400 })
     }
 
-    const orderId = `booking-remaining-${bookingId}`
+    const orderId = booking.booking_code ? `${booking.booking_code}-R` : `booking-remaining-${bookingId}`
 
     // Pastikan record transaksi (payments) untuk pelunasan ini — booking_id diisi otomatis oleh database
     const { data: paymentId } = await admin.rpc("create_payment", {
