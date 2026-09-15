@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { BookOpen, Heart, Package, Clock, Search, ChevronRight, Calendar } from "lucide-react"
+import { BookOpen, Heart, Package, Clock, Search, ChevronRight, Calendar, Bell, User } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
 import { getStatusColor, getStatusLabel, formatRupiah } from "@/lib/constants"
 
@@ -113,7 +113,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Link
           href="/search"
           className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-emerald-200"
@@ -142,6 +142,36 @@ export default function DashboardOverview() {
               <p className="text-xs text-muted-foreground mt-0.5">{stats.wishlist} paket yang Anda simpan</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-rose-600 transition-colors" />
+          </div>
+        </Link>
+        <Link
+          href="/dashboard/notifications"
+          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-amber-200"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
+              <Bell className="w-5 h-5 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">Notifikasi</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Pengumuman dan pengingat perjalanan</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-amber-600 transition-colors" />
+          </div>
+        </Link>
+        <Link
+          href="/dashboard/data-diri"
+          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-sky-200"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0 group-hover:bg-sky-200 transition-colors">
+              <User className="w-5 h-5 text-sky-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">Data Diri</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Lengkapi data pribadi jamaah</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-sky-600 transition-colors" />
           </div>
         </Link>
       </div>
