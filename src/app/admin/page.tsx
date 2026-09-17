@@ -2,18 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, XCircle, Clock, ArrowRight, Users, DollarSign, Package, Zap } from "lucide-react"
+import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, Clock, ArrowRight, DollarSign, Zap } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
-
-const STATUS_COLORS: Record<string, string> = {
-  pending: "var(--color-gold)",
-  verified: "var(--color-brand-900, #0E5C4E)",
-  rejected: "#e53e3e",
-  open: "#3b82f6",
-  in_progress: "var(--color-gold)",
-  resolved: "var(--color-brand-900, #0E5C4E)",
-}
 
 const BRAND_PRIMARY = "#0E5C4E"
 

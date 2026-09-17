@@ -10,7 +10,7 @@ import AuthInputField from "@/components/auth/input-field"
 import { createClient } from "@/lib/supabase/client"
 import { useTranslation } from "@/lib/i18n"
 import { z } from "zod"
-import { Mail, Lock, AlertCircle } from "lucide-react"
+import { Mail } from "lucide-react"
 
 type LoginErrors = { email?: string; password?: string }
 

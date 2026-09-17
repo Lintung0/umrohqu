@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, ChevronDown, HelpCircle, Sparkles, MessageCircle } from "lucide-react"
-import Link from "next/link"
+import { Search, ChevronDown, HelpCircle, Sparkles } from "lucide-react"
 
 interface FAQItem {
   id: string

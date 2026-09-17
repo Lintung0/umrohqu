@@ -11,7 +11,7 @@ interface PrayerTime {
 
 function getPrayerTimes(latitude: number, longitude: number): PrayerTime[] {
   const now = new Date()
-  const year = now.getFullYear()
+  const _year = now.getFullYear()
   const month = now.getMonth() + 1
   const day = now.getDate()
 
@@ -31,7 +31,7 @@ function getPrayerTimes(latitude: number, longitude: number): PrayerTime[] {
   const ishaOffset = 1.75
 
   const fajr = midDay - timeDiff - fajrOffset
-  const sunrise = midDay - timeDiff + 0.12
+  const _sunrise = midDay - timeDiff + 0.12
   const dhuhr = midDay + dhuhrOffset
   const asr = midDay + timeDiff * asrFactor
   const maghrib = midDay + timeDiff + maghribOffset

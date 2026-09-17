@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BookOpen, Heart, Package, Clock, Search, ChevronRight, Calendar, Bell, UserRound } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
-import { getStatusColor, getStatusLabel, formatRupiah } from "@/lib/constants"
+import { getStatusColor, getStatusLabel } from "@/lib/constants"
 
 export default function DashboardOverview() {
   const supabase = createClient()
@@ -30,12 +30,6 @@ export default function DashboardOverview() {
 
           const allBookings = allBookingsRes.data || []
           setRecentBookings(bookingsRes.data || [])
-
-          const thisMonth = allBookings.filter((b: any) => {
-            const d = new Date(b.created_at)
-            const now = new Date()
-            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-          }).length
 
           setStats({
             bookings: allBookings.filter((b: any) => b.status === "pending_payment" || b.status === "confirmed").length,

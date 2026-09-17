@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar"
 import { createClient } from "@/lib/supabase/client"
 
@@ -58,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="text-center space-y-3">
           <p className="text-muted-foreground font-medium">Akses ditolak</p>
           <p className="text-sm text-muted-foreground">Anda tidak memiliki akses ke halaman ini.</p>
-          <a href="/" className="text-emerald-600 text-sm hover:underline inline-block">Kembali ke Beranda</a>
+          <Link href="/" className="text-emerald-600 text-sm hover:underline inline-block">Kembali ke Beranda</Link>
         </div>
       </div>
     )

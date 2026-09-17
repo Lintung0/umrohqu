@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Shield, Check, X, Building2, Loader2 } from "lucide-react"
+import { Shield, Check, X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 interface TenantPending {

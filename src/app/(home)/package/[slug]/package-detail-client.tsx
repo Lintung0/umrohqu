@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
   Star, MapPin, Clock, Plane, Hotel, Shield, CheckCircle,
-  XCircle, BadgeCheck, Zap, Calendar, Scale, Loader2, ChevronLeft, ChevronRight,
-  Share2, Phone, MessageCircle, ArrowUp, ChevronDown, Heart, Info, Wifi,
-  Utensils, Car, Camera, Globe, Award, TrendingUp, Sparkles, Package, Maximize2, X, Timer,
+  XCircle, BadgeCheck, Calendar, Scale, Loader2, ChevronRight,
+  Share2, MessageCircle, ArrowUp, Heart, Info,
+  TrendingUp, Package, Maximize2, X, Timer,
   BadgePercent, Users,
 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
@@ -172,7 +172,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
     count: initialReviews.filter((r) => r.rating === star).length,
   }))
 
-  const hotelInfo = (pkg.hotel_info || {}) as any
+  const _hotelInfo = (pkg.hotel_info || {}) as any
   const facilitiesList: string[] = Array.isArray(pkg.facilities) ? pkg.facilities : []
   const includesList: string[] = Array.isArray(pkg.includes) ? pkg.includes : (typeof pkg.facilities === "object" && pkg.facilities?.includes ? pkg.facilities.includes : [])
   const excludesList: string[] = Array.isArray(pkg.excludes) ? pkg.excludes : (typeof pkg.facilities === "object" && pkg.facilities?.excludes ? pkg.facilities.excludes : [])
@@ -184,7 +184,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       return raw.map((item: any, idx: number) => {
         if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
         if (item && typeof item === "object") {
-          let description = String(item.description || item.details || item.text || "")
+          const description = String(item.description || item.details || item.text || "")
             // 1. Hapus SEMUA "Hari ke-N" dan "Hari N" dari mana saja (global) — INI YANG KUNCI biar "UMROH AWAL MUSIM Hari ke-1" jadi bersih
             .replace(/hari\s*ke\s*\d+/gi, "")
             // 2. Ekstra hapus "Hari1"/"Hari 1" tanpa "ke"
@@ -478,7 +478,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         <div className="relative ml-5 pr-2 sm:pr-3 border-l-2 border-emerald-200 space-y-0">
                           {itineraryList.map((item, idx) => {
                             const isOpen = expandedItinerary === idx
-                            const isLast = idx === itineraryList.length - 1
+                            const _isLast = idx === itineraryList.length - 1
                             return (
                               <div
                                 key={idx}

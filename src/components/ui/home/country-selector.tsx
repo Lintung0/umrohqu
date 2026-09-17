@@ -6,7 +6,7 @@ import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { useEffect } from "react"
-import type { Tenant } from "@/lib/types"
+
 
 const COUNTRY_FLAGS: Record<string, { flag: string; code: string }> = {
   Indonesia: { flag: "\ud83c\uddee\ud83c\uddf9", code: "id" },
@@ -26,7 +26,7 @@ interface CountryCount {
 
 export default function CountrySelector() {
   const [counts, setCounts] = useState<CountryCount[]>([])
-  const [loading, setLoading] = useState(true)
+  const [_loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {

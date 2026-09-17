@@ -27,7 +27,7 @@ interface WishlistItem {
 
 export default function WishlistPage() {
   const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
   const [items, setItems] = useState<WishlistItem[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)

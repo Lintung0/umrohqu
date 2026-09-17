@@ -31,7 +31,7 @@ function toBookingChannel(feeChannel: string): string {
   return "marketplace"
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Silakan login terlebih dahulu" }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await _request.json()
     const parsed = schema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Data tidak valid" }, { status: 400 })
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
 
     const feeConfig = await getFeeConfig(admin)
-    const feeBreakdown = calculateTotalFee(Number(pkg.price), pilgrimCount, feeChannel, feeConfig)
+    const _feeBreakdown = calculateTotalFee(Number(pkg.price), pilgrimCount, feeChannel, feeConfig)
 
     const totalPrice = Number(pkg.price) * pilgrimCount
 

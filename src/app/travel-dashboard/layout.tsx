@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import TravelDashboardSidebar from "@/components/dashboard/TravelDashboardSidebar"
 import { createClient } from "@/lib/supabase/client"
 
@@ -47,7 +48,7 @@ export default function TravelDashboardLayout({ children }: { children: React.Re
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground">Akses ditolak</p>
-          <a href="/" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Beranda</a>
+          <Link href="/" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Beranda</Link>
         </div>
       </div>
     )

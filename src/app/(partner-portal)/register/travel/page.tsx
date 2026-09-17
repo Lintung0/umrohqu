@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
@@ -9,7 +9,7 @@ import {
   AlertCircle, CheckCircle, ArrowRight, ArrowLeft, Loader2, Globe,
   BadgeCheck, ChevronRight, Users
 } from "lucide-react"
-import Logo from "@/components/logo"
+
 import { PasswordInput } from "@/components/auth/password-input"
 import { PhoneInput } from "@/components/auth/phone-input"
 import { FileUpload } from "@/components/auth/file-upload"
@@ -145,7 +145,7 @@ function StepHeader({ step }: { step: Step }) {
   )
 }
 
-function InputField({ label, icon: Icon, error, children }: {
+function InputField({ label, icon: _Icon, error, children }: {
   label: string
   icon: React.ElementType
   error?: string
@@ -181,7 +181,6 @@ export default function RegisterTravelPage() {
   const [loading, setLoading] = useState(false)
   const [serverError, setServerError] = useState("")
   const [success, setSuccess] = useState(false)
-  const [direction, setDirection] = useState<"forward" | "backward">("forward")
   const cardRef = useRef<HTMLDivElement>(null)
 
   const set = (k: keyof Form) => (v: string) => {
@@ -211,7 +210,6 @@ export default function RegisterTravelPage() {
 
   const nextStep = () => {
     if (validateStep(step)) {
-      setDirection("forward")
       setStep((s) => Math.min(s + 1, 4) as Step)
       setServerError("")
       cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -219,7 +217,6 @@ export default function RegisterTravelPage() {
   }
 
   const prevStep = () => {
-    setDirection("backward")
     setStep((s) => Math.max(s - 1, 1) as Step)
     setErrors({})
     setServerError("")

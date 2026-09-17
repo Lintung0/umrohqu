@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "NODE_OPTIONS=\"--dns-result-order=ipv4first\" next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -47,6 +49,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "^16.3.5",
     "supabase": "^2.109.1",
     "tailwindcss": "^4",
     "typescript": "^5"

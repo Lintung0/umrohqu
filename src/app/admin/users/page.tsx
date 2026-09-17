@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Search, Shield, ShieldAlert, UserCog, Loader2, AlertCircle, CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatRupiah } from "@/lib/utils"
+
 
 const ROLES = [
   { value: "all", label: "Semua Role" },

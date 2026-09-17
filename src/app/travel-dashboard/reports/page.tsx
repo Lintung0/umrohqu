@@ -18,8 +18,8 @@ interface BookingRow {
 
 export default function TravelReportsPage() {
   const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
-  const [tenantId, setTenantId] = useState<string | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
+  const [_tenantId, setTenantId] = useState<string | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [depositBalance, setDepositBalance] = useState(0)
   const [loading, setLoading] = useState(true)

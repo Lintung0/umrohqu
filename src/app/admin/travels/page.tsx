@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Search, Eye, Check, X, Ban, Mail, Phone, MapPin, Loader2 } from "lucide-react"
-import { formatRupiah } from "@/lib/utils"
+import { Search, Check, X, Ban, Mail, Phone, MapPin, Loader2 } from "lucide-react"
+
 import { toast } from "sonner"
 
 interface TenantRow {

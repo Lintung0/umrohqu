@@ -42,7 +42,7 @@ function formatRupiah(num: number) {
   return "Rp " + Math.round(num).toLocaleString("id-ID")
 }
 
-function generateFallbackResponse(packages: any[], message: string, history: any[]): string {
+function generateFallbackResponse(packages: any[], message: string, _history: any[]): string {
   const scores = packages.map(calcScore)
   const msg = message.toLowerCase()
 
@@ -113,7 +113,7 @@ function generateFallbackResponse(packages: any[], message: string, history: any
     let text = intro
     text += `📅 **Paket terlama:** **${byDuration[0].name}** — ${byDuration[0].duration_nights} hari\n`
     text += `📅 **Paket terpendek:** **${byDuration[byDuration.length - 1].name}** — ${byDuration[byDuration.length - 1].duration_nights} hari\n\n`
-    byDuration.forEach((p, i) => {
+    byDuration.forEach((p, _i) => {
       text += `• ${p.name}: ${p.duration_nights} hari — ${formatRupiah(Math.round(scores[packages.indexOf(p)].pricePerDay))}/hari\n`
     })
     text += `\n💡 Makin lama biasanya lebih hemat per hari, tapi pertimbangkan jadwal libur Anda.`
@@ -227,7 +227,7 @@ Selamat membantu! 🕋`
               controller.enqueue(new TextEncoder().encode(text))
             }
           }
-        } catch (e) {
+        } catch (_e) {
           controller.enqueue(new TextEncoder().encode("\n\nMaaf, terjadi kesalahan saat memproses jawaban. Silakan coba lagi."))
         } finally {
           controller.close()

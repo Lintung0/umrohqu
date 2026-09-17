@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/home/extra-sections"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Search, MapPin, Calendar, Building2, ChevronDown, Sparkles } from "lucide-react"
+import { Search, Calendar, Building2, ChevronDown, Sparkles } from "lucide-react"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
 
 const MONTHS = [

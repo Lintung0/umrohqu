@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { Search, Eye, Check, X, Download, Users } from "lucide-react"
+import { Search, Check, X } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel, BOOKING_STATUSES } from "@/lib/constants"
 import { toast } from "sonner"
 import { useTranslation } from "@/lib/i18n"
@@ -24,8 +24,8 @@ interface BookingRow {
 export default function TravelBookingsPage() {
   const { t } = useTranslation()
   const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
-  const [tenantId, setTenantId] = useState<string | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
+  const [_tenantId, setTenantId] = useState<string | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [statusFilter, setStatusFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")

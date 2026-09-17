@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, Users, BadgeCheck, Shield, Package, ChevronRight, Phone, Mail, MessageCircle, Zap, Building2, Globe, FileCheck, Award, ArrowRight, Star } from "lucide-react"
+import { MapPin, Users, BadgeCheck, Package, ChevronRight, Phone, Mail, MessageCircle, Building2, Globe, Award, Star } from "lucide-react"
 import { getPackageAvailable } from "@/lib/utils"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import { enrichTenantsWithDetail } from "@/lib/tenant-detail-fields"
@@ -47,7 +47,7 @@ interface PackageRow {
   doc_drive_link: string | null
 }
 
-function PackageCard({ pkg, href }: { pkg: PackageRow; href?: string | null }) {
+function PackageCard({ pkg, href: _href }: { pkg: PackageRow; href?: string | null }) {
   return (
     <PackageCardShared pkg={pkg as unknown as PackageType} showTravel={false} />
   )

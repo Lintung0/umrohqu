@@ -98,7 +98,7 @@ export default function EditPackagePage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [originalSlug, setOriginalSlug] = useState("")
+  const [_originalSlug, setOriginalSlug] = useState("")
 
   const [name, setName] = useState("")
   const [type, setType] = useState<string>("reguler")

@@ -30,7 +30,7 @@ interface BookingGroup {
 export default function BookingsPage() {
   const { t } = useTranslation()
   const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [filter, setFilter] = useState("semua")
   const [page, setPage] = useState(1)

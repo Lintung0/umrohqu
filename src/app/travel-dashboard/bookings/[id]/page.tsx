@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { formatRupiah } from "@/lib/utils"
 import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import {
-  ArrowLeft, User, CreditCard, MapPin, Plane, Hotel, Calendar,
+  ArrowLeft, User, CreditCard, Plane, Hotel, Calendar,
   CheckCircle, Clock, XCircle, Loader2, Phone, Mail, FileText,
   RotateCcw, X,
 } from "lucide-react"
@@ -42,7 +42,7 @@ interface BookingDetail extends Booking {
 
 export default function TravelBookingDetailPage() {
   const params = useParams()
-  const router = useRouter()
+  const _router = useRouter()
   const { t } = useTranslation()
   const id = params.id as string
   const supabase = createClient()
@@ -330,14 +330,14 @@ function RefundCard({
   bookingId,
   amount,
   detail,
-  onUpdate,
+  onUpdate: _onUpdate,
 }: {
   bookingId: string
   amount: number
   detail: BookingDetail
   onUpdate: (patch: Partial<BookingDetail>) => void
 }) {
-  const { t } = useTranslation()
+  const { t: _t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState("")
   const [amountInput, setAmountInput] = useState(String(amount))

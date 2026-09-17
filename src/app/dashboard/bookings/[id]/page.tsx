@@ -60,7 +60,7 @@ export default function BookingDetailPage() {
   const [loading, setLoading] = useState(true)
   const [authChecked, setAuthChecked] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [_showCancelModal, _setShowCancelModal] = useState(false)
 
   // Track auth state with onAuthStateChange — handles hydration delay after Xendit redirect
   useEffect(() => {
@@ -519,7 +519,7 @@ function CancelStatusCard({
 
 function CancelBookingModal({ bookingId, onClose }: { bookingId: string; onClose: () => void }) {
   const { t } = useTranslation()
-  const router = useRouter()
+  const _router = useRouter()
   const [selected, setSelected] = useState<string | null>(null)
   const [customReason, setCustomReason] = useState("")
   const [submitting, setSubmitting] = useState(false)
@@ -623,8 +623,8 @@ function CancelBookingModal({ bookingId, onClose }: { bookingId: string; onClose
 
 function PaymentStatusSection({
   bookingId, status, total, paidAmount, remainingBalance,
-  paymentType, dpAmount, dpPercentage, remainingAmount,
-  remainingDueDate, paidAt, paymentMethod, createdAt,
+  paymentType, dpAmount: _dpAmount, dpPercentage: _dpPercentage, remainingAmount,
+  remainingDueDate, paidAt, paymentMethod, createdAt: _createdAt,
 }: {
   bookingId: string
   status: string
@@ -640,7 +640,7 @@ function PaymentStatusSection({
   paymentMethod: string | null
   createdAt: string
 }) {
-  const { t } = useTranslation()
+  const { t: _t } = useTranslation()
 
   const effectiveRemaining = remainingBalance > 0 ? remainingBalance : (remainingAmount || 0)
   const effectivePaid = paidAmount > 0 ? paidAmount : (total - effectiveRemaining)
@@ -798,7 +798,7 @@ function PaymentStatusSection({
 
 // ─── Pay Now Section (Full Payment) ──────────────────────────────────────────
 
-function PayNowSection({ bookingId, total }: { bookingId: string; total: number }) {
+function PayNowSection({ bookingId, total: _total }: { bookingId: string; total: number }) {
   const { t } = useTranslation()
   const [submitting, setSubmitting] = useState(false)
 

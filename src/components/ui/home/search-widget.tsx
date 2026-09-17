@@ -27,7 +27,7 @@ const YEARS = Array.from({ length: 3 }, (_, i) => {
 })
 
 export default function SearchWidget() {
-  const { t } = useTranslation()
+  const { t: _t } = useTranslation()
   const router = useRouter()
   const [query, setQuery] = useState("")
   const [departureCity, setDepartureCity] = useState("")

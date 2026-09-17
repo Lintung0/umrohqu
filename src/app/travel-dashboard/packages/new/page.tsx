@@ -49,8 +49,6 @@ const packageSchema = z.object({
   image_url: z.string().url("URL tidak valid").optional().or(z.literal("")),
 })
 
-type PackageFormData = z.infer<typeof packageSchema>
-
 const PACKAGE_TYPES = [
   { value: "reguler", label: "Reguler" },
   { value: "plus", label: "Plus" },

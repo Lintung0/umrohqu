@@ -4,7 +4,7 @@ import { createNotification } from "@/lib/notify/create-notification"
 
 // Dipicu dari client (bell/halaman notifikasi) untuk generate notifikasi
 // "segera berangkat" untuk booking yang keberangkatannya ≤ 7 hari lagi.
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

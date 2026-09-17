@@ -84,6 +84,7 @@ build:
     - job: lint
       artifacts: true
   script:
+    - cp "$ENV_PRODUCTION" .env.production.local
     - bun run build
   artifacts:
     paths:
@@ -92,6 +93,7 @@ build:
       - package.json
       - bun.lock
       - ecosystem.config.js
+      - .env.production.local
     expire_in: 1 hour
   only:
     - main
@@ -124,7 +126,7 @@ deploy:
     # Test SSH
     - ssh -i ~/.ssh/deploy_key root@192.168.1.210 "echo 'SSH connection OK'"
 
-    # Deploy
+    # Deploy application files
     - |
       rsync -az --delete \
         --exclude='.git' \
@@ -139,7 +141,15 @@ deploy:
         ecosystem.config.js \
         root@192.168.1.210:${DEPLOY_PATH}/
 
-    # Restart application
+    # Deploy env file (terpisah, bukan log ke output)
+    - |
+      rsync -az \
+        -e "ssh -i ~/.ssh/deploy_key" \
+        --chmod=600 \
+        .env.production.local \
+        root@192.168.1.210:${DEPLOY_PATH}/
+
+    # Set permissions & restart
     - |
       ssh -i ~/.ssh/deploy_key root@192.168.1.210 << 'ENDSSH'
         set -e
@@ -147,6 +157,7 @@ deploy:
         cd /www/wwwroot/UmrahQu-Marketplace
 
         chown -R www:www /www/wwwroot/UmrahQu-Marketplace
+        chmod 600 /www/wwwroot/UmrahQu-Marketplace/.env.production.local
 
         su - www -s /bin/bash -c '
           cd /www/wwwroot/UmrahQu-Marketplace

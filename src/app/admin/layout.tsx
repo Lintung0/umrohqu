@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import AdminSidebar from "@/components/dashboard/AdminSidebar"
 import { createClient } from "@/lib/supabase/client"
 import type { AdminRole } from "@/lib/types"
@@ -45,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex min-h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground">Akses ditolak</p>
-          <a href="/" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Beranda</a>
+          <Link href="/" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Kembali ke Beranda</Link>
         </div>
       </div>
     )

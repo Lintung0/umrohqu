@@ -1,6 +1,6 @@
 // ─── Revenue Calculation Engine ───────────────────────────────────────────────
 
-import { FeeBreakdown, BookingChannel, DEFAULT_FEE_CONFIG, FeeConfig } from "./fees"
+import { FeeBreakdown, BookingChannel } from "./fees"
 
 export interface RevenueEntry {
   bookingId: string

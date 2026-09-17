@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import { User } from "@supabase/supabase-js"
-import { Plus, Search, Edit, Trash2, Eye, EyeOff, MoreHorizontal, Calendar, Hotel, Loader2, Package, ExternalLink } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Eye, EyeOff, Package, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { formatRupiah } from "@/lib/utils"
@@ -30,7 +30,7 @@ interface TravelPackage {
 
 export default function TravelPackagesPage() {
   const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [packages, setPackages] = useState<TravelPackage[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -188,7 +188,7 @@ export default function TravelPackagesPage() {
             </Link>
           </div>
         ) : filtered.map((pkg) => {
-          const hotelInfo = (pkg.hotel_info || {}) as any
+          const _hotelInfo = (pkg.hotel_info || {}) as any
           return (
             <div key={pkg.id} className="bg-white rounded-2xl border border-border overflow-hidden group">
               <div className="relative h-40 overflow-hidden">

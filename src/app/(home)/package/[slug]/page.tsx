@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!error && pkgData) {
       pkg = pkgData
     }
-  } catch (e) {
+  } catch {
     // error caught, pkg stays null
   }
 
@@ -68,7 +68,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     if (!error && pkgData) {
       pkg = pkgData
     }
-  } catch (e) {
+  } catch {
     // error caught, pkg stays null
   }
 

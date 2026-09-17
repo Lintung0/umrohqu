@@ -28,7 +28,7 @@ const ONBOARDING_STEPS = [
 export default function TravelDashboardOverview() {
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
-  const [tenantId, setTenantId] = useState<string | null>(null)
+  const [_tenantId, setTenantId] = useState<string | null>(null)
   const [stats, setStats] = useState<TravelStats>({ packageCount: 0, bookingCount: 0, totalRevenue: 0, totalPilgrims: 0, recentBookings: [] })
   const [onboardingStep, setOnboardingStep] = useState(1)
   const [loading, setLoading] = useState(true)

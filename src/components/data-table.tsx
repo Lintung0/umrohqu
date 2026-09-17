@@ -31,7 +31,7 @@ import {
   X,
   AlertTriangle,
   Clock,
-  Activity,
+  
   Check,
   Loader,
 } from "lucide-react";
@@ -79,7 +79,7 @@ interface DataTableProps {
   data?: any;
 }
 
-export function DataTable({ data: initialData }: DataTableProps) {
+export function DataTable({ data: _initialData }: DataTableProps) {
   const [data, setData] = React.useState<ActionCenterData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [activeTaskType, setActiveTaskType] = React.useState<
@@ -155,7 +155,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
     });
 
     // Refund
-    data.refund.items.forEach((item, idx) => {
+    data.refund.items.forEach((item, _idx) => {
       mappedRows.push({
         id: item.id,
         category: "refund",
@@ -172,7 +172,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
     });
 
     // Bidding
-    data.bidding.items.forEach((item, idx) => {
+    data.bidding.items.forEach((item, _idx) => {
       mappedRows.push({
         id: item.id,
         category: "bidding",

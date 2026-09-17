@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { Search, Phone, FileText, Users } from "lucide-react"
-import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
+import { Search, Phone } from "lucide-react"
+import { getStatusColor, getStatusLabel } from "@/lib/constants"
 
 interface PilgrimRow {
   id: string
@@ -21,8 +21,8 @@ interface PilgrimRow {
 
 export default function TravelPilgrimsPage() {
   const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
-  const [tenantId, setTenantId] = useState<string | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
+  const [_tenantId, setTenantId] = useState<string | null>(null)
   const [pilgrims, setPilgrims] = useState<PilgrimRow[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(true)

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { BookOpen, RefreshCw } from "lucide-react"
+import { BookOpen } from "lucide-react"
 
 interface DailyContent {
   arabic?: string

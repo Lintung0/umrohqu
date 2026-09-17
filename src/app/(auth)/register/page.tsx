@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { User, Mail, AlertCircle } from "lucide-react"
+import { User, Mail } from "lucide-react"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { Divider } from "@/components/auth/divider"

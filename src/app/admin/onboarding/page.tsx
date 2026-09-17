@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { ClipboardCheck, CheckCircle, ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
+import { ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 interface TenantRow {
@@ -98,7 +98,7 @@ export default function AdminOnboardingPage() {
   }
 
   const pending = tenants.filter((t) => t.status === "pending")
-  const active = tenants.filter((t) => t.status === "active")
+  const _active = tenants.filter((t) => t.status === "active")
   const allOnboarding = tenants.filter((t) => t.status !== "pending")
 
   if (loading) {

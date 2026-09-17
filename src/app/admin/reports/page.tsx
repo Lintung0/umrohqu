@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { BarChart3, TrendingUp, Download, DollarSign, Building2, Users, Package, Loader2 } from "lucide-react"
+import { TrendingUp, Download, DollarSign, Building2, Users, Package } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 

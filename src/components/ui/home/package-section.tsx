@@ -2,11 +2,9 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
-import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Clock, Loader2, Search, ArrowRight } from "lucide-react";
+import { Loader2, Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils";
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields";
 import PackageCard from "@/components/shared/package-card";
 import type { Package, Tenant } from "@/lib/types";
@@ -142,7 +140,7 @@ export default function PackageSection() {
     fetchPackages(next);
   }
 
-  const toggleCompare = (id: string) => {
+  const _toggleCompare = (id: string) => {
     setCompared((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : prev.length < 3 ? [...prev, id] : prev
     );

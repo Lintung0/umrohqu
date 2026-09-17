@@ -5,7 +5,6 @@ import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { useDateRangeStore } from "@/hooks/use-date-range";
 import { subDays, format } from "date-fns";
 
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Card,
   CardAction,
