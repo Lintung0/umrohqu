@@ -7,7 +7,7 @@ module.exports = {
     {
       name: "UmrahQu-Marketplace",
       cwd: DEPLOY_PATH,
-      script: DEPLOY_PATH + "/node_modules/.bin/next",
+      script: DEPLOY_PATH + "/node_modules/next/dist/bin/next",
       args: "start -p 3000",
       interpreter: NODE_BIN,
       instances: 2,
