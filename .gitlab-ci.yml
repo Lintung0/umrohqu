@@ -20,6 +20,7 @@ cache:
     - node_modules/
     - .next/cache/
 
+
 # ─────────────────────────────────────────────
 # INSTALL
 # ─────────────────────────────────────────────
@@ -35,7 +36,9 @@ install:
   script:
     - bun install --frozen-lockfile
 
-    # Pastikan Next.js benar-benar terinstall
+    - echo "=== Checking Next.js dependency ==="
+    - test -d node_modules
+    - test -d node_modules/next
     - test -f node_modules/next/dist/bin/next
     - echo "Next.js dependency OK"
 
@@ -89,19 +92,17 @@ build:
     - bun --version
 
   script:
-    # Production environment
+    - echo "=== Preparing production environment ==="
     - cp "$ENV_PRODUCTION" .env.production.local
 
-    # Build Next.js
+    - echo "=== Building Next.js ==="
     - bun run build
 
-    # Validasi hasil dependency
-    - echo "Checking Next.js executable..."
+    - echo "=== Checking Next.js executable ==="
     - test -f node_modules/next/dist/bin/next
     - ls -lah node_modules/next/dist/bin/next
 
-    # Validasi hasil build
-    - echo "Checking Next.js build..."
+    - echo "=== Checking Next.js build ==="
     - test -d .next
     - ls -lah .next | head
 
@@ -144,16 +145,37 @@ deploy:
   script:
 
     # ─────────────────────────────────────────
-    # VALIDATE ARTIFACT
+    # CHECK ARTIFACT
     # ─────────────────────────────────────────
 
     - echo "=== Checking deployment artifact ==="
+
     - test -d .next
     - test -d node_modules
+    - test -d node_modules/next
     - test -f node_modules/next/dist/bin/next
     - test -f ecosystem.config.js
     - test -f .env.production.local
+
     - echo "Artifact validation OK"
+
+
+    # ─────────────────────────────────────────
+    # PREPARE DEPLOY DIRECTORY
+    # ─────────────────────────────────────────
+
+    - echo "=== Preparing deploy directory ==="
+
+    - mkdir -p deploy
+    - cp -a .next deploy/
+    - cp -a node_modules deploy/
+    - cp -a ecosystem.config.js deploy/
+
+    - echo "=== Deploy directory ==="
+    - du -sh deploy/.next
+    - du -sh deploy/node_modules
+    - ls -lah deploy
+
 
     # ─────────────────────────────────────────
     # TEST SSH
@@ -161,22 +183,26 @@ deploy:
 
     - ssh -i ~/.ssh/deploy_key root@192.168.1.210 "echo 'SSH connection OK'"
 
+
     # ─────────────────────────────────────────
     # DEPLOY APPLICATION
     # ─────────────────────────────────────────
+
+    - echo "=== Syncing application ==="
 
     - |
       rsync -az --delete \
         --exclude='.next/cache' \
         -e "ssh -i ~/.ssh/deploy_key" \
-        .next/ \
-        node_modules/ \
-        ecosystem.config.js \
+        deploy/ \
         root@192.168.1.210:${DEPLOY_PATH}/
+
 
     # ─────────────────────────────────────────
     # DEPLOY ENVIRONMENT
     # ─────────────────────────────────────────
+
+    - echo "=== Syncing environment ==="
 
     - |
       rsync -az \
@@ -185,46 +211,129 @@ deploy:
         .env.production.local \
         root@192.168.1.210:${DEPLOY_PATH}/
 
+
     # ─────────────────────────────────────────
     # SERVER VALIDATION + PM2
     # ─────────────────────────────────────────
 
     - |
       ssh -i ~/.ssh/deploy_key root@192.168.1.210 << 'ENDSSH'
+
         set -e
 
         DEPLOY_PATH="/www/wwwroot/UmrahQu-Marketplace"
 
-        echo "=== Checking deployed files ==="
+        echo "========================================"
+        echo " DEPLOYED FILE CHECK"
+        echo "========================================"
 
-        test -d "$DEPLOY_PATH/node_modules"
-        test -d "$DEPLOY_PATH/node_modules/next"
-        test -f "$DEPLOY_PATH/node_modules/next/dist/bin/next"
 
-        echo "Next.js executable:"
-        ls -lah "$DEPLOY_PATH/node_modules/next/dist/bin/next"
+        echo ""
+        echo "[1] Project directory"
 
-        echo "=== Fixing permissions ==="
+        ls -lah "$DEPLOY_PATH"
+
+
+        echo ""
+        echo "[2] node_modules"
+
+        if [ -d "$DEPLOY_PATH/node_modules" ]; then
+          echo "OK: node_modules exists"
+        else
+          echo "ERROR: node_modules NOT FOUND"
+          exit 1
+        fi
+
+
+        echo ""
+        echo "[3] Next.js"
+
+        if [ -d "$DEPLOY_PATH/node_modules/next" ]; then
+          echo "OK: node_modules/next exists"
+        else
+          echo "ERROR: node_modules/next NOT FOUND"
+          exit 1
+        fi
+
+
+        echo ""
+        echo "[4] Next.js executable"
+
+        if [ -f "$DEPLOY_PATH/node_modules/next/dist/bin/next" ]; then
+          echo "OK: Next.js executable exists"
+          ls -lah "$DEPLOY_PATH/node_modules/next/dist/bin/next"
+        else
+          echo "ERROR: Next.js executable NOT FOUND"
+          exit 1
+        fi
+
+
+        echo ""
+        echo "[5] Next.js build"
+
+        if [ -d "$DEPLOY_PATH/.next" ]; then
+          echo "OK: .next exists"
+        else
+          echo "ERROR: .next NOT FOUND"
+          exit 1
+        fi
+
+
+        echo ""
+        echo "========================================"
+        echo " FIXING PERMISSIONS"
+        echo "========================================"
 
         chown -R www:www "$DEPLOY_PATH"
+
         chmod 600 "$DEPLOY_PATH/.env.production.local"
 
-        echo "=== PM2 ==="
+
+        echo ""
+        echo "========================================"
+        echo " PM2"
+        echo "========================================"
+
 
         if sudo -u www pm2 list | grep -q "UmrahQu-Marketplace"; then
-          echo "Reloading application..."
-          sudo -u www pm2 reload "$DEPLOY_PATH/ecosystem.config.js" --env production
+
+          echo "Application already exists."
+          echo "Reloading..."
+
+          sudo -u www pm2 reload \
+            "$DEPLOY_PATH/ecosystem.config.js" \
+            --env production
+
         else
-          echo "Starting application..."
-          sudo -u www pm2 start "$DEPLOY_PATH/ecosystem.config.js" --env production
+
+          echo "Application not found."
+          echo "Starting..."
+
+          sudo -u www pm2 start \
+            "$DEPLOY_PATH/ecosystem.config.js" \
+            --env production
+
         fi
+
+
+        echo ""
+        echo "Saving PM2 process list..."
 
         sudo -u www pm2 save
 
-        echo "=== PM2 Status ==="
+
+        echo ""
+        echo "========================================"
+        echo " PM2 STATUS"
+        echo "========================================"
+
         sudo -u www pm2 status
 
-        echo "Deploy complete!"
+
+        echo ""
+        echo "========================================"
+        echo " DEPLOY COMPLETE"
+        echo "========================================"
 
       ENDSSH
 
