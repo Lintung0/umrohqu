@@ -10,10 +10,14 @@ variables:
 
 default:
   image: node:${NODE_VERSION}
+  tags:
+    - server5
   before_script:
     - curl -fsSL https://bun.sh/install | bash
     - export BUN_INSTALL="$HOME/.bun"
     - export PATH="$BUN_INSTALL/bin:$PATH"
+    - bun --version
+    - node --version
 
 cache:
   key:
@@ -23,25 +27,46 @@ cache:
     - node_modules/
     - .next/cache/
 
-# ─── Stage 1: Install ───────────────────────────────────────
+# ─────────────────────────────────────────────
+# INSTALL
+# ─────────────────────────────────────────────
+
 install:
   stage: install
   script:
     - bun install --frozen-lockfile
+  artifacts:
+    paths:
+      - node_modules/
+      - package.json
+      - bun.lock
+    expire_in: 1 hour
   only:
     - main
 
-# ─── Stage 2: Lint ──────────────────────────────────────────
+# ─────────────────────────────────────────────
+# LINT
+# ─────────────────────────────────────────────
+
 lint:
   stage: lint
+  needs:
+    - job: install
+      artifacts: true
   script:
     - bun run lint
   only:
     - main
 
-# ─── Stage 3: Build di Runner ───────────────────────────────
+# ─────────────────────────────────────────────
+# BUILD
+# ─────────────────────────────────────────────
+
 build:
   stage: build
+  needs:
+    - job: install
+      artifacts: true
   script:
     - bun run build
   artifacts:
@@ -55,78 +80,65 @@ build:
   only:
     - main
 
-# ─── Stage 4: Deploy ke Server ──────────────────────────────
+# ─────────────────────────────────────────────
+# DEPLOY
+# ─────────────────────────────────────────────
+
 deploy:
   stage: deploy
   image: alpine:latest
+
+  tags:
+    - server5
+
   needs:
     - job: build
       artifacts: true
+
   before_script:
-    - apk add --no-cache rsync openssh-client bash curl
-    - curl -fsSL https://bun.sh/install | bash
-    - export BUN_INSTALL="$HOME/.bun"
-    - export PATH="$BUN_INSTALL/bin:$PATH"
-    - eval $(ssh-agent -s)
-    - echo "$DEPLOY_SSH_KEY" | ssh-add -
+    - apk add --no-cache rsync openssh-client
+
     - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    - echo "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+    - chmod 600 ~/.ssh/deploy_key
+
     - echo "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
-    - chmod 600 ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
   script:
-    # Rsync ke server
+
+    # Test SSH
+    - ssh -i ~/.ssh/deploy_key root@192.168.1.210 "echo 'SSH connection OK'"
+
+    # Deploy files
     - |
-      rsync -avz --delete \
+      rsync -az --delete \
         --exclude='.git' \
-        --exclude='node_modules/.cache' \
-        --exclude='.next/cache' \
         --exclude='.env*' \
         --exclude='.agents' \
-        -e "ssh -o StrictHostKeyChecking=no" \
-        .next/ node_modules/ package.json bun.lock ecosystem.config.js \
-        "umrahqu:${DEPLOY_PATH}/"
+        --exclude='.next/cache' \
+        -e "ssh -i ~/.ssh/deploy_key" \
+        .next/ \
+        node_modules/ \
+        package.json \
+        bun.lock \
+        ecosystem.config.js \
+        root@192.168.1.210:${DEPLOY_PATH}/
 
-    # Setup & jalankan di server
+    # Restart application
     - |
-      ssh -o StrictHostKeyChecking=no "umrahqu" << 'ENDSSH'
+      ssh -i ~/.ssh/deploy_key root@192.168.1.210 << 'ENDSSH'
         set -e
 
-        # Pastikan direktori dimiliki oleh www
-        chown -R www:www /www/wwwroot/UmrahQu-Marketplace
-        chown -R www:www /www/wwwlogs 2>/dev/null || true
+        cd /www/wwwroot/UmrahQu-Marketplace
 
-        # Switch ke www user dan jalankan setup
-        su - www -s /bin/bash << 'ENDUSER'
-          set -e
+        chown -R www:www /www/wwwroot/UmrahQu-Marketplace
+
+        su - www -s /bin/bash -c '
           cd /www/wwwroot/UmrahQu-Marketplace
 
-          # Load bun path
-          export BUN_INSTALL="$HOME/.bun"
-          export PATH="$BUN_INSTALL/bin:$PATH"
-
-          # Install Node.js 24 jika belum ada
-          if ! command -v node &> /dev/null; then
-            curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
-            apt-get install -y nodejs
-          fi
-
-          # Install bun jika belum ada
-          if ! command -v bun &> /dev/null; then
-            curl -fsSL https://bun.sh/install | bash
-          fi
-
-          # Install PM2 global jika belum ada
-          if ! command -v pm2 &> /dev/null; then
-            npm install -g pm2
-            pm2 startup
-          fi
-
-          # Install production dependencies
-          bun install --production
-
-          # Buat logs directory
-          mkdir -p /www/wwwlogs
-
-          # Reload atau start PM2
           if pm2 list | grep -q "UmrahQu-Marketplace"; then
             pm2 reload ecosystem.config.js --env production
           else
@@ -134,11 +146,14 @@ deploy:
           fi
 
           pm2 save
-          echo "✅ Deploy complete!"
-        ENDUSER
+        '
+
+        echo "Deploy complete!"
       ENDSSH
+
   only:
     - main
+
   environment:
     name: production
     url: https://yourdomain.com
