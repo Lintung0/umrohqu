@@ -10,11 +10,15 @@ variables:
 
 default:
   image: node:${NODE_VERSION}
+  before_script:
+    - curl -fsSL https://bun.sh/install | bash
+    - export BUN_INSTALL="$HOME/.bun"
+    - export PATH="$BUN_INSTALL/bin:$PATH"
 
 cache:
   key:
     files:
-      - package-lock.json
+      - bun.lock
   paths:
     - node_modules/
     - .next/cache/
@@ -23,7 +27,7 @@ cache:
 install:
   stage: install
   script:
-    - npm ci
+    - bun install --frozen-lockfile
   only:
     - main
 
@@ -31,7 +35,7 @@ install:
 lint:
   stage: lint
   script:
-    - npm run lint
+    - bun run lint
   only:
     - main
 
@@ -39,13 +43,13 @@ lint:
 build:
   stage: build
   script:
-    - npm run build
+    - bun run build
   artifacts:
     paths:
       - .next/
       - node_modules/
       - package.json
-      - package-lock.json
+      - bun.lock
       - ecosystem.config.js
     expire_in: 1 hour
   only:
@@ -59,7 +63,10 @@ deploy:
     - job: build
       artifacts: true
   before_script:
-    - apk add --no-cache rsync openssh-client bash
+    - apk add --no-cache rsync openssh-client bash curl
+    - curl -fsSL https://bun.sh/install | bash
+    - export BUN_INSTALL="$HOME/.bun"
+    - export PATH="$BUN_INSTALL/bin:$PATH"
     - eval $(ssh-agent -s)
     - echo "$DEPLOY_SSH_KEY" | ssh-add -
     - mkdir -p ~/.ssh
@@ -75,7 +82,7 @@ deploy:
         --exclude='.env*' \
         --exclude='.agents' \
         -e "ssh -o StrictHostKeyChecking=no" \
-        .next/ node_modules/ package.json package-lock.json ecosystem.config.js \
+        .next/ node_modules/ package.json bun.lock ecosystem.config.js \
         "umrahqu:${DEPLOY_PATH}/"
 
     # Setup & jalankan di server
@@ -92,10 +99,19 @@ deploy:
           set -e
           cd /www/wwwroot/UmrahQu-Marketplace
 
+          # Load bun path
+          export BUN_INSTALL="$HOME/.bun"
+          export PATH="$BUN_INSTALL/bin:$PATH"
+
           # Install Node.js 24 jika belum ada
           if ! command -v node &> /dev/null; then
             curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
             apt-get install -y nodejs
+          fi
+
+          # Install bun jika belum ada
+          if ! command -v bun &> /dev/null; then
+            curl -fsSL https://bun.sh/install | bash
           fi
 
           # Install PM2 global jika belum ada
@@ -105,7 +121,7 @@ deploy:
           fi
 
           # Install production dependencies
-          npm ci --omit=dev --ignore-scripts 2>/dev/null || true
+          bun install --production
 
           # Buat logs directory
           mkdir -p /www/wwwlogs
