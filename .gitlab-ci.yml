@@ -139,7 +139,7 @@ deploy:
         chmod 600 "$DEPLOY_PATH/.env.production.local"
 
         # ── Install (sama seperti CI, lolos frozen check) ──
-        sudo -H -u www "$BUN_SYS" install --frozen-lockfile --cwd "$DEPLOY_PATH"
+        sudo -H -u www env NODE_ENV=development "$BUN_SYS" install --frozen-lockfile --cwd "$DEPLOY_PATH"
 
         # ── Prune devDependencies → production tree ──
         sudo -H -u www "$BUN_SYS" prune --production --cwd "$DEPLOY_PATH"
