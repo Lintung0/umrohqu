@@ -154,22 +154,27 @@ deploy:
       ssh -i ~/.ssh/deploy_key root@192.168.1.210 << 'ENDSSH'
         set -e
 
-        cd /www/wwwroot/UmrahQu-Marketplace
+        DEPLOY_PATH="/www/wwwroot/UmrahQu-Marketplace"
+        NODE_BIN="/www/server/nvm/versions/node/v24.21.0/bin/node"
+        PM2_BIN="/www/server/nvm/versions/node/v24.21.0/bin/pm2"
 
-        chown -R www:www /www/wwwroot/UmrahQu-Marketplace
-        chmod 600 /www/wwwroot/UmrahQu-Marketplace/.env.production.local
+        chown -R www:www "$DEPLOY_PATH"
+        chmod 600 "$DEPLOY_PATH/.env.production.local"
 
-        su - www -s /bin/bash -c '
-          cd /www/wwwroot/UmrahQu-Marketplace
+        export PATH="/www/server/nvm/versions/node/v24.21.0/bin:$PATH"
 
-          if pm2 list | grep -q "UmrahQu-Marketplace"; then
-            pm2 reload ecosystem.config.js --env production
+        su - www -s /bin/bash -c "
+          export PATH='/www/server/nvm/versions/node/v24.21.0/bin:\$PATH'
+          cd $DEPLOY_PATH
+
+          if $PM2_BIN list 2>/dev/null | grep -q 'UmrahQu-Marketplace'; then
+            $PM2_BIN reload $DEPLOY_PATH/ecosystem.config.js --env production
           else
-            pm2 start ecosystem.config.js --env production
+            $PM2_BIN start $DEPLOY_PATH/ecosystem.config.js --env production
           fi
 
-          pm2 save
-        '
+          $PM2_BIN save
+        "
 
         echo "Deploy complete!"
       ENDSSH
