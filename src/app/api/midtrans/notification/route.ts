@@ -26,29 +26,30 @@ export async function POST(request: NextRequest) {
     const paymentProvider: string =
       notification.va_numbers?.[0]?.bank || notification.bank || paymentType
 
+    // order_id bisa berupa:
+    //   - booking_code (format "UQ-..." / legacy "BKG-..."), dengan sufiks "-R" untuk pelunasan
+    //   - booking-{uuid} (legacy) atau booking-remaining-{uuid}
     const isRemaining =
       orderId.startsWith("booking-remaining-") ||
-      (orderId.startsWith("BKG-") && orderId.endsWith("-R"))
+      (!orderId.startsWith("booking-") && orderId.endsWith("-R"))
 
     let bookingId: string | null = null
-    if (orderId.startsWith("BKG-")) {
-      bookingId = null
+    let bookingCode: string | null = null
+    if (orderId.startsWith("booking-remaining-")) {
+      bookingId = orderId.slice("booking-remaining-".length)
     } else if (orderId.startsWith("booking-")) {
-      bookingId = orderId.startsWith("booking-remaining-")
-        ? orderId.slice("booking-remaining-".length)
-        : orderId.slice("booking-".length)
+      bookingId = orderId.slice("booking-".length)
     } else {
-      // Bukan notifikasi booking kami
-      return NextResponse.json({ status: "ignored" })
+      bookingCode = isRemaining ? orderId.slice(0, -2) : orderId
     }
 
     const bookingQuery = admin
       .from("bookings")
       .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, dp_type, total, remaining_amount")
 
-    const { data: booking } = bookingId
-      ? await bookingQuery.eq("id", bookingId).single()
-      : await bookingQuery.eq("booking_code", isRemaining ? orderId.slice(0, -2) : orderId).single()
+    const { data: booking } = bookingCode
+      ? await bookingQuery.eq("booking_code", bookingCode).single()
+      : await bookingQuery.eq("id", bookingId).single()
 
     if (!booking) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })

@@ -45,12 +45,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Belum ada transaksi gateway" }, { status: 400 })
     }
 
-    const txn = await getTransactionStatus(booking.gateway_invoice_id)
+    let txn: Awaited<ReturnType<typeof getTransactionStatus>> | null = null
+    try {
+      txn = await getTransactionStatus(booking.gateway_invoice_id)
+    } catch (statusErr) {
+      console.error("Verify payment status check error:", statusErr)
+    }
 
-    if (!isSuccessStatus(txn.transaction_status)) {
+    if (!txn || !isSuccessStatus(txn.transaction_status)) {
       return NextResponse.json({
-        status: isPendingStatus(txn.transaction_status) ? "pending_payment" : booking.status,
-        midtrans_status: txn.transaction_status,
+        status: txn && isPendingStatus(txn.transaction_status) ? "pending_payment" : booking.status,
+        midtrans_status: txn?.transaction_status ?? null,
       })
     }
 
