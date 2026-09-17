@@ -141,7 +141,6 @@ export default function TravelPackagesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Paket Saya</h1>
-          <p className="text-muted-foreground mt-1">Kelola semua paket umroh yang tersedia</p>
         </div>
         <Link
           href="/travel-dashboard/packages/new"

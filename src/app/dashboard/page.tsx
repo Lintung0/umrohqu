@@ -77,7 +77,6 @@ export default function DashboardOverview() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Selamat Datang, {firstName}</h1>
-          <p className="text-muted-foreground mt-1">Kelola perjalanan ibadah Anda dari sini</p>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground bg-white border border-border rounded-lg px-3 py-2 shadow-sm">
           <Calendar className="w-4 h-4" />

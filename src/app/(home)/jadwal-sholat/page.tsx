@@ -126,7 +126,6 @@ export default function JadwalSholatPage() {
             Jadwal Sholat
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Jadwal Sholat</h1>
-          <p className="text-muted-foreground text-sm">Jadwal sholat harian berdasarkan lokasi Anda</p>
         </div>
 
         {/* City Search */}

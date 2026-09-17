@@ -98,7 +98,6 @@ export default function AdminTravelsPage() {
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Akun Travel</h1>
-        <p className="text-muted-foreground mt-1">Kelola seluruh akun travel yang terdaftar</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

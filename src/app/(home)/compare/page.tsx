@@ -774,7 +774,6 @@ function CompareContent() {
               </span>
               <div>
                 <h1 className="text-lg sm:text-2xl font-bold text-zinc-900 tracking-tight">Bandingkan Paket</h1>
-                <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">Bandingkan hingga {MAX_COMPARE} paket sekaligus untuk menemukan pilihan terbaik</p>
               </div>
             </div>
           </div>
