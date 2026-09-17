@@ -5,11 +5,12 @@ stages:
   - deploy
 
 variables:
-  NODE_VERSION: "24"
   DEPLOY_PATH: "/www/wwwroot/UmrahQu-Marketplace"
 
 default:
-  image: node:${NODE_VERSION}
+  image: node:24
+  tags:
+    - server5
 
 cache:
   key:
@@ -19,70 +20,44 @@ cache:
     - node_modules/
     - .next/cache/
 
-# ─────────────────────────────────────────────
-# INSTALL
-# ─────────────────────────────────────────────
-
 install:
   stage: install
-  tags:
-    - server5
   before_script:
     - curl -fsSL https://bun.sh/install | bash
-    - export BUN_INSTALL="$HOME/.bun"
-    - export PATH="$BUN_INSTALL/bin:$PATH"
+    - export PATH="$HOME/.bun/bin:$PATH"
     - bun --version
-    - node --version
   script:
     - bun install --frozen-lockfile
   artifacts:
     paths:
       - node_modules/
-      - package.json
-      - bun.lock
     expire_in: 1 hour
-  only:
-    - main
-
-# ─────────────────────────────────────────────
-# LINT
-# ─────────────────────────────────────────────
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 lint:
   stage: lint
-  tags:
-    - server5
-  before_script:
-    - curl -fsSL https://bun.sh/install | bash
-    - export BUN_INSTALL="$HOME/.bun"
-    - export PATH="$BUN_INSTALL/bin:$PATH"
-    - bun --version
-    - node --version
   needs:
     - job: install
       artifacts: true
+  before_script:
+    - curl -fsSL https://bun.sh/install | bash
+    - export PATH="$HOME/.bun/bin:$PATH"
+    - bun --version
   script:
     - bun run lint
-  only:
-    - main
-
-# ─────────────────────────────────────────────
-# BUILD
-# ─────────────────────────────────────────────
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 build:
   stage: build
-  tags:
-    - server5
-  before_script:
-    - curl -fsSL https://bun.sh/install | bash
-    - export BUN_INSTALL="$HOME/.bun"
-    - export PATH="$BUN_INSTALL/bin:$PATH"
-    - bun --version
-    - node --version
   needs:
     - job: lint
       artifacts: true
+  before_script:
+    - curl -fsSL https://bun.sh/install | bash
+    - export PATH="$HOME/.bun/bin:$PATH"
+    - bun --version
   script:
     - cp "$ENV_PRODUCTION" .env.production.local
     - bun run build
@@ -90,98 +65,73 @@ build:
     paths:
       - .next/
       - node_modules/
-      - package.json
-      - bun.lock
       - ecosystem.config.js
       - .env.production.local
     expire_in: 1 hour
-  only:
-    - main
-
-# ─────────────────────────────────────────────
-# DEPLOY
-# ─────────────────────────────────────────────
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 deploy:
   stage: deploy
-  tags:
-    - server5
   image: alpine:latest
-
   needs:
     - job: build
       artifacts: true
-
   before_script:
     - apk add --no-cache rsync openssh-client
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - echo "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+    - printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+    - printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 600 ~/.ssh/deploy_key
-    - echo "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-
   script:
-
-    # Test SSH
     - ssh -i ~/.ssh/deploy_key root@192.168.1.210 "echo 'SSH connection OK'"
 
-    # Deploy application files
     - |
       rsync -az --delete \
-        --exclude='.git' \
-        --exclude='.env*' \
-        --exclude='.agents' \
         --exclude='.next/cache' \
         -e "ssh -i ~/.ssh/deploy_key" \
         .next/ \
         node_modules/ \
-        package.json \
-        bun.lock \
         ecosystem.config.js \
         root@192.168.1.210:${DEPLOY_PATH}/
 
-    # Deploy env file (terpisah, bukan log ke output)
     - |
       rsync -az \
-        -e "ssh -i ~/.ssh/deploy_key" \
         --chmod=600 \
+        -e "ssh -i ~/.ssh/deploy_key" \
         .env.production.local \
         root@192.168.1.210:${DEPLOY_PATH}/
 
-    # Set permissions & restart
     - |
       ssh -i ~/.ssh/deploy_key root@192.168.1.210 << 'ENDSSH'
         set -e
 
         DEPLOY_PATH="/www/wwwroot/UmrahQu-Marketplace"
-        NODE_BIN="/www/server/nvm/versions/node/v24.21.0/bin/node"
-        PM2_BIN="/www/server/nvm/versions/node/v24.21.0/bin/pm2"
+        PM2="/www/server/nvm/versions/node/v24.21.0/bin/pm2"
 
         chown -R www:www "$DEPLOY_PATH"
         chmod 600 "$DEPLOY_PATH/.env.production.local"
 
-        export PATH="/www/server/nvm/versions/node/v24.21.0/bin:$PATH"
-
         su - www -s /bin/bash -c "
           export PATH='/www/server/nvm/versions/node/v24.21.0/bin:\$PATH'
-          cd $DEPLOY_PATH
+          cd '$DEPLOY_PATH'
 
-          if $PM2_BIN list 2>/dev/null | grep -q 'UmrahQu-Marketplace'; then
-            $PM2_BIN reload $DEPLOY_PATH/ecosystem.config.js --env production
+          if \$PM2 list 2>/dev/null | grep -q 'UmrahQu-Marketplace'; then
+            \$PM2 reload ecosystem.config.js --env production
           else
-            $PM2_BIN start $DEPLOY_PATH/ecosystem.config.js --env production
+            \$PM2 start ecosystem.config.js --env production
           fi
 
-          $PM2_BIN save
+          \$PM2 save
         "
 
         echo "Deploy complete!"
       ENDSSH
 
-  only:
-    - main
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
   environment:
     name: production
-    url: https://yourdomain.com
