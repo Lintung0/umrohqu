@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, Building2, Palette, DollarSign, BarChart3, LifeBuoy, ClipboardCheck, CreditCard, Wallet, Receipt, LogOut, Shield, Menu, X, Home, BadgePercent, Banknote } from "lucide-react"
+import { LayoutDashboard, Building2, Palette, DollarSign, BarChart3, LifeBuoy, ClipboardCheck, Wallet, Receipt, LogOut, Shield, Menu, X, Home, BadgePercent, Banknote } from "lucide-react"
 import { type AdminRole } from "@/lib/types"
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -16,7 +16,6 @@ const ADMIN_NAV = [
   { href: "/admin/config", label: "Konfigurasi Biaya", icon: DollarSign, roles: ["admin"], category: "transaksi" },
   { href: "/admin/setup-fees", label: "Biaya Setup", icon: Wallet, roles: ["admin", "finance"], category: "transaksi" },
   { href: "/admin/service-fees", label: "Biaya Layanan", icon: Receipt, roles: ["admin", "finance"], category: "transaksi" },
-  { href: "/admin/payments", label: "Pembayaran Travel", icon: CreditCard, roles: ["admin", "finance"], category: "transaksi" },
   { href: "/admin/templates", label: "Template Website", icon: Palette, roles: ["admin"], category: "pemasaran" },
   { href: "/admin/cashback", label: "Kelola Cashback", icon: BadgePercent, roles: ["admin"], category: "pemasaran" },
   { href: "/admin/cashback/requests", label: "Review Cashback", icon: Banknote, roles: ["admin", "finance"], category: "transaksi" },

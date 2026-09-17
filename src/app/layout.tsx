@@ -19,7 +19,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UmrahQu - Teman Perjalanan Terbaikmu",
+  title: {
+    default: "UmrahQu - Teman Perjalanan Terbaikmu",
+    template: "%s | UmrahQu",
+  },
   description: "Teman Perjalanan Terbaikmu",
   icons: {
     icon: "/logo-icon.svg",

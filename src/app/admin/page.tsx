@@ -260,7 +260,6 @@ export default function AdminOverviewPage() {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-border overflow-hidden">
           <div className="flex items-center justify-between p-5 border-b border-border">
             <h2 className="font-semibold">Pesan Terbaru</h2>
-            <Link href="/admin/payments" className="text-sm text-primary hover:underline">Lihat Semua</Link>
           </div>
           <div className="divide-y divide-border">
             {recentBookings.length === 0 ? (

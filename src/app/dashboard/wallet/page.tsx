@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
 
 export default function DashboardWalletRedirect() {
-  redirect("/dashboard")
+  redirect("/dashboard/cashback")
 }

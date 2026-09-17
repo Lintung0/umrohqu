@@ -1,9 +1,5 @@
 import Logo from "@/components/logo"
 
-export const metadata = {
-  title: "UmrahQu - Daftar Travel Partner",
-}
-
 export default function PartnerPortalLayout({
   children,
 }: {

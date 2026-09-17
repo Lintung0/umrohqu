@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const ogImage = coverImg?.image_url
 
   return {
-    title: pkg.name + " - UmrahQu",
+    title: pkg.name,
     description,
     openGraph: {
       title: pkg.name,

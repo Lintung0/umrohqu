@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { LayoutDashboard, Package, BookOpen, Users, BarChart3, Globe, Megaphone, Settings, LogOut, Home, Menu, X, Shield } from "lucide-react"
+import { LayoutDashboard, Package, BookOpen, Users, BarChart3, Globe, Settings, LogOut, Home, Menu, X, Shield } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Image from "next/image"
@@ -16,7 +16,6 @@ const NAV_ITEMS = [
   { href: "/travel-dashboard/staff", label: "Tim Saya", icon: Shield },
   { href: "/travel-dashboard/reports", label: "Laporan", icon: BarChart3 },
   { href: "/travel-dashboard/website", label: "Website", icon: Globe },
-  { href: "/travel-dashboard/promotions", label: "Promo & Bidding", icon: Megaphone },
   { href: "/travel-dashboard/settings", label: "Pengaturan", icon: Settings },
 ]
 
