@@ -19,7 +19,7 @@ import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
-import { getSeatAvailability, getPackageAvailable } from "@/lib/utils"
+import { getPackageAvailable } from "@/lib/utils"
 import { useCompare } from "@/lib/compare-context"
 import type { Package as PackageType } from "@/lib/types"
 
@@ -160,7 +160,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
     : 0
 
   const displayPkg = livePkg || pkg
-  const seat = getSeatAvailability(displayPkg.available, displayPkg.quota, displayPkg.quota_taken)
   const soldOut = getPackageAvailable(displayPkg) <= 0
   const blocked = displayPkg.status === "ongoing" || soldOut
   const currentAvailable = getPackageAvailable(displayPkg)
@@ -804,15 +803,9 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 </div>
               </div>
 
-              {/* Seat — terintegrasi, bukan kartu terpisah */}
+              {/* Seat — bar bawaan: label "Sisa kursi" + jumlah + progress (satu sumber) */}
               <div className="mt-4 pt-4 border-t border-border/50">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-medium text-muted-foreground">Sisa kursi</span>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${seat.bgColor} ${seat.textColor}`}>
-                    {seat.label}
-                  </span>
-                </div>
-                <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="compact" showLabel={false} soldOut={soldOut} />
+                <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="compact" soldOut={soldOut} />
               </div>
 
               {/* CTA */}
