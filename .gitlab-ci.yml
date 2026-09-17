@@ -1,4 +1,3 @@
-```yaml
 stages:
   - install
   - lint
@@ -154,4 +153,3 @@ deploy:
 
   environment:
     name: production
-```
