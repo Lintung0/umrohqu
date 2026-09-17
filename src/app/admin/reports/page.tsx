@@ -69,7 +69,7 @@ export default function AdminReportsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <div className="h-8 bg-muted rounded animate-pulse w-48 mb-2" />
         <div className="h-4 bg-muted rounded animate-pulse w-64" />
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
@@ -86,7 +86,7 @@ export default function AdminReportsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Laporan Sistem</h1>

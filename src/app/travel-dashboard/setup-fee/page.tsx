@@ -36,7 +36,7 @@ export default function SetupFeePage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-2xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
         <div className="h-48 bg-muted rounded-2xl animate-pulse" />
       </div>
     )
@@ -45,7 +45,7 @@ export default function SetupFeePage() {
   const active = tenant?.status === "active"
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Status Aktivasi Travel</h1>
         <p className="text-muted-foreground mt-1">

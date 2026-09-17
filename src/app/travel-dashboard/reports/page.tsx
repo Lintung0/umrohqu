@@ -68,7 +68,7 @@ export default function TravelReportsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <div className="h-8 w-48 bg-muted rounded animate-pulse" />
         <div className="grid grid-cols-5 gap-3">
           {[1,2,3,4,5].map((i) => <div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />)}
@@ -78,7 +78,7 @@ export default function TravelReportsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Laporan</h1>
         <p className="text-muted-foreground mt-1">Analitik revenue dan performa travel</p>

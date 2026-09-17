@@ -166,7 +166,7 @@ export default function BookingDetailPage() {
   // Show skeleton while auth is being checked or data is loading
   if (loading || !authChecked) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-6 w-32 bg-muted rounded animate-pulse" />
         <div className="h-32 bg-muted rounded-2xl animate-pulse" />
         <div className="grid grid-cols-2 gap-6">
@@ -179,7 +179,7 @@ export default function BookingDetailPage() {
 
   if (!booking) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl border border-border p-12 text-center space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto">
             <FileText className="w-8 h-8 text-gray-300" />
@@ -204,7 +204,7 @@ export default function BookingDetailPage() {
   const currentStepIndex = TIMELINE_STEPS.findIndex((s) => s.key === booking.status)
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="w-4 h-4" />
         {t("booking.back")}

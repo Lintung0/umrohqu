@@ -78,7 +78,7 @@ export default function TravelSettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-8 w-48 bg-muted rounded animate-pulse" />
         <div className="h-64 bg-muted rounded-2xl animate-pulse" />
       </div>
@@ -91,7 +91,7 @@ export default function TravelSettingsPage() {
   ]
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Pengaturan</h1>
         <p className="text-muted-foreground mt-1">Atur profil dan preferensi akun travel</p>

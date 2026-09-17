@@ -258,7 +258,7 @@ export default function NewPackagePage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-8 w-48 bg-muted rounded animate-pulse" />
         <div className="h-96 bg-muted rounded-2xl animate-pulse" />
       </div>
@@ -271,7 +271,7 @@ export default function NewPackagePage() {
     ) : null
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
         <Link
           href="/travel-dashboard/packages"

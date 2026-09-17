@@ -51,7 +51,7 @@ export default function AdminConfigPage() {
 
   if (loading || !config) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-8 w-56 bg-muted rounded animate-pulse" />
         <div className="h-48 bg-muted rounded-2xl animate-pulse" />
       </div>
@@ -59,7 +59,7 @@ export default function AdminConfigPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Konfigurasi Biaya</h1>
         <p className="text-muted-foreground mt-1">Atur biaya platform, service fee, dan konfigurasi pembayaran</p>

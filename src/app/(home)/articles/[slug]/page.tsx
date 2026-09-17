@@ -78,7 +78,7 @@ export default function ArticleDetailPage() {
               <Image src={article.image_url} alt={article.title} fill className="object-cover" />
             </div>
           )}
-          <div className="p-6 lg:p-8 space-y-4">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-4">
             <div className="flex items-center gap-3 flex-wrap">
               {article.category && (
                 <span className="px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">{article.category}</span>

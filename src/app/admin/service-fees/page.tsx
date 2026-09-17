@@ -83,7 +83,7 @@ export default function AdminServiceFeesPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-8 bg-muted rounded animate-pulse w-48 mb-2" />
         <div className="h-4 bg-muted rounded animate-pulse w-64" />
         <div className="bg-white rounded-2xl border border-border p-6">
@@ -96,7 +96,7 @@ export default function AdminServiceFeesPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Service Fee Transaksi</h1>
         <p className="text-muted-foreground mt-1">Kelola biaya layanan per transaksi</p>
