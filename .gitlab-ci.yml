@@ -26,18 +26,27 @@ cache:
 
 install:
   stage: install
+
   before_script:
     - curl -fsSL https://bun.sh/install | bash -s "bun-v1.4.2"
     - export PATH="$HOME/.bun/bin:$PATH"
     - bun --version
+
   script:
     - bun install --frozen-lockfile
+
+    # Pastikan Next.js benar-benar terinstall
+    - test -f node_modules/next/dist/bin/next
+    - echo "Next.js dependency OK"
+
   artifacts:
     paths:
       - node_modules/
     expire_in: 1 hour
+
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
 
 # ─────────────────────────────────────────────
 # LINT
@@ -45,17 +54,22 @@ install:
 
 lint:
   stage: lint
+
   needs:
     - job: install
       artifacts: true
+
   before_script:
     - curl -fsSL https://bun.sh/install | bash -s "bun-v1.4.2"
     - export PATH="$HOME/.bun/bin:$PATH"
     - bun --version
+
   script:
     - bun run lint
+
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
 
 # ─────────────────────────────────────────────
 # BUILD
@@ -63,17 +77,34 @@ lint:
 
 build:
   stage: build
+
   needs:
     - job: install
       artifacts: true
     - job: lint
+
   before_script:
     - curl -fsSL https://bun.sh/install | bash -s "bun-v1.4.2"
     - export PATH="$HOME/.bun/bin:$PATH"
     - bun --version
+
   script:
+    # Production environment
     - cp "$ENV_PRODUCTION" .env.production.local
+
+    # Build Next.js
     - bun run build
+
+    # Validasi hasil dependency
+    - echo "Checking Next.js executable..."
+    - test -f node_modules/next/dist/bin/next
+    - ls -lah node_modules/next/dist/bin/next
+
+    # Validasi hasil build
+    - echo "Checking Next.js build..."
+    - test -d .next
+    - ls -lah .next | head
+
   artifacts:
     paths:
       - .next/
@@ -81,8 +112,10 @@ build:
       - ecosystem.config.js
       - .env.production.local
     expire_in: 1 hour
+
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
 
 # ─────────────────────────────────────────────
 # DEPLOY
@@ -98,18 +131,40 @@ deploy:
 
   before_script:
     - apk add --no-cache rsync openssh-client
+
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
+
     - printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
     - printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
     - chmod 600 ~/.ssh/deploy_key
     - chmod 644 ~/.ssh/known_hosts
 
   script:
-    # Test SSH
+
+    # ─────────────────────────────────────────
+    # VALIDATE ARTIFACT
+    # ─────────────────────────────────────────
+
+    - echo "=== Checking deployment artifact ==="
+    - test -d .next
+    - test -d node_modules
+    - test -f node_modules/next/dist/bin/next
+    - test -f ecosystem.config.js
+    - test -f .env.production.local
+    - echo "Artifact validation OK"
+
+    # ─────────────────────────────────────────
+    # TEST SSH
+    # ─────────────────────────────────────────
+
     - ssh -i ~/.ssh/deploy_key root@192.168.1.210 "echo 'SSH connection OK'"
 
-    # Deploy application
+    # ─────────────────────────────────────────
+    # DEPLOY APPLICATION
+    # ─────────────────────────────────────────
+
     - |
       rsync -az --delete \
         --exclude='.next/cache' \
@@ -119,7 +174,10 @@ deploy:
         ecosystem.config.js \
         root@192.168.1.210:${DEPLOY_PATH}/
 
-    # Deploy environment
+    # ─────────────────────────────────────────
+    # DEPLOY ENVIRONMENT
+    # ─────────────────────────────────────────
+
     - |
       rsync -az \
         --chmod=600 \
@@ -127,25 +185,47 @@ deploy:
         .env.production.local \
         root@192.168.1.210:${DEPLOY_PATH}/
 
-    # Permissions & PM2
+    # ─────────────────────────────────────────
+    # SERVER VALIDATION + PM2
+    # ─────────────────────────────────────────
+
     - |
       ssh -i ~/.ssh/deploy_key root@192.168.1.210 << 'ENDSSH'
         set -e
 
         DEPLOY_PATH="/www/wwwroot/UmrahQu-Marketplace"
 
+        echo "=== Checking deployed files ==="
+
+        test -d "$DEPLOY_PATH/node_modules"
+        test -d "$DEPLOY_PATH/node_modules/next"
+        test -f "$DEPLOY_PATH/node_modules/next/dist/bin/next"
+
+        echo "Next.js executable:"
+        ls -lah "$DEPLOY_PATH/node_modules/next/dist/bin/next"
+
+        echo "=== Fixing permissions ==="
+
         chown -R www:www "$DEPLOY_PATH"
         chmod 600 "$DEPLOY_PATH/.env.production.local"
 
+        echo "=== PM2 ==="
+
         if sudo -u www pm2 list | grep -q "UmrahQu-Marketplace"; then
+          echo "Reloading application..."
           sudo -u www pm2 reload "$DEPLOY_PATH/ecosystem.config.js" --env production
         else
+          echo "Starting application..."
           sudo -u www pm2 start "$DEPLOY_PATH/ecosystem.config.js" --env production
         fi
 
         sudo -u www pm2 save
 
+        echo "=== PM2 Status ==="
+        sudo -u www pm2 status
+
         echo "Deploy complete!"
+
       ENDSSH
 
   rules:
