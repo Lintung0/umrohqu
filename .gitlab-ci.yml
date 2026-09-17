@@ -74,9 +74,11 @@ build:
 deploy:
   stage: deploy
   image: alpine:latest
+
   needs:
     - job: build
       artifacts: true
+
   before_script:
     - apk add --no-cache rsync openssh-client
     - mkdir -p ~/.ssh
@@ -85,6 +87,7 @@ deploy:
     - printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
     - chmod 600 ~/.ssh/deploy_key
     - chmod 644 ~/.ssh/known_hosts
+
   script:
     - ssh -i ~/.ssh/deploy_key root@192.168.1.210 "echo 'SSH connection OK'"
 
@@ -109,23 +112,17 @@ deploy:
         set -e
 
         DEPLOY_PATH="/www/wwwroot/UmrahQu-Marketplace"
-        PM2="/www/server/nvm/versions/node/v24.21.0/bin/pm2"
 
         chown -R www:www "$DEPLOY_PATH"
         chmod 600 "$DEPLOY_PATH/.env.production.local"
 
-        su - www -s /bin/bash -c "
-          export PATH='/www/server/nvm/versions/node/v24.21.0/bin:\$PATH'
-          cd '$DEPLOY_PATH'
+        if sudo -u www pm2 list | grep -q "UmrahQu-Marketplace"; then
+          sudo -u www pm2 reload "$DEPLOY_PATH/ecosystem.config.js" --env production
+        else
+          sudo -u www pm2 start "$DEPLOY_PATH/ecosystem.config.js" --env production
+        fi
 
-          if \$PM2 list 2>/dev/null | grep -q 'UmrahQu-Marketplace'; then
-            \$PM2 reload ecosystem.config.js --env production
-          else
-            \$PM2 start ecosystem.config.js --env production
-          fi
-
-          \$PM2 save
-        "
+        sudo -u www pm2 save
 
         echo "Deploy complete!"
       ENDSSH
