@@ -81,7 +81,7 @@ build:
     - bun --version
     - node --version
   needs:
-    - job: install
+    - job: lint
       artifacts: true
   script:
     - bun run build
