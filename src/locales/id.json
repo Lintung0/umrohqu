@@ -19,8 +19,8 @@
     "travel_dashboard": "Travel"
   },
   "hero": {
-    "title": "Cari & Bandingkan Paket Umroh Terbaik",
-    "subtitle": "Temukan paket umroh impian Anda dari travel terpercaya di seluruh Indonesia",
+    "title": "Cari & Bandingkan Paket umrah Terbaik",
+    "subtitle": "Temukan paket umrah impian Anda dari travel terpercaya di seluruh Indonesia",
     "cta": "Cari Paket",
     "packages_available": "Paket Tersedia",
     "travel_partners": "Travel Partner",
@@ -166,7 +166,7 @@
     "confirm_btn": "Konfirmasi"
   },
   "footer": {
-    "description": "Platform pencarian dan perbandingan paket umroh terpercaya di Indonesia.",
+    "description": "Platform pencarian dan perbandingan paket umrah terpercaya di Indonesia.",
     "quick_links": "Tautan Cepat",
     "contact_us": "Hubungi Kami",
     "follow_us": "Ikuti Kami",
@@ -185,11 +185,11 @@
     "jadwal_sholat": "Jadwal Sholat",
     "tagline": "Perjalanan Suci Berkualitas",
     "headline": "Wujudkan Niat Suci Bersama UmrahQuu",
-    "hero_desc": "Platform marketplace umroh terpercaya yang menghubungkan Anda dengan travel agency resmi berizin Kemenhaj dari berbagai belahan dunia dengan transparansi harga dan pembayaran aman."
+    "hero_desc": "Platform marketplace umrah terpercaya yang menghubungkan Anda dengan travel agency resmi berizin Kemenhaj dari berbagai belahan dunia dengan transparansi harga dan pembayaran aman."
   },
   "package": {
-    "title": "Paket Umroh",
-    "search_title": "Cari Paket Umroh",
+    "title": "Paket umrah",
+    "search_title": "Cari Paket umrah",
     "from": "Dari",
     "duration": "Durasi",
     "day": "hari",
@@ -314,27 +314,27 @@
   },
   "landing": {
     "why_us_title": "Kenapa Pilih UmrahQu?",
-    "why_us_desc": "Kami membantu Anda menemukan paket umroh terbaik dengan mudah dan terpercaya.",
+    "why_us_desc": "Kami membantu Anda menemukan paket umrah terbaik dengan mudah dan terpercaya.",
     "why_us_compare_title": "Bandingkan Paket",
     "why_us_compare_desc": "Bandingkan harga, fasilitas, dan itinerary dari berbagai travel dalam satu tampilan.",
     "why_us_trusted_title": "Travel Terpercaya",
     "why_us_trusted_desc": "Semua travel partner kami telah terverifikasi dan memiliki track record yang baik.",
     "why_us_easy_title": "Mudah & Cepat",
     "why_us_easy_desc": "Proses pemesanan yang mudah dengan dukungan pelanggan 24/7.",
-    "stats_title": "Platform Umroh Terdepan di Indonesia",
+    "stats_title": "Platform umrah Terdepan di Indonesia",
     "stats_packages": "Paket Tersedia",
     "stats_travels": "Travel Partner",
     "stats_customers": "Pelanggan",
     "stats_cities": "Kota Keberangkatan",
     "travel_section_title": "Travel Partner Terpercaya",
-    "travel_section_desc": "Kami bekerja sama dengan travel umroh terbaik yang telah terverifikasi dan berizin resmi.",
+    "travel_section_desc": "Kami bekerja sama dengan travel umrah terbaik yang telah terverifikasi dan berizin resmi.",
     "testimonial_title": "Apa Kata Mereka",
-    "testimonial_desc": "Pengalaman jamaah yang telah menggunakan UmrahQu untuk perjalanan umroh mereka.",
-    "cta_title": "Siap Berangkat Umroh?",
-    "cta_desc": "Mulai cari paket umroh impian Anda sekarang dan dapatkan penawaran terbaik!",
+    "testimonial_desc": "Pengalaman jamaah yang telah menggunakan UmrahQu untuk perjalanan umrah mereka.",
+    "cta_title": "Siap Berangkat umrah?",
+    "cta_desc": "Mulai cari paket umrah impian Anda sekarang dan dapatkan penawaran terbaik!",
     "cta_button": "Mulai Cari",
     "trust_title": "Terpercaya & Berizin Resmi",
-    "trust_desc": "Kami hanya bekerja sama dengan travel umroh yang memiliki izin resmi dari Kementerian Agama RI."
+    "trust_desc": "Kami hanya bekerja sama dengan travel umrah yang memiliki izin resmi dari Kementerian Agama RI."
   },
   "checkout": {
     "step_package": "Paket & Jamaah",

@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .maybeSingle()) || { data: null }
 
   const travelName = (pkg.travel as any)?.name || "UmrahQu"
-  const description = pkg.description || "Paket umroh " + pkg.name + " dari " + travelName + " mulai dari Rp " + (pkg.price || 0).toLocaleString("id-ID")
+  const description = pkg.description || "Paket umrah " + pkg.name + " dari " + travelName + " mulai dari Rp " + (pkg.price || 0).toLocaleString("id-ID")
   const ogImage = coverImg?.image_url
 
   return {

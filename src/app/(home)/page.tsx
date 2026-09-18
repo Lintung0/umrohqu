@@ -95,7 +95,7 @@ function HeroSearch() {
           <button
             type="submit"
             className="w-full h-11 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/40 transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
-            aria-label="Cari paket umroh"
+            aria-label="Cari paket umrah"
           >
             <Search className="w-3.5 h-3.5" />
             <span>Cari</span>
@@ -151,7 +151,7 @@ export default function Home() {
 
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 mt-8 sm:mt-10 text-xs text-emerald-100/70">
             <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>200+ PPIU Resmi</span>
-            <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" /></span>500+ Paket Umroh</span>
+            <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" /></span>500+ Paket umrah</span>
             <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>50.000+ Jamaah</span>
           </div>
         </div>

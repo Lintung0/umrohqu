@@ -16,7 +16,7 @@ const STATIC_FAQS: FAQItem[] = [
     id: "1",
     category: "Umum",
     question: "Apa itu UmrahQu?",
-    answer: "UmrahQu adalah platform pencarian dan perbandingan paket umroh terpercaya di Indonesia. Kami membantu jamaah menemukan paket umroh terbaik dari travel-travel terverifikasi, serta membantu travel mengelola bisnis mereka secara digital."
+    answer: "UmrahQu adalah platform pencarian dan perbandingan paket umrah terpercaya di Indonesia. Kami membantu jamaah menemukan paket umrah terbaik dari travel-travel terverifikasi, serta membantu travel mengelola bisnis mereka secara digital."
   },
   {
     id: "2",
@@ -40,13 +40,13 @@ const STATIC_FAQS: FAQItem[] = [
     id: "5",
     category: "Travel",
     question: "Bagaimana cara travel mendapat pesanan?",
-    answer: "Setelah paket umroh dipublikasikan, paket akan tampil di halaman pencarian UmrahQu. Jamaah dapat mencari, membandingkan, dan memesan langsung paket travel Anda. Travel akan menerima notifikasi setiap ada pesanan baru melalui dashboard."
+    answer: "Setelah paket umrah dipublikasikan, paket akan tampil di halaman pencarian UmrahQu. Jamaah dapat mencari, membandingkan, dan memesan langsung paket travel Anda. Travel akan menerima notifikasi setiap ada pesanan baru melalui dashboard."
   },
   {
     id: "6",
     category: "Jamaah",
-    question: "Bagaimana cara memesan paket umroh?",
-    answer: 'Cukup cari paket umroh di halaman <a href="/search" class="text-emerald-600 hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Xendit.'
+    question: "Bagaimana cara memesan paket umrah?",
+    answer: 'Cukup cari paket umrah di halaman <a href="/search" class="text-emerald-600 hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Xendit.'
   },
   {
     id: "7",

@@ -24,7 +24,7 @@ export function PackageDocumentationSection({ packages, title }: { packages: Doc
           </div>
           <div>
             <h2 className="font-semibold text-sm">{title || "Dokumentasi Jamaah"}</h2>
-            <p className="text-xs text-muted-foreground">Foto & video dokumentasi perjalanan umroh</p>
+            <p className="text-xs text-muted-foreground">Foto & video dokumentasi perjalanan umrah</p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

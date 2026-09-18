@@ -122,7 +122,7 @@ export default function DashboardOverview() {
               <Search className="w-5 h-5 text-emerald-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Cari Paket Umroh</p>
+              <p className="font-semibold text-sm">Cari Paket umrah</p>
               <p className="text-xs text-muted-foreground mt-0.5">Temukan paket terbaik untuk Anda</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-600 transition-colors" />
@@ -207,7 +207,7 @@ export default function DashboardOverview() {
                     <BookOpen className="w-4 h-4 text-emerald-600" />
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
-                    <p className="text-sm font-medium truncate">{booking.package?.name || "Paket Umroh"}</p>
+                    <p className="text-sm font-medium truncate">{booking.package?.name || "Paket umrah"}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     </p>

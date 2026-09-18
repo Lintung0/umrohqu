@@ -74,7 +74,7 @@ export default function ArticlesPage() {
       <div className="bg-emerald-600 text-white py-16 px-6">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <h1 className="text-3xl font-bold">Blog & Artikel</h1>
-          <p className="text-emerald-100">Tips, panduan, dan informasi seputar umroh</p>
+          <p className="text-emerald-100">Tips, panduan, dan informasi seputar umrah</p>
         </div>
       </div>
 

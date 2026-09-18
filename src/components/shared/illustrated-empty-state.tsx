@@ -28,7 +28,7 @@ const VARIANTS: Record<EmptyVariant, VariantConfig> = {
   packages: {
     icon: Package,
     title: "Belum ada paket",
-    desc: "Tambahkan paket umroh pertama Anda untuk mulai menerima pesanan.",
+    desc: "Tambahkan paket umrah pertama Anda untuk mulai menerima pesanan.",
     cta: { label: "Buat Paket Baru", href: "/travel-dashboard/packages/new" },
   },
   bookings: {

@@ -20,8 +20,8 @@ const QUICK_CATEGORIES = [
   { label: "Semua", preset: {} },
   { label: "Bulan Ramadhan", preset: { month: "Ramadhan" } },
   { label: "Promo Terbaik", preset: { cost: "< Rp 25 Juta" } },
-  { label: "Umroh Reguler", preset: { type: "reguler" } },
-  { label: "Umroh VIP", preset: { type: "vip" } },
+  { label: "umrah Reguler", preset: { type: "reguler" } },
+  { label: "umrah VIP", preset: { type: "vip" } },
   { label: "Haji Furoda", preset: { type: "furoda" } },
 ]
 
@@ -461,7 +461,7 @@ function SearchContent() {
                   onChange={(e) => handleSearchInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
                   onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true) }}
-                  aria-label="Cari paket umroh"
+                  aria-label="Cari paket umrah"
                   className={`w-full pl-5 ${searchInput ? "pr-10" : "pr-4"} h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all`}
                 />
                 {searchInput && !loadingCitySuggestions && (
@@ -508,7 +508,7 @@ function SearchContent() {
             </div>
             <button
               onClick={handleSearchSubmit}
-              aria-label="Cari paket umroh"
+              aria-label="Cari paket umrah"
               className="w-11 h-11 shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70"
             >
               <Search className="w-5 h-5" />

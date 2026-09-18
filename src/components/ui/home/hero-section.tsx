@@ -95,7 +95,7 @@ export default function HeroSection() {
             <div className="animate-fade-in-up">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 text-white/80 text-xs font-medium tracking-wide backdrop-blur-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Layanan Umroh & Haji Terpercaya
+                Layanan umrah & Haji Terpercaya
               </span>
             </div>
 
@@ -205,7 +205,7 @@ export default function HeroSection() {
                 <button
                   type="submit"
                   className="w-full sm:w-auto h-11 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/25 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-emerald-600/30 cursor-pointer"
-                  aria-label="Cari paket umroh"
+                  aria-label="Cari paket umrah"
                 >
                   <Search className="w-4 h-4" />
                   <span className="hidden sm:inline text-sm">Cari</span>

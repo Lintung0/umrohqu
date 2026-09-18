@@ -571,7 +571,7 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
           <Scale className="w-8 h-8 text-white" />
         </div>
         <h3 className="font-semibold text-lg mb-2 text-zinc-800">Belum ada paket dibandingkan</h3>
-        <p className="text-sm text-muted-foreground mb-8">Pilih hingga {MAX_COMPARE} paket umroh untuk menemukan yang terbaik versi Anda</p>
+        <p className="text-sm text-muted-foreground mb-8">Pilih hingga {MAX_COMPARE} paket umrah untuk menemukan yang terbaik versi Anda</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
           {Array.from({ length: MAX_COMPARE }).map((_, slotIdx) => (

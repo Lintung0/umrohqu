@@ -38,7 +38,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
             </div>
           )}
           <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight">{tenant.name}</h1>
-          <p className="text-lg text-white/70 max-w-xl mx-auto mb-6">{tenant.description || "Biro perjalanan umroh & haji terpercaya"}</p>
+          <p className="text-lg text-white/70 max-w-xl mx-auto mb-6">{tenant.description || "Biro perjalanan umrah & haji terpercaya"}</p>
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-white/50">
             {tenant.city && <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full"><MapPin className="w-3.5 h-3.5" /> {tenant.city}</span>}
             {tenant.phone && <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full"><Phone className="w-3.5 h-3.5" /> {tenant.phone}</span>}
@@ -69,7 +69,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
       {/* Packages */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-gray-900">Paket Umroh Terbaik</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Paket umrah Terbaik</h2>
           <p className="text-muted-foreground mt-2 max-w-md mx-auto">Pilih paket perjalanan ibadah terbaik dari {tenant.name}</p>
           <div className="mt-4 w-16 h-1 mx-auto rounded-full" style={{ background: `linear-gradient(90deg, ${primary}, ${secondary})` }} />
         </div>
@@ -85,7 +85,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
               <Plane className="w-7 h-7" style={{ color: primary }} />
             </div>
             <p className="text-lg font-medium text-gray-900">Belum Ada Paket</p>
-            <p className="text-sm text-muted-foreground mt-1">Paket umroh akan segera tersedia</p>
+            <p className="text-sm text-muted-foreground mt-1">Paket umrah akan segera tersedia</p>
           </div>
         )}
       </section>

@@ -17,8 +17,8 @@ const FALLBACK_TESTIMONIALS = [
     city: "Jakarta",
     avatar: "https://ui-avatars.com/api/?name=Siti+Rahayu&background=E8F5EE&color=2A7D4F&size=80&bold=true",
     rating: 5,
-    package: "Umroh Reguler 12 Hari",
-    comment: "Alhamdulillah, perjalanan umroh kami sangat lancar. Pelayanan dari awal booking sampai kepulangan sangat memuaskan.",
+    package: "umrah Reguler 12 Hari",
+    comment: "Alhamdulillah, perjalanan umrah kami sangat lancar. Pelayanan dari awal booking sampai kepulangan sangat memuaskan.",
   },
   {
     id: "t-2",
@@ -26,7 +26,7 @@ const FALLBACK_TESTIMONIALS = [
     city: "Surabaya",
     avatar: "https://ui-avatars.com/api/?name=Agus+Santoso&background=E8F5EE&color=2A7D4F&size=80&bold=true",
     rating: 5,
-    package: "Umroh VIP Plus Turki",
+    package: "umrah VIP Plus Turki",
     comment: "Paket VIP benar-benar worth it. Hotel dekat Masjidil Haram, muthawwif berpengalaman, dan semua fasilitas terjaga.",
   },
   {
@@ -35,7 +35,7 @@ const FALLBACK_TESTIMONIALS = [
     city: "Bandung",
     avatar: "https://ui-avatars.com/api/?name=Fatimah+Noor&background=E8F5EE&color=2A7D4F&size=80&bold=true",
     rating: 5,
-    package: "Umroh Hemat Muharram",
+    package: "umrah Hemat Muharram",
     comment: "Harga terjangkau tapi kualitas tidak murahan. Booking mudah, pembayaran aman, status perjalanan bisa dipantau.",
   },
 ]
@@ -188,7 +188,7 @@ export function TestimonialSection() {
               const { data: pkgs } = await supabase.from("packages").select("id, name").in("id", pkgIds)
               const rawPkgMap = new Map<string, string>()
               ;(pkgs || []).forEach((p: any) => rawPkgMap.set(p.id, p.name))
-              bookingToPkg.forEach((pkgId, bid) => { pkgMap[bid] = rawPkgMap.get(pkgId) || "Umroh" })
+              bookingToPkg.forEach((pkgId, bid) => { pkgMap[bid] = rawPkgMap.get(pkgId) || "umrah" })
             }
           }
           const mapped = data.map((r: any) => ({
@@ -197,7 +197,7 @@ export function TestimonialSection() {
             city: "Indonesia",
             avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(nameMap[r.customer_id] || "U")}&background=E8F5EE&color=2A7D4F&size=80&bold=true`,
             rating: r.rating,
-            package: r.booking_id ? (pkgMap[r.booking_id] || "Umroh") : "Umroh",
+            package: r.booking_id ? (pkgMap[r.booking_id] || "umrah") : "umrah",
             comment: r.review || "Paket bagus, pelayanan memuaskan.",
           }))
           setTestimonials(mapped)

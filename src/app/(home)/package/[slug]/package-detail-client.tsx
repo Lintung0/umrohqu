@@ -184,7 +184,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
         if (item && typeof item === "object") {
           let description = String(item.description || item.details || item.text || "")
-            // 1. Hapus SEMUA "Hari ke-N" dan "Hari N" dari mana saja (global) — INI YANG KUNCI biar "UMROH AWAL MUSIM Hari ke-1" jadi bersih
+            // 1. Hapus SEMUA "Hari ke-N" dan "Hari N" dari mana saja (global) — INI YANG KUNCI biar "umrah AWAL MUSIM Hari ke-1" jadi bersih
             .replace(/hari\s*ke\s*\d+/gi, "")
             // 2. Ekstra hapus "Hari1"/"Hari 1" tanpa "ke"
             .replace(/\bHari\d+\b/gi, "")
