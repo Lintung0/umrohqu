@@ -31,13 +31,11 @@ function loadCompare(): Package[] {
 }
 
 export function CompareProvider({ children }: { children: React.ReactNode }) {
-  const [comparePackages, setComparePackages] = useState<Package[]>([])
-  const [hydrated, setHydrated] = useState(false)
-
-  useEffect(() => {
-    setComparePackages(loadCompare())
-    setHydrated(true)
-  }, [])
+  // Lazily hydrated from localStorage during render instead of via a
+  // mount effect; `hydrated` starts true on the client so the persist effect
+  // below keeps working unchanged.
+  const [comparePackages, setComparePackages] = useState<Package[]>(() => loadCompare())
+  const [hydrated] = useState(() => typeof window !== "undefined")
 
   useEffect(() => {
     if (hydrated) localStorage.setItem(COMPARE_KEY, JSON.stringify(comparePackages))

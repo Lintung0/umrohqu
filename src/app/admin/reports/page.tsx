@@ -20,6 +20,11 @@ interface RevenueRow {
   bookings: number
 }
 
+interface BookingRevenueRow {
+  total: number | null
+  created_at: string
+}
+
 export default function AdminReportsPage() {
   const [tenants, setTenants] = useState<TenantRow[]>([])
   const [revenue, setRevenue] = useState<RevenueRow[]>([])
@@ -43,7 +48,7 @@ export default function AdminReportsPage() {
 
       if (bkgs) {
         const monthly: Record<string, { revenue: number; bookings: number }> = {}
-        bkgs.forEach((b: any) => {
+        bkgs.forEach((b: BookingRevenueRow) => {
           const date = new Date(b.created_at)
           const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
           if (!monthly[key]) monthly[key] = { revenue: 0, bookings: 0 }

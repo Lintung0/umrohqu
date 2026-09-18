@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Banknote, CheckCircle2, Clock, Landmark, RefreshCcw, ShieldCheck, Wallet, X, XCircle } from "lucide-react"
+import { Banknote, CheckCircle2, Clock, Landmark, RefreshCcw, ShieldCheck, Wallet, X, XCircle, type LucideIcon } from "lucide-react"
 import { formatRupiah } from "@/lib/constants"
 
 interface ClaimRow {
@@ -47,7 +47,7 @@ const BANK_OPTIONS = [
   { code: "016", name: "Maybank" },
 ]
 
-const STATUS_META: Record<string, { label: string; cls: string; icon: any }> = {
+const STATUS_META: Record<string, { label: string; cls: string; icon: LucideIcon }> = {
   pending: { label: "Menunggu Review", cls: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300", icon: Clock },
   approved: { label: "Disetujui", cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300", icon: CheckCircle2 },
   paid: { label: "Sudah Dicairkan", cls: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300", icon: Wallet },
@@ -100,8 +100,36 @@ export default function CashbackPage() {
   }, [router])
 
   useEffect(() => {
-    load()
-  }, [load])
+    // Mount fetch as an async continuation: every setState below runs only
+    // after an await (never synchronously at effect start). `load` is kept
+    // for the claim modal where a sync setLoading is fine.
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch("/api/cashback/requests?mine=1")
+        if (cancelled) return
+        if (!res.ok) {
+          if (res.status === 401) {
+            router.push("/login")
+            return
+          }
+          throw new Error("Gagal memuat data")
+        }
+        const data: MineResponse = await res.json()
+        if (!cancelled) {
+          setRows(data.data || [])
+          setTotals(data.totals || {})
+        }
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Terjadi kesalahan")
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [router])
 
   const openClaim = (b: BookingRow) => {
     setError("")

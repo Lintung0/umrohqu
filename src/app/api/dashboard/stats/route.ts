@@ -224,10 +224,10 @@ export async function GET() {
         newLastWeek: newMitraLastWeek,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Dashboard Stats API Error:", error);
     return NextResponse.json(
-      { error: error.message || "Gagal memuat statistik dashboard" },
+      { error: error instanceof Error && error.message ? error.message : "Gagal memuat statistik dashboard" },
       { status: 500 },
     );
   }

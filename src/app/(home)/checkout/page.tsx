@@ -21,14 +21,22 @@ function CheckoutContent() {
 
   const [pkg, setPkg] = useState<Package | null>(null)
   const [travel, setTravel] = useState<Tenant | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Derived during render via lazy initializers: when the slug param is
+  // missing the page is already in its error state, so the fetch effect below
+  // never has to setState synchronously at its start.
+  const [loading, setLoading] = useState(() => !!packageSlug)
+  const [error, setError] = useState<string | null>(() => (!packageSlug ? "Parameter slug tidak ditemukan." : null))
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ success: boolean; bookingId?: string; error?: string } | null>(null)
 
   const [step, setStep] = useState(0)
   const [pilgrimCount, setPilgrimCount] = useState(1)
-  const [pilgrims, setPilgrims] = useState<Array<{ full_name: string; phone: string; relation: string; gender: string }>>([])
+  // Lazily start with one empty pilgrim entry so the array never needs an
+  // effect to mirror pilgrimCount; count changes go through
+  // handlePilgrimCountChange below which updates both pieces of state together.
+  const [pilgrims, setPilgrims] = useState<Array<{ full_name: string; phone: string; relation: string; gender: string }>>(() => [
+    { full_name: "", phone: "", relation: "self", gender: "" },
+  ])
   const [paymentType, setPaymentType] = useState<"full" | "dp">("full")
   const [dpPercentage, setDpPercentage] = useState(30)
   const [notes, setNotes] = useState("")
@@ -45,8 +53,6 @@ function CheckoutContent() {
   // Fetch package data
   useEffect(() => {
     if (!packageSlug) {
-      setLoading(false)
-      setError("Parameter slug tidak ditemukan.")
       return
     }
 
@@ -68,15 +74,15 @@ function CheckoutContent() {
           return
         }
 
-        if (pkgData.status === "ongoing" || getPackageAvailable(pkgData as any) <= 0) {
+        if (pkgData.status === "ongoing" || getPackageAvailable(pkgData) <= 0) {
           setError("Paket ini tidak bisa dipesan karena sedang berlangsung atau kursi sudah penuh.")
           setLoading(false)
           return
         }
 
-        const enriched = await enrichPackagesWithDetail(supabase, [pkgData as any])
-        setPkg((enriched?.[0] as any) || (pkgData as any))
-        setTravel((pkgData as any).travel as Tenant || null)
+        const enriched = await enrichPackagesWithDetail(supabase, [pkgData as Package])
+        setPkg(enriched?.[0] ?? (pkgData as Package))
+        setTravel((pkgData as Package & { travel?: Tenant | null }).travel ?? null)
         setLoading(false)
       } catch {
         if (!cancelled) {
@@ -90,16 +96,18 @@ function CheckoutContent() {
     return () => { cancelled = true }
   }, [packageSlug, supabase])
 
-  // Sync pilgrim array with pilgrimCount
-  useEffect(() => {
+  // Keep the pilgrim array in sync with the count in the same event handler
+  // instead of chaining a sync effect.
+  const handlePilgrimCountChange = useCallback((n: number) => {
+    setPilgrimCount(n)
     setPilgrims((prev) => {
       const next = [...prev]
-      while (next.length < pilgrimCount) {
+      while (next.length < n) {
         next.push({ full_name: "", phone: "", relation: "self", gender: "" })
       }
-      return next.slice(0, pilgrimCount)
+      return next.slice(0, n)
     })
-  }, [pilgrimCount])
+  }, [])
 
   const totalPrice = useMemo(() => pkg ? Number(pkg.price) * pilgrimCount : 0, [pkg, pilgrimCount])
   const dpAmount = useMemo(() => paymentType === "dp" ? Math.round(totalPrice * dpPercentage / 100) : totalPrice, [paymentType, totalPrice, dpPercentage])
@@ -250,7 +258,7 @@ function CheckoutContent() {
                 pkg={pkg}
                 travel={travel}
                 pilgrimCount={pilgrimCount}
-                setPilgrimCount={setPilgrimCount}
+                setPilgrimCount={handlePilgrimCountChange}
                 pilgrims={pilgrims}
                 updatePilgrim={updatePilgrim}
                 allPilgrimsFilled={allPilgrimsFilled}

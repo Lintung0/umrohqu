@@ -48,7 +48,7 @@ export async function PATCH(req: NextRequest) {
   const { id, role, status } = await req.json()
   if (!id) return Response.json({ error: "ID diperlukan" }, { status: 400 })
 
-  const updateData: any = {}
+  const updateData: { role?: string; status?: string } = {}
   if (role) updateData.role = role
   if (status) updateData.status = status
 

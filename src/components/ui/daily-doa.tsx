@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useMemo } from "react"
 import { BookOpen } from "lucide-react"
 
 interface DailyContent {
@@ -81,9 +81,8 @@ const DAILY_HADITS: DailyContent[] = [
 ]
 
 export default function DailyDoa() {
-  const [content, setContent] = useState<DailyContent | null>(null)
-
-  useEffect(() => {
+  // Derived during render: the day-based pick is pure computation, no effect needed.
+  const content: DailyContent | null = useMemo(() => {
     const today = new Date()
     const dayOfYear = Math.floor(
       (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
@@ -91,7 +90,7 @@ export default function DailyDoa() {
 
     const allContent = [...DAILY_DOAS, ...DAILY_HADITS]
     const index = dayOfYear % allContent.length
-    setContent(allContent[index])
+    return allContent[index] ?? null
   }, [])
 
   if (!content) return null

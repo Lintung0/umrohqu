@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { User as UserIcon, Lock, Save, Loader2 } from "lucide-react"
@@ -9,7 +9,7 @@ import { toast } from "sonner"
 import { useTranslation } from "@/lib/i18n"
 
 export default function TravelSettingsPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const { t } = useTranslation()
   const [_user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
@@ -39,7 +39,7 @@ export default function TravelSettingsPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function handleSaveProfile() {
     if (!tenantId) return

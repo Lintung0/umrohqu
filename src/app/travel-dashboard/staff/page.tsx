@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { Search, UserPlus, Shield, Mail, Phone, X, Loader2, UserX, UserCheck } from "lucide-react"
@@ -40,7 +40,7 @@ function getRoleLabel(role: string) {
 }
 
 export default function TravelStaffPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [_user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [staff, setStaff] = useState<StaffMember[]>([])
@@ -74,7 +74,7 @@ export default function TravelStaffPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   const filtered = staff.filter((s) => {
     const q = searchQuery.toLowerCase()

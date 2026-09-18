@@ -1,6 +1,8 @@
 // ─── Service Abstraction Layer ────────────────────────────────────────────────
 // Generic CRUD interface and providers for data access.
 
+import type { SupabaseClient } from "@supabase/supabase-js"
+
 export interface ServiceConfig {
   apiBaseUrl: string
   supabaseUrl?: string
@@ -10,12 +12,12 @@ export interface ServiceConfig {
 // ─── Generic CRUD Interface ──────────────────────────────────────────────────
 
 export interface DataProvider<T, ID = string> {
-  findAll(filter?: Record<string, any>): Promise<T[]>
+  findAll(filter?: Record<string, unknown>): Promise<T[]>
   findById(id: ID): Promise<T | null>
   create(data: Omit<T, "id">): Promise<T>
   update(id: ID, data: Partial<T>): Promise<T>
   delete(id: ID): Promise<boolean>
-  count(filter?: Record<string, any>): Promise<number>
+  count(filter?: Record<string, unknown>): Promise<number>
 }
 
 // ─── In-Memory Provider ─────────────────────────────────────────────────────
@@ -27,12 +29,12 @@ export class InMemoryProvider<T extends { id: string }> implements DataProvider<
     this.data = [...initialData]
   }
 
-  async findAll(filter?: Record<string, any>): Promise<T[]> {
+  async findAll(filter?: Record<string, unknown>): Promise<T[]> {
     if (!filter) return [...this.data]
     return this.data.filter((item) => {
       return Object.entries(filter).every(([key, value]) => {
         if (value === undefined || value === null || value === "") return true
-        return (item as any)[key] === value
+        return (item as Record<string, unknown>)[key] === value
       })
     })
   }
@@ -61,7 +63,7 @@ export class InMemoryProvider<T extends { id: string }> implements DataProvider<
     return true
   }
 
-  async count(filter?: Record<string, any>): Promise<number> {
+  async count(filter?: Record<string, unknown>): Promise<number> {
     return (await this.findAll(filter)).length
   }
 }
@@ -70,20 +72,20 @@ export class InMemoryProvider<T extends { id: string }> implements DataProvider<
 
 export class SupabaseProvider<T extends { id: string }> implements DataProvider<T> {
   private tableName: string
-  private supabase: any // Will be SupabaseClient when integrated
+  private supabase: SupabaseClient | undefined // Will be configured when integrated
 
-  constructor(tableName: string, supabaseClient?: any) {
+  constructor(tableName: string, supabaseClient?: SupabaseClient) {
     this.tableName = tableName
     this.supabase = supabaseClient
   }
 
-  async findAll(filter?: Record<string, any>): Promise<T[]> {
+  async findAll(filter?: Record<string, unknown>): Promise<T[]> {
     if (!this.supabase) throw new Error("Supabase not configured")
     let query = this.supabase.from(this.tableName).select("*")
     if (filter) {
       Object.entries(filter).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
-          query = query.eq(key, value)
+          query = query.eq(key, value as string | number | boolean)
         }
       })
     }
@@ -107,7 +109,7 @@ export class SupabaseProvider<T extends { id: string }> implements DataProvider<
     if (!this.supabase) throw new Error("Supabase not configured")
     const { data: created, error } = await this.supabase
       .from(this.tableName)
-      .insert(data)
+      .insert(data as T)
       .select()
       .single()
     if (error) throw error
@@ -118,7 +120,7 @@ export class SupabaseProvider<T extends { id: string }> implements DataProvider<
     if (!this.supabase) throw new Error("Supabase not configured")
     const { data: updated, error } = await this.supabase
       .from(this.tableName)
-      .update(data)
+      .update(data as T)
       .eq("id", id)
       .select()
       .single()
@@ -135,13 +137,13 @@ export class SupabaseProvider<T extends { id: string }> implements DataProvider<
     return !error
   }
 
-  async count(filter?: Record<string, any>): Promise<number> {
+  async count(filter?: Record<string, unknown>): Promise<number> {
     if (!this.supabase) throw new Error("Supabase not configured")
     let query = this.supabase.from(this.tableName).select("*", { count: "exact", head: true })
     if (filter) {
       Object.entries(filter).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
-          query = query.eq(key, value)
+          query = query.eq(key, value as string | number | boolean)
         }
       })
     }

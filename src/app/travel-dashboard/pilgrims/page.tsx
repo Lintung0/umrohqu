@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { Search, Phone } from "lucide-react"
@@ -19,8 +19,25 @@ interface PilgrimRow {
   package_name: string | null
 }
 
+interface BookingRef {
+  id: string
+  status: string
+  package: { name: string } | null
+}
+
+interface ParticipantRow {
+  id: string
+  full_name: string
+  national_id: string | null
+  passport_number: string | null
+  gender: string | null
+  phone: string | null
+  relation: string
+  booking_id: string
+}
+
 export default function TravelPilgrimsPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [_user, setUser] = useState<User | null>(null)
   const [_tenantId, setTenantId] = useState<string | null>(null)
   const [pilgrims, setPilgrims] = useState<PilgrimRow[]>([])
@@ -43,23 +60,25 @@ export default function TravelPilgrimsPage() {
         .eq("tenant_id", profile.tenant_id)
         .is("deleted_at", null)
 
-      if (!bookings || bookings.length === 0) {
+      const bookingsList = (bookings as unknown as BookingRef[]) || []
+      if (bookingsList.length === 0) {
         setLoading(false)
         return
       }
 
-      const bookingIds = bookings.map((b: any) => b.id)
+      const bookingIds = bookingsList.map((b) => b.id)
       const { data: participantData } = await supabase
         .from("booking_participants")
         .select("id, full_name, national_id, passport_number, gender, phone, relation, booking_id")
         .in("booking_id", bookingIds)
 
-      const enriched = (participantData || []).map((p: any) => {
-        const booking = bookings.find((b: any) => b.id === p.booking_id)
+      const participants = (participantData as unknown as ParticipantRow[]) || []
+      const enriched: PilgrimRow[] = participants.map((p) => {
+        const booking = bookingsList.find((b) => b.id === p.booking_id)
         return {
           ...p,
-          booking_status: (booking as any)?.status || "unknown",
-          package_name: (booking as any)?.package?.name || null,
+          booking_status: booking?.status || "unknown",
+          package_name: booking?.package?.name || null,
         }
       })
 
@@ -67,7 +86,7 @@ export default function TravelPilgrimsPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   const filtered = pilgrims.filter((p) => {
     const q = searchQuery.toLowerCase()

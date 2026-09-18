@@ -118,14 +118,16 @@ export default function PrayerTimeWidget() {
     }
 
     getPrayers()
+  }, [])
+
+  useEffect(() => {
+    if (prayers.length === 0) return
     const interval = setInterval(() => {
-      if (prayers.length > 0) {
-        setCurrentPrayer(getCurrentPrayer(prayers))
-      }
+      setCurrentPrayer(getCurrentPrayer(prayers))
     }, 60000)
 
     return () => clearInterval(interval)
-  }, [prayers.length])
+  }, [prayers])
 
   if (loading) {
     return (

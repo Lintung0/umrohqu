@@ -20,7 +20,27 @@ function FinishContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const [view, setView] = useState<ViewState>({ kind: "loading", title: "", description: "", bookingId: null })
+  // Derived during render (no effect): query params are the source of truth.
+  const bookingId = searchParams.get("booking_id")
+  const midtransStatus = searchParams.get("transaction_status")
+  const manualStatus = searchParams.get("status")
+
+  // Lazily start in "processing" when a booking id is present so the effect
+  // below never has to setState synchronously at its start.
+  const [view, setView] = useState<ViewState>(() =>
+    bookingId
+      ? { kind: "processing", title: "Memproses Pembayaran", description: "Kami sedang memverifikasi status pembayaran Anda...", bookingId }
+      : { kind: "loading", title: "", description: "", bookingId: null },
+  )
+
+  // Derived during render: the missing-param error view needs no state/effect.
+  const missingView: ViewState = {
+    kind: "error",
+    title: "Data Tidak Ditemukan",
+    description: "Parameter booking tidak tersedia. Silakan kembali ke halaman booking Anda.",
+    bookingId: null,
+  }
+  const currentView = bookingId ? view : missingView
 
   const verify = useCallback(
     async (bookingId: string) => {
@@ -36,19 +56,12 @@ function FinishContent() {
   )
 
   useEffect(() => {
-    const bookingId = searchParams.get("booking_id")
-    const midtransStatus = searchParams.get("transaction_status")
-    const manualStatus = searchParams.get("status")
-
     if (!bookingId) {
-      setView({ kind: "error", title: "Data Tidak Ditemukan", description: "Parameter booking tidak tersedia. Silakan kembali ke halaman booking Anda.", bookingId: null })
       return
     }
 
     const isSuccessFromMidtrans = SUCCESS_STATUSES.includes(midtransStatus || "")
     const isCanceledFromMidtrans = ["deny", "cancel", "expire"].includes(midtransStatus || "") || manualStatus === "error"
-
-    setView({ kind: "processing", title: "Memproses Pembayaran", description: "Kami sedang memverifikasi status pembayaran Anda...", bookingId })
 
     ;(async () => {
       try {
@@ -75,36 +88,36 @@ function FinishContent() {
         setView({ kind: "pending", title: "Menunggu Konfirmasi", description: "Kami gagal memverifikasi pembayaran saat ini. Cek status booking Anda dalam beberapa saat.", bookingId })
       }
     })()
-  }, [searchParams, verify, router])
+  }, [bookingId, midtransStatus, manualStatus, verify, router])
 
   const Icon =
-    view.kind === "success" ? CheckCircle
-    : view.kind === "pending" || view.kind === "processing" ? Clock
-    : view.kind === "canceled" ? XCircle
+    currentView.kind === "success" ? CheckCircle
+    : currentView.kind === "pending" || currentView.kind === "processing" ? Clock
+    : currentView.kind === "canceled" ? XCircle
     : AlertCircle
 
   const iconColor =
-    view.kind === "success" ? "bg-emerald-100 text-emerald-600"
-    : view.kind === "pending" || view.kind === "processing" ? "bg-amber-100 text-amber-600"
-    : view.kind === "canceled" ? "bg-red-100 text-red-500"
+    currentView.kind === "success" ? "bg-emerald-100 text-emerald-600"
+    : currentView.kind === "pending" || currentView.kind === "processing" ? "bg-amber-100 text-amber-600"
+    : currentView.kind === "canceled" ? "bg-red-100 text-red-500"
     : "bg-red-100 text-red-500"
 
   return (
     <main className="min-h-screen bg-zinc-50/50 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-4">
         <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${iconColor}`}>
-          {view.kind === "processing" ? (
+          {currentView.kind === "processing" ? (
             <Loader2 className="w-8 h-8 animate-spin" />
           ) : (
             <Icon className="w-8 h-8" />
           )}
         </div>
-        <h2 className="text-xl font-bold text-slate-900">{view.title}</h2>
-        <p className="text-sm text-slate-500 leading-relaxed">{view.description}</p>
+        <h2 className="text-xl font-bold text-slate-900">{currentView.title}</h2>
+        <p className="text-sm text-slate-500 leading-relaxed">{currentView.description}</p>
 
-        {view.bookingId && (
+        {currentView.bookingId && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link href={`/dashboard/bookings/${view.bookingId}`}>
+            <Link href={`/dashboard/bookings/${currentView.bookingId}`}>
               <Button className="gap-2 px-6 h-12 bg-emerald-600 hover:bg-emerald-700">
                 Lihat Status Booking <ChevronRight className="w-4 h-4" />
               </Button>
@@ -117,7 +130,7 @@ function FinishContent() {
           </div>
         )}
 
-        {view.kind === "success" && (
+        {currentView.kind === "success" && (
           <p className="text-xs text-slate-400 animate-pulse">Mengarahkan dalam beberapa saat...</p>
         )}
       </div>

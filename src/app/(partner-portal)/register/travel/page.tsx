@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -397,7 +398,7 @@ export default function RegisterTravelPage() {
                 <InputField label="Logo Resmi Travel" icon={Building2}>
                   {form.logo_url ? (
                     <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/50 px-3 py-2.5">
-                      <img src={form.logo_url} alt="Logo" className="h-12 w-12 rounded-lg object-cover ring-2 ring-white shadow-sm" />
+                      <Image src={form.logo_url} alt="Logo" width={48} height={48} unoptimized className="h-12 w-12 rounded-lg object-cover ring-2 ring-white shadow-sm" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900">Logo terupload</p>
                         <a href={form.logo_url} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-600 hover:underline">

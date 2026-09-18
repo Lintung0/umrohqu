@@ -9,6 +9,7 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { useTranslation } from "@/lib/i18n"
 import { Ban, X } from "lucide-react"
+import type { User } from "@supabase/supabase-js"
 
 const CANCEL_REASONS = [
   "Perubahan jadwal pribadi",
@@ -21,6 +22,8 @@ const CANCEL_REASONS = [
 interface BookingDetail {
   id: string
   status: string
+  customer_id: string
+  gateway_invoice_id: string | null
   pilgrim_count: number
   price: number
   total: number
@@ -59,7 +62,7 @@ export default function BookingDetailPage() {
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [authChecked, setAuthChecked] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [_showCancelModal, _setShowCancelModal] = useState(false)
 
   // Track auth state with onAuthStateChange — handles hydration delay after Xendit redirect
@@ -89,7 +92,7 @@ export default function BookingDetailPage() {
 
       const selectFields = "*, package:packages(name, slug, departure_city, duration_nights), participants:booking_participants(id, full_name, national_id, passport_number, gender, phone, relation)"
 
-      let bookingData: any = null
+      let bookingData: BookingDetail | null = null
 
       // Step 1: ALWAYS try API first (uses admin client, bypasses RLS)
       try {
@@ -103,8 +106,8 @@ export default function BookingDetailPage() {
         if (res.ok) {
           bookingData = result.data
         }
-      } catch (e: any) {
-        console.log("[DEBUG BOOKING LOAD] API fetch failed:", e?.message)
+      } catch (e: unknown) {
+        console.log("[DEBUG BOOKING LOAD] API fetch failed:", e instanceof Error ? e.message : e)
       }
 
       // Step 2: If API failed and user is logged in, try client-side Supabase query

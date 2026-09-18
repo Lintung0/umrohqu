@@ -32,6 +32,23 @@ interface GeoapifySuggestion {
   formatted: string
 }
 
+interface GeoapifyFeature {
+  properties: {
+    city?: string
+    name?: string
+    country?: string
+    country_code?: string
+    formatted?: string
+  }
+}
+
+interface BidRow {
+  tenant_id: string
+  bid_value: number | null
+  impressions: number | null
+  clicks: number | null
+}
+
 function SearchContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -73,13 +90,17 @@ function SearchContent() {
   const [searchInput, setSearchInput] = useState(searchQuery)
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
-  useEffect(() => {
-    setSearchInput(searchParams.get("search") ?? "")
-  }, [searchParams.get("search")])
-
-  useEffect(() => {
+  const searchParamsString = searchParams.toString()
+  const [prevSearchParam, setPrevSearchParam] = useState(searchQuery)
+  if (prevSearchParam !== searchQuery) {
+    setPrevSearchParam(searchQuery)
+    setSearchInput(searchQuery)
+  }
+  const [prevSearchParamsString, setPrevSearchParamsString] = useState(searchParamsString)
+  if (prevSearchParamsString !== searchParamsString) {
+    setPrevSearchParamsString(searchParamsString)
     setPage(1)
-  }, [searchParams.toString()])
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -125,7 +146,7 @@ function SearchContent() {
       const data = await res.json()
 
       const results: GeoapifySuggestion[] = (data.features || [])
-        .map((f: any) => ({
+        .map((f: GeoapifyFeature) => ({
           name: f.properties.city || f.properties.name || "",
           country: f.properties.country || "",
           country_code: f.properties.country_code || "",
@@ -260,14 +281,14 @@ function SearchContent() {
               .eq("status", "active")
 
             if (bids && bids.length > 0) {
-              const entries = bids.map((b: any) => ({
+              const entries = bids.map((b: BidRow) => ({
                 travelId: b.tenant_id,
                 factors: {
                   bidScore: b.bid_value || 0,
                   rating: 0,
                   reviewCount: 0,
                   totalBookings: 0,
-                  conversionRate: b.impressions > 0 ? (b.clicks / b.impressions) * 100 : 0,
+                  conversionRate: (b.impressions ?? 0) > 0 ? ((b.clicks ?? 0) / (b.impressions ?? 1)) * 100 : 0,
                   isVerified: tenantMap.get(b.tenant_id)?.is_verified ?? false,
                   hasPromo: false,
                   sponsored: false,
@@ -379,14 +400,14 @@ function SearchContent() {
 
   const hasActiveFilters = Boolean(departure || country || month || cost || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
 
-  const activeFilterChips: { label: string; onRemove: () => void }[] = []
-  if (departure) activeFilterChips.push({ label: departure, onRemove: () => setDeparture("") })
-  if (country) activeFilterChips.push({ label: getAseanCountryByCode(country)?.name || country, onRemove: () => setCountry("") })
-  if (month) activeFilterChips.push({ label: month, onRemove: () => setMonth("") })
-  if (cost && cost !== "Semua Biaya") activeFilterChips.push({ label: cost, onRemove: () => setCost("") })
-  if (type !== "semua") activeFilterChips.push({ label: type, onRemove: () => setType("semua") })
-  if (duration) activeFilterChips.push({ label: duration, onRemove: () => setDuration("") })
-  if (searchQuery) activeFilterChips.push({ label: `"${searchQuery}"`, onRemove: () => handleSearchInput("") })
+  const activeFilterChips: { id: string; label: string; onRemove: () => void }[] = []
+  if (departure) activeFilterChips.push({ id: "departure", label: departure, onRemove: () => setDeparture("") })
+  if (country) activeFilterChips.push({ id: "country", label: getAseanCountryByCode(country)?.name || country, onRemove: () => setCountry("") })
+  if (month) activeFilterChips.push({ id: "month", label: month, onRemove: () => setMonth("") })
+  if (cost && cost !== "Semua Biaya") activeFilterChips.push({ id: "cost", label: cost, onRemove: () => setCost("") })
+  if (type !== "semua") activeFilterChips.push({ id: "type", label: type, onRemove: () => setType("semua") })
+  if (duration) activeFilterChips.push({ id: "duration", label: duration, onRemove: () => setDuration("") })
+  if (searchQuery) activeFilterChips.push({ id: "search", label: `"${searchQuery}"`, onRemove: () => {} })
 
   if (loading) {
     return (
@@ -579,10 +600,10 @@ function SearchContent() {
         {/* Active Filter Chips */}
         {activeFilterChips.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-5">
-            {activeFilterChips.map((chip, i) => (
-              <span key={i} className="inline-flex items-center gap-1.5 pl-3 pr-0 py-1 bg-white text-emerald-800 text-xs font-medium rounded-full border border-emerald-200 shadow-sm">
+            {activeFilterChips.map((chip) => (
+              <span key={chip.id} className="inline-flex items-center gap-1.5 pl-3 pr-0 py-1 bg-white text-emerald-800 text-xs font-medium rounded-full border border-emerald-200 shadow-sm">
                 {chip.label}
-                <button onClick={chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="-my-1 p-1.5 flex items-center justify-center min-w-8 min-h-8 text-emerald-500 hover:text-emerald-900 hover:bg-emerald-50 rounded-full transition-colors cursor-pointer">
+                <button onClick={chip.id === "search" ? () => handleSearchInput("") : chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="-my-1 p-1.5 flex items-center justify-center min-w-8 min-h-8 text-emerald-500 hover:text-emerald-900 hover:bg-emerald-50 rounded-full transition-colors cursor-pointer">
                   <X className="w-3 h-3" />
                 </button>
               </span>

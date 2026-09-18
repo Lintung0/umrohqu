@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { formatRupiah } from "@/lib/utils"
@@ -11,6 +11,7 @@ import {
   RotateCcw, X,
 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { toast } from "sonner"
 import type { Booking, Package } from "@/lib/types"
 import { useTranslation } from "@/lib/i18n"
@@ -45,7 +46,7 @@ export default function TravelBookingDetailPage() {
   const _router = useRouter()
   const { t } = useTranslation()
   const id = params.id as string
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const STATUS_MAP: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
     pending: { label: t("booking.status_pending"), color: "text-amber-600", bg: "bg-amber-50 border-amber-200", icon: <Clock className="w-4 h-4" /> },
@@ -76,17 +77,18 @@ export default function TravelBookingDetailPage() {
         .single()
 
       if (!error && data) {
-        const enriched = await enrichPackagesWithCovers(supabase, data.packages ? [data.packages] : [])
-        setBooking({ ...(data as BookingDetail), packages: (enriched?.[0] as Package) || (data as any).packages })
+        const bookingData = data as unknown as BookingDetail
+        const enriched = await enrichPackagesWithCovers(supabase, bookingData.packages ? [bookingData.packages] : [])
+        setBooking({ ...bookingData, packages: enriched?.[0] || bookingData.packages })
       }
       setLoading(false)
     }
     fetchBooking()
-  }, [id])
+  }, [id, supabase])
 
   const updateStatus = async (newStatus: string) => {
     setUpdating(true)
-    const updateData: Record<string, any> = { status: newStatus }
+    const updateData: Record<string, string> = { status: newStatus }
     if (newStatus === "confirmed" || newStatus === "cancelled") {
       const action = newStatus === "confirmed" ? "confirm" : "cancel"
       const res = await fetch("/api/booking/travel-confirm", {
@@ -208,9 +210,12 @@ export default function TravelBookingDetailPage() {
               <h2 className="font-semibold mb-4">{t("travel_dashboard.package")}</h2>
               <div className="flex gap-4">
                 {booking.packages.image_url && (
-                  <img
+                  <Image
                     src={booking.packages.image_url}
                     alt={booking.packages.name}
+                    width={96}
+                    height={96}
+                    unoptimized
                     className="w-24 h-24 rounded-xl object-cover"
                   />
                 )}

@@ -29,9 +29,13 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  // Mirror external `value` changes during render (render-phase update, the
+  // sanctioned alternative to a syncing effect) instead of setInput in useEffect.
+  const [prevValue, setPrevValue] = useState(value)
+  if (prevValue !== value) {
+    setPrevValue(value)
     setInput(value)
-  }, [value])
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {

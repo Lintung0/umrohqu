@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import { User } from "@supabase/supabase-js"
@@ -11,6 +11,7 @@ import { formatRupiah } from "@/lib/utils"
 import { PACKAGE_STATUS_BADGES } from "@/lib/constants"
 import { toast } from "sonner"
 import { getTravelTenantId } from "@/lib/get-travel-tenant"
+import type { Package as PackageRecord } from "@/lib/types"
 
 interface TravelPackage {
   id: string
@@ -23,13 +24,13 @@ interface TravelPackage {
   departure_date: string | null
   duration_nights: number | null
   airline: string | null
-  hotel_info: any
+  hotel_info: Record<string, unknown> | null
   image_url: string | null
   doc_drive_link: string | null
 }
 
 export default function TravelPackagesPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [_user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [packages, setPackages] = useState<TravelPackage[]>([])
@@ -54,12 +55,12 @@ export default function TravelPackagesPage() {
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
 
-      const enriched = await enrichPackagesWithCovers(supabase, (data as any) || [])
-      setPackages((enriched as any) || [])
+      const enriched = await enrichPackagesWithCovers(supabase, (data as unknown as PackageRecord[]) || [])
+      setPackages((enriched as unknown as TravelPackage[]) || [])
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   // Realtime: refetch list when packages change
   useEffect(() => {
@@ -76,8 +77,8 @@ export default function TravelPackagesPage() {
             .eq("tenant_id", tenantId)
             .is("deleted_at", null)
             .order("created_at", { ascending: false })
-          const enriched = await enrichPackagesWithCovers(supabase, (data as any) || [])
-          setPackages((enriched as any) || [])
+          const enriched = await enrichPackagesWithCovers(supabase, (data as unknown as PackageRecord[]) || [])
+          setPackages((enriched as unknown as TravelPackage[]) || [])
         }
       )
       .subscribe()
@@ -188,7 +189,6 @@ export default function TravelPackagesPage() {
             </Link>
           </div>
         ) : filtered.map((pkg) => {
-          const _hotelInfo = (pkg.hotel_info || {}) as any
           return (
             <div key={pkg.id} className="bg-white rounded-2xl border border-border overflow-hidden group">
               <div className="relative h-40 overflow-hidden">

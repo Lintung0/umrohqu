@@ -1,6 +1,32 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 
+interface BookingPackageRef {
+  name: string | null
+  slug: string | null
+}
+
+interface EligibleBookingRow {
+  id: string
+  status: string
+  created_at: string
+  cashback_amount: number | null
+  package: BookingPackageRef | BookingPackageRef[] | null
+}
+
+interface CashbackClaimSummary {
+  id: string
+  amount: number
+  status: string
+  bank_code: string | null
+  account_number: string | null
+  account_holder_name: string | null
+  failure_reason: string | null
+  claimed_at: string | null
+  disbursed_at: string | null
+  iris_reference_no: string | null
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -54,7 +80,7 @@ export async function GET(request: NextRequest) {
     }
 
     const eligible = (bookings || [])
-      .map((b: any) => {
+      .map((b: EligibleBookingRow) => {
         const pkg = Array.isArray(b.package) ? b.package[0] : b.package
         const cashbackAmount = Number(b.cashback_amount || 0)
         return {
@@ -68,7 +94,7 @@ export async function GET(request: NextRequest) {
       })
       .filter((b) => b.cashback_amount > 0)
 
-    const claimMap: Record<string, any> = {}
+    const claimMap: Record<string, CashbackClaimSummary> = {}
     for (const c of claims || []) {
       claimMap[c.booking_id as string] = {
         id: c.id,

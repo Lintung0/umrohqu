@@ -22,8 +22,9 @@ import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
 import { getSeatAvailability, getPackageAvailable } from "@/lib/utils"
 import { useCompare } from "@/lib/compare-context"
 import type { Package as PackageType } from "@/lib/types"
+import type { LucideIcon } from "lucide-react"
 
-interface PackageDetail {
+export interface PackageDetail {
   id: string
   name: string
   slug: string
@@ -39,11 +40,11 @@ interface PackageDetail {
   departure_date: string | null
   duration_nights: number | null
   airline: string | null
-  hotel_info: any
-  facilities: any
-  includes: any
-  excludes: any
-  itinerary: any
+  hotel_info: Record<string, unknown> | null
+  facilities: unknown
+  includes: unknown
+  excludes: unknown
+  itinerary: unknown
   status: string
   image_url: string | null
   tenant_id: string
@@ -55,7 +56,7 @@ interface PackageDetail {
   travel: { id: string; name: string; slug: string; is_verified?: boolean; logo_url?: string | null; city?: string | null; description?: string | null; phone?: string | null; contact_email?: string | null } | null
 }
 
-interface ReviewRow {
+export interface ReviewRow {
   id: string
   rating: number
   review: string | null
@@ -66,6 +67,12 @@ interface ReviewRow {
 interface GalleryItem {
   url: string
   type: "image" | "video"
+}
+
+interface ItineraryItem {
+  day: number
+  title: string
+  description: string
 }
 
 interface Props {
@@ -90,7 +97,7 @@ function RatingBar({ star, count, total }: { star: number; count: number; total:
   )
 }
 
-function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; label: string; value: string; color?: string }) {
+function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: LucideIcon; label: string; value: string; color?: string }) {
   const colorMap: Record<string, string> = {
     primary: "from-primary/10 to-emerald-50 text-primary",
     amber: "from-amber-100 to-orange-50 text-amber-600",
@@ -122,7 +129,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
     const channel = supabase
       .channel(`package-${pkg.id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "packages", filter: `id=eq.${pkg.id}` }, (payload) => {
-        if (payload.new && (payload.new as any).id === pkg.id) {
+        if (payload.new && (payload.new as Record<string, unknown>).id === pkg.id) {
           setLivePkg((payload.new as unknown) as PackageDetail)
         }
       })
@@ -172,19 +179,29 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
     count: initialReviews.filter((r) => r.rating === star).length,
   }))
 
-  const _hotelInfo = (pkg.hotel_info || {}) as any
-  const facilitiesList: string[] = Array.isArray(pkg.facilities) ? pkg.facilities : []
-  const includesList: string[] = Array.isArray(pkg.includes) ? pkg.includes : (typeof pkg.facilities === "object" && pkg.facilities?.includes ? pkg.facilities.includes : [])
-  const excludesList: string[] = Array.isArray(pkg.excludes) ? pkg.excludes : (typeof pkg.facilities === "object" && pkg.facilities?.excludes ? pkg.facilities.excludes : [])
+  const _hotelInfo: Record<string, unknown> = pkg.hotel_info ?? {}
+  const toStringList = (value: unknown): string[] =>
+    Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : []
+  const extractNestedList = (value: unknown, key: string): string[] => {
+    if (value !== null && typeof value === "object") {
+      const inner = (value as Record<string, unknown>)[key]
+      if (Array.isArray(inner)) return inner.filter((v): v is string => typeof v === "string")
+    }
+    return []
+  }
+  const facilitiesList: string[] = toStringList(pkg.facilities)
+  const includesList: string[] = Array.isArray(pkg.includes) ? toStringList(pkg.includes) : extractNestedList(pkg.facilities, "includes")
+  const excludesList: string[] = Array.isArray(pkg.excludes) ? toStringList(pkg.excludes) : extractNestedList(pkg.facilities, "excludes")
   const cleanItineraryTitle = (raw: string) =>
     raw.replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "").trim()
 
-  const parseItinerary = (raw: any): { day: number; title: string; description: string }[] => {
+  const parseItinerary = (raw: unknown): ItineraryItem[] => {
     if (Array.isArray(raw)) {
-      return raw.map((item: any, idx: number) => {
+      return raw.map((item: unknown, idx: number) => {
         if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
         if (item && typeof item === "object") {
-          const description = String(item.description || item.details || item.text || "")
+          const record = item as Record<string, unknown>
+          const description = String(record.description || record.details || record.text || "")
             // 1. Hapus SEMUA "Hari ke-N" dan "Hari N" dari mana saja (global) — INI YANG KUNCI biar "UMROH AWAL MUSIM Hari ke-1" jadi bersih
             .replace(/hari\s*ke\s*\d+/gi, "")
             // 2. Ekstra hapus "Hari1"/"Hari 1" tanpa "ke"
@@ -196,8 +213,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             // 5. Trim sisa spasi
             .trim()
           return {
-            day: Number(item.day) || idx + 1,
-            title: cleanItineraryTitle(item.title ? String(item.title) : ""),
+            day: Number(record.day) || idx + 1,
+            title: cleanItineraryTitle(record.title ? String(record.title) : ""),
             description,
           }
         }
@@ -305,7 +322,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   async function toggleWishlist() {
     setTogglingWishlist(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { window.location.href = "/login"; return }
+    if (!user) { router.push("/login"); return }
 
     if (isWishlisted && wishlistId) {
       await supabase.from("wishlists").delete().eq("id", wishlistId)
@@ -326,10 +343,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   async function handleCheckout() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      window.location.href = `/login?redirect_to=${encodeURIComponent(`/checkout?slug=${pkg.slug}`)}`
+      router.push(`/login?redirect_to=${encodeURIComponent(`/checkout?slug=${pkg.slug}`)}`)
       return
     }
-    window.location.href = `/checkout?slug=${pkg.slug}`
+    router.push(`/checkout?slug=${pkg.slug}`)
   }
 
   function handleShare() {

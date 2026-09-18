@@ -224,8 +224,8 @@ export async function POST(_request: NextRequest) {
           .update({ gateway_reference: orderId })
           .eq("id", paymentId)
       }
-    } catch (serr: any) {
-      console.error("Midtrans Snap error:", serr.message)
+    } catch (serr: unknown) {
+      console.error("Midtrans Snap error:", serr instanceof Error ? serr.message : serr)
     }
 
     return NextResponse.json({

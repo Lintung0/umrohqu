@@ -55,8 +55,10 @@ export default function JadwalSholatPage() {
   }, [])
 
   useEffect(() => {
-    fetchTimes(city)
-  }, [])
+    ;(async () => {
+      await fetchTimes("Jakarta")
+    })()
+  }, [fetchTimes])
 
   useEffect(() => {
     if (!times) return

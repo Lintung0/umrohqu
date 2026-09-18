@@ -1,6 +1,5 @@
 const DEPLOY_PATH = "/www/wwwroot/UmrahQu-Marketplace";
 const NODE_BIN = "/www/server/nvm/versions/node/v24.21.0/bin/node";
-const PM2_BIN = "/www/server/nvm/versions/node/v24.21.0/bin/pm2";
 
 module.exports = {
   apps: [

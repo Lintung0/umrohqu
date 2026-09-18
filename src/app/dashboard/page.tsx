@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
@@ -8,11 +8,23 @@ import { BookOpen, Heart, Package, Clock, Search, ChevronRight, Calendar, Bell, 
 import StatCard from "@/components/shared/stat-card"
 import { getStatusColor, getStatusLabel } from "@/lib/constants"
 
+interface RecentBooking {
+  id: string
+  status: string
+  total: number
+  created_at: string
+  package: { name: string; slug: string } | null
+}
+
+interface BookingStatusRow {
+  status: string
+}
+
 export default function DashboardOverview() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [user, setUser] = useState<User | null>(null)
   const [stats, setStats] = useState({ bookings: 0, wishlist: 0, completed: 0 })
-  const [recentBookings, setRecentBookings] = useState<any[]>([])
+  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -28,13 +40,13 @@ export default function DashboardOverview() {
             supabase.from("wishlists").select("id", { count: "exact" }).eq("user_id", user.id),
           ])
 
-          const allBookings = allBookingsRes.data || []
-          setRecentBookings(bookingsRes.data || [])
+          const allBookings = (allBookingsRes.data as unknown as BookingStatusRow[]) || []
+          setRecentBookings((bookingsRes.data as unknown as RecentBooking[]) || [])
 
           setStats({
-            bookings: allBookings.filter((b: any) => b.status === "pending_payment" || b.status === "confirmed").length,
+            bookings: allBookings.filter((b) => b.status === "pending_payment" || b.status === "confirmed").length,
             wishlist: wishlistRes.count || 0,
-            completed: allBookings.filter((b: any) => b.status === "completed").length,
+            completed: allBookings.filter((b) => b.status === "completed").length,
           })
         }
       } catch (error) {
@@ -44,7 +56,7 @@ export default function DashboardOverview() {
       }
     }
     load()
-  }, [])
+  }, [supabase])
 
   if (loading) {
     return (
@@ -192,7 +204,7 @@ export default function DashboardOverview() {
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {recentBookings.map((booking: any) => (
+              {recentBookings.map((booking) => (
                 <Link
                   key={booking.id}
                   href={`/dashboard/bookings/${booking.id}`}

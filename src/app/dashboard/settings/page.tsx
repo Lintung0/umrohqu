@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTheme } from "next-themes"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
@@ -42,7 +42,7 @@ function Cloud({ fill, className, opacity = 1 }: { fill: string; className?: str
 
 export default function SettingsPage() {
   const { t } = useTranslation()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const { theme, setTheme } = useTheme()
   const isDark = theme === "dark"
   const [tab, setTab] = useState<"account" | "appearance">("account")
@@ -62,7 +62,7 @@ export default function SettingsPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase.auth])
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()

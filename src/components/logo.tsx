@@ -1,4 +1,5 @@
 "use client"
+import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -17,7 +18,7 @@ const Logo = ({
 
   if (type === "icon") {
     return (
-      <img
+      <Image
         width={40}
         height={40}
         alt="Logo UmrahQu"

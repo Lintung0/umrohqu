@@ -10,6 +10,33 @@ import type { Tenant } from "@/lib/types"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import LogoMarquee from "@/components/shared/logo-marquee"
 
+interface TestimonialReviewRow {
+  id: string
+  rating: number
+  review: string | null
+  customer_id: string | null
+  booking_id: string | null
+}
+
+interface UserNameRow {
+  id: string
+  full_name: string | null
+}
+
+interface BookingPackageIdRow {
+  id: string
+  package_id: string | null
+}
+
+interface PackageNameRow {
+  id: string
+  name: string
+}
+
+interface RatingOnlyRow {
+  rating: number | null
+}
+
 const FALLBACK_TESTIMONIALS = [
   {
     id: "t-1",
@@ -171,31 +198,31 @@ export function TestimonialSection() {
           .order("created_at", { ascending: false })
           .limit(3)
         if (data && data.length > 0) {
-          const userIds = [...new Set(data.map((r: any) => r.customer_id).filter(Boolean))]
+          const userIds = [...new Set(data.map((r: TestimonialReviewRow) => r.customer_id).filter(Boolean))]
           let nameMap: Record<string, string> = {}
           if (userIds.length > 0) {
             const { data: users } = await supabase.from("users").select("id, full_name").in("id", userIds)
-            if (users) nameMap = Object.fromEntries(users.map((u: any) => [u.id, u.full_name]))
+            if (users) nameMap = Object.fromEntries(users.map((u: UserNameRow) => [u.id, u.full_name ?? ""]))
           }
-          const bookingIds = [...new Set(data.map((r: any) => r.booking_id).filter(Boolean))]
+          const bookingIds = [...new Set(data.map((r: TestimonialReviewRow) => r.booking_id).filter(Boolean))]
           const pkgMap: Record<string, string> = {}
           if (bookingIds.length > 0) {
             const { data: bookings } = await supabase.from("bookings").select("id, package_id").in("id", bookingIds)
             const bookingToPkg = new Map<string, string>()
-            ;(bookings || []).forEach((b: any) => { if (b.package_id) bookingToPkg.set(b.id, b.package_id) })
-            const pkgIds = [...new Set((bookings || []).map((b: any) => b.package_id).filter(Boolean))]
+            ;(bookings || []).forEach((b: BookingPackageIdRow) => { if (b.package_id) bookingToPkg.set(b.id, b.package_id) })
+            const pkgIds = [...new Set((bookings || []).map((b: BookingPackageIdRow) => b.package_id).filter(Boolean))]
             if (pkgIds.length > 0) {
               const { data: pkgs } = await supabase.from("packages").select("id, name").in("id", pkgIds)
               const rawPkgMap = new Map<string, string>()
-              ;(pkgs || []).forEach((p: any) => rawPkgMap.set(p.id, p.name))
+              ;(pkgs || []).forEach((p: PackageNameRow) => rawPkgMap.set(p.id, p.name))
               bookingToPkg.forEach((pkgId, bid) => { pkgMap[bid] = rawPkgMap.get(pkgId) || "Umroh" })
             }
           }
-          const mapped = data.map((r: any) => ({
+          const mapped = data.map((r: TestimonialReviewRow) => ({
             id: r.id,
             name: r.customer_id ? (nameMap[r.customer_id] || "Pengguna") : "Pengguna",
             city: "Indonesia",
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(nameMap[r.customer_id] || "U")}&background=E8F5EE&color=2A7D4F&size=80&bold=true`,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(nameMap[r.customer_id ?? ""] || "U")}&background=E8F5EE&color=2A7D4F&size=80&bold=true`,
             rating: r.rating,
             package: r.booking_id ? (pkgMap[r.booking_id] || "Umroh") : "Umroh",
             comment: r.review || "Paket bagus, pelayanan memuaskan.",
@@ -224,13 +251,13 @@ export function TestimonialSection() {
               key={item.id}
               className="group relative flex flex-col gap-4 p-5 sm:p-6 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
-              <span className="absolute -top-1 right-4 text-6xl font-serif text-emerald-200/70 leading-none select-none" aria-hidden="true">"</span>
+              <span className="absolute -top-1 right-4 text-6xl font-serif text-emerald-200/70 leading-none select-none" aria-hidden="true">&quot;</span>
               <div className="flex gap-0.5">
                 {Array.from({ length: item.rating }).map((_, i) => (
                   <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400 drop-shadow-[0_1px_2px_rgba(251,191,36,0.4)]" />
                 ))}
               </div>
-              <p className="text-sm text-gray-600 leading-relaxed flex-1">"{item.comment}"</p>
+              <p className="text-sm text-gray-600 leading-relaxed flex-1">&quot;{item.comment}&quot;</p>
               <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
                 <div className="p-[2px] rounded-full bg-gradient-to-br from-emerald-500 to-amber-400">
                   <Image
@@ -356,7 +383,7 @@ export function StatsSection() {
         supabase.from("reviews").select("rating").limit(100),
       ])
       const allRatings = reviewsRes.data || []
-      const avg = allRatings.length > 0 ? allRatings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / allRatings.length : 4.9
+      const avg = allRatings.length > 0 ? allRatings.reduce((s: number, r: RatingOnlyRow) => s + (r.rating || 0), 0) / allRatings.length : 4.9
       setStats({
         travelCount: tenantsRes.count || 0,
         packageCount: packagesRes.count || 0,

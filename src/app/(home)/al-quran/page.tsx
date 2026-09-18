@@ -102,9 +102,9 @@ export default function AlQuranPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
             <BookOpen className="w-3.5 h-3.5" />
-            Al-Qur'an Digital
+            Al-Qur&apos;an Digital
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-emerald-900 mb-2">Al-Qur'an</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-emerald-900 mb-2">Al-Qur&apos;an</h1>
           <p className="text-muted-foreground text-sm">Baca 114 surah lengkap dengan terjemahan & audio</p>
         </div>
 

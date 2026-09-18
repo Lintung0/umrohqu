@@ -12,6 +12,12 @@ interface BookingRow {
   status: string
 }
 
+interface FeeConfigRow {
+  id: string
+  service_fee_percent: number | null
+  service_fee_flat: number | null
+}
+
 export default function AdminServiceFeesPage() {
   const [configId, setConfigId] = useState<string | null>(null)
   const [percent, setPercent] = useState(2)
@@ -30,9 +36,10 @@ export default function AdminServiceFeesPage() {
         .single()
 
       if (feeConfig) {
-        setConfigId(feeConfig.id)
-        setPercent((feeConfig as any).service_fee_percent || 2)
-        setFlatFee((feeConfig as any).service_fee_flat || 250000)
+        const config = feeConfig as FeeConfigRow
+        setConfigId(config.id)
+        setPercent(config.service_fee_percent || 2)
+        setFlatFee(config.service_fee_flat || 250000)
       }
 
       const { data: bkgs } = await supabase

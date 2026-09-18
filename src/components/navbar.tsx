@@ -48,7 +48,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [notifUnread, setNotifUnread] = useState(0)
+  const [storedNotifUnread, setStoredNotifUnread] = useState(0)
   const router = useRouter()
   const { t } = useTranslation()
   const { compareCount } = useCompare()
@@ -96,7 +96,6 @@ const Navbar = () => {
 
   useEffect(() => {
     if (!user) {
-      setNotifUnread(0)
       return
     }
     let cancelled = false
@@ -107,12 +106,16 @@ const Navbar = () => {
       .eq("user_id", user.id)
       .eq("is_read", false)
       .then(({ count }) => {
-        if (!cancelled) setNotifUnread(count || 0)
+        if (!cancelled) setStoredNotifUnread(count || 0)
       })
     return () => {
       cancelled = true
     }
   }, [user])
+
+  // Derived during render: no unread badge without a user, and the reset on
+  // logout happens implicitly instead of via setState in the effect above.
+  const notifUnread = user ? storedNotifUnread : 0
 
   const handleLogout = async () => {
     const supabase = createClient()

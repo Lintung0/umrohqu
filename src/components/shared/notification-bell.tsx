@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -20,7 +20,7 @@ interface AppNotification {
 }
 
 export default function NotificationBell() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<AppNotification[]>([])
@@ -30,7 +30,7 @@ export default function NotificationBell() {
 
   const ActiveIcon = items.length > 0 && unread > 0 ? BellRing : Bell
 
-  async function load() {
+  const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       setItems([])
@@ -50,16 +50,18 @@ export default function NotificationBell() {
     setItems(rows)
     setUnread(rows.filter((n) => !n.is_read).length)
     setLoaded(true)
-  }
+  }, [supabase])
 
   useEffect(() => {
-    load()
+    ;(async () => {
+      await load()
+    })()
     const onDoc = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener("mousedown", onDoc)
     return () => document.removeEventListener("mousedown", onDoc)
-  }, [])
+  }, [load])
 
   async function markAllRead() {
     const { data: { user } } = await supabase.auth.getUser()

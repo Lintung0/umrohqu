@@ -54,7 +54,16 @@ export default function AdminTemplatesPage() {
   }, [])
 
   useEffect(() => {
-    fetchTemplates().finally(() => setLoading(false))
+    // Mount fetch as an async continuation: setLoading(false) runs only after
+    // the fetch resolves, never synchronously at effect start.
+    let cancelled = false
+    ;(async () => {
+      await fetchTemplates()
+      if (!cancelled) setLoading(false)
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [fetchTemplates])
 
   // Realtime subscription

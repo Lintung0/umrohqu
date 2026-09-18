@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { PasswordInput } from "@/components/auth/password-input"
@@ -27,16 +27,15 @@ function LoginForm() {
   const [password, setPassword] = useState("")
   const [errors, setErrors] = useState<LoginErrors>({})
   const [loading, setLoading] = useState(false)
-  const [authError, setAuthError] = useState("")
 
   const supabase = createClient()
   const searchParams = useSearchParams()
 
-  useEffect(() => {
-    if (searchParams.get("error") === "auth_callback_error") {
-      setAuthError(t.auth.auth_error_google)
-    }
-  }, [searchParams, t.auth.auth_error_google])
+  // Derived during render: mirror the auth-callback error query param into
+  // the initial form error instead of syncing it via an effect.
+  const [authError, setAuthError] = useState(() =>
+    searchParams.get("error") === "auth_callback_error" ? t.auth.auth_error_google : "",
+  )
 
   const validate = () => {
     const result = loginSchema.safeParse({ email, password })

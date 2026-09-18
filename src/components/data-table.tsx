@@ -76,7 +76,7 @@ interface TaskRow {
 }
 
 interface DataTableProps {
-  data?: any;
+  data?: ActionCenterData | null;
 }
 
 export function DataTable({ data: _initialData }: DataTableProps) {
@@ -96,7 +96,7 @@ export function DataTable({ data: _initialData }: DataTableProps) {
       if (!res.ok) throw new Error("Gagal mengambil data Action Center");
       const json = await res.json();
       setData(json);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
     } finally {
       setLoading(false);
@@ -337,6 +337,9 @@ export function DataTable({ data: _initialData }: DataTableProps) {
     [],
   );
 
+  // TanStack's useReactTable returns memo-unsafe functions by design, so no
+  // structural fix exists that keeps the table working — suppress only this line.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: filteredRows,
     columns,
@@ -582,7 +585,7 @@ export function DataTable({ data: _initialData }: DataTableProps) {
                               Alasan:
                             </span>
                             <span className="col-span-2 text-foreground font-medium leading-relaxed font-sans">
-                              "{item.reason}"
+                              &quot;{item.reason}&quot;
                             </span>
                           </div>
                         </>

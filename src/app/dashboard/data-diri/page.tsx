@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { User, PostgrestError } from "@supabase/supabase-js"
@@ -43,7 +43,7 @@ const GENDER_OPTIONS = [
 ]
 
 export default function DataDiriPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
   const [authUser, setAuthUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -103,7 +103,7 @@ export default function DataDiriPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense, useMemo } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { X, Check, Scale, Award, Sparkles, TrendingDown, Star, Plus, Search, Loader2, Heart, Share2 } from "lucide-react"
@@ -39,8 +39,9 @@ function getFacilitiesList(facilities: unknown): string[] {
   if (!facilities) return []
   if (Array.isArray(facilities)) return facilities.map(String)
   if (typeof facilities === "object" && facilities !== null) {
-    if (Array.isArray((facilities as any).items)) {
-      return (facilities as any).items.map(String)
+    const items = (facilities as { items?: unknown }).items
+    if (Array.isArray(items)) {
+      return items.map(String)
     }
     const keys = Object.keys(facilities)
     if (keys.length === 0) return []
@@ -101,7 +102,8 @@ function SmartBadges({ scores, index }: { scores: ReturnType<typeof calcScore>[]
 }
 
 function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm" | "md" }) {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
+  const router = useRouter()
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [wishlistId, setWishlistId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -123,18 +125,18 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
       }
     })()
     return () => { active = false }
-  }, [pkg.id])
+  }, [pkg.id, supabase])
 
   async function toggleWishlist() {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { window.location.href = "/login"; return }
+    if (!user) { router.push("/login"); return }
     setBusy(true)
     if (isWishlisted && wishlistId) {
       const { error } = await supabase.from("wishlists").delete().eq("id", wishlistId)
       if (!error) {
         setIsWishlisted(false)
         setWishlistId(null)
-        toast.success("Dihapus dari wishlist", { action: { label: "Lihat Wishlist", onClick: () => { window.location.href = "/dashboard/wishlist" } } })
+        toast.success("Dihapus dari wishlist", { action: { label: "Lihat Wishlist", onClick: () => { router.push("/dashboard/wishlist") } } })
       }
     } else {
       const { data, error } = await supabase
@@ -145,7 +147,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
       if (!error && data) {
         setIsWishlisted(true)
         setWishlistId(data.id)
-        toast.success("Ditambahkan ke wishlist", { action: { label: "Lihat Wishlist", onClick: () => { window.location.href = "/dashboard/wishlist" } } })
+        toast.success("Ditambahkan ke wishlist", { action: { label: "Lihat Wishlist", onClick: () => { router.push("/dashboard/wishlist") } } })
       }
     }
     setBusy(false)

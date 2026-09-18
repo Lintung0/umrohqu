@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -12,7 +12,7 @@ interface TenantRow {
   contact_email: string | null
   status: string
   created_at: string
-  config: Record<string, any> | null
+  config: Record<string, string | number | boolean | null> | null
   logo_url: string | null
 }
 
@@ -56,23 +56,27 @@ function ProgressRing({ step, total = 5 }: { step: number; total?: number }) {
 }
 
 export default function AdminOnboardingPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [tenants, setTenants] = useState<TenantRow[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-  async function loadTenants() {
+  const loadTenants = useCallback(async () => {
     const { data } = await supabase
       .from("tenants")
       .select("id, name, slug, contact_email, status, created_at, config, logo_url")
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
-    setTenants((data as any) || [])
+    setTenants((data as unknown as TenantRow[]) || [])
     setLoading(false)
-  }
+  }, [supabase])
 
-  useEffect(() => { loadTenants() }, [])
+  useEffect(() => {
+    ;(async () => {
+      await loadTenants()
+    })()
+  }, [loadTenants])
 
   async function updateOnboardingStep(tenantId: string, newStep: number) {
     setUpdatingId(tenantId)

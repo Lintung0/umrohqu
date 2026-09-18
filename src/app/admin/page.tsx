@@ -1,12 +1,36 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Building2, BookOpen, TrendingUp, AlertTriangle, CheckCircle, Clock, ArrowRight, DollarSign, Zap } from "lucide-react"
 import Link from "next/link"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 
 const BRAND_PRIMARY = "#0E5C4E"
+
+interface AdminBookingRow {
+  id: string
+  status: string
+  total: number
+  pilgrim_count?: number
+  created_at?: string
+  package?: { name: string } | null
+  customer?: { full_name: string } | null
+}
+
+interface PendingTenantRow {
+  id: string
+  name: string
+  status: string
+  created_at: string
+  city?: string
+}
+
+interface BookingRevenueRow {
+  status: string
+  total: number | null
+  created_at?: string | null
+}
 
 function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
   const max = Math.max(...data.map((d) => d.gmv), 1)
@@ -53,10 +77,10 @@ function MiniChart({ data }: { data: { month: string; gmv: number }[] }) {
 }
 
 export default function AdminOverviewPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [stats, setStats] = useState({ travelCount: 0, bookingCount: 0, totalRevenue: 0, pendingTravel: 0 })
-  const [recentBookings, setRecentBookings] = useState<any[]>([])
-  const [pendingTravels, setPendingTravels] = useState<any[]>([])
+  const [recentBookings, setRecentBookings] = useState<AdminBookingRow[]>([])
+  const [pendingTravels, setPendingTravels] = useState<PendingTenantRow[]>([])
   const [chartData, setChartData] = useState<{ month: string; gmv: number }[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -71,11 +95,11 @@ export default function AdminOverviewPage() {
         ])
 
         const tenants = travelRes.data || []
-        const allBookings = allBookingsRes.data || []
+        const allBookings = (allBookingsRes.data as unknown as BookingRevenueRow[]) || []
         const REVENUE_STATUSES = ["processing", "confirmed", "completed"]
         const totalRevenue = allBookings
-          .filter((b: any) => REVENUE_STATUSES.includes(b.status))
-          .reduce((s: number, b: any) => s + (b.total || 0), 0)
+          .filter((b) => REVENUE_STATUSES.includes(b.status))
+          .reduce((s: number, b) => s + (b.total || 0), 0)
 
         setStats({
           travelCount: travelRes.data?.length || 0,
@@ -83,14 +107,15 @@ export default function AdminOverviewPage() {
           totalRevenue,
           pendingTravel: tenants.filter((t) => t.status === "pending").length,
         })
-        setRecentBookings(bookingRes.data || [])
+        setRecentBookings((bookingRes.data as unknown as AdminBookingRow[]) || [])
         setPendingTravels(pendingTravelRes.data || [])
 
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
         const revenueByMonth = new Map<string, number>()
         allBookings
-          .filter((b: any) => REVENUE_STATUSES.includes(b.status) && b.created_at)
-          .forEach((b: any) => {
+          .filter((b) => REVENUE_STATUSES.includes(b.status) && b.created_at)
+          .forEach((b) => {
+            if (!b.created_at) return
             const d = new Date(b.created_at)
             const key = monthNames[d.getMonth()]
             revenueByMonth.set(key, (revenueByMonth.get(key) || 0) + (b.total || 0))
@@ -110,7 +135,7 @@ export default function AdminOverviewPage() {
       }
     }
     load()
-  }, [])
+  }, [supabase])
 
   // Realtime: refresh stats when bookings/tenants change
   useEffect(() => {
@@ -121,11 +146,11 @@ export default function AdminOverviewPage() {
           supabase.from("bookings").select("id, total, status").is("deleted_at", null),
         ])
         const tenants = travelRes.data || []
-        const allBookings = allBookingsRes.data || []
+        const allBookings = (allBookingsRes.data as unknown as BookingRevenueRow[]) || []
         const REVENUE_STATUSES = ["processing", "confirmed", "completed"]
         const totalRevenue = allBookings
-          .filter((b: any) => REVENUE_STATUSES.includes(b.status))
-          .reduce((s: number, b: any) => s + (b.total || 0), 0)
+          .filter((b) => REVENUE_STATUSES.includes(b.status))
+          .reduce((s: number, b) => s + (b.total || 0), 0)
         setStats({
           travelCount: tenants.length,
           bookingCount: allBookings.length,
@@ -256,7 +281,7 @@ export default function AdminOverviewPage() {
           <div className="divide-y divide-border">
             {recentBookings.length === 0 ? (
               <p className="p-8 text-center text-muted-foreground text-sm">Belum ada booking</p>
-            ) : recentBookings.map((b: any) => (
+            ) : recentBookings.map((b) => (
               <div key={b.id} className="flex items-center gap-3 sm:gap-4 p-4 hover:bg-gray-50 transition-colors">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-xs font-bold text-primary shrink-0">
                   {(b.customer?.full_name || "P").charAt(0)}

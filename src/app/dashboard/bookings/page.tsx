@@ -29,7 +29,7 @@ interface BookingGroup {
 
 export default function BookingsPage() {
   const { t } = useTranslation()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [_user, setUser] = useState<User | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [filter, setFilter] = useState("semua")
@@ -47,12 +47,12 @@ export default function BookingsPage() {
           .eq("customer_id", user.id)
           .is("deleted_at", null)
           .order("created_at", { ascending: false })
-        setBookings((data as any) || [])
+        setBookings((data as unknown as BookingRow[]) || [])
       }
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   const filtered = useMemo(
     () => (filter === "semua" ? bookings : bookings.filter((b) => b.status === filter)),
@@ -86,10 +86,6 @@ export default function BookingsPage() {
   const startIndex = (currentPage - 1) * PAGE_SIZE
   const endIndex = Math.min(startIndex + PAGE_SIZE, filtered.length)
   const pageSlice = filtered.slice(startIndex, endIndex)
-
-  useEffect(() => {
-    setPage(1)
-  }, [filter])
 
   if (loading) {
     return (
@@ -152,7 +148,7 @@ export default function BookingsPage() {
         {BOOKING_STATUSES.map((s) => (
           <button
             key={s.value}
-            onClick={() => setFilter(s.value)}
+            onClick={() => { setFilter(s.value); setPage(1) }}
             className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
               filter === s.value
                 ? "bg-emerald-600 text-white shadow-sm"
