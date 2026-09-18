@@ -140,6 +140,9 @@ build:
       - .next/
       - node_modules/
       - ecosystem.config.js
+      - public/
+      - next.config.ts
+      - package.json
       - .env.production.local
     expire_in: 1 hour
 
@@ -192,6 +195,9 @@ deploy:
     - test -d node_modules/next
     - test -f node_modules/next/dist/bin/next
     - test -f ecosystem.config.js
+    - test -d public
+    - test -f next.config.ts
+    - test -f package.json
     - test -f .env.production.local
 
     - echo "Artifact validation OK"
@@ -207,10 +213,14 @@ deploy:
     - cp -a .next deploy/
     - cp -a node_modules deploy/
     - cp -a ecosystem.config.js deploy/
+    - cp -a public deploy/
+    - cp -a next.config.ts deploy/
+    - cp -a package.json deploy/
 
     - echo "=== Deploy directory ==="
     - du -sh deploy/.next
     - du -sh deploy/node_modules
+    - du -sh deploy/public
     - ls -lah deploy
 
 
@@ -317,6 +327,28 @@ deploy:
 
 
         echo ""
+        echo "[6] Public assets"
+
+        if [ -d "$DEPLOY_PATH/public" ]; then
+          echo "OK: public exists"
+        else
+          echo "ERROR: public NOT FOUND"
+          exit 1
+        fi
+
+
+        echo ""
+        echo "[7] Runtime config"
+
+        if [ -f "$DEPLOY_PATH/next.config.ts" ] && [ -f "$DEPLOY_PATH/package.json" ]; then
+          echo "OK: next.config.ts + package.json exist"
+        else
+          echo "ERROR: next.config.ts or package.json NOT FOUND"
+          exit 1
+        fi
+
+
+        echo ""
         echo "========================================"
         echo " FIXING PERMISSIONS"
         echo "========================================"
@@ -394,6 +426,15 @@ deploy:
         fi
 
         echo "Health OK"
+
+        # Static-asset guard: public/ must actually be served (regression trip
+        # for the missing-public incident — homepage can return 200 with broken images).
+        if ! sudo -u www node -e "fetch('http://localhost:3000/favicon.png').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"; then
+          echo "ERROR: static asset /favicon.png not served (public/ missing?)"
+          exit 1
+        fi
+
+        echo "Static assets OK"
 
         sudo -u www pm2 save
 
