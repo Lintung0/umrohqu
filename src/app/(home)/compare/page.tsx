@@ -597,21 +597,22 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
   return (
     <div className="pb-4">
       {insightLines.length > 0 && (
-        <div className="relative overflow-hidden rounded-2xl p-4 sm:p-5 mb-6 border border-white/60 bg-white/45 backdrop-blur-xl shadow-sm shadow-emerald-900/5 dark:border-emerald-400/20 dark:bg-emerald-950/30"
+        <div className="relative overflow-hidden rounded-2xl p-3 sm:p-5 mb-4 sm:mb-6 border border-white/60 bg-white/45 backdrop-blur-xl shadow-sm shadow-emerald-900/5 dark:border-emerald-400/20 dark:bg-emerald-950/30"
           style={{ backgroundImage: "var(--insight-card-bg)" }}>
           <div className="absolute inset-0 opacity-[0.05]"
             style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)", backgroundSize: "16px 16px" }}
             aria-hidden="true" />
-          <div className="relative flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-lg bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center">
+          <div className="relative flex items-center gap-2 mb-1.5 sm:mb-2">
+            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-emerald-600" />
             </span>
-            <span className="text-sm font-bold text-zinc-800 dark:text-zinc-50">Perbandingan Cerdas</span>
+            <span className="text-[13px] sm:text-sm font-bold text-zinc-800 dark:text-zinc-50">Perbandingan Cerdas</span>
           </div>
-          <ul className="relative space-y-1.5 mt-2">
+          <ul className="relative space-y-1">
             {insightLines.map((line, i) => (
               <li key={i} className="text-xs leading-relaxed text-zinc-600 dark:text-emerald-100/80 flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />{line}
+                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                <span className="line-clamp-1 sm:line-clamp-none">{line}</span>
               </li>
             ))}
           </ul>
