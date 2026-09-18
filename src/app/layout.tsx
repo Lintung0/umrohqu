@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
+import { SerwistProvider } from "@serwist/turbopack/react";
 import MobileBottomNav from "@/components/shared/mobile-bottom-nav";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -19,6 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  applicationName: "UmrahQu",
   title: {
     default: "UmrahQu - Teman Perjalanan Terbaikmu",
     template: "%s | UmrahQu",
@@ -26,7 +28,25 @@ export const metadata: Metadata = {
   description: "Teman Perjalanan Terbaikmu",
   icons: {
     icon: "/logo-icon.svg",
+    apple: [
+      { url: "/icons/apple-touch-icon-180x180.png", sizes: "180x180", type: "image/png" },
+    ],
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "UmrahQu",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#059669",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -44,7 +64,9 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          <SerwistProvider swUrl="/serwist/sw.js">{children}</SerwistProvider>
+        </Providers>
         <Toaster
           position="top-right"
           offset={80}
