@@ -1,14 +1,19 @@
 stages:
   - install
   - lint
+  - typecheck
   - build
   - deploy
+  - notify
 
 variables:
   DEPLOY_PATH: "/www/wwwroot/UmrahQu-Marketplace"
+  # Pinned images (bump quarterly). Digests resolved 2026-09-18.
+  NODE_IMAGE: "node:24@sha256:6dac556d980b7f0e5498d08f08cee0ca67798b4ad6c23964a9214920e67758d0"
+  ALPINE_IMAGE: "alpine:3.22@sha256:365499d9dccb7c8cfaffef995a6c382e71174585e0556f6476ead1c5971c39fb"
 
 default:
-  image: node:24
+  image: $NODE_IMAGE
   tags:
     - server5
 
@@ -75,6 +80,29 @@ lint:
 
 
 # ─────────────────────────────────────────────
+# TYPECHECK
+# ─────────────────────────────────────────────
+
+typecheck:
+  stage: typecheck
+
+  needs:
+    - job: install
+      artifacts: true
+
+  before_script:
+    - curl -fsSL https://bun.sh/install | bash -s "bun-v1.4.2"
+    - export PATH="$HOME/.bun/bin:$PATH"
+    - bun --version
+
+  script:
+    - bun run typecheck
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+
+# ─────────────────────────────────────────────
 # BUILD
 # ─────────────────────────────────────────────
 
@@ -85,6 +113,7 @@ build:
     - job: install
       artifacts: true
     - job: lint
+    - job: typecheck
 
   before_script:
     - curl -fsSL https://bun.sh/install | bash -s "bun-v1.4.2"
@@ -124,7 +153,15 @@ build:
 
 deploy:
   stage: deploy
-  image: alpine:latest
+  image: $ALPINE_IMAGE
+  resource_group: production-deploy
+  timeout: 30m
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - scheduler_failure
 
   needs:
     - job: build
@@ -291,6 +328,20 @@ deploy:
 
         echo ""
         echo "========================================"
+        echo " LEGACY CLEANUP"
+        echo "========================================"
+
+        # Stale stub manifest from the old rsync flow (Oct 2026 incident:
+        # .next/package.json overwrote the real manifest). The current flow
+        # never reads package.json on the server, so a tiny one is safely dead.
+        if [ -f "$DEPLOY_PATH/package.json" ] && [ "$(wc -c < "$DEPLOY_PATH/package.json")" -lt 100 ]; then
+          echo "Removing stale stub package.json"
+          rm -f "$DEPLOY_PATH/package.json"
+        fi
+
+
+        echo ""
+        echo "========================================"
         echo " PM2"
         echo "========================================"
 
@@ -319,6 +370,31 @@ deploy:
         echo ""
         echo "Saving PM2 process list..."
 
+        echo ""
+        echo "========================================"
+        echo " HEALTH CHECK"
+        echo "========================================"
+
+        # The app must answer on :3000 before the deploy is accepted.
+        # Uses the server Node (global fetch) so no curl dependency.
+        HEALTH_OK=0
+        for i in $(seq 1 12); do
+          if sudo -u www node -e "fetch('http://localhost:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"; then
+            HEALTH_OK=1
+            break
+          fi
+          echo "Waiting for app... ($i/12)"
+          sleep 5
+        done
+
+        if [ "$HEALTH_OK" != "1" ]; then
+          echo "ERROR: app did not become healthy on :3000 after reload"
+          sudo -u www pm2 status
+          exit 1
+        fi
+
+        echo "Health OK"
+
         sudo -u www pm2 save
 
 
@@ -342,3 +418,51 @@ deploy:
 
   environment:
     name: production
+
+
+# ─────────────────────────────────────────────
+# NOTIFY (Telegram)
+# Requires CI/CD variables (Settings → CI/CD → Variables,
+# masked + protected): TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID.
+# Missing vars => graceful skip so notify never fails the pipeline.
+# ─────────────────────────────────────────────
+
+.notify-base:
+  stage: notify
+  image: $ALPINE_IMAGE
+  tags:
+    - server5
+  before_script:
+    - apk add --no-cache curl
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+notify-failure:
+  extends: .notify-base
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_failure
+  script:
+    - |
+      if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] || [ -z "${TELEGRAM_CHAT_ID:-}" ]; then
+        echo "Telegram vars unset, skipping notification"
+        exit 0
+      fi
+      curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+        --data-urlencode "text=DEPLOY FAILED: ${CI_PROJECT_NAME} [${CI_COMMIT_BRANCH}] ${CI_COMMIT_SHORT_SHA} - ${CI_COMMIT_TITLE} | ${CI_PIPELINE_URL}" > /dev/null
+
+notify-success:
+  extends: .notify-base
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+  script:
+    - |
+      if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] || [ -z "${TELEGRAM_CHAT_ID:-}" ]; then
+        echo "Telegram vars unset, skipping notification"
+        exit 0
+      fi
+      curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+        --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+        --data-urlencode "text=DEPLOY OK: ${CI_PROJECT_NAME} [${CI_COMMIT_BRANCH}] ${CI_COMMIT_SHORT_SHA} - ${CI_COMMIT_TITLE} | ${CI_PIPELINE_URL}" > /dev/null

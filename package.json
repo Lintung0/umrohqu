@@ -7,7 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "eslint --max-warnings 0 --fix"
+    ]
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -51,6 +57,8 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9",
     "eslint-config-next": "^16.3.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
     "supabase": "^2.109.1",
     "tailwindcss": "^4",
     "typescript": "^5"
