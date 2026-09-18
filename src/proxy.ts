@@ -63,7 +63,7 @@ function isIpOrLocalhost(hostname: string): boolean {
   return false
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { hostname, protocol: _protocol } = request.nextUrl
   const { pathname } = request.nextUrl
 
