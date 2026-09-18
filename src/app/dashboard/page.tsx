@@ -112,65 +112,53 @@ export default function DashboardOverview() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
         <Link
           href="/search"
-          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-emerald-200"
+          className="group bg-white border border-border rounded-xl p-3 sm:p-5 flex flex-col items-center gap-2 text-center hover:shadow-md transition-all hover:border-emerald-200"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
-              <Search className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Cari Paket umrah</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Temukan paket terbaik untuk Anda</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-600 transition-colors" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
+            <Search className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-[11px] sm:text-sm leading-tight line-clamp-2">Cari Paket umrah</p>
+            <p className="hidden lg:block text-xs text-muted-foreground mt-0.5">Temukan paket terbaik untuk Anda</p>
           </div>
         </Link>
         <Link
           href="/dashboard/wishlist"
-          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-rose-200"
+          className="group bg-white border border-border rounded-xl p-3 sm:p-5 flex flex-col items-center gap-2 text-center hover:shadow-md transition-all hover:border-rose-200"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 group-hover:bg-rose-200 transition-colors">
-              <Heart className="w-5 h-5 text-rose-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Lihat Wishlist</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{stats.wishlist} paket yang Anda simpan</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-rose-600 transition-colors" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 group-hover:bg-rose-200 transition-colors">
+            <Heart className="w-5 h-5 text-rose-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-[11px] sm:text-sm leading-tight line-clamp-2">Lihat Wishlist</p>
+            <p className="hidden lg:block text-xs text-muted-foreground mt-0.5">{stats.wishlist} paket yang Anda simpan</p>
           </div>
         </Link>
         <Link
           href="/dashboard/notifications"
-          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-amber-200"
+          className="group bg-white border border-border rounded-xl p-3 sm:p-5 flex flex-col items-center gap-2 text-center hover:shadow-md transition-all hover:border-amber-200"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
-              <Bell className="w-5 h-5 text-amber-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Notifikasi</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Pengumuman dan pengingat perjalanan</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-amber-600 transition-colors" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
+            <Bell className="w-5 h-5 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-[11px] sm:text-sm leading-tight line-clamp-2">Notifikasi</p>
+            <p className="hidden lg:block text-xs text-muted-foreground mt-0.5">Pengumuman dan pengingat perjalanan</p>
           </div>
         </Link>
         <Link
           href="/dashboard/data-diri"
-          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-sky-200"
+          className="group bg-white border border-border rounded-xl p-3 sm:p-5 flex flex-col items-center gap-2 text-center hover:shadow-md transition-all hover:border-sky-200"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0 group-hover:bg-sky-200 transition-colors">
-              <UserRound className="w-5 h-5 text-sky-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Data Diri</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Lengkapi data pribadi jamaah</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-sky-600 transition-colors" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0 group-hover:bg-sky-200 transition-colors">
+            <UserRound className="w-5 h-5 text-sky-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-[11px] sm:text-sm leading-tight line-clamp-2">Data Diri</p>
+            <p className="hidden lg:block text-xs text-muted-foreground mt-0.5">Lengkapi data pribadi jamaah</p>
           </div>
         </Link>
       </div>
