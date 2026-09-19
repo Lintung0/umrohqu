@@ -7,7 +7,7 @@ import {
   TestimonialSection,
   TrustSection,
 } from "@/components/ui/home/extra-sections"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search, MapPin, Calendar, Building2, ChevronDown, Sparkles } from "lucide-react"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
@@ -31,12 +31,8 @@ function HeroSearch() {
   const router = useRouter()
   const [query, setQuery] = useState("")
   const [departureCity, setDepartureCity] = useState("")
-  const [country, setCountry] = useState("id")
+  const [country] = useState("id")
   const [selectedMonth, setSelectedMonth] = useState("")
-
-  useEffect(() => {
-    fetch("/api/user/country").then(r => r.json()).then(d => { if (d.country) setCountry(d.country) }).catch(() => {})
-  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

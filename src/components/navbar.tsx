@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Logo from "./logo"
-import { CompactLanguageSwitcher } from "@/components/shared/compact-language-switcher"
+
 import { LayoutDashboard, LogOut, ChevronDown, Menu, X, Scale, Bell } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -176,11 +176,6 @@ const Navbar = () => {
 
             <div className="w-px h-5 bg-slate-200 mx-0.5" />
 
-            {/* Compact Language Selector */}
-            <CompactLanguageSwitcher />
-
-            <div className="w-px h-5 bg-slate-200 mx-0.5" />
-
             {/* Auth */}
             {loading ? (
               <div className="w-20 h-9 bg-slate-100 rounded-xl animate-pulse" />
@@ -283,10 +278,6 @@ const Navbar = () => {
                 </span>
               )}
             </Link>
-
-            <div className="px-4 py-2">
-              <CompactLanguageSwitcher />
-            </div>
 
             <div className="pt-2 border-t border-slate-100 mt-2">
               {loading ? (

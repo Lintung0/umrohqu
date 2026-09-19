@@ -4,7 +4,6 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useState, useEffect, useRef, useCallback, Suspense } from "react"
 import { Search, SearchX, X, SlidersHorizontal, MapPin } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getAseanCountryByCode } from "@/lib/constants"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import { getPackageAvailable } from "@/lib/utils"
@@ -47,7 +46,6 @@ function SearchContent() {
   const [loadingCitySuggestions, setLoadingCitySuggestions] = useState(false)
 
   const departure = searchParams.get("departure") ?? ""
-  const country = searchParams.get("country") ?? ""
   const month = searchParams.get("month") ?? ""
   const cost = searchParams.get("cost") ?? ""
   const type = searchParams.get("type") ?? "semua"
@@ -161,7 +159,6 @@ function SearchContent() {
   )
 
   const setDeparture = useCallback((v: string) => setUrl({ departure: v }), [setUrl])
-  const setCountry = useCallback((v: string) => setUrl({ country: v }), [setUrl])
   const setMonth = useCallback((v: string) => setUrl({ month: v }), [setUrl])
   const setCost = useCallback((v: string) => setUrl({ cost: v === "Semua Biaya" ? null : v }), [setUrl])
   const setType = useCallback((v: string) => setUrl({ type: v === "semua" ? null : v }), [setUrl])
@@ -316,10 +313,6 @@ function SearchContent() {
 
   const filtered = packages
     .filter((pkg) => {
-      if (country) {
-        const pkgCountryCode = pkg.country_code || ""
-        if (pkgCountryCode.toLowerCase() !== country.toLowerCase()) return false
-      }
       if (departure) {
         const dep = departure.toLowerCase()
         const cities = [pkg.departure_city].filter(Boolean).map((c) => c?.toLowerCase() || "")
@@ -377,11 +370,10 @@ function SearchContent() {
     router.replace("/search", { scroll: false })
   }
 
-  const hasActiveFilters = Boolean(departure || country || month || cost || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
+  const hasActiveFilters = Boolean(departure || month || cost || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
 
   const activeFilterChips: { label: string; onRemove: () => void }[] = []
   if (departure) activeFilterChips.push({ label: departure, onRemove: () => setDeparture("") })
-  if (country) activeFilterChips.push({ label: getAseanCountryByCode(country)?.name || country, onRemove: () => setCountry("") })
   if (month) activeFilterChips.push({ label: month, onRemove: () => setMonth("") })
   if (cost && cost !== "Semua Biaya") activeFilterChips.push({ label: cost, onRemove: () => setCost("") })
   if (type !== "semua") activeFilterChips.push({ label: type, onRemove: () => setType("semua") })
@@ -419,7 +411,7 @@ function SearchContent() {
               </div>
             </div>
             <div className="flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="bg-white rounded-xl overflow-hidden border border-slate-200/70 shadow-sm">
                     <div className="aspect-[4/3] bg-slate-100 animate-pulse" />
@@ -600,8 +592,6 @@ function SearchContent() {
             <SearchSidebar
               departure={departure}
               setDeparture={setDeparture}
-              country={country}
-              setCountry={setCountry}
               priceRange={priceRange}
               setPriceRange={setPriceRange}
               duration={duration}
@@ -627,8 +617,6 @@ function SearchContent() {
                 <SearchSidebar
                   departure={departure}
                   setDeparture={setDeparture}
-                  country={country}
-                  setCountry={setCountry}
                   priceRange={priceRange}
                   setPriceRange={setPriceRange}
                   duration={duration}
@@ -655,7 +643,7 @@ function SearchContent() {
               </div>
             ) : (
               <>
-                <div key={currentPage} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+                <div key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
                   {paginated.map((pkg) => (
                     <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} showTravel={true} />
                   ))}

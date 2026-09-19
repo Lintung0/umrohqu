@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Clock, MapPin, Plane, Hotel, Calendar, Scale, Heart, Loader2, Star, Timer, BadgePercent } from "lucide-react"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -316,9 +317,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
               </div>
               {Number(pkg.cashback_amount) > 0 && (
-                <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
-                  <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
-                </span>
+                <TooltipProvider delay={100}>
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
+                      <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                    </span>} />
+                    <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </div>
           </div>
@@ -406,9 +412,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   <span className="text-[10px] text-gray-400 font-normal">{t("card.per_person")}</span>
                 </p>
                 {Number(pkg.cashback_amount) > 0 && (
-                  <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
-                    <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
-                  </span>
+                  <TooltipProvider delay={100}>
+                    <Tooltip>
+                      <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
+                        <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                      </span>} />
+                      <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
             </div>
@@ -561,9 +572,14 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
             </div>
             {Number(pkg.cashback_amount) > 0 && (
-              <span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
-                <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
-              </span>
+              <TooltipProvider delay={100}>
+                <Tooltip>
+                  <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
+                    <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                  </span>} />
+                  <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         </div>

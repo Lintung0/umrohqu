@@ -13,6 +13,7 @@ import {
   BadgePercent, Users,
 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { decodeUnicodeEscapes } from "@/lib/utils"
 import ImageGallery from "@/components/shared/image-gallery"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
@@ -796,9 +797,19 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     <span className="text-xs text-muted-foreground">/ orang</span>
                   </div>
                   {Number(pkg.cashback_amount) > 0 && (
-                    <span className="inline-flex items-center gap-1 w-fit text-xs font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2.5 py-1 shadow-sm">
-                      <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
-                    </span>
+                    <TooltipProvider delay={100}>
+                      <Tooltip>
+                        <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit text-xs font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2.5 py-1 shadow-sm">
+                          <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                        </span>} />
+                        <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {Number(pkg.cashback_amount) > 0 && (
+                    <p className="text-[11px] text-muted-foreground max-w-[220px] leading-relaxed">
+                      Ditangani langsung oleh travel saat keberangkatan sesuai kebijakan travel.
+                    </p>
                   )}
                 </div>
               </div>

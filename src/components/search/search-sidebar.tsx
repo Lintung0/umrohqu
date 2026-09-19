@@ -1,16 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { X, RotateCcw, MapPin, Clock, Banknote, ChevronDown, SlidersHorizontal } from "lucide-react"
+import { RotateCcw, MapPin, Clock, Banknote, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ASEAN_COUNTRIES } from "@/lib/constants"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
 
 interface SearchSidebarProps {
   departure: string
   setDeparture: (v: string) => void
-  country?: string
-  setCountry?: (v: string) => void
   priceRange: [number, number]
   setPriceRange: (v: [number, number]) => void
   duration: string
@@ -45,72 +41,6 @@ function SectionLabel({
   )
 }
 
-function CountrySelectFilter({
-  value,
-  onChange,
-}: {
-  value?: string
-  onChange?: (v: string) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  const selected = ASEAN_COUNTRIES.find((c) => c.code === value)
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-label={selected ? `Negara: ${selected.name}` : "Semua Negara"}
-        className="w-full h-11 flex items-center justify-between gap-2 px-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 shadow-sm hover:border-emerald-300 hover:shadow transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-base">{selected?.emoji || "🌏"}</span>
-          <span className={cn("font-medium", !selected && "text-slate-400")}>{selected?.name || "Semua Negara"}</span>
-        </div>
-        <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform", open && "rotate-180")} />
-      </button>
-
-      {open && (
-        <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl">
-          <li
-            onClick={() => { onChange?.(""); setOpen(false) }}
-            className={cn(
-              "flex cursor-pointer items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-emerald-50",
-              !value && "bg-emerald-50 text-emerald-700 font-medium"
-            )}
-          >
-            <span className="text-base">🌏</span>
-            <span>Semua Negara</span>
-          </li>
-          {ASEAN_COUNTRIES.map((c) => (
-            <li
-              key={c.code}
-              onClick={() => { onChange?.(c.code); setOpen(false) }}
-              className={cn(
-                "flex cursor-pointer items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-emerald-50",
-                value === c.code && "bg-emerald-50 text-emerald-700 font-medium"
-              )}
-            >
-              <span className="text-base">{c.emoji}</span>
-              <span>{c.name}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
@@ -130,7 +60,6 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 
 export default function SearchSidebar({
   departure, setDeparture,
-  country, setCountry,
   priceRange, setPriceRange,
   duration, setDuration,
   hasActiveFilters, clearFilters,
@@ -166,19 +95,13 @@ export default function SearchSidebar({
 
         <div className="divide-y divide-slate-100 px-4">
 
-          {/* Negara */}
-          <div className="py-4 space-y-3">
-            <SectionLabel icon={<MapPin className="w-3.5 h-3.5" />}>Negara</SectionLabel>
-            <CountrySelectFilter value={country} onChange={setCountry} />
-          </div>
-
-          {/* Kota Keberangkatan — Geoapify Autocomplete */}
+          {/* Kota Keberangkatan — Geoapify Autocomplete (Indonesia) */}
           <div className="py-4 space-y-3">
             <SectionLabel icon={<MapPin className="w-3.5 h-3.5" />}>Kota Keberangkatan</SectionLabel>
             <CityAutocomplete
               value={departure}
               onChange={setDeparture}
-              countryFilter={country}
+              countryFilter="id"
               placeholder="Ketik nama kota..."
               className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-white shadow-sm text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
             />
