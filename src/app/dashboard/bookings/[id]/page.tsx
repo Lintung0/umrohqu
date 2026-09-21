@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy } from "lucide-react"
+import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -205,11 +205,6 @@ export default function BookingDetailPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
-      <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-        <ArrowLeft className="w-4 h-4" />
-        {t("booking.back")}
-      </button>
-
       {/* Header */}
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
