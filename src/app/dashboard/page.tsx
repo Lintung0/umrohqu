@@ -93,7 +93,7 @@ export default function DashboardOverview() {
           value={stats.bookings}
           color="bg-gold/15 text-gold-dark"
           href="/dashboard/bookings"
-          subtitle={`${stats.bookings} pesanan sedang diproses`}
+          hideFooter
           className="bg-ivory-card border-ivory-border shadow-none hover:shadow-none"
         />
         <StatCard
@@ -102,7 +102,7 @@ export default function DashboardOverview() {
           value={stats.wishlist}
           color="bg-emerald-dark/10 text-emerald-dark"
           href="/dashboard/wishlist"
-          subtitle={`${stats.wishlist} paket tersimpan`}
+          hideFooter
           className="bg-ivory-card border-ivory-border shadow-none hover:shadow-none"
         />
         <StatCard
@@ -111,7 +111,7 @@ export default function DashboardOverview() {
           value={stats.completed}
           color="bg-emerald-dark/10 text-emerald-dark"
           href="/dashboard/bookings"
-          subtitle={`${stats.completed} perjalanan selesai`}
+          hideFooter
           className="bg-ivory-card border-ivory-border shadow-none hover:shadow-none"
         />
       </div>

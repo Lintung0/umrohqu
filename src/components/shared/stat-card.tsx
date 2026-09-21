@@ -13,10 +13,11 @@ interface StatCardProps {
   variant?: "gradient" | "bordered"
   gradient?: string
   trend?: { value: number; label: string }
+  hideFooter?: boolean
   className?: string
 }
 
-export default function StatCard({ icon: Icon, label, value, subtitle, color, href, variant = "bordered", gradient, trend, className }: StatCardProps) {
+export default function StatCard({ icon: Icon, label, value, subtitle, color, href, variant = "bordered", gradient, trend, hideFooter, className }: StatCardProps) {
   const content = (
     <div className={cn(`rounded-xl p-5 transition-shadow ${
       variant === "gradient"
@@ -34,7 +35,7 @@ export default function StatCard({ icon: Icon, label, value, subtitle, color, hr
           <Icon className="w-5 h-5" />
         </div>
       </div>
-      {(trend || subtitle) && (
+      {!hideFooter && (trend || subtitle) && (
         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
           {trend && (
             <span className={`inline-flex items-center gap-1 text-xs font-medium ${
@@ -51,7 +52,7 @@ export default function StatCard({ icon: Icon, label, value, subtitle, color, hr
           )}
         </div>
       )}
-      {href && !trend && !subtitle && variant === "bordered" && (
+      {!hideFooter && href && !trend && !subtitle && variant === "bordered" && (
         <div className="flex items-center gap-1 text-xs text-emerald-600 mt-3 group-hover:underline">
           Lihat Semua <ArrowRight className="w-3 h-3" />
         </div>
