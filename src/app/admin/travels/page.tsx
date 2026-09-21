@@ -167,7 +167,7 @@ export default function AdminTravelsPage() {
               </div>
               <div className="bg-gray-50 rounded-lg p-2">
                 <p className="font-bold">{tenant.booking_count}</p>
-                <p className="text-muted-foreground">Pesan</p>
+                <p className="text-muted-foreground">Pesanan</p>
               </div>
             </div>
 

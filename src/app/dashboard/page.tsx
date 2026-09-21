@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { BookOpen, Heart, Package, Clock, Search, ChevronRight, Calendar, Bell, UserRound } from "lucide-react"
+import { BookOpen, Heart, Package, Clock, ChevronRight, Calendar } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
 import { getStatusColor, getStatusLabel, formatRupiah } from "@/lib/constants"
 
@@ -88,7 +88,7 @@ export default function DashboardOverview() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           icon={BookOpen}
-          label="Pesan Aktif"
+          label="Pesanan Aktif"
           value={stats.bookings}
           color="bg-emerald-100 text-emerald-600"
           href="/dashboard/bookings"
@@ -111,74 +111,21 @@ export default function DashboardOverview() {
         />
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-4 gap-2 sm:gap-3">
-        <Link
-          href="/search"
-          className="group bg-white border border-border rounded-xl p-3 sm:p-5 flex flex-col items-center gap-2 text-center hover:shadow-md transition-all hover:border-emerald-200"
-        >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
-            <Search className="w-5 h-5 text-emerald-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[11px] sm:text-sm leading-tight line-clamp-2">Cari Paket umrah</p>
-            <p className="hidden lg:block text-xs text-muted-foreground mt-0.5">Temukan paket terbaik untuk Anda</p>
-          </div>
-        </Link>
-        <Link
-          href="/dashboard/wishlist"
-          className="group bg-white border border-border rounded-xl p-3 sm:p-5 flex flex-col items-center gap-2 text-center hover:shadow-md transition-all hover:border-rose-200"
-        >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 group-hover:bg-rose-200 transition-colors">
-            <Heart className="w-5 h-5 text-rose-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[11px] sm:text-sm leading-tight line-clamp-2">Lihat Wishlist</p>
-            <p className="hidden lg:block text-xs text-muted-foreground mt-0.5">{stats.wishlist} paket yang Anda simpan</p>
-          </div>
-        </Link>
-        <Link
-          href="/dashboard/notifications"
-          className="group bg-white border border-border rounded-xl p-3 sm:p-5 flex flex-col items-center gap-2 text-center hover:shadow-md transition-all hover:border-amber-200"
-        >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
-            <Bell className="w-5 h-5 text-amber-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[11px] sm:text-sm leading-tight line-clamp-2">Notifikasi</p>
-            <p className="hidden lg:block text-xs text-muted-foreground mt-0.5">Pengumuman dan pengingat perjalanan</p>
-          </div>
-        </Link>
-        <Link
-          href="/dashboard/data-diri"
-          className="group bg-white border border-border rounded-xl p-3 sm:p-5 flex flex-col items-center gap-2 text-center hover:shadow-md transition-all hover:border-sky-200"
-        >
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0 group-hover:bg-sky-200 transition-colors">
-            <UserRound className="w-5 h-5 text-sky-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[11px] sm:text-sm leading-tight line-clamp-2">Data Diri</p>
-            <p className="hidden lg:block text-xs text-muted-foreground mt-0.5">Lengkapi data pribadi jamaah</p>
-          </div>
-        </Link>
-      </div>
-
       {/* Recent Bookings */}
       <div className="bg-white border border-border rounded-xl shadow-sm">
         <div className="flex items-center justify-between p-6 pb-0">
           <div>
-            <h2 className="font-semibold">Pesan Terakhir</h2>
-            <p className="text-sm text-muted-foreground mt-1">Aktivitas booking terbaru Anda</p>
+            <h2 className="font-semibold">Pesanan Terakhir</h2>
           </div>
-          <Link href="/dashboard/bookings" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
-            Lihat Semua <ChevronRight className="w-4 h-4" />
+          <Link href="/dashboard/bookings" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-0.5">
+            Semua <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
         <div className="p-6 pt-4">
           {recentBookings.length === 0 ? (
             <div className="text-center py-10">
               <Clock className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground font-medium">Belum ada booking</p>
+              <p className="text-sm text-muted-foreground font-medium">Belum ada pesanan</p>
               <Link href="/search" className="text-sm text-emerald-600 hover:underline mt-2 inline-flex items-center gap-1">
                 Mulai Cari Paket <ChevronRight className="w-3 h-3" />
               </Link>

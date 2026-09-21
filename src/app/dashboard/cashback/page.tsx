@@ -134,7 +134,7 @@ export default function CashbackPage() {
                     {row.package_name}
                   </Link>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Pesan{" "}
+                    Pesanan{" "}
                     {new Date(row.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     · {STATUS_LABEL[row.status] || row.status}
                   </p>

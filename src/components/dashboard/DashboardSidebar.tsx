@@ -134,13 +134,6 @@ export default function DashboardSidebar() {
           <Logo />
         </Link>
         <div className="flex items-center gap-1">
-          <Link
-            href="/"
-            aria-label="Kembali ke beranda"
-            className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Home className="w-5 h-5" />
-          </Link>
           <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-xl hover:bg-muted" aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}>
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>

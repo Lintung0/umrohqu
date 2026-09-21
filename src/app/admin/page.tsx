@@ -181,7 +181,7 @@ export default function AdminOverviewPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Building2, label: "Total Travel", value: stats.travelCount, sub: `${stats.pendingTravel} menunggu verifikasi`, iconBg: "bg-emerald-50 text-emerald-600" },
-          { icon: BookOpen, label: "Total Pesan", value: stats.bookingCount, sub: "Sepanjang platform", iconBg: "bg-blue-50 text-blue-600" },
+          { icon: BookOpen, label: "Total Pesanan", value: stats.bookingCount, sub: "Sepanjang platform", iconBg: "bg-blue-50 text-blue-600" },
           { icon: DollarSign, label: "Pendapatan Platform", value: formatRupiah(stats.totalRevenue), sub: "Dari booking confirmed", iconBg: "bg-amber-50 text-amber-600" },
           { icon: AlertTriangle, label: "Menunggu Verifikasi", value: stats.pendingTravel, sub: "Travel menunggu tinjauan", iconBg: "bg-rose-50 text-rose-600" },
         ].map((s) => (
@@ -259,7 +259,7 @@ export default function AdminOverviewPage() {
         {/* Recent Bookings */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-border overflow-hidden">
           <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="font-semibold">Pesan Terbaru</h2>
+            <h2 className="font-semibold">Pesanan Terbaru</h2>
           </div>
           <div className="divide-y divide-border">
             {recentBookings.length === 0 ? (
