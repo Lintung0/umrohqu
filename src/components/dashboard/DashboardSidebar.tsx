@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Home, Menu, X, UserRound, Bell, BadgePercent } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { onNotificationsChanged } from "@/lib/notify/events"
 import { User } from "@supabase/supabase-js"
 import Image from "next/image"
 import Logo from "@/components/logo"
@@ -43,6 +44,20 @@ export default function DashboardSidebar() {
       }
     })
   }, [pathname])
+
+  useEffect(() => {
+    return onNotificationsChanged(() => {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (!user) return
+        supabase
+          .from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("is_read", false)
+          .then(({ count }) => setUnreadCount(count || 0))
+      })
+    })
+  }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

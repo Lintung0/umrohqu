@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Bell, BellRing, CheckCheck, RefreshCw, ChevronRight, Inbox } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { timeAgo } from "@/lib/constants"
+import { emitNotificationsChanged } from "@/lib/notify/events"
 
 interface AppNotification {
   id: string
@@ -72,6 +73,7 @@ export default function NotificationsPage() {
       .eq("user_id", user.id)
       .eq("is_read", false)
     setItems((prev) => prev.map((n) => ({ ...n, is_read: true, read_at: new Date().toISOString() })))
+    emitNotificationsChanged()
   }
 
   async function openItem(item: AppNotification) {
@@ -81,6 +83,7 @@ export default function NotificationsPage() {
         .update({ is_read: true, read_at: new Date().toISOString() })
         .eq("id", item.id)
       setItems((prev) => prev.map((n) => (n.id === item.id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)))
+      emitNotificationsChanged()
     }
     if (item.link_url) {
       router.push(item.link_url)

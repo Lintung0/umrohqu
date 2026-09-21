@@ -13,6 +13,7 @@ import { useTranslation } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 import { useCompare } from "@/lib/compare-context"
 import NotificationBell from "@/components/shared/notification-bell"
+import { onNotificationsChanged } from "@/lib/notify/events"
 
 const ROLE_DASHBOARD_MAP: Record<string, string> = {
   admin: "/admin",
@@ -101,16 +102,23 @@ const Navbar = () => {
     }
     let cancelled = false
     const supabase = createClient()
-    supabase
-      .from("notifications")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("is_read", false)
-      .then(({ count }) => {
-        if (!cancelled) setNotifUnread(count || 0)
-      })
+    const refresh = () => {
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false)
+        .then(({ count }) => {
+          if (!cancelled) setNotifUnread(count || 0)
+        })
+    }
+    refresh()
+    const off = onNotificationsChanged(() => {
+      if (!cancelled) refresh()
+    })
     return () => {
       cancelled = true
+      off()
     }
   }, [user])
 

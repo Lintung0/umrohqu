@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Bell, BellRing, CheckCheck, ArrowRight, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { timeAgo } from "@/lib/constants"
+import { onNotificationsChanged, emitNotificationsChanged } from "@/lib/notify/events"
 
 interface AppNotification {
   id: string
@@ -21,6 +22,7 @@ interface AppNotification {
 
 export default function NotificationBell() {
   const supabase = createClient()
+  const pathname = usePathname()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<AppNotification[]>([])
@@ -40,15 +42,22 @@ export default function NotificationBell() {
     }
     // Generate notifikasi "segera berangkat" (≤7 hari) bila ada, lazy dari client.
     fetch("/api/notifications/upcoming-departure", { method: "POST" }).catch(() => {})
-    const { data } = await supabase
-      .from("notifications")
-      .select("id, title, body, is_read, read_at, link_url, created_at, template_key")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(8)
+    const [{ data }, { count }] = await Promise.all([
+      supabase
+        .from("notifications")
+        .select("id, title, body, is_read, read_at, link_url, created_at, template_key")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(8),
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false),
+    ])
     const rows = (data as unknown as AppNotification[]) || []
     setItems(rows)
-    setUnread(rows.filter((n) => !n.is_read).length)
+    setUnread(count || 0)
     setLoaded(true)
   }
 
@@ -57,9 +66,13 @@ export default function NotificationBell() {
     const onDoc = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false)
     }
+    const offNotif = onNotificationsChanged(() => load())
     document.addEventListener("mousedown", onDoc)
-    return () => document.removeEventListener("mousedown", onDoc)
-  }, [])
+    return () => {
+      document.removeEventListener("mousedown", onDoc)
+      offNotif()
+    }
+  }, [pathname])
 
   async function markAllRead() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -71,6 +84,7 @@ export default function NotificationBell() {
       .eq("is_read", false)
     setItems((prev) => prev.map((n) => ({ ...n, is_read: true, read_at: new Date().toISOString() })))
     setUnread(0)
+    emitNotificationsChanged()
   }
 
   async function openItem(item: AppNotification) {
@@ -81,6 +95,7 @@ export default function NotificationBell() {
         .eq("id", item.id)
       setItems((prev) => prev.map((n) => (n.id === item.id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)))
       setUnread((u) => Math.max(0, u - 1))
+      emitNotificationsChanged()
     }
     setOpen(false)
     if (item.link_url) {
