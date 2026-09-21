@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Home, Menu, X, UserRound, Bell, BadgePercent } from "lucide-react"
+import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Home, Menu, X, Bell, BadgePercent } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { onNotificationsChanged } from "@/lib/notify/events"
 import { User } from "@supabase/supabase-js"
@@ -15,7 +15,6 @@ const NAV_ITEMS = [
   { href: "/dashboard/bookings", label: "Pesanan Saya", icon: BookOpen },
   { href: "/dashboard/wishlist", label: "Daftar Keinginan", icon: Heart },
   { href: "/dashboard/cashback", label: "Cashback", icon: BadgePercent },
-  { href: "/dashboard/data-diri", label: "Data Diri", icon: UserRound },
   { href: "/dashboard/notifications", label: "Notifikasi", icon: Bell },
   { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
 ]

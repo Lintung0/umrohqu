@@ -3,12 +3,25 @@
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy } from "lucide-react"
+import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, IdCard, PhoneCall, UserRound, ChevronDown, ChevronUp, Ban, X, ChevronRight } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import Link from "next/link"
 import { useTranslation } from "@/lib/i18n"
-import { Ban, X } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const GENDER_OPTIONS = [
+  { value: "laki-laki", label: "Laki-laki" },
+  { value: "perempuan", label: "Perempuan" },
+]
 
 const CANCEL_REASONS = [
   "Perubahan jadwal pribadi",
@@ -17,6 +30,28 @@ const CANCEL_REASONS = [
   "Keberangkatan kurang sesuai",
   "Lainnya",
 ]
+
+interface ParticipantData {
+  id: string
+  full_name: string
+  national_id: string | null
+  passport_number: string | null
+  passport_expiry: string | null
+  birth_date: string | null
+  birth_place: string | null
+  gender: string | null
+  phone: string | null
+  relation: string
+  emergency_contact_name: string | null
+  emergency_contact_phone: string | null
+  street: string | null
+  city: string | null
+  province: string | null
+  postal_code: string | null
+  village: string | null
+  district: string | null
+  rt_rw: string | null
+}
 
 interface BookingDetail {
   id: string
@@ -41,7 +76,7 @@ interface BookingDetail {
   cancel_reason?: string | null
   refund: { id: string; amount: number; reason?: string | null; status: string; method: string | null; completed_at: string | null } | null
   package: { name: string; slug: string; departure_city: string | null; duration_nights: number | null; airline?: string | null; hotel_makkah?: string | null; hotel_makkah_stars?: number | null; hotel_madinah?: string | null; hotel_madinah_stars?: number | null } | null
-  participants: { id: string; full_name: string; national_id: string | null; passport_number: string | null; gender: string | null; phone: string | null; relation: string }[]
+  participants: ParticipantData[]
 }
 
 export default function BookingDetailPage() {
@@ -61,6 +96,24 @@ export default function BookingDetailPage() {
   const [authChecked, setAuthChecked] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [showCancelModal, setShowCancelModal] = useState(false)
+  const [editingParticipant, setEditingParticipant] = useState<ParticipantData | null>(null)
+  const [participantForm, setParticipantForm] = useState({
+    passport_number: "",
+    passport_expiry: "",
+    birth_date: "",
+    birth_place: "",
+    gender: "",
+    emergency_contact_name: "",
+    emergency_contact_phone: "",
+    street: "",
+    city: "",
+    province: "",
+    postal_code: "",
+    village: "",
+    district: "",
+    rt_rw: "",
+  })
+  const [savingParticipant, setSavingParticipant] = useState(false)
 
   // Track auth state with onAuthStateChange — handles hydration delay after Midtrans redirect
   useEffect(() => {
@@ -87,7 +140,7 @@ export default function BookingDetailPage() {
     async function load() {
       console.log("[DEBUG BOOKING LOAD] Starting load for booking:", params.id, "authChecked:", authChecked, "user:", user?.id)
 
-      const selectFields = "*, package:packages(name, slug, departure_city, duration_nights), participants:booking_participants(id, full_name, national_id, passport_number, gender, phone, relation)"
+      const selectFields = "*, package:packages(name, slug, departure_city, duration_nights), participants:booking_participants(id, full_name, national_id, passport_number, passport_expiry, birth_date, birth_place, gender, phone, relation, emergency_contact_name, emergency_contact_phone, street, city, province, postal_code, village, district, rt_rw)"
 
       let bookingData: any = null
 
@@ -163,6 +216,86 @@ export default function BookingDetailPage() {
     return () => { cancelled = true }
   }, [params.id, authChecked, user, supabase, router])
 
+  // Handle editing participant data
+  const handleEditParticipant = (p: ParticipantData) => {
+    setEditingParticipant(p)
+    setParticipantForm({
+      passport_number: p.passport_number || "",
+      passport_expiry: p.passport_expiry || "",
+      birth_date: p.birth_date || "",
+      birth_place: p.birth_place || "",
+      gender: p.gender || "",
+      emergency_contact_name: p.emergency_contact_name || "",
+      emergency_contact_phone: p.emergency_contact_phone || "",
+      street: p.street || "",
+      city: p.city || "",
+      province: p.province || "",
+      postal_code: p.postal_code || "",
+      village: p.village || "",
+      district: p.district || "",
+      rt_rw: p.rt_rw || "",
+    })
+  }
+
+  const handleCloseParticipantModal = () => {
+    setEditingParticipant(null)
+    setParticipantForm({
+      passport_number: "",
+      passport_expiry: "",
+      birth_date: "",
+      birth_place: "",
+      gender: "",
+      emergency_contact_name: "",
+      emergency_contact_phone: "",
+      street: "",
+      city: "",
+      province: "",
+      postal_code: "",
+      village: "",
+      district: "",
+      rt_rw: "",
+    })
+  }
+
+  const handleParticipantFormChange = (field: string, value: string) => {
+    setParticipantForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleSaveParticipant = async () => {
+    if (!editingParticipant || !user) return
+    setSavingParticipant(true)
+    try {
+      const { error } = await supabase
+        .from("booking_participants")
+        .update({
+          passport_number: participantForm.passport_number,
+          passport_expiry: participantForm.passport_expiry,
+          birth_date: participantForm.birth_date,
+          birth_place: participantForm.birth_place,
+          gender: participantForm.gender,
+          emergency_contact_name: participantForm.emergency_contact_name,
+          emergency_contact_phone: participantForm.emergency_contact_phone,
+          street: participantForm.street,
+          city: participantForm.city,
+          province: participantForm.province,
+          postal_code: participantForm.postal_code,
+          village: participantForm.village,
+          district: participantForm.district,
+          rt_rw: participantForm.rt_rw,
+        })
+        .eq("id", editingParticipant.id)
+      if (error) throw error
+      toast.success("Data jamaah berhasil disimpan")
+      handleCloseParticipantModal()
+      // Refresh booking data
+      router.refresh()
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menyimpan data jamaah")
+    } finally {
+      setSavingParticipant(false)
+    }
+  }
+
   // Show skeleton while auth is being checked or data is loading
   if (loading || !authChecked) {
     return (
@@ -197,6 +330,223 @@ export default function BookingDetailPage() {
           </div>
         </div>
       </div>
+    )
+  }
+
+  // Participant Data Diri Modal - render at top level before main UI
+  if (editingParticipant) {
+    return (
+      <>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in-0 duration-200" onClick={handleCloseParticipantModal}>
+          <div className="bg-ivory-card rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-ivory-border sticky top-0 bg-ivory-card z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gold/15 flex items-center justify-center">
+                  <UserRound className="w-5 h-5 text-gold-dark" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-emerald-deep">Data Diri Jamaah</h2>
+                  <p className="text-xs text-muted-foreground">{editingParticipant.full_name} • {editingParticipant.relation === "self" ? "Jamaah Utama" : "Pendamping"}</p>
+                </div>
+              </div>
+              <button onClick={handleCloseParticipantModal} className="p-2 rounded-xl text-muted-foreground hover:text-emerald-dark hover:bg-ivory transition-colors" aria-label="Tutup">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveParticipant(); }} className="p-5 space-y-6">
+              {/* Identitas & Paspor */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-dark" />
+                  <h3 className="font-semibold text-sm text-emerald-deep">Identitas & Paspor</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Nomor Paspor</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.passport_number}
+                      onChange={(e) => handleParticipantFormChange("passport_number", e.target.value)}
+                      placeholder="A1234567"
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Masa Berlaku Paspor</Label>
+                    <Input
+                      type="date"
+                      value={participantForm.passport_expiry}
+                      onChange={(e) => handleParticipantFormChange("passport_expiry", e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Jenis Kelamin</Label>
+                    <Select
+                      value={participantForm.gender || undefined}
+                      onValueChange={(v: string | null) => handleParticipantFormChange("gender", v || "")}
+                    >
+                      <SelectTrigger className="mt-1.5">
+                        <SelectValue placeholder="Pilih jenis kelamin" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GENDER_OPTIONS.map((g) => (
+                          <SelectItem key={g.value} value={g.value}>
+                            {g.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Tanggal Lahir</Label>
+                    <Input
+                      type="date"
+                      value={participantForm.birth_date}
+                      onChange={(e) => handleParticipantFormChange("birth_date", e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Tempat Lahir</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.birth_place}
+                      onChange={(e) => handleParticipantFormChange("birth_place", e.target.value)}
+                      placeholder="Contoh: Jakarta"
+                      className="mt-1.5"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Kontak Darurat */}
+              <div className="space-y-4 pt-4 border-t border-ivory-border">
+                <div className="flex items-center gap-2">
+                  <PhoneCall className="w-4 h-4 text-emerald-dark" />
+                  <h3 className="font-semibold text-sm text-emerald-deep">Kontak Darurat</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Nama Keluarga</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.emergency_contact_name}
+                      onChange={(e) => handleParticipantFormChange("emergency_contact_name", e.target.value)}
+                      placeholder="Nama keluarga / kerabat"
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Nomor Telepon</Label>
+                    <Input
+                      type="tel"
+                      value={participantForm.emergency_contact_phone}
+                      onChange={(e) => handleParticipantFormChange("emergency_contact_phone", e.target.value)}
+                      placeholder="08xxx"
+                      className="mt-1.5"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Alamat */}
+              <div className="space-y-4 pt-4 border-t border-ivory-border">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-emerald-dark" />
+                  <h3 className="font-semibold text-sm text-emerald-deep">Alamat</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Alamat Lengkap</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.street}
+                      onChange={(e) => handleParticipantFormChange("street", e.target.value)}
+                      placeholder="Jalan, RT/RW, kelurahan"
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">RT/RW</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.rt_rw}
+                      onChange={(e) => handleParticipantFormChange("rt_rw", e.target.value)}
+                      placeholder="002/005"
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Kelurahan/Desa</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.village}
+                      onChange={(e) => handleParticipantFormChange("village", e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Kecamatan</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.district}
+                      onChange={(e) => handleParticipantFormChange("district", e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Kota/Kabupaten</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.city}
+                      onChange={(e) => handleParticipantFormChange("city", e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Provinsi</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.province}
+                      onChange={(e) => handleParticipantFormChange("province", e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground">Kode Pos</Label>
+                    <Input
+                      type="text"
+                      value={participantForm.postal_code}
+                      onChange={(e) => handleParticipantFormChange("postal_code", e.target.value)}
+                      className="mt-1.5"
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+
+            <div className="flex items-center justify-end gap-3 p-5 border-t border-ivory-border bg-ivory/50 rounded-b-2xl">
+              <button
+                onClick={handleCloseParticipantModal}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-ivory-border text-muted-foreground hover:bg-ivory transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSaveParticipant}
+                disabled={savingParticipant}
+                className="flex items-center gap-1.5 bg-emerald-dark text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-deep transition-colors disabled:opacity-50 text-sm cursor-pointer"
+              >
+                {savingParticipant ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                {savingParticipant ? "Menyimpan..." : "Simpan Data Diri"}
+                {!savingParticipant && <ChevronRight className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
     )
   }
 
@@ -349,18 +699,52 @@ export default function BookingDetailPage() {
                     <th className="pb-2 font-medium">{t("booking.participants")}</th>
                     <th className="pb-2 font-medium">{t("checkout.gender")}</th>
                     <th className="pb-2 font-medium">{t("checkout.phone")}</th>
+                    <th className="pb-2 font-medium">Data Diri</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {booking.participants.map((p) => (
-                    <tr key={p.id} className="border-b border-ivory-border last:border-0">
-                      <td className="py-3 font-medium">{p.full_name}</td>
-                      <td className="py-3">{p.national_id || "-"}</td>
-                      <td className="py-3">{p.passport_number || "-"}</td>
-                      <td className="py-3">{p.gender === "male" ? t("checkout.gender_male") : p.gender === "female" ? t("checkout.gender_female") : "-"}</td>
-                      <td className="py-3">{p.phone || "-"}</td>
-                    </tr>
-                  ))}
+                  {booking.participants.map((p) => {
+                    const hasPassport = !!p.passport_number
+                    const isComplete = hasPassport // Simple check for now
+                    return (
+                      <tr key={p.id} className="border-b border-ivory-border last:border-0">
+                        <td className="py-3 font-medium">{p.full_name}</td>
+                        <td className="py-3">{p.national_id || "-"}</td>
+                        <td className="py-3">{p.passport_number || "-"}</td>
+                        <td className="py-3">{p.gender === "male" ? t("checkout.gender_male") : p.gender === "female" ? t("checkout.gender_female") : "-"}</td>
+                        <td className="py-3">{p.phone || "-"}</td>
+                        <td className="py-3">
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                              isComplete
+                                ? "bg-emerald-dark/10 text-emerald-dark"
+                                : "bg-gold/15 text-gold-dark"
+                            }`}>
+                              {isComplete ? (
+                                <>
+                                  <Check className="w-3 h-3" />
+                                  Lengkap
+                                </>
+                              ) : (
+                                <>
+                                  <AlertTriangle className="w-3 h-3" />
+                                  Belum Lengkap
+                                </>
+                              )}
+                            </span>
+                            <button
+                              onClick={() => handleEditParticipant(p)}
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-emerald-dark hover:bg-ivory transition-colors"
+                              title="Isi Data Diri"
+                              aria-label={`Isi data diri untuk ${p.full_name}`}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
