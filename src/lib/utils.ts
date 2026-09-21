@@ -9,7 +9,7 @@ export function appUrl(path = ""): string {
   const base =
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-    "http://localhost:3000"
+    "https://umrahqu.com"
   const clean = base.startsWith("http") ? base : `https://${base}`
   if (!path) return clean
   return `${clean.replace(/\/$/, "")}/${path.replace(/^\//, "")}`
