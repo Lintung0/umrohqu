@@ -95,15 +95,15 @@ export default function BookingsPage() {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="space-y-2">
-          <div className="h-8 w-48 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+          <div className="h-8 w-48 bg-ivory-border/60 rounded animate-pulse" />
+          <div className="h-4 w-64 bg-ivory-border/60 rounded animate-pulse" />
         </div>
         <div className="grid grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => <div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-24 bg-ivory-border/60 rounded-xl animate-pulse" />)}
         </div>
-        <div className="h-10 bg-muted rounded-lg animate-pulse" />
+        <div className="h-10 bg-ivory-border/60 rounded-lg animate-pulse" />
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-muted rounded-xl animate-pulse" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-ivory-border/60 rounded-xl animate-pulse" />)}
         </div>
       </div>
     )
@@ -113,36 +113,37 @@ export default function BookingsPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("booking.title")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-emerald-deep">{t("booking.title")}</h1>
+        <p className="text-sm text-muted-foreground mt-1">Riwayat pemesanan paket umrah Anda.</p>
       </div>
 
       {/* Ringkasan Statistik */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-            <ClipboardList className="w-5 h-5 text-emerald-600" />
+        <div className="flex items-center gap-3 bg-ivory-card border border-ivory-border rounded-xl p-4">
+          <div className="w-11 h-11 rounded-xl bg-emerald-dark/10 flex items-center justify-center shrink-0">
+            <ClipboardList className="w-5 h-5 text-emerald-dark" />
           </div>
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground">Total Pemesanan</p>
-            <p className="text-xl font-bold text-slate-800">{totalBooks}</p>
+            <p className="text-xl font-bold text-emerald-deep">{totalBooks}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
-            <Package className="w-5 h-5 text-amber-600" />
+        <div className="flex items-center gap-3 bg-ivory-card border border-ivory-border rounded-xl p-4">
+          <div className="w-11 h-11 rounded-xl bg-gold/15 flex items-center justify-center shrink-0">
+            <Package className="w-5 h-5 text-gold-dark" />
           </div>
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground">Aktif</p>
-            <p className="text-xl font-bold text-slate-800">{activeCount}</p>
+            <p className="text-xl font-bold text-emerald-deep">{activeCount}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-            <CalendarRange className="w-5 h-5 text-blue-600" />
+        <div className="flex items-center gap-3 bg-ivory-card border border-ivory-border rounded-xl p-4">
+          <div className="w-11 h-11 rounded-xl bg-emerald-dark/10 flex items-center justify-center shrink-0">
+            <CalendarRange className="w-5 h-5 text-emerald-dark" />
           </div>
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground">Bulan Ini</p>
-            <p className="text-xl font-bold text-slate-800">{thisMonthCount}</p>
+            <p className="text-xl font-bold text-emerald-deep">{thisMonthCount}</p>
           </div>
         </div>
       </div>
@@ -153,10 +154,10 @@ export default function BookingsPage() {
           <button
             key={s.value}
             onClick={() => setFilter(s.value)}
-            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
               filter === s.value
-                ? "bg-emerald-600 text-white shadow-sm"
-                : "bg-white border border-border text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                ? "bg-emerald-dark text-ivory-soft"
+                : "bg-ivory-card border border-ivory-border text-muted-foreground hover:text-emerald-deep hover:bg-ivory"
             }`}
           >
             {s.label}
@@ -166,10 +167,10 @@ export default function BookingsPage() {
 
       {/* Bookings List */}
       {filtered.length === 0 ? (
-        <div className="bg-white border border-border rounded-xl p-12 text-center shadow-sm">
-          <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+        <div className="bg-ivory-card border border-ivory-border rounded-2xl p-12 text-center">
+          <BookOpen className="w-12 h-12 text-emerald-dark/25 mx-auto mb-3" />
           <p className="font-medium text-muted-foreground">{t("booking.no_bookings")}</p>
-          <Link href="/search" className="text-sm text-emerald-600 hover:text-emerald-700 mt-2 inline-flex items-center gap-1">
+          <Link href="/search" className="text-sm text-emerald-dark hover:text-emerald-deep mt-2 inline-flex items-center gap-1">
             {t("package.search_title")} <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
@@ -183,24 +184,24 @@ export default function BookingsPage() {
                 <div key={group.key}>
                   {/* Header bulan */}
                   <div className="flex items-center gap-2 mb-2 px-1">
-                    <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                    <span className="w-8 h-8 rounded-lg bg-emerald-dark/10 text-emerald-dark flex items-center justify-center shrink-0">
                       <CalendarCheck2 className="w-4 h-4" />
                     </span>
-                    <h2 className="font-semibold text-sm text-slate-700">{group.label}</h2>
+                    <h2 className="font-semibold text-sm text-emerald-deep">{group.label}</h2>
                     <span className="text-xs text-muted-foreground">· {group.bookings.length} pesanan</span>
                   </div>
-                  <div className="bg-white border border-border rounded-xl shadow-sm divide-y divide-border">
+                  <div className="bg-ivory-card border border-ivory-border rounded-2xl divide-y divide-ivory-border">
                     {groupPageSlice.map((booking) => (
                       <Link
                         key={booking.id}
                         href={`/dashboard/bookings/${booking.id}`}
-                        className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                        className="flex items-center gap-4 p-4 hover:bg-ivory transition-colors first:rounded-t-2xl last:rounded-b-2xl"
                       >
-                        <div className="w-14 h-14 rounded-lg bg-muted shrink-0 flex items-center justify-center">
-                          <BookOpen className="w-5 h-5 text-muted-foreground/50" />
+                        <div className="w-14 h-14 rounded-xl bg-emerald-dark/10 shrink-0 flex items-center justify-center">
+                          <BookOpen className="w-5 h-5 text-emerald-dark" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate text-sm">{booking.package?.name || t("booking.package")}</p>
+                          <p className="font-medium truncate text-sm text-emerald-deep">{booking.package?.name || t("booking.package")}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(booking.status, "booking")}`}>
                               {getStatusLabel(booking.status, "booking")}
@@ -211,7 +212,7 @@ export default function BookingsPage() {
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="text-sm font-bold">{formatRupiah(booking.total)}</p>
+                          <p className="text-sm font-bold text-emerald-deep">{formatRupiah(booking.total)}</p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                           </p>
@@ -228,13 +229,13 @@ export default function BookingsPage() {
           {/* Indikator + Pagination */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
             <p className="text-xs text-muted-foreground">
-              Menampilkan {filtered.length === 0 ? 0 : startIndex + 1}–{endIndex} dari {filtered.length} pemesanan
+              Menampilkan {filtered.length === 0 ? 0 : startIndex + 1}-{endIndex} dari {filtered.length} pemesanan
             </p>            {totalPages > 1 && (
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="w-9 h-9 rounded-lg border border-border bg-white flex items-center justify-center text-slate-600 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                  className="w-9 h-9 rounded-lg border border-ivory-border bg-ivory-card flex items-center justify-center text-emerald-deep hover:border-emerald-dark/30 hover:text-emerald-dark disabled:opacity-40 disabled:pointer-events-none transition-colors"
                   aria-label="Halaman sebelumnya"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -245,8 +246,8 @@ export default function BookingsPage() {
                     onClick={() => setPage(p)}
                     className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
                       p === currentPage
-                        ? "bg-emerald-600 text-white shadow-sm"
-                        : "border border-border bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-600"
+                        ? "bg-emerald-dark text-ivory-soft"
+                        : "border border-ivory-border bg-ivory-card text-emerald-deep hover:border-emerald-dark/30 hover:text-emerald-dark"
                     }`}
                   >
                     {p}
@@ -255,7 +256,7 @@ export default function BookingsPage() {
                 <button
                   onClick={() => setPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="w-9 h-9 rounded-lg border border-border bg-white flex items-center justify-center text-slate-600 hover:border-emerald-300 hover:text-emerald-600 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                  className="w-9 h-9 rounded-lg border border-ivory-border bg-ivory-card flex items-center justify-center text-emerald-deep hover:border-emerald-dark/30 hover:text-emerald-dark disabled:opacity-40 disabled:pointer-events-none transition-colors"
                   aria-label="Halaman berikutnya"
                 >
                   <ChevronRight className="w-4 h-4" />

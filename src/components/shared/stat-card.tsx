@@ -1,6 +1,7 @@
 import { ArrowRight, TrendingUp, TrendingDown } from "lucide-react"
 import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface StatCardProps {
   icon: LucideIcon
@@ -12,15 +13,16 @@ interface StatCardProps {
   variant?: "gradient" | "bordered"
   gradient?: string
   trend?: { value: number; label: string }
+  className?: string
 }
 
-export default function StatCard({ icon: Icon, label, value, subtitle, color, href, variant = "bordered", gradient, trend }: StatCardProps) {
+export default function StatCard({ icon: Icon, label, value, subtitle, color, href, variant = "bordered", gradient, trend, className }: StatCardProps) {
   const content = (
-    <div className={`rounded-xl p-5 transition-shadow ${
+    <div className={cn(`rounded-xl p-5 transition-shadow ${
       variant === "gradient"
         ? `bg-gradient-to-br ${gradient || "from-emerald-500 to-emerald-700"} text-white hover:shadow-lg`
         : "bg-white border border-border shadow-sm hover:shadow-md"
-    }`}>
+    }`, className)}>
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className={`text-sm font-medium ${variant === "gradient" ? "opacity-90" : "text-muted-foreground"}`}>{label}</p>

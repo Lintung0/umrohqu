@@ -75,6 +75,13 @@
   --color-emerald-dark: #0D3D2B;
   --color-emerald-glow: #1BA784;
 
+  /* Dashboard design tokens - warm ivory base (DESIGN.md) */
+  --color-ivory: #F5F0E6;
+  --color-ivory-soft: #FCFAF5;
+  --color-ivory-card: #FDFBF6;
+  --color-ivory-border: #E5DBC4;
+  --color-ivory-ink: #1A241E;
+
   /* Design Tokens - Brand */
   --color-brand-50: #ecfdf5;
   --color-brand-500: #059669;

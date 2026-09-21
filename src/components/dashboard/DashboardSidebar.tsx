@@ -67,17 +67,17 @@ export default function DashboardSidebar() {
 
   const sidebarContent = (
     <>
-      <div className="h-16 px-5 border-b border-border flex items-center">
+      <div className="h-16 px-5 border-b border-ivory-border flex items-center">
         <div className="flex items-center gap-3 min-w-0">
           <Image
-            src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || "U")}&background=2A7D4F&color=fff&size=80&bold=true`}
+            src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.user_metadata?.full_name || "U")}&background=0D3D2B&color=fdfbf6&size=80&bold=true`}
             alt="Avatar"
             width={40}
             height={40}
-            className="rounded-full"
+            className="rounded-full ring-1 ring-gold/50"
           />
           <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">{user?.user_metadata?.full_name || "Jamaah"}</p>
+            <p className="text-sm font-semibold truncate text-emerald-deep">{user?.user_metadata?.full_name || "Jamaah"}</p>
             <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
           </div>
         </div>
@@ -92,13 +92,13 @@ export default function DashboardSidebar() {
               href={item.href}
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors ${
-                isActive ? "bg-emerald-50 text-emerald-700 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                isActive ? "bg-emerald-dark text-ivory-soft font-medium" : "text-muted-foreground hover:text-emerald-deep hover:bg-ivory"
               }`}
             >
               <item.icon className="w-4 h-4 shrink-0" />
               {item.label}
               {item.href === "/dashboard/notifications" && unreadCount > 0 && (
-                <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-gold text-emerald-deep text-[10px] font-bold flex items-center justify-center">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
@@ -107,17 +107,17 @@ export default function DashboardSidebar() {
         })}
       </nav>
 
-      <div className="p-3 border-t border-border space-y-0.5">
+      <div className="p-3 border-t border-ivory-border space-y-0.5">
         <Link
           href="/"
-          className="flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-emerald-deep hover:bg-ivory rounded-xl transition-colors"
         >
           <Home className="w-4 h-4" />
           Beranda
         </Link>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Keluar
@@ -129,12 +129,12 @@ export default function DashboardSidebar() {
   return (
     <>
       {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-card border-b border-border h-16 px-4 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-ivory-card border-b border-ivory-border h-16 px-4 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2">
           <Logo />
         </Link>
         <div className="flex items-center gap-1">
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-xl hover:bg-muted" aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-xl hover:bg-ivory" aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}>
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -143,14 +143,14 @@ export default function DashboardSidebar() {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-30 bg-black/50 flex justify-end animate-in fade-in-0 duration-300" onClick={() => setMobileOpen(false)}>
-          <aside className="w-72 sm:w-80 h-full bg-card shadow-xl animate-in slide-in-from-right duration-300" onClick={(e) => e.stopPropagation()}>
+          <aside className="w-72 sm:w-80 h-full bg-ivory-card shadow-xl animate-in slide-in-from-right duration-300" onClick={(e) => e.stopPropagation()}>
             {sidebarContent}
           </aside>
         </div>
       )}
 
       {/* Desktop sidebar */}
-      <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-card border-r border-border min-h-screen sticky top-0">
+      <aside className="w-64 shrink-0 hidden lg:flex flex-col bg-ivory-card border-r border-ivory-border min-h-screen sticky top-0">
         {sidebarContent}
       </aside>
     </>

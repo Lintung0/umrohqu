@@ -84,11 +84,11 @@ export default function SettingsPage() {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
         <div className="space-y-2">
-          <div className="h-8 w-56 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-48 bg-muted rounded animate-pulse" />
+          <div className="h-8 w-56 bg-ivory-border/60 rounded animate-pulse" />
+          <div className="h-4 w-48 bg-ivory-border/60 rounded animate-pulse" />
         </div>
-        <div className="h-24 bg-muted rounded-xl animate-pulse" />
-        <div className="h-64 bg-muted rounded-xl animate-pulse" />
+        <div className="h-24 bg-ivory-border/60 rounded-xl animate-pulse" />
+        <div className="h-64 bg-ivory-border/60 rounded-xl animate-pulse" />
       </div>
     )
   }
@@ -104,20 +104,20 @@ export default function SettingsPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Pengaturan</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-emerald-deep">Pengaturan</h1>
         <p className="text-muted-foreground mt-1">
           {tab === "account" ? "Kelola informasi profil Anda" : "Pilih tampilan siang atau malam"}
         </p>
       </div>
 
       {/* Menu tabs */}
-      <div className="flex gap-1 bg-muted p-1 rounded-xl w-full sm:w-fit">
+      <div className="flex gap-1 bg-ivory-border/50 p-1 rounded-xl w-full sm:w-fit">
         <button
           type="button"
           onClick={() => setTab("account")}
           className={cn(
-            "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
-            tab === "account" ? "bg-card shadow-sm text-emerald-700" : "text-muted-foreground hover:text-foreground"
+            "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer",
+            tab === "account" ? "bg-ivory-card text-emerald-deep" : "text-muted-foreground hover:text-foreground"
           )}
         >
           <UserRound className="w-4 h-4" /> Pengaturan Akun
@@ -126,8 +126,8 @@ export default function SettingsPage() {
           type="button"
           onClick={() => setTab("appearance")}
           className={cn(
-            "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
-            tab === "appearance" ? "bg-card shadow-sm text-emerald-700" : "text-muted-foreground hover:text-foreground"
+            "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer",
+            tab === "appearance" ? "bg-ivory-card text-emerald-deep" : "text-muted-foreground hover:text-foreground"
           )}
         >
           <Palette className="w-4 h-4" /> Tampilan
@@ -137,7 +137,7 @@ export default function SettingsPage() {
       {tab === "account" ? (
         <>
           {/* Profile Card */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <div className="bg-ivory-card border border-ivory-border rounded-2xl p-6">
             <div className="flex items-center gap-5">
               <div className="relative">
                 {avatarUrl ? (
@@ -149,20 +149,20 @@ export default function SettingsPage() {
                     className="rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
-                    <span className="text-xl font-bold text-white">{initials}</span>
+                  <div className="w-[72px] h-[72px] rounded-full bg-emerald-dark flex items-center justify-center">
+                    <span className="text-xl font-bold text-gold">{initials}</span>
                   </div>
                 )}
                 <button
                   type="button"
-                  className="absolute -bottom-1 -right-1 w-7 h-7 bg-white border border-border rounded-full flex items-center justify-center hover:bg-muted transition-colors shadow-sm"
+                  className="absolute -bottom-1 -right-1 w-7 h-7 bg-ivory-soft border border-ivory-border rounded-full flex items-center justify-center hover:bg-gold/10 transition-colors cursor-pointer"
                   title="Ganti foto profil"
                 >
                   <Camera className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               </div>
               <div>
-                <p className="font-semibold">{name || "Pengguna"}</p>
+                <p className="font-semibold text-emerald-deep">{name || "Pengguna"}</p>
                 <p className="text-sm text-muted-foreground">{email}</p>
                 <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                   <Calendar className="w-3 h-3" />
@@ -173,9 +173,9 @@ export default function SettingsPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSave} className="bg-card border border-border rounded-xl shadow-sm divide-y divide-border">
+          <form onSubmit={handleSave} className="bg-ivory-card border border-ivory-border rounded-2xl divide-y divide-ivory-border">
             <div className="p-5">
-              <h2 className="font-semibold mb-4">Informasi Pribadi</h2>
+              <h2 className="font-semibold mb-4 text-emerald-deep">Informasi Pribadi</h2>
               <div className="space-y-4">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Nama Lengkap</label>
@@ -192,7 +192,7 @@ export default function SettingsPage() {
                     type="email"
                     value={email}
                     disabled
-                    className="mt-1.5 bg-muted/50 text-muted-foreground cursor-not-allowed"
+                    className="mt-1.5 bg-ivory-border/40 text-muted-foreground cursor-not-allowed"
                   />
                   <p className="text-xs text-muted-foreground mt-1">Email tidak dapat diubah dari halaman ini</p>
                 </div>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
             <div className="px-5 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {saved && (
-                  <span className="inline-flex items-center gap-1 text-sm text-emerald-600 font-medium">
+                  <span className="inline-flex items-center gap-1 text-sm text-emerald-dark font-medium">
                     <Check className="w-4 h-4" /> Tersimpan
                   </span>
                 )}
@@ -219,7 +219,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2 text-sm"
+                className="bg-emerald-dark text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-deep transition-colors disabled:opacity-50 flex items-center gap-2 text-sm cursor-pointer"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 {saving ? "Menyimpan..." : "Simpan Perubahan"}
@@ -229,9 +229,9 @@ export default function SettingsPage() {
         </>
       ) : (
         /* ===== Tampilan ===== */
-        <div className="bg-card border border-border rounded-xl shadow-sm p-5 sm:p-6">
-          <h2 className="font-semibold flex items-center gap-2">
-            <Palette className="w-4 h-4 text-emerald-600" /> Tampilan Aplikasi
+        <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 sm:p-6">
+          <h2 className="font-semibold flex items-center gap-2 text-emerald-deep">
+            <Palette className="w-4 h-4 text-emerald-dark" /> Tampilan Aplikasi
           </h2>
           <div className="mb-6" />
 
@@ -239,7 +239,7 @@ export default function SettingsPage() {
             type="button"
             onClick={() => setTheme(isDark ? "light" : "dark")}
             aria-label="Ganti tema siang malam"
-            className="relative block w-full max-w-[360px] h-20 rounded-full overflow-hidden border border-border shadow-inner select-none"
+            className="relative block w-full max-w-[360px] h-20 rounded-full overflow-hidden border border-ivory-border select-none cursor-pointer"
           >
             {/* Langit siang */}
             <div
@@ -261,14 +261,12 @@ export default function SettingsPage() {
               {STARS.map((s, i) => (
                 <div
                   key={i}
-                  className="absolute rounded-full bg-slate-100 animate-[twinkle_3.5s_ease-in-out_infinite]"
+                  className="absolute rounded-full bg-slate-100"
                   style={{
                     top: s.top,
                     left: s.left,
                     width: s.size,
                     height: s.size,
-                    boxShadow: "0 0 6px rgba(255,255,255,0.9)",
-                    animationDelay: s.delay,
                   }}
                 />
               ))}
@@ -276,15 +274,15 @@ export default function SettingsPage() {
 
             {/* Awan siang */}
             <div className={cn("absolute inset-0 transition-opacity duration-700", isDark ? "opacity-0" : "opacity-100")}>
-              <Cloud fill="rgba(255,255,255,0.95)" className="absolute -left-2 top-1 w-24 h-14 animate-[drift-x_7s_ease-in-out_infinite]" />
-              <Cloud fill="rgba(255,255,255,0.8)" className="absolute left-[38%] -top-1 w-16 h-10 animate-[drift-x_5s_ease-in-out_infinite_reverse]" />
-              <Cloud fill="rgba(255,255,255,0.85)" className="absolute -right-3 top-6 w-20 h-12 animate-[drift-x_6s_ease-in-out_infinite]" />
+              <Cloud fill="rgba(255,255,255,0.95)" className="absolute -left-2 top-1 w-24 h-14" />
+              <Cloud fill="rgba(255,255,255,0.8)" className="absolute left-[38%] -top-1 w-16 h-10" />
+              <Cloud fill="rgba(255,255,255,0.85)" className="absolute -right-3 top-6 w-20 h-12" />
             </div>
 
             {/* Awan malam */}
             <div className={cn("absolute inset-0 transition-opacity duration-700", isDark ? "opacity-60" : "opacity-0")}>
-              <Cloud fill="#2a2f5e" className="absolute -left-3 bottom-0 w-28 h-16 animate-[drift-x_9s_ease-in-out_infinite]" />
-              <Cloud fill="#303568" className="absolute left-[45%] -top-2 w-20 h-12 animate-[drift-x_6s_ease-in-out_infinite_reverse]" />
+              <Cloud fill="#2a2f5e" className="absolute -left-3 bottom-0 w-28 h-16" />
+              <Cloud fill="#303568" className="absolute left-[45%] -top-2 w-20 h-12" />
             </div>
 
             {/* Knob */}
@@ -300,7 +298,6 @@ export default function SettingsPage() {
                   "absolute inset-0 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 flex items-center justify-center transition-[opacity,transform] duration-500",
                   isDark ? "opacity-0 scale-90" : "opacity-100 scale-100"
                 )}
-                style={!isDark ? { boxShadow: "0 0 30px rgba(251,191,36,0.85)" } : undefined}
               >
                 <Sun
                   className="w-7 h-7 text-white"
@@ -313,7 +310,6 @@ export default function SettingsPage() {
                   "absolute inset-0 rounded-full bg-gradient-to-br from-indigo-900/90 to-slate-900/90 flex items-center justify-center transition-[opacity,transform] duration-500 scale-90",
                   isDark ? "opacity-100 scale-100" : "opacity-0"
                 )}
-                style={isDark ? { boxShadow: "0 0 26px rgba(196,181,253,0.55)" } : undefined}
               >
                 <Moon className="w-7 h-7 text-amber-100 fill-amber-100" />
               </div>
@@ -321,7 +317,7 @@ export default function SettingsPage() {
           </button>
 
           <p className="text-xs text-muted-foreground mt-4 flex items-center gap-1.5">
-            <Star className="w-3.5 h-3.5 text-emerald-600" />
+            <Star className="w-3.5 h-3.5 text-gold-dark" />
             Tema saat ini: {isDark ? "Malam" : "Siang"}
           </p>
         </div>

@@ -74,48 +74,49 @@ export default function CashbackPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <BadgePercent className="w-6 h-6 text-emerald-600" /> Cashback
+        <h1 className="text-2xl font-bold tracking-tight text-emerald-deep flex items-center gap-2">
+          <BadgePercent className="w-6 h-6 text-gold-dark" /> Cashback
         </h1>
+        <p className="text-sm text-muted-foreground mt-1">Ringkasan cashback dari setiap pesanan paket umrah Anda.</p>
       </div>
 
       {/* Penjelasan — ditangani langsung oleh travel */}
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 p-4 sm:p-5 shadow-sm dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100">
+      <div className="rounded-xl border border-gold/30 bg-gold/10 text-emerald-deep p-4 sm:p-5">
         <div className="flex items-start gap-3.5">
-          <span className="shrink-0 w-9 h-9 rounded-lg bg-emerald-600/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center">
-            <Info className="w-5 h-5 text-emerald-700 dark:text-emerald-300" />
+          <span className="shrink-0 w-9 h-9 rounded-lg bg-gold/20 border border-gold/30 flex items-center justify-center">
+            <Info className="w-5 h-5 text-gold-dark" />
           </span>
           <div>
             <p className="font-semibold">Cashback ditangani langsung oleh travel</p>
             <p className="mt-1 text-sm leading-relaxed">{CASHBACK_EXPLANATION}</p>
-            <p className="mt-2 text-xs text-emerald-700/80 dark:text-emerald-200/70">
-              Tidak ada pengajuan pencairan di sistem kami — silakan hubungi travel Anda untuk detail penyerahan cashback.
+            <p className="mt-2 text-xs text-muted-foreground">
+              Tidak ada pengajuan pencairan di sistem kami. Silakan hubungi travel Anda untuk detail penyerahan cashback.
             </p>
           </div>
         </div>
       </div>
 
       {/* Ringkasan */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-xl border border-ivory-border bg-ivory-card p-5">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Total Cashback Anda</p>
-            <BadgePercent className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <BadgePercent className="h-4 w-4 text-gold-dark" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-emerald-700 dark:text-emerald-300">{formatRupiah(totalCashback)}</p>
+          <p className="mt-2 text-2xl font-bold text-emerald-deep">{formatRupiah(totalCashback)}</p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <div className="rounded-xl border border-ivory-border bg-ivory-card p-5">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Pesanan dengan Cashback</p>
-            <Banknote className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <Banknote className="h-4 w-4 text-emerald-dark" />
           </div>
-          <p className="mt-2 text-2xl font-bold">{rows.length} pesanan</p>
+          <p className="mt-2 text-2xl font-bold text-emerald-deep">{rows.length} pesanan</p>
         </div>
       </div>
 
-      <section className="rounded-xl border border-border bg-card shadow-sm">
-        <div className="border-b border-border px-6 py-5">
-          <h2 className="font-semibold">Pesanan dengan Cashback</h2>
+      <section className="rounded-2xl border border-ivory-border bg-ivory-card">
+        <div className="border-b border-ivory-border px-6 py-5">
+          <h2 className="font-semibold text-emerald-deep">Pesanan dengan Cashback</h2>
         </div>
         {rows.length === 0 ? (
           <div className="px-6 py-12 text-center text-muted-foreground">
@@ -123,13 +124,13 @@ export default function CashbackPage() {
             Belum ada pesanan yang berhak atas cashback. Pesan paket dengan badge Cashback untuk mulai.
           </div>
         ) : (
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-ivory-border">
             {rows.map((row) => (
               <div key={row.id} className="flex flex-col gap-3 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <Link
                     href={`/package/${row.package_slug}`}
-                    className="font-medium hover:text-emerald-600 hover:underline dark:hover:text-emerald-400"
+                    className="font-medium text-emerald-deep hover:text-emerald-dark hover:underline"
                   >
                     {row.package_name}
                   </Link>
@@ -139,8 +140,8 @@ export default function CashbackPage() {
                     · {STATUS_LABEL[row.status] || row.status}
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1 w-fit rounded-full bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 px-2.5 py-1 text-xs font-bold text-amber-900 shadow-sm sm:shrink-0">
-                  <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(row.cashback_amount))}
+                <span className="inline-flex items-center gap-1 w-fit rounded-full bg-gold/15 border border-gold/30 px-2.5 py-1 text-xs font-bold text-gold-dark sm:shrink-0">
+                  <BadgePercent className="w-3.5 h-3.5 text-gold-dark" /> Cashback {formatRupiah(Number(row.cashback_amount))}
                 </span>
               </div>
             ))}

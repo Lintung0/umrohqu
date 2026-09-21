@@ -66,11 +66,11 @@ export default function WishlistPage() {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="space-y-2">
-          <div className="h-8 w-48 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+          <div className="h-8 w-48 bg-ivory-border/60 rounded animate-pulse" />
+          <div className="h-4 w-64 bg-ivory-border/60 rounded animate-pulse" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-64 bg-muted rounded-xl animate-pulse" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-64 bg-ivory-border/60 rounded-xl animate-pulse" />)}
         </div>
       </div>
     )
@@ -80,15 +80,16 @@ export default function WishlistPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Daftar Keinginan</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-emerald-deep">Daftar Keinginan</h1>
+        <p className="text-sm text-muted-foreground mt-1">Paket umrah yang Anda simpan untuk dibandingkan nanti.</p>
       </div>
 
       {/* Content */}
       {items.length === 0 ? (
-        <div className="bg-white border border-border rounded-xl p-12 text-center shadow-sm">
-          <Heart className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+        <div className="bg-ivory-card border border-ivory-border rounded-2xl p-12 text-center">
+          <Heart className="w-12 h-12 text-emerald-dark/25 mx-auto mb-3" />
           <p className="font-medium text-muted-foreground">Belum ada paket di wishlist</p>
-          <Link href="/search" className="text-sm text-emerald-600 hover:text-emerald-700 mt-2 inline-flex items-center gap-1">
+          <Link href="/search" className="text-sm text-emerald-dark hover:text-emerald-deep mt-2 inline-flex items-center gap-1">
             Cari paket umrah <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
@@ -99,7 +100,7 @@ export default function WishlistPage() {
             return (
               <div
                 key={item.id}
-                className="bg-white border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group"
+                className="bg-ivory-card border border-ivory-border rounded-2xl overflow-hidden group"
               >
                 <Link href={`/package/${pkg?.slug || ""}`} className="block">
                   <div className="relative">
@@ -112,7 +113,7 @@ export default function WishlistPage() {
                         className="w-full h-40 object-cover group-hover:scale-[1.02] transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-40 bg-muted" />
+                      <div className="w-full h-40 bg-ivory-border/50" />
                     )}
                     <div className="absolute top-2 left-2">
                       <PackageStatusBadge status={pkg?.status} />
@@ -121,7 +122,7 @@ export default function WishlistPage() {
                 </Link>
                 <div className="p-4">
                   <Link href={`/package/${pkg?.slug || ""}`}>
-                    <h3 className="font-semibold text-sm hover:text-emerald-600 transition-colors line-clamp-1">{pkg?.name}</h3>
+                    <h3 className="font-semibold text-sm text-emerald-deep hover:text-emerald-dark transition-colors line-clamp-1">{pkg?.name}</h3>
                   </Link>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
                     {pkg?.duration_nights && (
@@ -131,8 +132,8 @@ export default function WishlistPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-                    <span className="text-base font-bold text-emerald-600">{formatRupiah(pkg?.price || 0)}</span>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-ivory-border/70">
+                    <span className="text-base font-bold text-emerald-dark">{formatRupiah(pkg?.price || 0)}</span>
                     <button
                       onClick={() => setDeletingId(item.id)}
                       className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
@@ -151,15 +152,15 @@ export default function WishlistPage() {
       {/* Delete Confirmation */}
       {deletingId && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" onClick={() => setDeletingId(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-ivory-card rounded-2xl shadow-xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-5 h-5 text-red-500" />
             </div>
-            <h3 className="font-semibold text-center mb-1">Hapus dari Wishlist?</h3>
+            <h3 className="font-semibold text-center mb-1 text-emerald-deep">Hapus dari Wishlist?</h3>
             <p className="text-sm text-muted-foreground text-center mb-5">Paket ini akan dihapus dari daftar wishlist Anda.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeletingId(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">Batal</button>
-              <button onClick={confirmRemove} className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors">Hapus</button>
+              <button onClick={() => setDeletingId(null)} className="flex-1 px-4 py-2.5 rounded-xl border border-ivory-border text-sm font-medium hover:bg-ivory transition-colors cursor-pointer">Batal</button>
+              <button onClick={confirmRemove} className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors cursor-pointer">Hapus</button>
             </div>
           </div>
         </div>

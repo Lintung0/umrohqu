@@ -43,9 +43,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-background items-center justify-center">
+      <div className="flex min-h-screen bg-ivory items-center justify-center">
         <div className="text-center space-y-3">
-          <div className="h-8 w-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="h-8 w-8 border-4 border-emerald-dark border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-muted-foreground">Memuat sesi autentikasi...</p>
         </div>
       </div>
@@ -54,18 +54,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!authorized) {
     return (
-      <div className="flex min-h-screen bg-background items-center justify-center">
+      <div className="flex min-h-screen bg-ivory items-center justify-center">
         <div className="text-center space-y-3">
           <p className="text-muted-foreground font-medium">Akses ditolak</p>
           <p className="text-sm text-muted-foreground">Anda tidak memiliki akses ke halaman ini.</p>
-          <a href="/" className="text-emerald-600 text-sm hover:underline inline-block">Kembali ke Beranda</a>
+          <a href="/" className="text-emerald-dark text-sm hover:underline inline-block">Kembali ke Beranda</a>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-ivory">
       <DashboardSidebar />
       <main className="flex-1 min-w-0 pt-16 pb-20 lg:pt-0 lg:pb-0">{children}</main>
     </div>

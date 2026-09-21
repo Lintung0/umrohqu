@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { User, PostgrestError } from "@supabase/supabase-js"
-import { UserRound, Loader2, Check, ChevronRight, ShieldCheck, MapPin, IdCard, PhoneCall } from "lucide-react"
+import { UserRound, Loader2, Check, ChevronRight, ShieldCheck, MapPin, IdCard, PhoneCall, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -165,10 +165,10 @@ export default function DataDiriPage() {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
         <div className="space-y-2">
-          <div className="h-8 w-56 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-48 bg-muted rounded animate-pulse" />
+          <div className="h-8 w-56 bg-ivory-border/60 rounded animate-pulse" />
+          <div className="h-4 w-48 bg-ivory-border/60 rounded animate-pulse" />
         </div>
-        <div className="h-96 bg-muted rounded-xl animate-pulse" />
+        <div className="h-96 bg-ivory-border/60 rounded-xl animate-pulse" />
       </div>
     )
   }
@@ -192,15 +192,15 @@ export default function DataDiriPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Data Diri</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-emerald-deep">Data Diri</h1>
         <p className="text-muted-foreground mt-1">Lengkapi data jamaah tahap 2 agar pengajuan visa & keberangkatan Anda berjalan lancar.</p>
       </div>
 
       {/* Kelengkapan */}
       <div className={`rounded-xl border px-4 py-3 text-sm flex items-start gap-2 ${
         missingFields.length === 0
-          ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-          : "bg-amber-50 border-amber-200 text-amber-700"
+          ? "bg-emerald-dark/10 border-emerald-dark/25 text-emerald-dark"
+          : "bg-gold/15 border-gold/30 text-gold-dark"
       }`}>
         {missingFields.length === 0 ? (
           <>
@@ -209,10 +209,10 @@ export default function DataDiriPage() {
           </>
         ) : (
           <>
-            <span className="w-4 h-4 shrink-0 mt-0.5 flex items-center justify-center text-amber-700">⚠</span>
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-gold-dark" />
             <span>
               <b>{missingFields.length} data belum diisi</b> agar data diri lengkap:
-              <span className="block mt-1 text-xs text-amber-700/80">{missingFields.join(", ")}</span>
+              <span className="block mt-1 text-xs text-gold-dark/80">{missingFields.join(", ")}</span>
             </span>
           </>
         )}
@@ -220,13 +220,13 @@ export default function DataDiriPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Identitas Jamaah */}
-        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-gradient-to-br from-emerald-50/60 to-white">
-            <span className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center">
-              <UserRound className="w-4 h-4 text-white" />
+        <div className="bg-ivory-card border border-ivory-border rounded-2xl overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-ivory-border bg-gold/10">
+            <span className="w-9 h-9 rounded-lg bg-emerald-dark flex items-center justify-center">
+              <UserRound className="w-4 h-4 text-gold" />
             </span>
             <div>
-              <h2 className="font-semibold text-sm">Identitas Jamaah</h2>
+              <h2 className="font-semibold text-sm text-emerald-deep">Identitas Jamaah</h2>
             </div>
           </div>
           <div className="p-5 space-y-4">
@@ -267,14 +267,14 @@ export default function DataDiriPage() {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex items-center gap-2 text-xs text-muted-foreground px-1">
+            <div className="pt-2 border-t border-ivory-border flex items-center gap-2 text-xs text-muted-foreground px-1">
               <IdCard className="w-3.5 h-3.5" />
               Gunakan data yang sesuai dengan paspor Anda
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <ShieldCheck className="w-4 h-4 text-emerald-dark" />
                 <h3 className="font-semibold text-sm">Data Paspor</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -291,7 +291,7 @@ export default function DataDiriPage() {
 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <PhoneCall className="w-4 h-4 text-emerald-600" />
+                <PhoneCall className="w-4 h-4 text-emerald-dark" />
                 <h3 className="font-semibold text-sm">Kontak Darurat</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -309,13 +309,13 @@ export default function DataDiriPage() {
         </div>
 
         {/* Alamat */}
-        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-gradient-to-br from-emerald-50/60 to-white">
-            <span className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-white" />
+        <div className="bg-ivory-card border border-ivory-border rounded-2xl overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-ivory-border bg-gold/10">
+            <span className="w-9 h-9 rounded-lg bg-gold flex items-center justify-center">
+              <MapPin className="w-4 h-4 text-emerald-deep" />
             </span>
             <div>
-              <h2 className="font-semibold text-sm">Alamat</h2>
+              <h2 className="font-semibold text-sm text-emerald-deep">Alamat</h2>
               <p className="text-xs text-muted-foreground">Alamat tempat tinggal saat ini</p>
             </div>
           </div>
@@ -352,10 +352,10 @@ export default function DataDiriPage() {
         </div>
 
         {/* Submit */}
-        <div className="flex items-center justify-between bg-card border border-border rounded-xl px-5 py-4 shadow-sm">
+        <div className="flex items-center justify-between bg-ivory-card border border-ivory-border rounded-2xl px-5 py-4">
           <div className="flex items-center gap-2">
             {saved && (
-              <span className="inline-flex items-center gap-1 text-sm text-emerald-600 font-medium">
+              <span className="inline-flex items-center gap-1 text-sm text-emerald-dark font-medium">
                 <Check className="w-4 h-4" /> Tersimpan
               </span>
             )}
@@ -365,14 +365,14 @@ export default function DataDiriPage() {
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="px-4 py-2 rounded-lg text-sm font-medium border border-border text-muted-foreground hover:bg-muted/50 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium border border-ivory-border text-muted-foreground hover:bg-ivory transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-5 py-2 rounded-lg font-medium hover:from-emerald-700 hover:to-emerald-600 transition-colors disabled:opacity-50 text-sm shadow-md shadow-emerald-600/25"
+              className="flex items-center gap-1.5 bg-emerald-dark text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-deep transition-colors disabled:opacity-50 text-sm cursor-pointer"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               {saving ? "Menyimpan..." : "Simpan Data Diri"}
