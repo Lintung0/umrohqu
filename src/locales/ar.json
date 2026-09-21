@@ -96,7 +96,7 @@
     "remaining_dp_info": "حجز الدفعة الأولى لا يزال لديه رصيد متبقي قدره {{amount}}.",
     "due_date": "تاريخ الاستحقاق",
     "simulate_pay": "محاكاة الدفع الآن",
-    "pay_via_xendit": "ادفع عبر Xendit",
+    "pay_via_xendit": "ادفع عبر Midtrans",
     "booking_success": "تم الدفع بنجاح! تم تحديث حالة الحجز.",
     "booking_created": "تم الإنشاء",
     "personal_info": "المعلومات الشخصية",
@@ -132,7 +132,7 @@
     "payment_submitted_desc": "تم إرسال دفعتك. سيتم تحديث الحالة تلقائياً.",
     "wallet": "محفظة UmrahQu",
     "bank_transfer": "تحويل بنكي / QRIS",
-    "bank_transfer_desc": "ادفع عبر Xendit (BCA, Mandiri, BRI, QRIS)",
+    "bank_transfer_desc": "ادفع عبر Midtrans (BCA, Mandiri, BRI, QRIS)",
     "balance": "الرصيد",
     "insufficient": "غير كافٍ"
   },

@@ -97,7 +97,7 @@
     "remaining_dp_info": "Booking DP Anda masih memiliki sisa cicilan sebesar {{amount}}.",
     "due_date": "Jatuh tempo",
     "simulate_pay": "Simulasi Pembayaran",
-    "pay_via_xendit": "Bayar via Xendit",
+    "pay_via_xendit": "Bayar via Midtrans",
     "booking_success": "Pembayaran berhasil! Status booking telah diperbarui.",
     "booking_created": "Dibuat",
     "personal_info": "Data Pemesan",
@@ -133,7 +133,7 @@
     "payment_submitted_desc": "Pembayaran Anda telah terkirim. Status akan diperbarui secara otomatis.",
     "wallet": "Dompet UmrahQu",
     "bank_transfer": "Transfer Bank / QRIS",
-    "bank_transfer_desc": "Bayar via Xendit (BCA, Mandiri, BRI, QRIS)",
+    "bank_transfer_desc": "Bayar via Midtrans (BCA, Mandiri, BRI, QRIS)",
     "balance": "Saldo",
     "insufficient": "kurang"
   },

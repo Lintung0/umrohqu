@@ -34,7 +34,7 @@ const STATIC_FAQS: FAQItem[] = [
     id: "4",
     category: "Travel",
     question: "Apa itu sistem deposit/saldo untuk travel?",
-    answer: "Setelah aktif, travel dapat mengisi saldo dompet melalui fitur Topup. Saldo ini digunakan untuk membayar service fee platform per transaksi booking. Sistem ini seperti ATM — isi saldo dulu, baru bisa transaksi. Topup dapat dilakukan via Xendit (virtual account, QRIS, kartu kredit)."
+    answer: "Setelah aktif, travel dapat mengisi saldo dompet melalui fitur Topup. Saldo ini digunakan untuk membayar service fee platform per transaksi booking. Sistem ini seperti ATM — isi saldo dulu, baru bisa transaksi. Topup dapat dilakukan via Midtrans (virtual account, QRIS, kartu kredit)."
   },
   {
     id: "5",
@@ -46,13 +46,13 @@ const STATIC_FAQS: FAQItem[] = [
     id: "6",
     category: "Jamaah",
     question: "Bagaimana cara memesan paket umrah?",
-    answer: 'Cukup cari paket umrah di halaman <a href="/search" class="text-emerald-600 hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Xendit.'
+    answer: 'Cukup cari paket umrah di halaman <a href="/search" class="text-emerald-600 hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Midtrans.'
   },
   {
     id: "7",
     category: "Jamaah",
     question: "Metode pembayaran apa saja yang tersedia?",
-    answer: "Pembayaran dapat dilakukan melalui Virtual Account (BCA, Mandiri, BRI, BNI), QRIS (GoPay, OVO, DANA, ShopeePay), dan Kartu Kredit. Semua pembayaran diproses melalui Xendit yang terpercaya."
+    answer: "Pembayaran dapat dilakukan melalui Virtual Account (BCA, Mandiri, BRI, BNI), QRIS (GoPay, OVO, DANA, ShopeePay), dan Kartu Kredit. Semua pembayaran diproses melalui Midtrans yang terpercaya."
   },
   {
     id: "8",

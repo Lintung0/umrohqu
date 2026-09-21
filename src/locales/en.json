@@ -97,7 +97,7 @@
     "remaining_dp_info": "Your DP booking still has remaining balance of {{amount}}.",
     "due_date": "Due date",
     "simulate_pay": "Simulate Pay Now",
-    "pay_via_xendit": "Pay via Xendit",
+    "pay_via_xendit": "Pay via Midtrans",
     "booking_success": "Payment successful! Booking status has been updated.",
     "booking_created": "Created",
     "personal_info": "Personal Info",
@@ -133,7 +133,7 @@
     "payment_submitted_desc": "Your payment has been submitted. Status will be updated automatically.",
     "wallet": "UmrahQu Wallet",
     "bank_transfer": "Bank Transfer / QRIS",
-    "bank_transfer_desc": "Pay via Xendit (BCA, Mandiri, BRI, QRIS)",
+    "bank_transfer_desc": "Pay via Midtrans (BCA, Mandiri, BRI, QRIS)",
     "balance": "Balance",
     "insufficient": "insufficient"
   },

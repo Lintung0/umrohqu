@@ -62,7 +62,7 @@ export default function BookingDetailPage() {
   const [user, setUser] = useState<any>(null)
   const [showCancelModal, setShowCancelModal] = useState(false)
 
-  // Track auth state with onAuthStateChange — handles hydration delay after Xendit redirect
+  // Track auth state with onAuthStateChange — handles hydration delay after Midtrans redirect
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("[DEBUG BOOKING PAGE] onAuthStateChange:", { event: _event, userId: session?.user?.id, email: session?.user?.email })
@@ -138,7 +138,7 @@ export default function BookingDetailPage() {
       setBooking(bookingData)
       setLoading(false)
 
-      // Step 4: Verify Xendit payment status if applicable
+      // Step 4: Verify Midtrans payment status if applicable
       if (bookingData.gateway_invoice_id) {
         const shouldVerify = bookingData.status === "pending_payment" ||
           (bookingData.status === "processing" && bookingData.dp_type === "dp" && (bookingData.remaining_amount || 0) > 0 && (bookingData.gateway_invoice_id?.startsWith("booking-remaining-") || bookingData.gateway_invoice_id?.endsWith("-R")))
