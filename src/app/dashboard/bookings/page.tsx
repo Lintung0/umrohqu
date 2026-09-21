@@ -114,7 +114,6 @@ export default function BookingsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-emerald-deep">{t("booking.title")}</h1>
-        <p className="text-sm text-muted-foreground mt-1">Riwayat pemesanan paket umrah Anda.</p>
       </div>
 
       {/* Ringkasan Statistik */}
@@ -149,7 +148,7 @@ export default function BookingsPage() {
       </div>
 
       {/* Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 -mb-1">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2">
         {BOOKING_STATUSES.map((s) => (
           <button
             key={s.value}
