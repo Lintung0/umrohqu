@@ -42,6 +42,41 @@ export default function ManasikProgramsPage() {
     getTenantId()
   }, [])
 
+  const fetchPrograms = async ({ page, limit, search, sortBy, sortOrder, filters }: {
+    page: number
+    limit: number
+    search: string
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    filters?: Record<string, any>
+  }) => {
+    if (!tenantId) return { data: [], total: 0 }
+
+    let query = supabase
+      .from("manasik_programs")
+      .select(`
+        *,
+        package:packages(name),
+        lead_muthawif:muthawifs(user:users(full_name))
+      `, { count: "exact" })
+      .eq("package.tenant_id", tenantId)
+
+    if (search) {
+      query = query.or(`package.name.ilike.%${search}%,name.ilike.%${search}%`)
+    }
+
+    if (sortBy) {
+      query = query.order(sortBy as any, { ascending: sortOrder === "asc" })
+    } else {
+      query = query.order("created_at", { ascending: false })
+    }
+
+    query = query.range((page - 1) * limit, page * limit - 1)
+
+    const { data, count } = await query
+    return { data: (data as unknown as ManasikProgram[]) || [], total: count || 0 }
+  }
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -82,7 +117,7 @@ export default function ManasikProgramsPage() {
             render: (row: any) => format(new Date(row.created_at), "dd MMM yyyy", { locale: id }),
           },
         ]}
-        fetchData={async (params) => ({ data: [], total: 0 })}
+        fetchData={fetchPrograms}
         createUrl="/travel-dashboard/manasik-programs/new"
         pageSize={10}
         exportable

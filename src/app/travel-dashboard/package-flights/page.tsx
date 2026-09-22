@@ -46,6 +46,41 @@ export default function PackageFlightsPage() {
     getTenantId()
   }, [])
 
+  const fetchFlights = async ({ page, limit, search, sortBy, sortOrder, filters }: {
+    page: number
+    limit: number
+    search: string
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    filters?: Record<string, any>
+  }) => {
+    if (!tenantId) return { data: [], total: 0 }
+
+    let query = supabase
+      .from("package_flights")
+      .select(`
+        *,
+        package:packages(name),
+        airline:airlines(name, iata_code)
+      `, { count: "exact" })
+      .eq("package.tenant_id", tenantId)
+
+    if (search) {
+      query = query.or(`package.name.ilike.%${search}%,airline.name.ilike.%${search}%,flight_number.ilike.%${search}%`)
+    }
+
+    if (sortBy) {
+      query = query.order(sortBy as any, { ascending: sortOrder === "asc" })
+    } else {
+      query = query.order("departure_time", { ascending: false })
+    }
+
+    query = query.range((page - 1) * limit, page * limit - 1)
+
+    const { data, count } = await query
+    return { data: (data as unknown as PackageFlight[]) || [], total: count || 0 }
+  }
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -113,7 +148,7 @@ export default function PackageFlightsPage() {
             render: (row: any) => row.arrival_time
           },
         ]}
-        fetchData={async (params) => ({ data: [], total: 0 })}
+        fetchData={fetchFlights}
         createUrl="/travel-dashboard/package-flights/new"
         pageSize={10}
         exportable

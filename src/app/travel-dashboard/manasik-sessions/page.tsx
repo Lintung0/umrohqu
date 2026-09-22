@@ -45,6 +45,41 @@ export default function ManasikSessionsPage() {
     getTenantId()
   }, [])
 
+  const fetchSessions = async ({ page, limit, search, sortBy, sortOrder, filters }: {
+    page: number
+    limit: number
+    search: string
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    filters?: Record<string, any>
+  }) => {
+    if (!tenantId) return { data: [], total: 0 }
+
+    let query = supabase
+      .from("manasik_sessions")
+      .select(`
+        *,
+        program:manasik_programs(name, package:packages(tenant_id)),
+        muthawif:muthawifs(user:users(full_name))
+      `, { count: "exact" })
+      .eq("program.package.tenant_id", tenantId)
+
+    if (search) {
+      query = query.or(`program.name.ilike.%${search}%,location.ilike.%${search}%`)
+    }
+
+    if (sortBy) {
+      query = query.order(sortBy as any, { ascending: sortOrder === "asc" })
+    } else {
+      query = query.order("session_date", { ascending: false })
+    }
+
+    query = query.range((page - 1) * limit, page * limit - 1)
+
+    const { data, count } = await query
+    return { data: (data as unknown as ManasikSession[]) || [], total: count || 0 }
+  }
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -99,7 +134,7 @@ export default function ManasikSessionsPage() {
             render: (row: any) => row.materials_url ? "Tersedia" : "Belum ada"
           },
         ]}
-        fetchData={async (params) => ({ data: [], total: 0 })}
+        fetchData={fetchSessions}
         createUrl="/travel-dashboard/manasik-sessions/new"
         pageSize={10}
         exportable

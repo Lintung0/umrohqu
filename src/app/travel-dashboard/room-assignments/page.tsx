@@ -24,8 +24,10 @@ interface RoomAssignment {
   room_template?: {
     room_number: string
     room_type: string
-    hotel?: {
-      name: string
+    package_hotel?: {
+      hotel?: {
+        name: string
+      }
     }
   }
 }
@@ -47,6 +49,41 @@ export default function RoomAssignmentsPage() {
     }
     getTenantId()
   }, [])
+
+  const fetchRoomAssignments = async ({ page, limit, search, sortBy, sortOrder, filters }: {
+    page: number
+    limit: number
+    search: string
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    filters?: Record<string, any>
+  }) => {
+    if (!tenantId) return { data: [], total: 0 }
+
+    let query = supabase
+      .from("room_assignments")
+      .select(`
+        *,
+        participant:booking_participants(full_name, booking:bookings(package:packages(name))),
+        room_template:room_templates(room_number, room_type, package_hotel:package_hotels(hotel:hotels(name)))
+      `, { count: "exact" })
+      .eq("participant.booking.package.tenant_id", tenantId)
+
+    if (search) {
+      query = query.or(`participant.full_name.ilike.%${search}%,room_template.room_number.ilike.%${search}%`)
+    }
+
+    if (sortBy) {
+      query = query.order(sortBy as any, { ascending: sortOrder === "asc" })
+    } else {
+      query = query.order("created_at", { ascending: false })
+    }
+
+    query = query.range((page - 1) * limit, page * limit - 1)
+
+    const { data, count } = await query
+    return { data: (data as unknown as RoomAssignment[]) || [], total: count || 0 }
+  }
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -94,7 +131,7 @@ export default function RoomAssignmentsPage() {
             header: "Hotel",
             sortable: false,
             width: "200px",
-            render: (row: any) => row.room_template?.hotel?.name || "-"
+            render: (row: any) => row.room_template?.package_hotel?.hotel?.name || "-"
           },
           {
             key: "location",
@@ -112,7 +149,7 @@ export default function RoomAssignmentsPage() {
             ),
           },
         ]}
-        fetchData={async (params) => ({ data: [], total: 0 })}
+        fetchData={fetchRoomAssignments}
         pageSize={10}
         exportable
       />

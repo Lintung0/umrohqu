@@ -43,6 +43,41 @@ export default function PackageHotelsPage() {
     getTenantId()
   }, [])
 
+  const fetchPackageHotels = async ({ page, limit, search, sortBy, sortOrder, filters }: {
+    page: number
+    limit: number
+    search: string
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    filters?: Record<string, any>
+  }) => {
+    if (!tenantId) return { data: [], total: 0 }
+
+    let query = supabase
+      .from("package_hotels")
+      .select(`
+        *,
+        package:packages(name),
+        hotel:hotels(name, city)
+      `, { count: "exact" })
+      .eq("package.tenant_id", tenantId)
+
+    if (search) {
+      query = query.or(`package.name.ilike.%${search}%,hotel.name.ilike.%${search}%`)
+    }
+
+    if (sortBy) {
+      query = query.order(sortBy as any, { ascending: sortOrder === "asc" })
+    } else {
+      query = query.order("created_at", { ascending: false })
+    }
+
+    query = query.range((page - 1) * limit, page * limit - 1)
+
+    const { data, count } = await query
+    return { data: (data as unknown as PackageHotel[]) || [], total: count || 0 }
+  }
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -105,7 +140,7 @@ export default function PackageHotelsPage() {
             render: (row: any) => `#${row.sort_order}`
           },
         ]}
-        fetchData={async (params) => ({ data: [], total: 0 })}
+        fetchData={fetchPackageHotels}
         createUrl="/travel-dashboard/package-hotels/new"
         pageSize={10}
         exportable

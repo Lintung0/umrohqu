@@ -38,6 +38,40 @@ export default function BusSeatsPage() {
     getTenantId()
   }, [])
 
+  const fetchBusSeats = async ({ page, limit, search, sortBy, sortOrder, filters }: {
+    page: number
+    limit: number
+    search: string
+    sortBy?: string
+    sortOrder?: "asc" | "desc"
+    filters?: Record<string, any>
+  }) => {
+    if (!tenantId) return { data: [], total: 0 }
+
+    let query = supabase
+      .from("bus_seats")
+      .select(`
+        *,
+        bus_template:bus_templates(bus_number, package:packages(name))
+      `, { count: "exact" })
+      .eq("bus_template.package.tenant_id", tenantId)
+
+    if (search) {
+      query = query.or(`bus_template.bus_number.ilike.%${search}%,seat_number.ilike.%${search}%`)
+    }
+
+    if (sortBy) {
+      query = query.order(sortBy as any, { ascending: sortOrder === "asc" })
+    } else {
+      query = query.order("seat_number", { ascending: true })
+    }
+
+    query = query.range((page - 1) * limit, page * limit - 1)
+
+    const { data, count } = await query
+    return { data: (data as unknown as BusSeat[]) || [], total: count || 0 }
+  }
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -78,7 +112,7 @@ export default function BusSeatsPage() {
             render: (row: any) => format(new Date(row.created_at), "dd MMM yyyy", { locale: id }),
           },
         ]}
-        fetchData={async (params) => ({ data: [], total: 0 })}
+        fetchData={fetchBusSeats}
         pageSize={10}
         exportable
       />
