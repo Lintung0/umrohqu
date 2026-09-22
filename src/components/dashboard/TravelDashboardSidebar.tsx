@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { LayoutDashboard, Package, BookOpen, Users, BarChart3, Globe, Settings, LogOut, Home, Menu, X, Shield } from "lucide-react"
+import { LayoutDashboard, Package, BookOpen, Users, BarChart3, Globe, Settings, LogOut, Home, Menu, X, Shield, Building2, UserCheck, MapPin, Plane, Hotel, Building, Bus, Bed, Calendar, Box, UsersRound, ClipboardList, PackageCheck, ChevronDown, ChevronRight } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Image from "next/image"
@@ -17,6 +17,51 @@ const NAV_ITEMS = [
   { href: "/travel-dashboard/reports", label: "Laporan", icon: BarChart3 },
   { href: "/travel-dashboard/website", label: "Website", icon: Globe },
   { href: "/travel-dashboard/settings", label: "Pengaturan", icon: Settings },
+]
+
+// Fix Seat icon import - use a different icon
+const Seat = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 18V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v12"/><path d="M3 6h18"/><path d="M16 10a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/></svg>
+
+const OPERATIONAL_NAV_GROUPS = [
+  {
+    label: "OPERASIONAL SDM & CABANG",
+    items: [
+      { href: "/travel-dashboard/branches", label: "Cabang", icon: Building2 },
+      { href: "/travel-dashboard/agents", label: "Agen", icon: UserCheck },
+      { href: "/travel-dashboard/muthawifs", label: "Muthawif", icon: UsersRound },
+      { href: "/travel-dashboard/agent-commissions", label: "Komisi Agen", icon: PackageCheck },
+    ],
+  },
+  {
+    label: "KEBERANGKATAN & AKOMODASI",
+    items: [
+      { href: "/travel-dashboard/package-departures", label: "Keberangkatan Paket", icon: MapPin },
+      { href: "/travel-dashboard/hotels", label: "Hotel", icon: Hotel },
+      { href: "/travel-dashboard/airlines", label: "Maskapai", icon: Plane },
+      { href: "/travel-dashboard/package-hotels", label: "Hotel Paket", icon: Bed },
+      { href: "/travel-dashboard/package-flights", label: "Penerbangan Paket", icon: Plane },
+    ],
+  },
+  {
+    label: "ROOMING & BUS",
+    items: [
+      { href: "/travel-dashboard/room-templates", label: "Template Kamar", icon: Bed },
+      { href: "/travel-dashboard/bus-templates", label: "Template Bus", icon: Bus },
+      { href: "/travel-dashboard/bus-seats", label: "Kursi Bus", icon: Seat },
+      { href: "/travel-dashboard/room-assignments", label: "Penempatan Kamar", icon: Bed },
+      { href: "/travel-dashboard/seat-assignments", label: "Penempatan Kursi", icon: Seat },
+    ],
+  },
+  {
+    label: "MANASIK & PERLENGKAPAN",
+    items: [
+      { href: "/travel-dashboard/manasik-programs", label: "Program Manasik", icon: Calendar },
+      { href: "/travel-dashboard/manasik-sessions", label: "Sesi Manasik", icon: Calendar },
+      { href: "/travel-dashboard/manasik-attendances", label: "Presensi Manasik", icon: ClipboardList },
+      { href: "/travel-dashboard/equipment-templates", label: "Template Perlengkapan", icon: Box },
+      { href: "/travel-dashboard/participant-equipment", label: "Perlengkapan Jamaah", icon: PackageCheck },
+    ],
+  },
 ]
 
 export default function TravelDashboardSidebar() {
@@ -71,6 +116,30 @@ export default function TravelDashboardSidebar() {
             </Link>
           )
         })}
+
+        {OPERATIONAL_NAV_GROUPS.map((group, groupIndex) => (
+          <div key={groupIndex} className="space-y-1">
+            <p className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+              {group.label}
+            </p>
+            {group.items.map((item) => {
+              const isActive = pathname.startsWith(item.href)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm rounded-xl transition-colors ${
+                    isActive ? "bg-emerald-50 text-emerald-700 font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <item.icon className="w-4 h-4 shrink-0" />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="p-3 border-t border-border space-y-0.5">
