@@ -415,7 +415,7 @@ function PackagePickerModal({ onClose }: {
   const q = query.toLowerCase().trim()
   const filtered = packages.filter((pkg) => {
     if (q === "") return true
-    const haystack = [pkg.name, pkg.description, pkg.departure_city, pkg.airline]
+    const haystack = [pkg.name, pkg.description, pkg.departure_cities?.join(", "), pkg.airline]
       .filter(Boolean).join(" ").toLowerCase()
     return haystack.includes(q)
   })
@@ -483,7 +483,7 @@ function PackagePickerModal({ onClose }: {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold leading-snug line-clamp-1">{pkg.name}</p>
                     <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                      {pkg.departure_city || "-"} · {pkg.airline || "-"} · {pkg.duration_nights || "-"} Hari
+                      {pkg.departure_cities?.[0] || "-"} · {pkg.airline || "-"} · {pkg.duration_nights || "-"} Hari
                     </p>
                     <p className="text-xs font-bold text-primary mt-0.5">{formatRupiah(Number(pkg.price) || 0)}</p>
                   </div>

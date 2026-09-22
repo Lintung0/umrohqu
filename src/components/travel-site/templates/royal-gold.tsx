@@ -151,7 +151,7 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
           <div className="space-y-1.5">
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <MapPin className="w-3 h-3 shrink-0" style={{ color: gold }} />
-            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
+            <span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <Plane className="w-3 h-3 shrink-0" style={{ color: gold }} />

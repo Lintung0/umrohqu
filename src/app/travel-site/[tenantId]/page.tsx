@@ -35,7 +35,7 @@ export default function TravelSitePage() {
       setTenant(enrichedTenant as (Tenant & Record<string, unknown>) | null)
       const allPackages = ((await enrichPackagesWithDetail(supabase, (pkgRes.data as Package[]) || [])) || []) as Package[]
       setPackages(allPackages.filter((p) => p.status === "active" || p.status === "ongoing"))
-      setDocPackages(allPackages.filter((p) => p.doc_drive_link))
+      setDocPackages(allPackages.filter((p) => p.images && p.images.length > 0))
 
       if (websiteRes.data) {
         setTemplateId(websiteRes.data.template_id)

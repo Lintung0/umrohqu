@@ -315,7 +315,7 @@ function SearchContent() {
     .filter((pkg) => {
       if (departure) {
         const dep = departure.toLowerCase()
-        const cities = [pkg.departure_city].filter(Boolean).map((c) => c?.toLowerCase() || "")
+        const cities = (pkg.departure_cities || []).map((c) => c?.toLowerCase() || "")
         if (!cities.some((c) => c.includes(dep))) return false
       }
       if (month && month !== "") {

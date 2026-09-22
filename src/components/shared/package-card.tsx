@@ -269,7 +269,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-slate-500 mb-3">
             <span className="inline-flex items-center gap-0.5 max-w-full">
               <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-              <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
+<span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
             </span>
             <span className="text-slate-300">·</span>
             <span>{pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</span>
@@ -390,7 +390,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 mb-2">
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-                  <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities.join(", ") : pkg.departure_city) || "-"}</span>
+                  <span className="truncate">{(pkg.departure_cities || []).join(", ") || "-"}</span>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                   <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
@@ -522,7 +522,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="space-y-1.5 mb-3 text-xs text-gray-500">
           <div className="flex items-center gap-1.5">
             <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
-            <span className="truncate">{(pkg.departure_cities?.length ? pkg.departure_cities : [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
+            <span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
