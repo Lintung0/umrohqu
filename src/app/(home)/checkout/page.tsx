@@ -144,9 +144,70 @@ function CheckoutContent() {
         }),
       })
       const data = await res.json()
-      if (res.ok && data.snap) {
-        // Arahkan ke halaman pembayaran Midtrans Snap
-        window.location.href = data.snap.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.snap.token}`
+      if (res.ok && data.snap && data.booking_id) {
+        // Gunakan Midtrans Snap JS SDK dengan callback onPending untuk capture VA number
+        const snapToken = data.snap.token
+        const bookingId = data.booking_id
+
+        // Load Midtrans Snap JS SDK dynamically
+        const loadSnapScript = (): Promise<void> => {
+          return new Promise((resolve, reject) => {
+            if (typeof window !== "undefined" && (window as any).snap) {
+              resolve()
+              return
+            }
+            const script = document.createElement("script")
+            script.src = "https://app.sandbox.midtrans.com/snap/snap.js"
+            script.setAttribute("data-client-key", "Mid-client-PXKN5rw9PS9TRGdo")
+            script.onload = () => resolve()
+            script.onerror = () => reject(new Error("Gagal memuat Midtrans Snap JS"))
+            document.body.appendChild(script)
+          })
+        }
+
+        try {
+          await loadSnapScript()
+
+          // @ts-ignore - Midtrans Snap types
+          window.snap.pay(snapToken, {
+            onSuccess: async function (result: any) {
+              console.log("Payment success:", result)
+              router.push(`/dashboard/bookings/${bookingId}`)
+            },
+            onPending: async function (result: any) {
+              console.log("Payment pending:", result)
+              // Capture VA number dari callback onPending
+              const vaNumber = result.va_numbers?.[0]?.va_number
+              const bank = result.va_numbers?.[0]?.bank
+              if (vaNumber) {
+                try {
+                  await fetch("/api/payments/update-va", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ bookingId, vaNumber, bank }),
+                  })
+                  console.log("VA number updated:", vaNumber, bank)
+                } catch (e) {
+                  console.error("Failed to update VA:", e)
+                }
+              }
+              // Redirect ke detail pesanan setelah VA ter-capture
+              router.push(`/dashboard/bookings/${bookingId}`)
+            },
+            onError: async function (result: any) {
+              console.log("Payment error:", result)
+              router.push(`/dashboard/bookings/${bookingId}`)
+            },
+            onClose: function () {
+              console.log("Payment popup closed")
+              router.push(`/dashboard/bookings/${bookingId}`)
+            },
+          })
+        } catch (snapError) {
+          console.error("Snap JS error:", snapError)
+          // Fallback ke redirect biasa jika Snap JS gagal
+          window.location.href = data.snap.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${snapToken}`
+        }
       } else if (res.ok) {
         setResult({ success: true, bookingId: data.booking_id })
         setTimeout(() => router.push(`/dashboard/bookings/${data.booking_id}`), 2000)
