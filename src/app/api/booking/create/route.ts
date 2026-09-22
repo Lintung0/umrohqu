@@ -228,10 +228,12 @@ export async function POST(request: NextRequest) {
         errorUrl: appUrl(`checkout/finish?booking_id=${booking.id}&status=error`),
       })
 
-      await admin
-        .from("payments")
-        .update({ gateway_reference: orderId })
-        .eq("id", paymentId)
+      if (paymentId) {
+        await admin
+          .from("payments")
+          .update({ gateway_reference: orderId })
+          .eq("id", paymentId)
+      }
     } catch (serr: any) {
       console.error("Midtrans Snap error:", serr.message)
     }

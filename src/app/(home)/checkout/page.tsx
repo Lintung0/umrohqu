@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { getPackageAvailable } from "@/lib/utils"
 import type { Package, Tenant, PackageDeparture } from "@/lib/types"
+import { SNAP_SCRIPT_URL, MIDTRANS_CLIENT_KEY, vtWebUrl } from "@/lib/services/midtrans-client"
 
 const DP_OPTIONS = [30, 40, 50]
 
@@ -175,8 +176,8 @@ body: JSON.stringify({
               return
             }
             const script = document.createElement("script")
-            script.src = "https://app.sandbox.midtrans.com/snap/snap.js"
-            script.setAttribute("data-client-key", "Mid-client-PXKN5rw9PS9TRGdo")
+            script.src = SNAP_SCRIPT_URL
+            script.setAttribute("data-client-key", MIDTRANS_CLIENT_KEY)
             script.onload = () => resolve()
             script.onerror = () => reject(new Error("Gagal memuat Midtrans Snap JS"))
             document.body.appendChild(script)
@@ -224,7 +225,7 @@ body: JSON.stringify({
         } catch (snapError) {
           console.error("Snap JS error:", snapError)
           // Fallback ke redirect biasa jika Snap JS gagal
-          window.location.href = data.snap.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${snapToken}`
+          window.location.href = data.snap.redirect_url || vtWebUrl(snapToken)
         }
       } else if (res.ok) {
         setResult({ success: true, bookingId: data.booking_id })

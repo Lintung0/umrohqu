@@ -77,11 +77,6 @@ export async function POST(request: NextRequest) {
         errorUrl: appUrl(`checkout/finish?booking_id=${bookingId}&status=error`),
       })
 
-      await admin
-        .from("payments")
-        .update({ gateway_reference: orderId })
-        .eq("id", paymentId)
-
       if (paymentId) {
         await admin
           .from("payments")

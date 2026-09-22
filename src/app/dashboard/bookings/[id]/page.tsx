@@ -8,6 +8,7 @@ import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import Link from "next/link"
 import { useTranslation } from "@/lib/i18n"
+import { vtWebUrl } from "@/lib/services/midtrans-client"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -1265,7 +1266,7 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
       })
       const data = await res.json()
       if (res.ok && data.snap) {
-        window.location.href = data.snap.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.snap.token}`
+        window.location.href = data.snap.redirect_url || vtWebUrl(data.snap.token)
       } else {
         toast.error(data.error || t("common.error"))
       }
@@ -1323,7 +1324,7 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
       })
       const data = await res.json()
       if (res.ok && data.snap) {
-        window.location.href = data.snap.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.snap.token}`
+        window.location.href = data.snap.redirect_url || vtWebUrl(data.snap.token)
       } else if (res.ok) {
         toast.success(t("booking.booking_success"))
         setTimeout(() => window.location.reload(), 1000)
