@@ -76,7 +76,10 @@ interface BookingDetail {
   payment_status?: string
   cancel_reason?: string | null
   refund: { id: string; amount: number; reason?: string | null; status: string; method: string | null; completed_at: string | null } | null
-  package: { name: string; slug: string; departure_city: string | null; duration_nights: number | null; airline?: string | null; hotel_makkah?: string | null; hotel_makkah_stars?: number | null; hotel_madinah?: string | null; hotel_madinah_stars?: number | null } | null
+  package: { name: string; slug: string; duration_nights: number | null } | null
+  departures: { departure_city: string | null; departure_date: string | null }[] | null
+  flights: { airline_name: string | null; flight_number: string | null; departure_city: string | null }[] | null
+  package_hotels: { night_count: number | null; sort_order: number | null; hotel: { name: string | null; rating: number | null; city: string | null } | null }[] | null
   participants: ParticipantData[]
 }
 
@@ -149,7 +152,7 @@ export default function BookingDetailPage() {
     async function load() {
       console.log("[DEBUG BOOKING LOAD] Starting load for booking:", params.id, "authChecked:", authChecked, "user:", user?.id)
 
-      const selectFields = "*, package:packages(name, slug, departure_city, duration_nights), participants:booking_participants(id, full_name, national_id, passport_number, passport_expiry, birth_date, birth_place, gender, phone, relation, emergency_contact_name, emergency_contact_phone, street, city, province, postal_code, village, district, rt_rw)"
+      const selectFields = "*, package:packages(name, slug, duration_nights), departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city)), participants:booking_participants(id, full_name, national_id, passport_number, passport_expiry, birth_date, birth_place, gender, phone, relation, emergency_contact_name, emergency_contact_phone, street, city, province, postal_code, village, district, rt_rw)"
 
       let bookingData: any = null
 
@@ -630,10 +633,10 @@ export default function BookingDetailPage() {
             {t("booking.package")}
           </h2>
           <div className="space-y-3 text-sm">
-            {pkg?.departure_city && (
+            {booking.departures?.[0]?.departure_city && (
               <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{pkg.departure_city}</span>
+                <span>{booking.departures[0].departure_city}</span>
               </div>
             )}
             {pkg?.duration_nights && (
@@ -642,22 +645,32 @@ export default function BookingDetailPage() {
                 <span>{pkg.duration_nights} {t("package.day")}</span>
               </div>
             )}
-            {pkg?.airline && (
+            {booking.departures?.[0]?.departure_date && (
               <div className="flex items-center gap-3">
                 <Plane className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{pkg.airline}</span>
+                <span>{new Date(booking.departures[0].departure_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
               </div>
             )}
-            {pkg?.hotel_makkah && (
+            {(booking.flights?.length ?? 0) > 0 && (
               <div className="flex items-center gap-3">
-                <Hotel className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>Makkah: {pkg.hotel_makkah} {pkg.hotel_makkah_stars ? `(${pkg.hotel_makkah_stars} bintang)` : ""}</span>
+                <Plane className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span>{booking.flights!.map((f) => [f.airline_name, f.flight_number, f.departure_city].filter(Boolean).join(" ")).join(", ")}</span>
               </div>
             )}
-            {pkg?.hotel_madinah && (
+            {(booking.package_hotels?.length ?? 0) > 0 && (
               <div className="flex items-center gap-3">
                 <Hotel className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>Madinah: {pkg.hotel_madinah} {pkg.hotel_madinah_stars ? `(${pkg.hotel_madinah_stars} bintang)` : ""}</span>
+                <span>
+                  {booking.package_hotels!
+                    .map((ph) => {
+                      const name = ph.hotel?.name
+                      const rating = ph.hotel?.rating ? ` (${ph.hotel.rating} bintang)` : ""
+                      const city = ph.hotel?.city ? `, ${ph.hotel.city}` : ""
+                      return name ? `${name}${rating}${city}` : ""
+                    })
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
               </div>
             )}
           </div>
