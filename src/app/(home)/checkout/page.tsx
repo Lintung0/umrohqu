@@ -6,11 +6,11 @@ import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
-import { Loader2, CreditCard, Users, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User, Phone, Heart } from "lucide-react"
+import { Loader2, CreditCard, Users, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User, Phone, Heart, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { getPackageAvailable } from "@/lib/utils"
-import type { Package, Tenant } from "@/lib/types"
+import type { Package, Tenant, PackageDeparture } from "@/lib/types"
 
 const DP_OPTIONS = [30, 40, 50]
 
@@ -33,9 +33,12 @@ function CheckoutContent() {
   const [dpPercentage, setDpPercentage] = useState(30)
   const [notes, setNotes] = useState("")
   const [expandedJemaah, setExpandedJemaah] = useState<Record<number, boolean>>({ 0: true })
+  const [packageDepartures, setPackageDepartures] = useState<PackageDeparture[]>([])
+  const [selectedDepartureId, setSelectedDepartureId] = useState<string | null>(null)
 
   const STEPS = useMemo(() => [
     { id: "package", label: "Data Singkat" },
+    { id: "departure", label: "Keberangkatan" },
     { id: "payment", label: "Pembayaran" },
     { id: "confirm", label: "Selesai" },
   ], [])
@@ -56,7 +59,7 @@ function CheckoutContent() {
       try {
         const { data: pkgData, error: pkgError } = await supabase
           .from("packages")
-          .select("*, travel:tenants(*)")
+          .select("*, travel:tenants(*), departures:package_departures(id, departure_city, departure_date, quota, price_adjustment)")
           .eq("slug", packageSlug)
           .single()
 
@@ -72,6 +75,19 @@ function CheckoutContent() {
           setError("Paket ini tidak bisa dipesan karena sedang berlangsung atau kursi sudah penuh.")
           setLoading(false)
           return
+        }
+
+        // Filter active departures with available quota
+        const activeDepartures = (pkgData.departures || [])
+          .filter((d: PackageDeparture) => d.quota > 0)
+          .sort((a: PackageDeparture, b: PackageDeparture) => new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime())
+
+        if (activeDepartures.length > 0) {
+          setPackageDepartures(activeDepartures)
+          // Auto-select first departure if only one
+          if (activeDepartures.length === 1) {
+            setSelectedDepartureId(activeDepartures[0].id)
+          }
         }
 
         const enriched = await enrichPackagesWithDetail(supabase, [pkgData as any])
@@ -130,7 +146,7 @@ function CheckoutContent() {
         headers: { "Content-Type": "application/json" },
 body: JSON.stringify({
             packageId: pkg.id,
-            packageDepartureId: null,
+            packageDepartureId: selectedDepartureId,
             pilgrimCount,
             pilgrims: pilgrims.map((p) => ({
               full_name: p.full_name,
@@ -323,7 +339,18 @@ body: JSON.stringify({
               />
             )}
 
-            {step === 1 && (
+            {step === 1 && packageDepartures.length > 0 && (
+              <StepDeparture
+                pkg={pkg}
+                travel={travel}
+                packageDepartures={packageDepartures}
+                selectedDepartureId={selectedDepartureId}
+                setSelectedDepartureId={setSelectedDepartureId}
+                setStep={setStep}
+              />
+            )}
+
+            {step === (packageDepartures.length > 0 ? 2 : 1) && (
               <StepPayment
                 pkg={pkg}
                 travel={travel}
@@ -342,7 +369,7 @@ body: JSON.stringify({
               />
             )}
 
-            {step === 2 && (
+            {step === (packageDepartures.length > 0 ? 3 : 2) && (
               <StepReview
                 pkg={pkg}
                 travel={travel}
@@ -591,6 +618,130 @@ function StepDataSingkat({
                 <AlertCircle className="w-3 h-3" /> Isi nama & telepon semua jemaah
               </p>
             )}
+          </div>
+
+          <SecurityBadges />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+  // ─── Step Departure: Pilih Keberangkatan ──────────────────────────────────────
+  function StepDeparture({
+  pkg, travel, packageDepartures, selectedDepartureId, setSelectedDepartureId, setStep,
+}: {
+  pkg: Package
+  travel: Tenant | null
+  packageDepartures: PackageDeparture[]
+  selectedDepartureId: string | null
+  setSelectedDepartureId: (id: string) => void
+  setStep: (n: number) => void
+}) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-5">
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 text-xs flex items-start gap-3">
+          <span className="text-base shrink-0 mt-0.5">📅</span>
+          <p>
+            <strong>Pilih Keberangkatan:</strong> Pilih jadwal keberangkatan yang sesuai dengan jadwal Anda. 
+            Setiap keberangkatan memiliki kuota dan tanggal berangkat yang berbeda.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {packageDepartures.map((dep) => (
+            <button
+              key={dep.id}
+              onClick={() => setSelectedDepartureId(dep.id)}
+              className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                selectedDepartureId === dep.id
+                  ? "border-emerald-500 bg-emerald-50"
+                  : "border-slate-200 hover:border-emerald-200 hover:bg-emerald-50/30"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    selectedDepartureId === dep.id
+                      ? "bg-emerald-500 text-white"
+                      : "bg-emerald-100 text-emerald-700"
+                  }`}>
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-emerald-deep">
+                      {new Date(dep.departure_date).toLocaleDateString("id-ID", { 
+                        weekday: "long", 
+                        day: "numeric", 
+                        month: "long", 
+                        year: "numeric" 
+                      })}
+                    </p>
+                    <p className="text-xs text-emerald-700">Kota: {dep.departure_city}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-emerald-deep">
+                    Kuota: {dep.quota} kursi
+                  </p>
+                  {dep.price_adjustment && dep.price_adjustment > 0 && (
+                    <p className="text-xs text-gold-dark">+{formatRupiah(dep.price_adjustment)}</p>
+                  )}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {!selectedDepartureId && (
+          <p className="text-center text-amber-600 text-sm py-2">
+            Silakan pilih salah satu jadwal keberangkatan
+          </p>
+        )}
+
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={() => setStep(2)}
+            disabled={!selectedDepartureId}
+            className="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Lanjut ke Pembayaran <ChevronRight className="w-4 h-4 ml-1" />
+          </button>
+        </div>
+      </div>
+
+      <div className="lg:col-span-1">
+        <div className="lg:sticky lg:top-24 space-y-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <h3 className="font-bold text-sm text-slate-900 mb-4">Ringkasan Paket</h3>
+            <div className="flex gap-3 pb-4 border-b border-slate-100">
+              <div className="relative w-16 h-14 rounded-xl overflow-hidden shrink-0">
+                <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name} fill className="object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] text-slate-400 truncate">{travel?.name}</p>
+                <p className="text-sm font-semibold text-slate-900 leading-snug line-clamp-2">{pkg.name}</p>
+              </div>
+            </div>
+
+            <div className="py-4 space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Harga per orang</span>
+                <span className="font-medium text-slate-900">{formatRupiah(Number(pkg.price))}</span>
+              </div>
+            </div>
+
+            <div className="bg-emerald-50 rounded-xl p-4">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-emerald-700 font-medium">Total Pembayaran</span>
+                <span className="text-lg font-bold text-emerald-800">{formatRupiah(Number(pkg.price))}</span>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-slate-400 flex items-center gap-1">
+              <Shield className="w-3 h-3" /> Harga sudah termasuk fasilitas paket umrah lengkap
+            </p>
           </div>
 
           <SecurityBadges />
