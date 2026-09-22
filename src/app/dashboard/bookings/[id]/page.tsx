@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, IdCard, PhoneCall, UserRound, ChevronDown, ChevronUp, Ban, X, ChevronRight } from "lucide-react"
@@ -84,6 +84,14 @@ export default function BookingDetailPage() {
   const router = useRouter()
   const { t } = useTranslation()
   const supabase = createClient()
+
+  // Check for payment callback params
+  const searchParams = useSearchParams()
+  const isPaymentCallback = searchParams?.get("status") === "success" || searchParams?.get("payment_status") === "paid"
+  if (isPaymentCallback) {
+    // Force refresh after payment callback
+    router.refresh()
+  }
 
   const TIMELINE_STEPS = [
     { key: "pending_payment", label: t("booking.booking_created"), icon: Clock },
@@ -265,6 +273,18 @@ export default function BookingDetailPage() {
     if (!editingParticipant || !user) return
     setSavingParticipant(true)
     try {
+      // Optimistic update - update local state immediately
+      const updatedParticipant = { ...editingParticipant, ...participantForm }
+      setBooking((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          participants: prev.participants.map((p) =>
+            p.id === editingParticipant.id ? updatedParticipant : p
+          ),
+        }
+      })
+
       const { error } = await supabase
         .from("booking_participants")
         .update({
@@ -287,10 +307,10 @@ export default function BookingDetailPage() {
       if (error) throw error
       toast.success("Data jamaah berhasil disimpan")
       handleCloseParticipantModal()
-      // Refresh booking data
-      router.refresh()
     } catch (err: any) {
       toast.error(err.message || "Gagal menyimpan data jamaah")
+      // Rollback on error
+      router.refresh()
     } finally {
       setSavingParticipant(false)
     }
@@ -540,7 +560,7 @@ export default function BookingDetailPage() {
                 className="flex items-center gap-1.5 bg-emerald-dark text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-deep transition-colors disabled:opacity-50 text-sm cursor-pointer"
               >
                 {savingParticipant ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                {savingParticipant ? "Menyimpan..." : "Simpan Data Diri"}
+                {savingParticipant ? "Menyimpan..." : "Simpan"}
                 {!savingParticipant && <ChevronRight className="w-4 h-4" />}
               </button>
             </div>
@@ -704,8 +724,19 @@ export default function BookingDetailPage() {
                 </thead>
                 <tbody>
                   {booking.participants.map((p) => {
-                    const hasPassport = !!p.passport_number
-                    const isComplete = hasPassport // Simple check for now
+                    const isComplete = [
+                      p.passport_number,
+                      p.passport_expiry,
+                      p.birth_date,
+                      p.birth_place,
+                      p.gender,
+                      p.emergency_contact_name,
+                      p.emergency_contact_phone,
+                      p.street,
+                      p.city,
+                      p.province,
+                      p.postal_code,
+                    ].every(Boolean)
                     return (
                       <tr key={p.id} className="border-b border-ivory-border last:border-0">
                         <td className="py-3 font-medium">{p.full_name}</td>
@@ -1024,9 +1055,52 @@ function PaymentStatusSection({
   const effectiveRemaining = remainingBalance > 0 ? remainingBalance : (remainingAmount || 0)
   const effectivePaid = paidAmount > 0 ? paidAmount : (total - effectiveRemaining)
 
-  // ── KONDISI 1: Dikonfirmasi Travel ──
-  // DP yang sudah diverifikasi travel tapi sisa pelunasan belum dibayar
-  // → ditampilkan dengan tombol pelunasan sisa.
+  // Helper: check if fully paid (no remaining balance)
+  const isFullyPaid = effectiveRemaining <= 0
+
+  // ── KONDISI 1: LUNAS (Fully Paid) ──
+  // Prioritaskan cek pembayaran penuh sebelum cek status
+  if (isFullyPaid) {
+    return (
+      <div className="bg-ivory-card rounded-2xl border border-emerald-dark/20 p-6 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-emerald-dark/10 rounded-xl flex items-center justify-center shrink-0">
+            <CheckCircle className="w-6 h-6 text-emerald-dark" />
+          </div>
+          <div>
+            <h3 className="font-bold text-emerald-deep">Lunas & Dikonfirmasi</h3>
+            <p className="text-sm text-emerald-dark">Pembayaran penuh diterima. Dalam persiapan dokumen travel</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="bg-ivory rounded-xl p-3">
+            <p className="text-xs text-muted-foreground mb-1">Dibayar</p>
+            <p className="font-bold text-emerald-deep">{formatRupiah(effectivePaid)}</p>
+          </div>
+          <div className="bg-ivory rounded-xl p-3">
+            <p className="text-xs text-muted-foreground mb-1">Sisa</p>
+            <p className="font-bold text-emerald-dark">Rp 0</p>
+          </div>
+          {paidAt && (
+            <div className="bg-ivory rounded-xl p-3">
+              <p className="text-xs text-muted-foreground mb-1">Dibayar pada</p>
+              <p className="font-medium text-emerald-deep">
+                {new Date(paidAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+              </p>
+            </div>
+          )}
+          {paymentMethod && (
+            <div className="bg-ivory rounded-xl p-3">
+              <p className="text-xs text-muted-foreground mb-1">Metode</p>
+              <p className="font-medium text-emerald-deep">{paymentMethod}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ── KONDISI 2: Dikonfirmasi Travel (DP paid, perlu pelunasan) ──
   if (status === "confirmed" || status === "completed") {
     const needsPelunasan = paymentType === "dp" && effectiveRemaining > 0
 
