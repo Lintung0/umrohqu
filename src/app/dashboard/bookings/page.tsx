@@ -148,7 +148,7 @@ export default function BookingsPage() {
       </div>
 
       {/* Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4">
         {BOOKING_STATUSES.map((s) => (
           <button
             key={s.value}
@@ -175,14 +175,14 @@ export default function BookingsPage() {
         </div>
       ) : (
         <>
-          <div className="space-y-5">
+          <div className="space-y-6">
             {groups.map((group) => {
               const groupPageSlice = group.bookings.filter((b) => pageSlice.includes(b))
               if (groupPageSlice.length === 0) return null
               return (
                 <div key={group.key}>
                   {/* Header bulan */}
-                  <div className="flex items-center gap-2 mb-2 px-1">
+                  <div className="flex items-center gap-2 mb-3 px-1">
                     <span className="w-8 h-8 rounded-lg bg-emerald-dark/10 text-emerald-dark flex items-center justify-center shrink-0">
                       <CalendarCheck2 className="w-4 h-4" />
                     </span>
