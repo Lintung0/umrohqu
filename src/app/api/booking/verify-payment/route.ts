@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, gateway_invoice_id, dp_type, remaining_amount, total, tenant_id, price, pilgrim_count, booking_source, package_id")
+      .select("id, status, dp_type, remaining_amount, total, tenant_id, price, pilgrim_count, booking_source, package_id")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -41,13 +41,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ status: booking.status })
     }
 
-    if (!booking.gateway_invoice_id) {
+    // Get gateway reference from payments table
+    const { data: payment } = await admin
+      .from("payments")
+      .select("gateway_reference")
+      .eq("booking_id", bookingId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (!payment?.gateway_reference) {
       return NextResponse.json({ error: "Belum ada transaksi gateway" }, { status: 400 })
     }
 
     let txn: Awaited<ReturnType<typeof getTransactionStatus>> | null = null
     try {
-      txn = await getTransactionStatus(booking.gateway_invoice_id)
+      txn = await getTransactionStatus(payment.gateway_reference)
     } catch (statusErr) {
       console.error("Verify payment status check error:", statusErr)
     }
@@ -84,15 +94,15 @@ export async function POST(request: NextRequest) {
       ? new Date(txn.transaction_time).toISOString()
       : new Date().toISOString()
 
-    await admin
+await admin
       .from("payments")
       .update({
         status: "paid",
         paid_at: paidAt,
         payment_type: stablePaymentType(txn.payment_type) as never,
-        payment_provider: txn.va_numbers?.[0]?.bank || txn.bank || txn.payment_type,
+        payment_provider: stablePaymentType(txn.payment_type) as never,
         va_number: txn.va_numbers?.[0]?.va_number || txn.payment_code || "",
-        gateway_reference: txn.transaction_id || booking.gateway_invoice_id,
+        gateway_reference: txn.transaction_id || payment.gateway_reference,
         updated_at: new Date().toISOString(),
       })
       .eq("booking_id", bookingId)

@@ -17,11 +17,13 @@ const pilgrimSchema = z.object({
 
 const schema = z.object({
   packageId: z.string().uuid(),
+  packageDepartureId: z.string().uuid().nullable().optional(),
   pilgrimCount: z.number().min(1).max(99),
   pilgrims: z.array(pilgrimSchema).optional(),
   paymentType: z.enum(["full", "dp"]),
   dpPercentage: z.number().min(10).max(90).optional(),
   feeChannel: z.enum(["portal", "subdomain", "custom_domain"]).default("portal"),
+  referralCode: z.string().optional(),
   notes: z.string().optional(),
 })
 
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Data tidak valid" }, { status: 400 })
     }
 
-    const { packageId, pilgrimCount, pilgrims, paymentType, dpPercentage, feeChannel, notes } = parsed.data
+    const { packageId, packageDepartureId, pilgrimCount, pilgrims, paymentType, dpPercentage, feeChannel, referralCode, notes } = parsed.data
     const admin = createAdminClient()
 
     // 1. Get package (harga SELALU dari database, bukan dari client)
@@ -85,23 +87,36 @@ export async function POST(request: NextRequest) {
     const payNow = dpAmount
 
     // 2. Insert booking
+    // Resolve agent_id from referral_code if provided
+    let agentId: string | null = null
+    if (referralCode) {
+      const { data: agent } = await admin
+        .from("agents")
+        .select("id")
+        .eq("referral_code", referralCode)
+        .eq("status", "active")
+        .maybeSingle()
+      agentId = agent?.id || null
+    }
+
     const { data: booking, error: insertErr } = await admin
       .from("bookings")
       .insert({
         package_id: packageId,
+        package_departure_id: packageDepartureId,
         tenant_id: pkg.tenant_id,
         customer_id: user.id,
+        agent_id: agentId,
+        referral_code: referralCode || null,
         status: "pending_payment",
         booking_channel: toBookingChannel(feeChannel),
         pilgrim_count: pilgrimCount,
         price: pkg.price,
         total: payNow,
         dp_type: paymentType === "dp" ? "dp" : "full",
-        dp_percentage: paymentType === "dp" ? dpPercentage : null,
         dp_amount: paymentType === "dp" ? dpAmount : 0,
         remaining_amount: paymentType === "dp" ? remainingAmount : 0,
         remaining_due_date: remainingDueDate,
-        booking_source: feeChannel,
         cashback_amount: Number(pkg.cashback_amount || 0),
         notes: notes || null,
       })
@@ -214,16 +229,9 @@ export async function POST(request: NextRequest) {
       })
 
       await admin
-        .from("bookings")
-        .update({ gateway_invoice_id: orderId })
-        .eq("id", booking.id)
-
-      if (paymentId) {
-        await admin
-          .from("payments")
-          .update({ gateway_reference: orderId })
-          .eq("id", paymentId)
-      }
+        .from("payments")
+        .update({ gateway_reference: orderId })
+        .eq("id", paymentId)
     } catch (serr: any) {
       console.error("Midtrans Snap error:", serr.message)
     }

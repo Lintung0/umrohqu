@@ -128,20 +128,22 @@ function CheckoutContent() {
       const res = await fetch("/api/booking/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          packageId: pkg.id,
-          pilgrimCount,
-          pilgrims: pilgrims.map((p) => ({
-            full_name: p.full_name,
-            phone: p.phone || null,
-            gender: p.gender || null,
-            relation: p.relation || "self",
-          })),
-          paymentType,
-          dpPercentage: paymentType === "dp" ? dpPercentage : undefined,
-          notes,
-          feeChannel: "portal",
-        }),
+body: JSON.stringify({
+            packageId: pkg.id,
+            packageDepartureId: null,
+            pilgrimCount,
+            pilgrims: pilgrims.map((p) => ({
+              full_name: p.full_name,
+              phone: p.phone || null,
+              gender: p.gender || null,
+              relation: p.relation || "self",
+            })),
+            paymentType,
+            dpPercentage: paymentType === "dp" ? dpPercentage : undefined,
+            notes,
+            feeChannel: "portal",
+            referralCode: undefined,
+          }),
       })
       const data = await res.json()
       if (res.ok && data.snap && data.booking_id) {

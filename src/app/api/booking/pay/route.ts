@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error: bErr } = await admin
       .from("bookings")
-      .select("id, status, total, remaining_amount, dp_amount, gateway_invoice_id, booking_code, package_id, pilgrim_count, tenant_id")
+      .select("id, status, total, remaining_amount, dp_amount, booking_code, package_id, pilgrim_count, tenant_id")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -78,9 +78,9 @@ export async function POST(request: NextRequest) {
       })
 
       await admin
-        .from("bookings")
-        .update({ gateway_invoice_id: orderId })
-        .eq("id", booking.id)
+        .from("payments")
+        .update({ gateway_reference: orderId })
+        .eq("id", paymentId)
 
       if (paymentId) {
         await admin

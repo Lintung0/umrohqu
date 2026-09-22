@@ -75,16 +75,9 @@ export async function POST(request: NextRequest) {
       })
 
       await admin
-        .from("bookings")
-        .update({ gateway_invoice_id: orderId })
-        .eq("id", bookingId)
-
-      if (paymentId) {
-        await admin
-          .from("payments")
-          .update({ gateway_reference: orderId })
-          .eq("id", paymentId)
-      }
+        .from("payments")
+        .update({ gateway_reference: orderId })
+        .eq("id", paymentId)
     } catch (merr: any) {
       console.error("Midtrans Snap remaining error:", merr.message)
       return NextResponse.json({ error: "Gagal membuat transaksi pembayaran" }, { status: 500 })
