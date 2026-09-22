@@ -6,7 +6,20 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BookOpen, Heart, Package, Clock, ChevronRight, Calendar } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
-import { getStatusColor, getStatusLabel, formatRupiah } from "@/lib/constants"
+import { getStatusLabel, formatRupiah } from "@/lib/constants"
+
+function getBookingStatusColor(status: string): string {
+  const colors: Record<string, string> = {
+    pending_payment: "bg-gold/15 text-gold-dark",
+    processing: "bg-emerald-dark/15 text-emerald-dark",
+    confirmed: "bg-emerald-dark/15 text-emerald-dark",
+    completed: "bg-emerald-dark/15 text-emerald-dark",
+    cancellation_pending: "bg-gold/15 text-gold-dark",
+    refunded: "bg-ivory-border text-emerald-deep",
+    cancelled: "bg-red-50 text-red-700",
+  }
+  return colors[status] || "bg-ivory-border text-emerald-deep"
+}
 
 export default function DashboardOverview() {
   const supabase = createClient()
@@ -116,7 +129,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* Recent Bookings */}
-      <div className="bg-ivory-card border border-ivory-border rounded-2xl">
+      <div className="bg-ivory-card border border-ivory-border rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between p-6 pb-0">
           <div>
             <h2 className="font-semibold text-emerald-deep">Pesanan Terakhir</h2>
@@ -140,7 +153,7 @@ export default function DashboardOverview() {
                 <Link
                   key={booking.id}
                   href={`/dashboard/bookings/${booking.id}`}
-                  className="flex items-center gap-4 py-4 first:pt-0 last:pb-0 hover:bg-ivory -mx-2 px-2 rounded-lg transition-colors"
+                  className="flex items-center gap-4 py-3 hover:bg-ivory transition-colors"
                 >
                   <div className="w-10 h-10 rounded-xl bg-emerald-dark/10 flex items-center justify-center shrink-0">
                     <BookOpen className="w-4 h-4 text-emerald-dark" />
@@ -151,8 +164,8 @@ export default function DashboardOverview() {
                       {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-medium ${getStatusColor(booking.status, "booking")}`}>
+                  <div className="shrink-0">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBookingStatusColor(booking.status)}`}>
                       {getStatusLabel(booking.status, "booking")}
                     </span>
                   </div>
