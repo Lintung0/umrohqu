@@ -76,10 +76,14 @@ interface BookingDetail {
   payment_status?: string
   cancel_reason?: string | null
   refund: { id: string; amount: number; reason?: string | null; status: string; method: string | null; completed_at: string | null } | null
-  package: { name: string; slug: string; duration_nights: number | null } | null
-  departures: { departure_city: string | null; departure_date: string | null }[] | null
-  flights: { airline_name: string | null; flight_number: string | null; departure_city: string | null }[] | null
-  package_hotels: { night_count: number | null; sort_order: number | null; hotel: { name: string | null; rating: number | null; city: string | null } | null }[] | null
+  package: {
+    name: string
+    slug: string
+    duration_nights: number | null
+    departures: { departure_city: string | null; departure_date: string | null }[] | null
+    flights: { airline_name: string | null; flight_number: string | null; departure_city: string | null }[] | null
+    package_hotels: { night_count: number | null; sort_order: number | null; hotel: { name: string | null; rating: number | null; city: string | null } | null }[] | null
+  } | null
   participants: ParticipantData[]
 }
 
@@ -152,7 +156,7 @@ export default function BookingDetailPage() {
     async function load() {
       console.log("[DEBUG BOOKING LOAD] Starting load for booking:", params.id, "authChecked:", authChecked, "user:", user?.id)
 
-      const selectFields = "*, package:packages(name, slug, duration_nights), departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city)), participants:booking_participants(id, full_name, national_id, passport_number, passport_expiry, birth_date, birth_place, gender, phone, relation, emergency_contact_name, emergency_contact_phone, street, city, province, postal_code, village, district, rt_rw)"
+      const selectFields = "*, package:packages(name, slug, duration_nights, departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city))), participants:booking_participants(id, full_name, national_id, passport_number, passport_expiry, birth_date, birth_place, gender, phone, relation, emergency_contact_name, emergency_contact_phone, street, city, province, postal_code, village, district, rt_rw)"
 
       let bookingData: any = null
 
@@ -633,10 +637,10 @@ export default function BookingDetailPage() {
             {t("booking.package")}
           </h2>
           <div className="space-y-3 text-sm">
-            {booking.departures?.[0]?.departure_city && (
+            {pkg?.departures?.[0]?.departure_city && (
               <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{booking.departures[0].departure_city}</span>
+                <span>{pkg.departures[0].departure_city}</span>
               </div>
             )}
             {pkg?.duration_nights && (
@@ -645,23 +649,23 @@ export default function BookingDetailPage() {
                 <span>{pkg.duration_nights} {t("package.day")}</span>
               </div>
             )}
-            {booking.departures?.[0]?.departure_date && (
+            {pkg?.departures?.[0]?.departure_date && (
               <div className="flex items-center gap-3">
                 <Plane className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{new Date(booking.departures[0].departure_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
+                <span>{new Date(pkg.departures[0].departure_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span>
               </div>
             )}
-            {(booking.flights?.length ?? 0) > 0 && (
+            {(pkg?.flights?.length ?? 0) > 0 && (
               <div className="flex items-center gap-3">
                 <Plane className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{booking.flights!.map((f) => [f.airline_name, f.flight_number, f.departure_city].filter(Boolean).join(" ")).join(", ")}</span>
+                <span>{pkg!.flights!.map((f) => [f.airline_name, f.flight_number, f.departure_city].filter(Boolean).join(" ")).join(", ")}</span>
               </div>
             )}
-            {(booking.package_hotels?.length ?? 0) > 0 && (
+            {(pkg?.package_hotels?.length ?? 0) > 0 && (
               <div className="flex items-center gap-3">
                 <Hotel className="w-4 h-4 text-muted-foreground shrink-0" />
                 <span>
-                  {booking.package_hotels!
+                  {pkg!.package_hotels!
                     .map((ph) => {
                       const name = ph.hotel?.name
                       const rating = ph.hotel?.rating ? ` (${ph.hotel.rating} bintang)` : ""
