@@ -223,7 +223,7 @@ function SearchContent() {
           query = query.or(
             `name.ilike.*${searchQueryParam}*,` +
             `description.ilike.*${searchQueryParam}*,` +
-            `departure_city.ilike.*${searchQueryParam}*,` +
+            `departure_date.cast(text).ilike.*${searchQueryParam}*,` +
             `slug.ilike.*${searchQueryParam}*`
           )
         }
