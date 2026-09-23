@@ -153,7 +153,7 @@ export default function DashboardOverview() {
                 <Link
                   key={booking.id}
                   href={`/dashboard/bookings/${booking.id}`}
-                  className="flex items-center gap-4 py-3 hover:bg-ivory transition-colors"
+                  className="flex items-center gap-4 -mx-6 px-6 py-3 hover:bg-ivory transition-colors first:rounded-t-xl last:rounded-b-xl"
                 >
                   <div className="w-10 h-10 rounded-xl bg-emerald-dark/10 flex items-center justify-center shrink-0">
                     <BookOpen className="w-4 h-4 text-emerald-dark" />
