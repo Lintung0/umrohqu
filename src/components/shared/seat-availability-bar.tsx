@@ -32,8 +32,8 @@ export default function SeatAvailabilityBar({ available, quota, quotaTaken, vari
             )}
           </div>
         )}
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-700 ${soldOut ? "bg-gray-300" : seat.color}`} style={{ width: `${soldOut ? 100 : seat.percent}%` }} />
+        <div className="h-2 bg-ivory-border/70 rounded-full overflow-hidden">
+          <div className={`h-full rounded-full transition-all duration-700 ${soldOut ? "bg-ivory-ink/30" : seat.color}`} style={{ width: `${soldOut ? 100 : seat.percent}%` }} />
         </div>
       </div>
     )
@@ -52,7 +52,7 @@ export default function SeatAvailabilityBar({ available, quota, quotaTaken, vari
             </span>
           )}
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 bg-ivory-border/70 rounded-full overflow-hidden">
           <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
@@ -71,7 +71,7 @@ export default function SeatAvailabilityBar({ available, quota, quotaTaken, vari
         </span>
         <span className="font-semibold">{seat.available}/{quota}</span>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-2 bg-ivory-border/70 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-700 ${seat.color}`} style={{ width: `${seat.percent}%` }} />
       </div>
     </div>

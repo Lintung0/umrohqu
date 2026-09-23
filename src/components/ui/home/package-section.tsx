@@ -170,16 +170,16 @@ export default function PackageSection() {
       <section className="py-12 px-4 sm:px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 sm:mb-12 space-y-2">
-            <div className="h-8 w-72 bg-muted rounded animate-pulse" />
-            <div className="h-4 w-48 bg-muted rounded animate-pulse" />
+            <div className="h-8 w-72 bg-ivory-border/70 rounded animate-pulse" />
+            <div className="h-4 w-48 bg-ivory-border/50 rounded animate-pulse" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden bg-white border animate-shimmer-skeleton">
-                <div className="h-44" />
+              <div key={i} className="rounded-2xl overflow-hidden bg-ivory-card border border-ivory-border animate-shimmer-skeleton">
+                <div className="h-44 bg-ivory/60" />
                 <div className="p-4 space-y-3">
-                  <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
-                  <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                  <div className="h-4 bg-ivory-border/70 rounded animate-pulse w-3/4" />
+                  <div className="h-3 bg-ivory-border/50 rounded animate-pulse w-1/2" />
                 </div>
               </div>
             ))}
@@ -190,18 +190,18 @@ export default function PackageSection() {
   }
 
   return (
-    <section className="py-14 sm:py-16 px-4 sm:px-6 md:px-12 bg-white">
+    <section className="py-14 sm:py-16 px-4 sm:px-6 md:px-12 bg-ivory-soft">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between mb-8 sm:mb-12">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-emerald-dark">
               {t.package.title}
             </h2>
-            <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-emerald-500 to-amber-400" />
+            <div className="mt-3 h-1 w-14 rounded-full bg-gold" />
           </div>
           <Link
             href="/search"
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-900 transition-colors group"
+            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-dark hover:text-emerald-deep transition-colors group"
           >
             {t.common.view_all}
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
@@ -209,9 +209,9 @@ export default function PackageSection() {
         </div>
 
         {compared.length > 0 && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-1.25rem)] px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl z-40 flex items-center gap-2.5 sm:gap-4 bg-primary text-white shadow-2xl shadow-primary/40">
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-1.25rem)] px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl z-40 flex items-center gap-2.5 sm:gap-4 bg-emerald-dark text-ivory shadow-xl shadow-emerald-deep/25">
             <span className="text-sm font-medium">{compared.length} paket dipilih untuk dibandingkan</span>
-            <Link href={`/compare?ids=${compared.join(",")}`} className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-gold to-gold-light text-emerald-deep">
+            <Link href={`/compare?ids=${compared.join(",")}`} className="px-4 py-2 rounded-xl text-sm font-bold bg-gold text-emerald-deep hover:bg-gold-dark transition-colors">
               Bandingkan
             </Link>
             <button onClick={() => setCompared([])} className="text-xs opacity-60 hover:opacity-100">
@@ -234,10 +234,10 @@ export default function PackageSection() {
 
         {packages.length === 0 && (
           <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <Search className="w-7 h-7 text-primary/40" />
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-ivory-border/50 flex items-center justify-center">
+              <Search className="w-7 h-7 text-ivory-ink/50" />
             </div>
-            <p className="text-muted-foreground font-medium">Belum ada paket tersedia</p>
+            <p className="text-ivory-ink/70 font-medium">Belum ada paket tersedia</p>
           </div>
         )}
 
@@ -246,7 +246,7 @@ export default function PackageSection() {
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="group inline-flex w-full sm:w-auto justify-center items-center gap-2 px-6 sm:px-9 py-3.5 rounded-2xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                className="group inline-flex w-full sm:w-auto justify-center items-center gap-2 px-6 sm:px-9 py-3.5 rounded-xl text-sm font-semibold bg-ivory-card text-emerald-dark border border-ivory-border hover:border-gold hover:bg-ivory transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingMore ? (
                   <>
@@ -256,7 +256,7 @@ export default function PackageSection() {
                 ) : (
                   <>
                     Muat Lebih Banyak
-                    <span className="text-xs text-emerald-100/80">({packages.length} paket)</span>
+                    <span className="text-xs text-ivory-ink/70">({packages.length} paket)</span>
                   </>
                 )}
               </button>

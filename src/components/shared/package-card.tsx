@@ -178,7 +178,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     return (
       <Link
         href={`/package/${pkg.slug}`}
-        className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group cursor-pointer"
+        className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:shadow-md hover:shadow-emerald-deep/5 hover:border-gold/50 transition-all group cursor-pointer"
       >
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
@@ -193,13 +193,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
           <div className="absolute top-2.5 left-2.5 flex gap-1.5 pointer-events-none">
             {pkg.duration_nights && (
-              <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
+              <span className="bg-emerald-deep/60 text-ivory text-[10px] font-medium px-2 py-0.5 rounded-md">
                 <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
                 {pkg.duration_nights} {t("card.days")}
               </span>
             )}
             {soldOut && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800/80 text-white backdrop-blur-sm flex items-center gap-1">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-deep/80 text-ivory flex items-center gap-1">
                 <Timer className="w-2.5 h-2.5" /> Paket ini penuh
               </span>
             )}
@@ -208,31 +208,31 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           <div className="absolute top-2.5 right-2.5 z-10 flex gap-1.5">
             <button
               onClick={handleWishlist}
-              className="bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+              className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
               type="button"
               aria-label="Tambah ke wishlist"
             >
               {togglingWishlist ? (
-                <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 text-ivory-ink/70 animate-spin" />
               ) : (
-                <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
+                <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-ivory-ink/70"}`} />
               )}
             </button>
             {!soldOut && (
               <button
                 onClick={handleCompare}
-                className="bg-white/90 p-2 rounded-full hover:bg-white transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
                 type="button"
                 aria-label="Bandingkan paket"
               >
-                <Scale className="w-4 h-4 text-emerald-600" />
+                <Scale className="w-4 h-4 text-gold-dark" />
               </button>
             )}
           </div>
         </div>
 
         <div className="flex flex-col flex-1 p-3.5">
-          <h3 title={pkg.name} className="font-semibold text-xl leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-1 mb-[1.375em]">
+          <h3 title={pkg.name} className="font-semibold text-xl leading-snug text-emerald-dark group-hover:text-emerald-deep transition-colors line-clamp-1 mb-[1.375em]">
             {pkg.name}
           </h3>
 
@@ -256,40 +256,40 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
                 />
               ) : (
-                <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
+                <div className="w-4 h-4 rounded-full bg-ivory border border-ivory-border flex items-center justify-center">
+                  <span className="text-[6px] font-bold text-emerald-dark">{travel.name.charAt(0)}</span>
                 </div>
               )}
-              <span className="text-[11px] text-slate-600 hover:text-emerald-600 transition-colors truncate max-w-[160px] font-medium">
+              <span className="text-[11px] text-ivory-ink/70 hover:text-emerald-dark transition-colors truncate max-w-[160px] font-medium">
                 {travel.name}
               </span>
             </button>
           )}
 
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-slate-500 mb-3">
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-ivory-ink/70 mb-3">
             <span className="inline-flex items-center gap-0.5 max-w-full">
-              <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+              <MapPin className="w-3 h-3 text-emerald-dark shrink-0" />
 <span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
             </span>
-            <span className="text-slate-300">·</span>
+            <span className="text-ivory-border">·</span>
             <span>{pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</span>
             {airline && (
               <>
-                <span className="text-slate-300">·</span>
+                <span className="text-ivory-border">·</span>
                 <span className="truncate">{decodeUnicodeEscapes(airline)}</span>
               </>
             )}
             <>
-              <span className="text-slate-300">·</span>
+              <span className="text-ivory-border">·</span>
               {hotelStars ? (
                 <span className="inline-flex items-center gap-0.5">
-                  <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <Hotel className="w-3 h-3 text-emerald-dark shrink-0" />
                   <span>Hotel</span>
-                  <span className="text-amber-500">{"★".repeat(hotelStars)}</span>
+                  <span className="text-emerald-dark">{"★".repeat(hotelStars)}</span>
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-0.5">
-                  <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <Hotel className="w-3 h-3 text-emerald-dark shrink-0" />
                   <span>-</span>
                 </span>
               )}
@@ -299,9 +299,9 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 <div className="flex items-center gap-1 mb-2 h-4">
           {avgRating !== null && (
             <>
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span className="text-xs font-semibold text-slate-700">{avgRating}</span>
-              <span className="text-[11px] text-slate-400">({reviewCount})</span>
+              <Star className="w-3.5 h-3.5 text-gold-dark fill-gold" />
+              <span className="text-xs font-semibold text-emerald-dark">{avgRating}</span>
+              <span className="text-[11px] text-ivory-ink/70">({reviewCount})</span>
             </>
           )}
         </div>
@@ -310,17 +310,17 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
           </div>
 
-          <div className="flex items-end justify-between pt-2.5 border-t border-slate-100 mt-auto">
+          <div className="flex items-end justify-between pt-2.5 border-t border-ivory-border mt-auto">
             <div>
               <div className="flex items-baseline gap-1">
-                <p className="text-lg font-bold text-emerald-700">{formatRupiah(pkg.price)}</p>
-                <p className="text-[10px] text-slate-400">{t("card.per_person")}</p>
+                <p className="text-lg font-bold text-emerald-dark">{formatRupiah(pkg.price)}</p>
+                <p className="text-[10px] text-ivory-ink/70">{t("card.per_person")}</p>
               </div>
               {Number(pkg.cashback_amount) > 0 && (
                 <TooltipProvider delay={100}>
                   <Tooltip>
-                    <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
-                      <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                    <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold-dark/40 rounded-full px-2.5 py-1">
+                      <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                     </span>} />
                     <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
                   </Tooltip>
@@ -338,7 +338,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     return (
       <Link
         href={`/package/${pkg.slug}`}
-        className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 transition-colors group cursor-pointer"
+        className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:border-gold/50 transition-colors group cursor-pointer"
       >
         <div className="flex flex-col sm:flex-row h-full">
           <div className="relative w-full aspect-video sm:aspect-auto sm:h-full min-h-[180px] shrink-0 overflow-hidden">
@@ -352,7 +352,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             />
             <div className="absolute top-2 left-2 flex gap-1 pointer-events-none">
               {pkg.duration_nights && (
-                <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
+                <span className="bg-emerald-deep/60 text-ivory text-[10px] font-medium px-2 py-0.5 rounded-md">
                   <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
                   {pkg.duration_nights} {t("card.days")}
                 </span>
@@ -361,24 +361,24 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             <div className="absolute top-2 right-2 z-10 flex gap-1.5">
               <button
                 onClick={handleWishlist}
-                className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+                className="bg-ivory-card/95 p-1.5 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto"
                 type="button"
                 aria-label="Tambah ke wishlist"
               >
                 {togglingWishlist ? (
-                  <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 text-ivory-ink/70 animate-spin" />
                 ) : (
-                  <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
+                  <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-ivory-ink/70"}`} />
                 )}
               </button>
               {!soldOut && (
                 <button
                   onClick={handleCompare}
-                  className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+                  className="bg-ivory-card/95 p-1.5 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto"
                   type="button"
                   aria-label="Bandingkan paket"
                 >
-                  <Scale className="w-4 h-4 text-emerald-600" />
+                  <Scale className="w-4 h-4 text-gold-dark" />
                 </button>
               )}
             </div>
@@ -386,37 +386,37 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
           <div className="flex-1 p-4 flex flex-col justify-between">
             <div>
-              <h3 title={pkg.name} className="font-semibold text-xl leading-snug group-hover:text-emerald-700 transition-colors line-clamp-1 mb-[1.375em]">{pkg.name}</h3>
+              <h3 title={pkg.name} className="font-semibold text-xl leading-snug group-hover:text-emerald-deep transition-colors line-clamp-1 mb-[1.375em]">{pkg.name}</h3>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 mb-2">
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
+                  <MapPin className="w-3 h-3 text-emerald-dark shrink-0" />
                   <span className="truncate">{(pkg.departure_cities || []).join(", ") || "-"}</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Clock className="w-3 h-3 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
+                  <Clock className="w-3 h-3 text-emerald-dark shrink-0" />
                   {pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
+                  <Plane className="w-3 h-3 text-emerald-dark shrink-0" />
                   <span className="truncate">{pkg.airline ? decodeUnicodeEscapes(pkg.airline) : "-"}</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500">
+                <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
                   <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
                 </div>
               </div>
             </div>
-            <div className="flex items-end justify-between pt-2 border-t border-gray-100">
+            <div className="flex items-end justify-between pt-2 border-t border-ivory-border">
               <div>
-                <p className="text-lg font-extrabold text-emerald-700">
+                <p className="text-lg font-extrabold text-emerald-dark">
                   {formatRupiah(pkg.price)}
-                  <span className="text-[10px] text-gray-400 font-normal">{t("card.per_person")}</span>
+                  <span className="text-[10px] text-ivory-ink/70 font-normal">{t("card.per_person")}</span>
                 </p>
                 {Number(pkg.cashback_amount) > 0 && (
                   <TooltipProvider delay={100}>
                     <Tooltip>
-                      <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
-                        <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
-                      </span>} />
+                      <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold-dark/40 rounded-full px-2.5 py-1">
+                          <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                        </span>} />
                       <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -433,7 +433,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   return (
     <Link
       href={`/package/${pkg.slug}`}
-      className="flex flex-col h-full bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-emerald-300 transition-colors group cursor-pointer"
+      className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:border-gold/50 transition-colors group cursor-pointer"
     >
       <div className="relative aspect-video w-full overflow-hidden">
         <Image
@@ -448,13 +448,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
         <div className="absolute top-2.5 left-2.5 flex gap-1 pointer-events-none">
           {pkg.duration_nights && (
-            <span className="bg-black/50 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm">
+            <span className="bg-emerald-deep/60 text-ivory text-[10px] font-medium px-2 py-0.5 rounded-md">
               <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
               {pkg.duration_nights} {t("card.days")}
             </span>
           )}
           {soldOut && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800/80 text-white backdrop-blur-sm flex items-center gap-1">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-deep/80 text-ivory flex items-center gap-1">
               <Timer className="w-2.5 h-2.5" /> Paket ini penuh
             </span>
           )}
@@ -463,24 +463,24 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="absolute top-2.5 right-2.5 z-10 flex gap-1.5">
           <button
             onClick={handleWishlist}
-            className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+            className="bg-ivory-card/95 p-1.5 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto"
             type="button"
             aria-label="Tambah ke wishlist"
           >
             {togglingWishlist ? (
-              <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 text-ivory-ink/70 animate-spin" />
             ) : (
-              <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-gray-500"}`} />
+              <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "text-rose-500 fill-rose-500" : "text-ivory-ink/70"}`} />
             )}
           </button>
           {!soldOut && (
             <button
               onClick={handleCompare}
-              className="bg-white/90 p-1.5 rounded-full hover:bg-white transition pointer-events-auto"
+              className="bg-ivory-card/95 p-1.5 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto"
               type="button"
               aria-label="Bandingkan paket"
             >
-              <Scale className="w-4 h-4 text-emerald-600" />
+              <Scale className="w-4 h-4 text-gold-dark" />
             </button>
           )}
         </div>
@@ -488,7 +488,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
       </div>
 
       <div className="flex flex-col flex-1 p-3.5">
-        <h3 className="font-semibold text-xl leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2 mb-3 min-h-[3.5rem]">
+        <h3 className="font-semibold text-xl leading-snug group-hover:text-emerald-deep transition-colors line-clamp-2 mb-3 min-h-[3.5rem]">
           {pkg.name}
         </h3>
 
@@ -509,31 +509,31 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
               />
             ) : (
-              <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                <span className="text-[6px] font-bold text-emerald-700">{travel.name.charAt(0)}</span>
+              <div className="w-3.5 h-3.5 rounded-full bg-ivory border border-ivory-border flex items-center justify-center shrink-0">
+                <span className="text-[6px] font-bold text-emerald-dark">{travel.name.charAt(0)}</span>
               </div>
             )}
-            <span className="text-gray-600 font-medium truncate hover:text-emerald-600 transition-colors text-[11px]">
+            <span className="text-ivory-ink/70 font-medium truncate hover:text-emerald-dark transition-colors text-[11px]">
               {travel.name}
             </span>
           </Link>
         )}
 
-        <div className="space-y-1.5 mb-3 text-xs text-gray-500">
+        <div className="space-y-1.5 mb-3 text-xs text-ivory-ink/70">
           <div className="flex items-center gap-1.5">
-            <MapPin className="w-3 h-3 text-emerald-600 shrink-0" />
+            <MapPin className="w-3 h-3 text-emerald-dark shrink-0" />
             <span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Plane className="w-3 h-3 text-emerald-600 shrink-0" />
+            <Plane className="w-3 h-3 text-emerald-dark shrink-0" />
             <span className="truncate">{airline ? decodeUnicodeEscapes(airline) : "-"}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Hotel className="w-3 h-3 text-emerald-600 shrink-0" />
+            <Hotel className="w-3 h-3 text-emerald-dark shrink-0" />
             <span className="truncate">{hotelName ? `${hotelName}${hotelStars ? ` ${"★".repeat(hotelStars)}` : ""}` : hotelStars ? `Hotel ${"★".repeat(hotelStars)}` : "-"}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Calendar className="w-3 h-3 text-emerald-600 shrink-0" />
+            <Calendar className="w-3 h-3 text-emerald-dark shrink-0" />
             <span className="truncate">{departureLabel || "-"}</span>
           </div>
         </div>
@@ -541,9 +541,9 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         <div className="flex items-center gap-1 mb-2 h-4">
           {avgRating !== null && (
             <>
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span className="text-xs font-semibold text-gray-700">{avgRating}</span>
-              <span className="text-[11px] text-gray-400">({reviewCount} ulasan)</span>
+              <Star className="w-3.5 h-3.5 text-gold-dark fill-gold" />
+              <span className="text-xs font-semibold text-emerald-dark">{avgRating}</span>
+              <span className="text-[11px] text-ivory-ink/70">({reviewCount} ulasan)</span>
             </>
           )}
         </div>
@@ -553,29 +553,29 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         {pkg.facilities && pkg.facilities.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2 h-6 overflow-hidden">
             {(pkg.facilities as string[]).slice(0, 3).map((f) => (
-              <span key={f} className="px-2 py-0.5 text-[10px] rounded bg-gray-100 text-gray-600 whitespace-nowrap">
+              <span key={f} className="px-2 py-0.5 text-[10px] rounded-md bg-ivory border border-ivory-border text-emerald-dark whitespace-nowrap">
                 {f}
               </span>
             ))}
             {pkg.facilities.length > 3 && (
-              <span className="px-2 py-0.5 text-[10px] rounded bg-gray-100 text-gray-500 whitespace-nowrap">
+              <span className="px-2 py-0.5 text-[10px] rounded-md bg-ivory border border-ivory-border text-ivory-ink/70 whitespace-nowrap">
                 +{pkg.facilities.length - 3}
               </span>
             )}
           </div>
         )}
 
-        <div className="flex items-end justify-between pt-3 border-t border-gray-100 mt-auto">
+        <div className="flex items-end justify-between pt-3 border-t border-ivory-border mt-auto">
           <div>
             <div className="flex items-baseline gap-1">
-              <p className="text-lg font-extrabold text-emerald-700">{formatRupiah(pkg.price)}</p>
-              <p className="text-[10px] text-gray-400">{t("card.per_person")}</p>
+              <p className="text-lg font-extrabold text-emerald-dark">{formatRupiah(pkg.price)}</p>
+              <p className="text-[10px] text-ivory-ink/70">{t("card.per_person")}</p>
             </div>
             {Number(pkg.cashback_amount) > 0 && (
               <TooltipProvider delay={100}>
                 <Tooltip>
-                  <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2 py-0.5 shadow-sm">
-                    <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+<TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold-dark/40 rounded-full px-2.5 py-1">
+                    <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                   </span>} />
                   <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
                 </Tooltip>

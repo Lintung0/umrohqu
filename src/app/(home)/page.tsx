@@ -7,10 +7,11 @@ import {
   TestimonialSection,
   TrustSection,
 } from "@/components/ui/home/extra-sections"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Search, MapPin, Calendar, Building2, ChevronDown, Sparkles } from "lucide-react"
+import { Search, Calendar, Building2, ChevronDown } from "lucide-react"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
+import { supabase } from "@/lib/supabase/client"
 
 const MONTHS = [
   { value: "januari", label: "Januari 2026" },
@@ -26,6 +27,43 @@ const MONTHS = [
   { value: "november", label: "November 2026" },
   { value: "desember", label: "Desember 2026" },
 ]
+
+function HeroStats() {
+  const [packages, setPackages] = useState<number | null>(null)
+  const [travels, setTravels] = useState<number | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const [pkg, tnt] = await Promise.all([
+        supabase.from("packages").select("id", { count: "exact", head: true }).in("status", ["active", "ongoing"]),
+        supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "active"),
+      ])
+      if (!cancelled) {
+        setPackages(pkg.count || 0)
+        setTravels(tnt.count || 0)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [])
+
+  const items = [
+    { value: travels, label: "Travel Mitra Terverifikasi" },
+    { value: packages, label: "Paket Umrah Aktif" },
+  ]
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-8 sm:mt-10 text-xs text-ivory/85">
+      {items.map((item) => (
+        <span key={item.label} className="flex items-baseline gap-1.5">
+          <span className="text-lg font-semibold text-ivory">{item.value === null ? "..." : item.value}</span>
+          <span>{item.label}</span>
+        </span>
+      ))}
+    </div>
+  )
+}
 
 function HeroSearch() {
   const router = useRouter()
@@ -43,54 +81,57 @@ function HeroSearch() {
     router.push(`/search?${params.toString()}`)
   }
 
+  const inputClass =
+    "w-full h-11 pl-8 pr-2.5 bg-ivory-soft border border-ivory-border rounded-xl text-xs text-ivory-ink placeholder:text-ivory-ink/70 focus:bg-ivory-card focus:outline-none focus:ring-2 focus:ring-emerald-dark/30 focus:border-emerald-dark transition-all"
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-xl p-3.5 sm:p-4 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] ring-1 ring-white/40 border border-white/20 text-gray-800 text-left max-w-4xl mx-auto">
+    <form onSubmit={handleSubmit} className="bg-ivory-card p-3.5 sm:p-4 rounded-3xl shadow-[0_20px_50px_-20px_rgba(10,31,22,0.55)] border border-ivory-border text-ivory-ink text-left max-w-4xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
         <div className="sm:col-span-4">
-          <label className="block text-[11px] font-bold text-emerald-900/50 uppercase tracking-wider mb-1.5 px-1">Travel / Paket</label>
+          <label className="block text-[11px] font-semibold text-emerald-dark uppercase tracking-wider mb-1.5 px-1">Travel / Paket</label>
           <div className="relative group">
-            <Building2 className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 transition-colors group-focus-within:text-emerald-600" />
+            <Building2 className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-dark transition-colors" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Cari travel atau paket..."
-              className="w-full h-11 pl-8 pr-2.5 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all group-focus-within:bg-white"
+              className={inputClass}
             />
           </div>
         </div>
         <div className="sm:col-span-3">
-          <label className="block text-[11px] font-bold text-emerald-900/50 uppercase tracking-wider mb-1.5 px-1">Keberangkatan</label>
+          <label className="block text-[11px] font-semibold text-emerald-dark uppercase tracking-wider mb-1.5 px-1">Keberangkatan</label>
           <CityAutocomplete
             value={departureCity}
             onChange={setDepartureCity}
             placeholder="Kota asal..."
             countryFilter={country}
-            iconClassName="text-emerald-500"
-            className="w-full h-11 pl-8 pr-2.5 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all"
+            iconClassName="text-emerald-dark"
+            className={inputClass}
           />
         </div>
         <div className="sm:col-span-3">
-          <label className="block text-[11px] font-bold text-emerald-900/50 uppercase tracking-wider mb-1.5 px-1">Waktu</label>
+          <label className="block text-[11px] font-semibold text-emerald-dark uppercase tracking-wider mb-1.5 px-1">Waktu</label>
           <div className="relative">
-            <Calendar className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none" />
+            <Calendar className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-dark pointer-events-none" />
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-full h-11 pl-8 pr-7 bg-gray-50/70 border border-gray-200 rounded-xl text-xs text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all appearance-none cursor-pointer"
+              className={`${inputClass} appearance-none cursor-pointer pr-7`}
             >
               <option value="">Semua Bulan</option>
               {MONTHS.map((m) => (
                 <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>
-            <ChevronDown className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 text-ivory-ink/50 pointer-events-none" />
           </div>
         </div>
         <div className="sm:col-span-2">
           <button
             type="submit"
-            className="w-full h-11 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 active:scale-95 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/40 transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+            className="w-full h-11 bg-gold hover:bg-gold-dark text-emerald-deep font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 text-xs cursor-pointer border border-emerald-deep/10"
             aria-label="Cari paket umrah"
           >
             <Search className="w-3.5 h-3.5" />
@@ -106,50 +147,41 @@ export default function Home() {
   return (
     <main className="flex-1">
       {/* Hero — Makkah Background */}
-      <section className="relative py-12 sm:py-16 flex items-center justify-center overflow-hidden border-b border-emerald-900/30">
+      <section className="relative py-12 sm:py-16 flex items-center justify-center overflow-hidden border-b border-emerald-deep/40">
         {/* Makkah background image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
           style={{ backgroundImage: "url('/images/hero-makkah.jpg')" }}
           aria-hidden="true"
         />
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-emerald-950/75 to-slate-950/80 z-10" aria-hidden="true" />
+        {/* Warm dark overlay (emerald-deep base, DESIGN.md core) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald-deep/80 via-emerald-deep/70 to-emerald-deep/85 z-10" aria-hidden="true" />
 
-        {/* Islamic star pattern */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none z-10" aria-hidden="true">
+        {/* Islamic star pattern — identity motif, kept faint */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.035] pointer-events-none z-10" aria-hidden="true">
           <defs>
             <pattern id="islamic-star" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-              <polygon points="30,2 35,22 55,22 40,34 46,54 30,42 14,54 20,34 5,22 25,22" fill="none" stroke="#d4a017" strokeWidth="0.8" />
+              <polygon points="30,2 35,22 55,22 40,34 46,54 30,42 14,54 20,34 5,22 25,22" fill="none" stroke="#D4A843" strokeWidth="0.8" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#islamic-star)" />
         </svg>
 
-        <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 text-center text-white">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-200 text-xs font-medium mb-6 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
-            <span>Marketplace Umrah Resmi PPIU Kemenhaj</span>
-          </div>
+        <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 text-center text-ivory">
+          <p className="text-sm text-ivory/90 mb-5 font-medium">
+            Marketplace Umrah Resmi PPIU Kemenhaj
+          </p>
 
-          <div className="relative">
-            {/* Ambient gold glow behind the headline */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[520px] h-[220px] rounded-full bg-amber-400/20 blur-[110px] pointer-events-none" aria-hidden="true" />
-            <h1 className="relative whitespace-normal sm:whitespace-nowrap text-[clamp(14px,4vw,24px)] sm:text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold tracking-tight mb-8 sm:mb-12 leading-none drop-shadow-lg">
-              Cari, Bandingkan &amp; Pesan{" "}
-              <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-100 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(251,191,36,0.25)]">
-                Paket Umrah
-              </span>
-            </h1>
-          </div>
+          <h1 className="relative whitespace-normal sm:whitespace-nowrap text-[clamp(24px,4.5vw,28px)] sm:text-4xl md:text-5xl lg:text-[3.4rem] font-bold tracking-tight mb-8 sm:mb-10 leading-[1.1]">
+            Cari, Bandingkan &amp; Pesan{" "}
+            <span className="text-gold-light">
+              Paket Umrah
+            </span>
+          </h1>
 
           <HeroSearch />
 
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 mt-8 sm:mt-10 text-xs text-emerald-100/70">
-            <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>200+ PPIU Resmi</span>
-            <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" /></span>500+ Paket umrah</span>
-            <span className="flex items-center gap-2"><span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" /></span>50.000+ Jamaah</span>
-          </div>
+          <HeroStats />
         </div>
       </section>
 
