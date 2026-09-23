@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { BadgePercent, Banknote, Info, RefreshCcw } from "lucide-react"
+import { BadgePercent, Banknote, ChevronLeft, ChevronRight, Info, RefreshCcw } from "lucide-react"
 import { formatRupiah } from "@/lib/constants"
 
 interface BookingRow {
@@ -23,6 +23,8 @@ interface MineResponse {
 const CASHBACK_EXPLANATION =
   "Cashback (pengembalian sebagian dana) dari biaya umrah akan ditangani langsung oleh travel. Biasanya dikembalikan berupa uang cash Riyal atau lainnya sesuai kebijakan travel."
 
+const PAGE_SIZE = 8
+
 const STATUS_LABEL: Record<string, string> = {
   pending_payment: "Menunggu Pembayaran",
   processing: "Sedang Diproses",
@@ -35,6 +37,7 @@ export default function CashbackPage() {
   const [loading, setLoading] = useState(true)
   const [rows, setRows] = useState<BookingRow[]>([])
   const [error, setError] = useState("")
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -59,6 +62,12 @@ export default function CashbackPage() {
   useEffect(() => {
     load()
   }, [load])
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const startIndex = (currentPage - 1) * PAGE_SIZE
+  const endIndex = Math.min(startIndex + PAGE_SIZE, rows.length)
+  const pageSlice = rows.slice(startIndex, endIndex)
 
   if (loading) {
     return (
@@ -125,7 +134,7 @@ export default function CashbackPage() {
           </div>
         ) : (
           <div className="divide-y divide-ivory-border">
-            {rows.map((row) => (
+            {pageSlice.map((row) => (
               <div key={row.id} className="flex flex-col gap-3 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <Link
@@ -148,6 +157,33 @@ export default function CashbackPage() {
           </div>
         )}
       </section>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between gap-3 px-1 pt-1">
+          <p className="text-xs text-muted-foreground">
+            Menampilkan {startIndex + 1}–{endIndex} dari {rows.length} pesanan
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-dark bg-ivory-card border border-ivory-border hover:bg-ivory transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" /> Prev
+            </button>
+            <span className="text-sm font-medium text-muted-foreground">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-dark bg-ivory-card border border-ivory-border hover:bg-ivory transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -33,8 +33,6 @@ export default function BookingsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [filter, setFilter] = useState("semua")
-  const [dateFrom, setDateFrom] = useState("")
-  const [dateTo, setDateTo] = useState("")
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
 
@@ -59,12 +57,9 @@ export default function BookingsPage() {
   const filtered = useMemo(
     () => bookings.filter((b) => {
       const statusMatch = filter === "semua" || b.status === filter
-      const created = new Date(b.created_at)
-      const fromMatch = !dateFrom || created >= new Date(dateFrom)
-      const toMatch = !dateTo || created <= new Date(dateTo + "T23:59:59")
-      return statusMatch && fromMatch && toMatch
+      return statusMatch
     }),
-    [bookings, filter, dateFrom, dateTo]
+    [bookings, filter]
   )
 
   const groups = useMemo<BookingGroup[]>(() => {
@@ -97,7 +92,7 @@ export default function BookingsPage() {
 
   useEffect(() => {
     setPage(1)
-  }, [filter, dateFrom, dateTo])
+  }, [filter])
 
   if (loading) {
     return (
@@ -156,47 +151,20 @@ export default function BookingsPage() {
       </div>
 
       {/* Filter Pills */}
-      <div className="flex flex-col gap-3 overflow-x-auto pb-2 mb-4">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          {BOOKING_STATUSES.map((s) => (
-            <button
-              key={s.value}
-              onClick={() => setFilter(s.value)}
-              className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                filter === s.value
-                  ? "bg-emerald-dark text-ivory-soft"
-                  : "bg-ivory-card border border-ivory-border text-muted-foreground hover:text-emerald-deep hover:bg-ivory"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-        {/* Date Range Filter */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <label className="text-xs text-muted-foreground whitespace-nowrap">Dari</label>
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-ivory-border bg-ivory-card text-sm text-emerald-deep focus:outline-none focus:ring-2 focus:ring-emerald-dark/20"
-          />
-          <label className="text-xs text-muted-foreground whitespace-nowrap">Sampai</label>
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-ivory-border bg-ivory-card text-sm text-emerald-deep focus:outline-none focus:ring-2 focus:ring-emerald-dark/20"
-          />
-          {(dateFrom || dateTo) && (
-            <button
-              onClick={() => { setDateFrom(""); setDateTo(""); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-emerald-deep hover:bg-ivory transition-colors whitespace-nowrap"
-            >
-              Hapus filter
-            </button>
-          )}
-        </div>
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4">
+        {BOOKING_STATUSES.map((s) => (
+          <button
+            key={s.value}
+            onClick={() => setFilter(s.value)}
+            className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+              filter === s.value
+                ? "bg-emerald-dark text-ivory-soft"
+                : "bg-ivory-card border border-ivory-border text-muted-foreground hover:text-emerald-deep hover:bg-ivory"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
       </div>
 
       {/* Bookings List */}
