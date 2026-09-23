@@ -81,7 +81,7 @@ export default function CashbackPage() {
   const totalCashback = rows.reduce((s, r) => s + Number(r.cashback_amount || 0), 0)
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-emerald-deep flex items-center gap-2">
           <BadgePercent className="w-6 h-6 text-gold-dark" /> Cashback
@@ -90,15 +90,15 @@ export default function CashbackPage() {
       </div>
 
       {/* Penjelasan — ditangani langsung oleh travel */}
-      <div className="rounded-xl border border-gold/30 bg-gold/10 text-emerald-deep p-4 sm:p-5">
-        <div className="flex items-start gap-3.5">
-          <span className="shrink-0 w-9 h-9 rounded-lg bg-gold/20 border border-gold/30 flex items-center justify-center">
-            <Info className="w-5 h-5 text-gold-dark" />
+      <div className="rounded-xl border border-gold/30 bg-gold/10 text-emerald-deep px-4 py-3.5">
+        <div className="flex items-start gap-3">
+          <span className="shrink-0 w-8 h-8 rounded-lg bg-gold/20 border border-gold/30 flex items-center justify-center">
+            <Info className="w-4 h-4 text-gold-dark" />
           </span>
           <div>
-            <p className="font-semibold">Cashback ditangani langsung oleh travel</p>
-            <p className="mt-1 text-sm leading-relaxed">{CASHBACK_EXPLANATION}</p>
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="font-semibold text-sm">Cashback ditangani langsung oleh travel</p>
+            <p className="mt-0.5 text-sm leading-relaxed">{CASHBACK_EXPLANATION}</p>
+            <p className="mt-1.5 text-xs text-muted-foreground">
               Tidak ada pengajuan pencairan di sistem kami. Silakan hubungi travel Anda untuk detail penyerahan cashback.
             </p>
           </div>
@@ -106,44 +106,44 @@ export default function CashbackPage() {
       </div>
 
       {/* Ringkasan */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-xl border border-ivory-border bg-ivory-card p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="rounded-xl border border-ivory-border bg-ivory-card p-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Total Cashback Anda</p>
             <BadgePercent className="h-4 w-4 text-gold-dark" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-emerald-deep">{formatRupiah(totalCashback)}</p>
+          <p className="mt-1.5 text-xl font-bold text-emerald-deep">{formatRupiah(totalCashback)}</p>
         </div>
-        <div className="rounded-xl border border-ivory-border bg-ivory-card p-5">
+        <div className="rounded-xl border border-ivory-border bg-ivory-card p-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Pesanan dengan Cashback</p>
             <Banknote className="h-4 w-4 text-emerald-dark" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-emerald-deep">{rows.length} pesanan</p>
+          <p className="mt-1.5 text-xl font-bold text-emerald-deep">{rows.length} pesanan</p>
         </div>
       </div>
 
       <section className="rounded-2xl border border-ivory-border bg-ivory-card">
-        <div className="border-b border-ivory-border px-6 py-5">
-          <h2 className="font-semibold text-emerald-deep">Pesanan dengan Cashback</h2>
+        <div className="border-b border-ivory-border px-5 py-4">
+          <h2 className="font-semibold text-emerald-deep text-sm">Pesanan dengan Cashback</h2>
         </div>
         {rows.length === 0 ? (
-          <div className="px-6 py-12 text-center text-muted-foreground">
-            <Banknote className="mx-auto mb-2 h-8 w-8 opacity-50" />
+          <div className="px-6 py-10 text-center text-muted-foreground">
+            <Banknote className="mx-auto mb-2 h-7 w-7 opacity-50" />
             Belum ada pesanan yang berhak atas cashback. Pesan paket dengan badge Cashback untuk mulai.
           </div>
         ) : (
           <div className="divide-y divide-ivory-border">
             {pageSlice.map((row) => (
-              <div key={row.id} className="flex flex-col gap-3 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <div key={row.id} className="flex flex-col gap-2.5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <Link
                     href={`/package/${row.package_slug}`}
-                    className="font-medium text-emerald-deep hover:text-emerald-dark hover:underline"
+                    className="font-medium text-sm text-emerald-deep hover:text-emerald-dark hover:underline"
                   >
                     {row.package_name}
                   </Link>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     Pesanan{" "}
                     {new Date(row.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     · {STATUS_LABEL[row.status] || row.status}
