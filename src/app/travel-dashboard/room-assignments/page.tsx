@@ -64,7 +64,7 @@ export default function RoomAssignmentsPage() {
       .from("room_assignments")
       .select(`
         *,
-        participant:booking_participants(full_name, booking:bookings(package:packages(name))),
+        participant:participants(full_name, booking:bookings(package:packages(name))),
         room_template:room_templates(room_number, room_type, package_hotel:package_hotels(hotel:hotels(name)))
       `, { count: "exact" })
       .eq("participant.booking.package.tenant_id", tenantId)

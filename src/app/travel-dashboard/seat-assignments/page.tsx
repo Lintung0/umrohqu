@@ -63,7 +63,7 @@ export default function SeatAssignmentsPage() {
       .from("seat_assignments")
       .select(`
         *,
-        participant:booking_participants(full_name, booking:bookings(package:packages(name))),
+        participant:participants(full_name, booking:bookings(package:packages(name))),
         bus_seat:bus_seats(seat_number, bus_template:bus_templates(bus_number))
       `, { count: "exact" })
       .eq("participant.booking.package.tenant_id", tenantId)

@@ -31,7 +31,7 @@ interface BookingDetail extends Booking {
     package_hotels?: { night_count: number | null; sort_order: number | null; hotel: { name: string | null; rating: number | null; city: string | null } | null }[]
   }
   users?: { full_name: string; email: string; phone: string }
-  booking_participants?: Participant[]
+  participants?: Participant[]
   cancel_reason?: string | null
   refunds?: {
     id: string
@@ -73,7 +73,7 @@ export default function TravelBookingDetailPage() {
           *,
           packages(name, slug, duration_nights, price, departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city))),
           users(full_name, email, phone),
-          booking_participants(*),
+          participants(*),
           refunds(id, amount, status, method, reference, reason, note)
         `)
         .eq("id", id)
@@ -240,11 +240,11 @@ export default function TravelBookingDetailPage() {
           {/* Participants */}
           <div className="bg-white rounded-2xl border border-border p-6">
             <h2 className="font-semibold mb-4">
-              {t("booking.participants")} ({booking.booking_participants?.length || 0})
+              {t("booking.participants")} ({booking.participants?.length || 0})
             </h2>
-            {booking.booking_participants && booking.booking_participants.length > 0 ? (
+            {booking.participants && booking.participants.length > 0 ? (
               <div className="space-y-3">
-                {booking.booking_participants.map((p, i) => (
+                {booking.participants.map((p, i) => (
                   <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-muted/30 border border-border/50">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
                       {i + 1}

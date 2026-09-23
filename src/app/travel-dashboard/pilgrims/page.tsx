@@ -50,7 +50,7 @@ export default function TravelPilgrimsPage() {
 
       const bookingIds = bookings.map((b: any) => b.id)
       const { data: participantData } = await supabase
-        .from("booking_participants")
+        .from("participants")
         .select("id, full_name, national_id, passport_number, gender, phone, relation, booking_id")
         .in("booking_id", bookingIds)
 

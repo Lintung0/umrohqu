@@ -176,7 +176,7 @@ const TIMELINE_STEPS = [
     async function load() {
       console.log("[DEBUG BOOKING LOAD] Starting load for booking:", params.id, "authChecked:", authChecked, "user:", user?.id)
 
-      const selectFields = "*, package:packages(name, slug, duration_nights, departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city))), participants:booking_participants(id, full_name, national_id, passport_number, passport_expiry, birth_date, birth_place, gender, phone, relation, emergency_contact_name, emergency_contact_phone, street, city, province, postal_code, village, district, rt_rw)"
+      const selectFields = "*, package:packages(name, slug, duration_nights, departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city))), participants(id, full_name, national_id, passport_number, passport_expiry, birth_date, birth_place, gender, phone, relation, emergency_contact_name, emergency_contact_phone, street, city, province, postal_code, village, district, rt_rw)"
 
       let bookingData: any = null
 
@@ -314,7 +314,7 @@ const TIMELINE_STEPS = [
       })
 
       const { error } = await supabase
-        .from("booking_participants")
+        .from("participants")
         .update({
           passport_number: participantForm.passport_number,
           passport_expiry: participantForm.passport_expiry,

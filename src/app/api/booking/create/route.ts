@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Gagal membuat booking" }, { status: 500 })
     }
 
-    // 3. Insert booking_participants
+    // 3. Insert participants
     if (pilgrims && pilgrims.length > 0) {
       const participantRecords = pilgrims.map((p) => ({
         booking_id: booking.id,
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
         phone: p.phone || null,
         relation: p.relation || "self",
       }))
-      await admin.from("booking_participants").insert(participantRecords)
+      await admin.from("participants").insert(participantRecords)
     }
 
     // 4. Update package quota (reserved on booking creation)

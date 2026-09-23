@@ -61,7 +61,7 @@ export default function ParticipantEquipmentPage() {
       .from("participant_equipment")
       .select(`
         *,
-        participant:booking_participants(full_name, booking:bookings(package:packages(name))),
+        participant:participants(full_name, booking:bookings(package:packages(name))),
         equipment_template:equipment_templates(name)
       `, { count: "exact" })
       .eq("participant.booking.package.tenant_id", tenantId)

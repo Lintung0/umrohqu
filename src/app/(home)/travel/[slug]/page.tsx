@@ -94,7 +94,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
     const bookingIds = (bookingIdsResult.data ?? []).map((b) => b.id)
     if (bookingIds.length > 0) {
       const participantsResult = await supabase
-        .from("booking_participants")
+        .from("participants")
         .select("id", { count: "exact", head: true })
         .in("booking_id", bookingIds)
       totalJamaah = participantsResult.count ?? 0

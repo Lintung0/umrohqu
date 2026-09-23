@@ -64,7 +64,7 @@ export default function ManasikAttendancesPage() {
       .select(`
         *,
         session:manasik_sessions(session_date, start_time, location, program:manasik_programs(name, package:packages(tenant_id))),
-        participant:booking_participants(full_name)
+        participant:participants(full_name)
       `, { count: "exact" })
       .eq("session.program.package.tenant_id", tenantId)
 
