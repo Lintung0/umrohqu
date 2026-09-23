@@ -622,13 +622,10 @@ const TIMELINE_STEPS = [
 
       {/* Timeline */}
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6">
-        <div className="flex items-baseline justify-between mb-8">
+        <div className="mb-8">
           <h2 className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-medium">
             {t("booking.status")}
           </h2>
-          <span className="font-mono text-[11px] tracking-widest text-muted-foreground/60">
-            {String(Math.max(currentStepIndex + 1, 1)).padStart(2, "0")} / {String(TIMELINE_STEPS.length).padStart(2, "0")}
-          </span>
         </div>
 
         <div className="flex items-center">
@@ -655,9 +652,6 @@ const TIMELINE_STEPS = [
                   isCurrent ? "font-semibold text-emerald-dark" : "text-muted-foreground/70"
                 }`}>
                   {step.label}
-                </p>
-                <p className={`mt-1 font-mono text-[9px] tracking-widest ${isCurrent ? "text-gold-dark" : "text-muted-foreground/40"}`}>
-                  {String(i + 1).padStart(2, "0")}
                 </p>
               </div>
             )
