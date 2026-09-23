@@ -101,12 +101,32 @@ export default function BookingDetailPage() {
     router.refresh()
   }
 
-  const TIMELINE_STEPS = [
-    { key: "pending_payment", label: t("booking.booking_created"), icon: Clock },
-    { key: "processing", label: t("booking.status_processing"), icon: Loader2 },
-    { key: "confirmed", label: t("booking.status_confirmed"), icon: CheckCircle },
-    { key: "completed", label: t("booking.status_completed"), icon: CheckCircle },
-  ]
+const STATUS_ACCENT: Record<string, string> = {
+  pending_payment: "bg-gold-dark",
+  processing: "bg-gold",
+  cancellation_pending: "bg-gold",
+  confirmed: "bg-emerald-dark",
+  completed: "bg-emerald-dark",
+  refunded: "bg-slate-400",
+  cancelled: "bg-red-500",
+}
+
+const STATUS_ACCENT_TEXT: Record<string, string> = {
+  pending_payment: "text-gold-dark",
+  processing: "text-gold-dark",
+  cancellation_pending: "text-gold-dark",
+  confirmed: "text-emerald-dark",
+  completed: "text-emerald-dark",
+  refunded: "text-muted-foreground",
+  cancelled: "text-red-600",
+}
+
+const TIMELINE_STEPS = [
+  { key: "pending_payment", label: t("booking.booking_created"), icon: Clock },
+  { key: "processing", label: t("booking.status_processing"), icon: Loader2 },
+  { key: "confirmed", label: t("booking.status_confirmed"), icon: CheckCircle },
+  { key: "completed", label: t("booking.status_completed"), icon: CheckCircle },
+]
   const [booking, setBooking] = useState<BookingDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [authChecked, setAuthChecked] = useState(false)
@@ -587,42 +607,65 @@ export default function BookingDetailPage() {
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">{t("booking.booking_id")}</p>
-            <h1 className="text-xl font-bold font-mono">{booking.id.slice(0, 8).toUpperCase()}</h1>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{t("booking.booking_id")}</p>
+            <h1 className="text-xl font-bold font-mono mt-1">{booking.id.slice(0, 8).toUpperCase()}</h1>
             <p className="text-muted-foreground mt-1">{pkg?.name || t("booking.package")}</p>
           </div>
-          <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(booking.status, "booking")}`}>
-            {getStatusLabel(booking.status, "booking")}
-          </span>
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            <span className={`w-2 h-2 rounded-full ${STATUS_ACCENT[booking.status] ?? "bg-slate-400"}`} />
+            <span className={`text-[11px] uppercase tracking-[0.18em] font-medium ${STATUS_ACCENT_TEXT[booking.status] ?? "text-muted-foreground"}`}>
+              {getStatusLabel(booking.status, "booking")}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Timeline */}
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6">
-        <h2 className="font-semibold mb-4">{t("booking.status")}</h2>
-        <div className="flex items-center gap-0">
+        <div className="flex items-baseline justify-between mb-8">
+          <h2 className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-medium">
+            {t("booking.status")}
+          </h2>
+          <span className="font-mono text-[11px] tracking-widest text-muted-foreground/60">
+            {String(Math.max(currentStepIndex + 1, 1)).padStart(2, "0")} / {String(TIMELINE_STEPS.length).padStart(2, "0")}
+          </span>
+        </div>
+
+        <div className="flex items-center">
           {TIMELINE_STEPS.map((step, i) => {
-            const isActive = currentStepIndex >= i
+            const isDone = currentStepIndex > i
             const isCurrent = TIMELINE_STEPS[currentStepIndex]?.key === step.key
+            const isActive = currentStepIndex >= i
+
+            const nodeCls = isCurrent
+              ? "w-4 h-4 bg-emerald-dark ring-[5px] ring-emerald-dark/10"
+              : isDone
+                ? "w-2.5 h-2.5 bg-emerald-dark/70"
+                : "w-2.5 h-2.5 bg-ivory border border-slate-300"
+
             return (
               <div key={step.key} className="flex-1 flex flex-col items-center relative">
                 {i > 0 && (
-                  <div className={`absolute top-4 right-1/2 w-full h-0.5 ${isActive ? "bg-emerald-dark/100" : "bg-border"}`} />
+                  <div className={`absolute top-[7px] right-1/2 w-full h-px ${isActive ? "bg-emerald-dark/40" : "bg-slate-200"}`} />
                 )}
-                <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center ${
-                  isCurrent ? "bg-emerald-dark text-white" : isActive ? "bg-emerald-dark/10 text-emerald-dark" : "bg-ivory text-muted-foreground"
-                }`}>
-                  <step.icon className="w-4 h-4" />
+                <div className={`relative transition-all duration-300 ${isCurrent ? "z-10" : ""} ${nodeCls} rounded-full flex items-center justify-center`}>
+                  {isCurrent && <span className="w-1 h-1 rounded-full bg-white" />}
                 </div>
-                <p className={`text-xs mt-2 text-center ${isCurrent ? "font-semibold text-emerald-dark" : "text-muted-foreground"}`}>
+                <p className={`mt-2.5 text-[10px] uppercase tracking-[0.16em] text-center leading-tight ${
+                  isCurrent ? "font-semibold text-emerald-dark" : "text-muted-foreground/70"
+                }`}>
                   {step.label}
+                </p>
+                <p className={`mt-1 font-mono text-[9px] tracking-widest ${isCurrent ? "text-gold-dark" : "text-muted-foreground/40"}`}>
+                  {String(i + 1).padStart(2, "0")}
                 </p>
               </div>
             )
           })}
         </div>
+
         {booking.status === "cancelled" && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-xl">
+          <div className="mt-5 pt-4 border-t border-slate-200 flex items-center gap-2 text-sm text-red-600">
             <XCircle className="w-4 h-4" />
             {t("booking.status_cancelled")}
           </div>
@@ -849,12 +892,13 @@ function CancelStatusCard({
     return (
       <div className="bg-ivory-card rounded-2xl border border-gold/30 p-6 space-y-3">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center shrink-0">
-            <Clock className="w-6 h-6 text-gold-dark" />
-          </div>
+          <span className="w-9 h-9 rounded-full border border-gold/40 flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4 text-gold-dark" />
+          </span>
           <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-gold-dark font-medium">Menunggu Persetujuan</p>
             <h3 className="font-bold text-emerald-deep">Menunggu Persetujuan Travel</h3>
-            <p className="text-sm text-gold-dark">
+            <p className="text-sm text-muted-foreground mt-1">
               Permintaan pembatalanmu sudah terkirim. Travel akan menyetujui atau menolak. Danamu akan dikembalikan jika disetujui.
             </p>
           </div>
@@ -887,16 +931,19 @@ function CancelStatusCard({
     return (
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-3">
         <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${status === "refunded" ? "bg-ivory" : "bg-red-50"}`}>
+          <span className={`w-9 h-9 rounded-full border flex items-center justify-center shrink-0 ${status === "refunded" ? "border-emerald-dark/30" : "border-red-200"}`}>
             {status === "refunded"
-              ? <CreditCard className={`w-6 h-6 ${refund?.status === "completed" ? "text-emerald-dark" : "text-slate-500"}`} />
-              : <XCircle className="w-6 h-6 text-red-600" />}
-          </div>
+              ? <CreditCard className={`w-4 h-4 ${refund?.status === "completed" ? "text-emerald-dark" : "text-slate-500"}`} />
+              : <XCircle className="w-4 h-4 text-red-500" />}
+          </span>
           <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-medium">
+              {status === "refunded" ? "Refund" : "Pembatalan"}
+            </p>
             <h3 className="font-bold text-emerald-deep">
               {status === "refunded" ? "Pembayaran Dikembalikan" : t("booking.status_cancelled")}
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {status === "refunded" ? "Dana dikembalikan via travel partner." : "Pesanan dibatalkan."}
             </p>
           </div>
@@ -923,12 +970,13 @@ function CancelStatusCard({
     <>
       <div className="bg-ivory-card rounded-2xl border border-red-200/70 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
-            <Ban className="w-6 h-6 text-red-500" />
-          </div>
+          <span className="w-9 h-9 rounded-full border border-red-200 flex items-center justify-center shrink-0">
+            <Ban className="w-4 h-4 text-red-500" />
+          </span>
           <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-red-500 font-medium">Tindakan</p>
             <h3 className="font-bold text-emerald-deep">Batalkan Pesanan</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {status === "pending_payment" ? "Pesanan akan dibatalkan tanpa pengembalian dana (belum dibayar)." : "Dana akan dikembalikan oleh travel."}
             </p>
           </div>
