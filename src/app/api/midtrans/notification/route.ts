@@ -28,28 +28,58 @@ export async function POST(request: NextRequest) {
 
     // order_id bisa berupa:
     //   - booking_code (format "UQ-..." / legacy "BKG-..."), dengan sufiks "-R" untuk pelunasan
-    //   - booking-{uuid} (legacy) atau booking-remaining-{uuid}
+    //   - booking-{uuid}[-timestamp] (legacy / baru) atau booking-remaining-{uuid}[-timestamp]
+    //   - pay-{paymentId} / pay-remaining-{paymentId} (format baru → lookup via payments)
     const isRemaining =
       orderId.startsWith("booking-remaining-") ||
-      (!orderId.startsWith("booking-") && orderId.endsWith("-R"))
+      orderId.startsWith("pay-remaining-") ||
+      (!orderId.startsWith("booking-") && !orderId.startsWith("pay-") && orderId.endsWith("-R"))
+
+    const uuidPart = orderId.match(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+    )?.[0] || null
 
     let bookingId: string | null = null
     let bookingCode: string | null = null
-    if (orderId.startsWith("booking-remaining-")) {
-      bookingId = orderId.slice("booking-remaining-".length)
+    let paymentId: string | null = null
+    if (orderId.startsWith("pay-")) {
+      // Format baru: order_id = pay-{paymentId}. Ambil bookingId dari payments.
+      const { data: payByRef } = await admin
+        .from("payments")
+        .select("id, booking_id")
+        .eq("gateway_reference", orderId)
+        .maybeSingle()
+      if (payByRef?.booking_id) {
+        paymentId = payByRef.id
+        bookingId = payByRef.booking_id
+      } else {
+        return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
+      }
+    } else if (orderId.startsWith("booking-remaining-")) {
+      bookingId = uuidPart
     } else if (orderId.startsWith("booking-")) {
-      bookingId = orderId.slice("booking-".length)
+      bookingId = uuidPart
     } else {
       bookingCode = isRemaining ? orderId.slice(0, -2) : orderId
     }
 
-    const bookingQuery = admin
-      .from("bookings")
-      .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, dp_type, total, remaining_amount")
-
-    const { data: booking } = bookingCode
-      ? await bookingQuery.eq("booking_code", bookingCode).single()
-      : await bookingQuery.eq("id", bookingId).single()
+    let booking: { id: string; status: string; tenant_id: string; price: number; pilgrim_count: number; booking_source: string; package_id: string; dp_type: string; total: number; remaining_amount: number } | null = null
+    if (bookingId) {
+      const { data: b } = await admin
+        .from("bookings")
+        .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, dp_type, total, remaining_amount")
+        .eq("id", bookingId)
+        .single()
+      booking = b
+    } else {
+      const bookingQuery = admin
+        .from("bookings")
+        .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, dp_type, total, remaining_amount")
+      const { data: b } = bookingCode
+        ? await bookingQuery.eq("booking_code", bookingCode).single()
+        : await bookingQuery.eq("id", bookingId).single()
+      booking = b
+    }
 
     if (!booking) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
@@ -57,13 +87,15 @@ export async function POST(request: NextRequest) {
 
     bookingId = booking.id
 
-    const { data: payment } = await admin
-      .from("payments")
-      .select("id, status")
-      .eq("booking_id", bookingId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const { data: payment } = paymentId
+      ? { data: { id: paymentId } as any }
+      : await admin
+          .from("payments")
+          .select("id, status")
+          .eq("booking_id", bookingId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
 
     const paidAt = notification.transaction_time
       ? new Date(notification.transaction_time).toISOString()

@@ -48,10 +48,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Sisa pembayaran sudah 0" }, { status: 400 })
     }
 
-    const orderId = booking.booking_code ? `${booking.booking_code}-R` : `booking-remaining-${bookingId}`
-
-    // Pastikan record transaksi (payments) untuk pelunasan ini — booking_id diisi otomatis oleh database
-    const { data: paymentId } = await admin.rpc("create_payment", {
+    // Catat transaksi payments (pelunasan) via RPC create_payment
+    const { data: paymentId, error: payErr } = await admin.rpc("create_payment", {
       p_booking_id: bookingId,
       p_tenant_id: booking.tenant_id,
       p_status: "pending",
@@ -59,6 +57,12 @@ export async function POST(request: NextRequest) {
       p_amount: remaining,
       p_currency: "IDR",
     })
+    if (payErr) {
+      console.error("Payment insert error:", payErr)
+    }
+
+    // order_id unik, ≤ 50 char
+    const orderId = paymentId ? `pay-remaining-${paymentId}` : `pay-remaining-${bookingId.slice(0, 8)}-${Date.now()}`
 
     // Midtrans Snap untuk pelunasan sisa
     let snap: { token: string; redirect_url: string } | null = null
@@ -74,10 +78,12 @@ export async function POST(request: NextRequest) {
         errorUrl: appUrl(`checkout/finish?booking_id=${bookingId}&status=error`),
       })
 
-      await admin
-        .from("payments")
-        .update({ gateway_reference: orderId })
-        .eq("id", paymentId)
+      if (paymentId) {
+        await admin
+          .from("payments")
+          .update({ gateway_reference: orderId })
+          .eq("id", paymentId)
+      }
     } catch (merr: any) {
       console.error("Midtrans Snap remaining error:", merr.message)
       return NextResponse.json({ error: "Gagal membuat transaksi pembayaran" }, { status: 500 })

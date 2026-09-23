@@ -228,23 +228,21 @@ const TIMELINE_STEPS = [
       setLoading(false)
 
       // Step 4: Verify Midtrans payment status if applicable
-      if (bookingData.gateway_invoice_id) {
-        const shouldVerify = bookingData.status === "pending_payment" ||
-          (bookingData.status === "processing" && bookingData.dp_type === "dp" && (bookingData.remaining_amount || 0) > 0 && (bookingData.gateway_invoice_id?.startsWith("booking-remaining-") || bookingData.gateway_invoice_id?.endsWith("-R")))
-        if (shouldVerify) {
-          try {
-            const res = await fetch("/api/booking/verify-payment", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ bookingId: params.id }),
-            })
-            const result = await res.json()
-            if (!cancelled && result.status && result.status !== bookingData.status) {
-              setBooking((prev) => prev ? { ...prev, status: result.status, remaining_amount: result.status === "confirmed" ? 0 : prev.remaining_amount } : prev)
-            }
-          } catch (e) {
-            console.error("Verify payment error:", e)
+      const shouldVerify = bookingData.status === "pending_payment" ||
+        (bookingData.status === "processing" && bookingData.dp_type === "dp" && (bookingData.remaining_amount || 0) > 0)
+      if (shouldVerify) {
+        try {
+          const res = await fetch("/api/booking/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bookingId: params.id }),
+          })
+          const result = await res.json()
+          if (!cancelled && result.status && result.status !== bookingData.status) {
+            setBooking((prev) => prev ? { ...prev, status: result.status, remaining_amount: result.status === "confirmed" ? 0 : prev.remaining_amount } : prev)
           }
+        } catch (e) {
+          console.error("Verify payment error:", e)
         }
       }
     }

@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
       console.error("[notify booking create]", notifErr)
     }
 
-    // 6. Catat transaksi payments wajib ada di database — booking_id diisi otomatis oleh database (fungsi create_payment + trigger)
+    // 6. Catat transaksi payments via RPC create_payment (trigger menuntut app.booking_id)
     const { data: paymentId, error: payErr } = await admin.rpc("create_payment", {
       p_booking_id: booking.id,
       p_tenant_id: pkg.tenant_id,
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
     let snap: { token: string; redirect_url: string } | null = null
     try {
       const { createSnapTransaction } = await import("@/lib/services/midtrans")
-      const orderId = booking.booking_code || `booking-${booking.id}`
+      const orderId = paymentId ? `pay-${paymentId}` : `pay-${booking.id.slice(0, 8)}-${Date.now()}`
       const finishBase = appUrl(`checkout/finish?booking_id=${booking.id}`)
       snap = await createSnapTransaction({
         orderId,
