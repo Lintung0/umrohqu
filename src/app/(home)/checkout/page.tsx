@@ -367,6 +367,7 @@ body: JSON.stringify({
                 notes={notes}
                 setNotes={setNotes}
                 setStep={setStep}
+                reviewStep={packageDepartures.length > 0 ? 3 : 2}
               />
             )}
 
@@ -757,7 +758,7 @@ function StepDataSingkat({
 function StepPayment({
   pkg, travel, pilgrimCount, totalPrice, dpAmount, remainingAmount,
   dpPercentage, setDpPercentage, paymentType, setPaymentType,
-  amountToPayNow, notes, setNotes, setStep,
+  amountToPayNow, notes, setNotes, setStep, reviewStep,
 }: {
   pkg: Package
   travel: Tenant | null
@@ -773,6 +774,7 @@ function StepPayment({
   notes: string
   setNotes: (v: string) => void
   setStep: (n: number) => void
+  reviewStep: number
 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -860,7 +862,7 @@ function StepPayment({
 
         <div className="lg:hidden flex justify-between">
           <Button variant="outline" onClick={() => setStep(0)}>← Kembali</Button>
-          <Button onClick={() => setStep(2)} className="gap-2 px-6 h-12">Tinjau <ChevronRight className="w-4 h-4" /></Button>
+          <Button onClick={() => setStep(reviewStep)} className="gap-2 px-6 h-12">Tinjau <ChevronRight className="w-4 h-4" /></Button>
         </div>
       </div>
 
@@ -921,7 +923,7 @@ function StepPayment({
             )}
 
             <Button
-              onClick={() => setStep(2)}
+              onClick={() => setStep(reviewStep)}
               className="w-full h-12 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
             >
               Proses Pembayaran <ChevronRight className="w-4 h-4" />
