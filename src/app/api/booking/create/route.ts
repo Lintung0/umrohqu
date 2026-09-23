@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
 
       const [{ data: userRow }, { data: addrRow }] = await Promise.all([
         admin.from("users").select("profile").eq("id", user.id).maybeSingle(),
-        admin.from("user_addresses").select("*").eq("user_id", user.id).maybeSingle(),
+        admin.from("addresses").select("*").eq("user_id", user.id).maybeSingle(),
       ])
       const profile = (userRow?.profile || {}) as DataDiriProfile
       const address = {

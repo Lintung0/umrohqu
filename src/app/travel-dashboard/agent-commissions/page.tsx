@@ -65,7 +65,7 @@ export default function AgentCommissionsPage() {
     if (!tenantId) return { data: [], total: 0 }
 
     let query = supabase
-      .from("agent_commissions")
+      .from("commissions")
       .select(`
         *,
         agent:agents(user:users(full_name, email)),

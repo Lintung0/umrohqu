@@ -6,8 +6,8 @@ import { calculateTotalFee, type BookingChannel } from "./fees"
  * Credit the platform commission (net amount owed to the travel) into the
  * travel's deposit wallet when a booking payment succeeds.
  *
- * Under the Direct Merchant model the platform does NOT custody customer funds,
- * but we still accrue the travel's net commission in `travel_deposits` (per the
+* Under the Direct Merchant model the platform does NOT custody customer funds,
+ * but we still accrue the travel's net commission in `deposits` (per the
  * new schema) and record a ledger entry in `deposit_mutations`.
  */
 export async function creditTravelCommission(
@@ -28,9 +28,9 @@ export async function creditTravelCommission(
 
   // Get or create the travel deposit wallet.
   const { data: deposit } = await admin
-    .from("travel_deposits")
+    .from("deposits")
     .select("id, balance")
-    .eq("travel_id", tenantId)
+    .eq("tenant_id", tenantId)
     .maybeSingle()
 
   const now = new Date().toISOString()
@@ -39,9 +39,9 @@ export async function creditTravelCommission(
 
   if (!depositId) {
     const { data: created } = await admin
-      .from("travel_deposits")
+      .from("deposits")
       .insert({
-        travel_id: tenantId,
+        tenant_id: tenantId,
         balance: 0,
         minimum_balance: 0,
         status: "active",
@@ -62,7 +62,7 @@ export async function creditTravelCommission(
   const balanceAfter = balanceBefore + netCommission
 
   await admin
-    .from("travel_deposits")
+    .from("deposits")
     .update({ balance: balanceAfter, updated_at: now })
     .eq("id", depositId)
 

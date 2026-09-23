@@ -57,7 +57,6 @@ export async function POST(request: Request) {
 
     const {
       travel_name, slug: rawSlug, description, logo_url, city, travel_phone, founded_year, quota,
-      ppiu_number, sk_ppiu_doc_url, nib, nib_doc_url, npwp,
       name, email, admin_phone, password,
       full_address, province, postal_code,
     } = parsed.data
@@ -100,7 +99,7 @@ export async function POST(request: Request) {
     }
 
     // Store contact info (email, phone, address) — separate table
-    const { error: contactError } = await admin.from("tenant_contacts").insert({
+    const { error: contactError } = await admin.from("contacts").insert({
       tenant_id: tenant.id,
       email: lowerEmail,
       phone: travel_phone || null,
@@ -115,24 +114,6 @@ export async function POST(request: Request) {
       await admin.from("tenants").update({ deleted_at: new Date().toISOString() }).eq("id", tenant.id)
       return NextResponse.json(
         { error: "Gagal menyimpan kontak travel: " + contactError.message },
-        { status: 500 }
-      )
-    }
-
-    // Store legal info (PPIU, NIB, NPWP) — separate table
-    const { error: legalError } = await admin.from("tenant_legals").insert({
-      tenant_id: tenant.id,
-      ppiu_number,
-      nib_number: nib,
-      npwp: npwp || null,
-      sk_ppiu_doc_url,
-      nib_doc_url,
-    })
-
-    if (legalError) {
-      await admin.from("tenants").update({ deleted_at: new Date().toISOString() }).eq("id", tenant.id)
-      return NextResponse.json(
-        { error: "Gagal menyimpan legalitas travel: " + legalError.message },
         { status: 500 }
       )
     }

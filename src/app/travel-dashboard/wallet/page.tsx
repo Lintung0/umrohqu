@@ -54,16 +54,16 @@ export default function TravelWalletPage() {
 
         const [depositRes, mutationRes] = await Promise.all([
           supabase
-            .from("travel_deposits")
+            .from("deposits")
             .select("balance, minimum_balance, status, updated_at")
-            .eq("travel_id", tId)
+            .eq("tenant_id", tId)
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle(),
           supabase
             .from("deposit_mutations")
-            .select("id, amount, type, description, balance_before, balance_after, created_at, deposit:travel_deposits(travel_id)")
-            .eq("deposit.travel_id", tId)
+            .select("id, amount, type, description, balance_before, balance_after, created_at, deposit:deposits(tenant_id)")
+            .eq("deposit.tenant_id", tId)
             .order("created_at", { ascending: false })
             .limit(50),
         ])

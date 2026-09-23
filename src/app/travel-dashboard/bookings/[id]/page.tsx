@@ -33,7 +33,7 @@ interface BookingDetail extends Booking {
   users?: { full_name: string; email: string; phone: string }
   booking_participants?: Participant[]
   cancel_reason?: string | null
-  booking_refunds?: {
+  refunds?: {
     id: string
     amount: number
     status: string
@@ -74,7 +74,7 @@ export default function TravelBookingDetailPage() {
           packages(name, slug, duration_nights, price, departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city))),
           users(full_name, email, phone),
           booking_participants(*),
-          booking_refunds(id, amount, status, method, reference, reason, note)
+          refunds(id, amount, status, method, reference, reason, note)
         `)
         .eq("id", id)
         .single()
@@ -352,7 +352,7 @@ function RefundCard({
   const [note, setNote] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
-  const refund = detail.booking_refunds?.[0]
+  const refund = detail.refunds?.[0]
 
   const callRefundApi = async (action: string, payload?: Record<string, unknown>) => {
     const res = await fetch("/api/booking/refund", {

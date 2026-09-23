@@ -42,9 +42,9 @@ export default function TravelReportsPage() {
 
       const [depositRes] = await Promise.all([
         supabase
-          .from("travel_deposits")
+          .from("deposits")
           .select("balance")
-          .eq("travel_id", profile.tenant_id)
+          .eq("tenant_id", profile.tenant_id)
           .maybeSingle(),
       ])
       setDepositBalance(Number(depositRes.data?.balance || 0))

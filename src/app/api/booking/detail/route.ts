@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: refund } = await admin
-      .from("booking_refunds")
+      .from("refunds")
       .select("id, amount, status, reason, method, reference, note, completed_at")
       .eq("booking_id", bookingId)
       .order("created_at", { ascending: false })

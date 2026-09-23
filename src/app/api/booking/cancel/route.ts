@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Pastikan belum ada permintaan batal yang sedang berjalan/diproses
     const { data: existing } = await admin
-      .from("booking_refunds")
+      .from("refunds")
       .select("id")
       .eq("booking_id", bookingId)
       .in("status", ["pending", "processing"])
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Simpan status sebelumnya agar bisa dikembalikan jika ditolak
     const { data: refund } = await admin
-      .from("booking_refunds")
+      .from("refunds")
       .insert({
         booking_id: bookingId,
         amount: Number(booking.total || 0),
