@@ -60,6 +60,29 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (pkgErr || !pkg) {
+// Idempotency: cek apakah booking pending_payment sudah ada untuk user+package+departure
+    const existingBooking = await admin
+      .from("bookings")
+      .select("id, status, total, dp_amount, remaining_amount, dp_type")
+      .eq("customer_id", user.id)
+      .eq("package_id", packageId)
+      .eq("package_departure_id", packageDepartureId || null)
+      .eq("status", "pending_payment")
+      .maybeSingle()
+
+    if (existingBooking?.id) {
+      // Booking sudah ada — kembalikan data booking lama (hindari duplikat pesanan)
+      return NextResponse.json({
+        success: true,
+        booking_id: existingBooking.id,
+        payment_type: existingBooking.dp_type === "dp" ? "dp" : "full",
+        dp_amount: existingBooking.dp_amount || 0,
+        remaining: existingBooking.remaining_amount || 0,
+        total: existingBooking.total || 0,
+        snap: null,
+        is_duplicate: true,
+      })
+    }
       return NextResponse.json({ error: "Paket tidak ditemukan" }, { status: 404 })
     }
 
