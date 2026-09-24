@@ -90,15 +90,15 @@ export default function BookingSuccessPage() {
   // ── Loading ──
   if (status === "loading") {
     return (
-      <main className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <main className="min-h-screen bg-ivory-50 flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="relative w-16 h-16 mx-auto">
             <div className="absolute inset-0 rounded-full border-4 border-emerald-100" />
             <div className="absolute inset-0 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
             <CheckCircle className="absolute inset-0 m-auto w-7 h-7 text-emerald-600" />
           </div>
-          <p className="text-slate-700 font-semibold">Memverifikasi pembayaran</p>
-          <p className="text-sm text-slate-400">Tunggu sebentar...</p>
+          <p className="text-emerald-700 font-semibold">Memverifikasi pembayaran</p>
+          <p className="text-sm text-emerald-500">Tunggu sebentar...</p>
         </div>
       </main>
     )
@@ -107,20 +107,20 @@ export default function BookingSuccessPage() {
   // ── Timeout ──
   if (status === "timeout") {
     return (
-      <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
-          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto">
-            <Clock className="w-7 h-7 text-amber-600" />
+      <main className="min-h-screen bg-ivory-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-3xl border border-emerald-dark/20 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
+          <div className="w-14 h-14 bg-emerald-dark/10 rounded-2xl flex items-center justify-center mx-auto">
+            <Clock className="w-7 h-7 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900">Pembayaran Sedang Diverifikasi</h1>
-            <p className="text-sm text-slate-500 mt-1">Tim kami sedang memproses pembayaran Anda.</p>
+            <h1 className="text-lg font-bold text-emerald-deep">Pembayaran Sedang Diverifikasi</h1>
+            <p className="text-sm text-emerald-500 mt-1">Tim kami sedang memproses pembayaran Anda.</p>
           </div>
           <div className="flex flex-col gap-2">
             <button onClick={handleRetry} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
               <RefreshCw className="w-4 h-4" /> Cek Status
             </button>
-            <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+            <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 text-emerald-500 hover:text-emerald-700 transition-colors">
               Lihat Pesanan <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -129,21 +129,21 @@ export default function BookingSuccessPage() {
     )
   }
 
-  // ── Processing (webhook belum sampai / menunggu verifikasi travel) ──
+// ── Processing (webhook belum sampai / menunggu verifikasi travel) ──
   if (status === "processing") {
     return (
-      <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
-          <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto">
-            <Loader2 className="w-7 h-7 text-purple-600 animate-spin" />
+      <main className="min-h-screen bg-ivory-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-3xl border border-emerald-dark/20 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
+          <div className="w-14 h-14 bg-emerald-dark/10 rounded-2xl flex items-center justify-center mx-auto">
+            <Loader2 className="w-7 h-7 text-emerald-400 animate-spin" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900">Pembayaran Diterima</h1>
-            <p className="text-sm text-slate-500 mt-1">Pembayaran telah kami terima. Travel partner sedang memverifikasi dana — booking akan dikonfirmasi setelah diverifikasi.</p>
+            <h1 className="text-lg font-bold text-emerald-deep">Pembayaran Diterima</h1>
+            <p className="text-sm text-emerald-500 mt-1">Pembayaran telah kami terima. Travel partner sedang memverifikasi dana — booking akan dikonfirmasi setelah diverifikasi.</p>
           </div>
-          <Link href={`/dashboard/bookings/${params.id}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
+          <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
             Lihat Pesanan <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          </div>
         </div>
       </main>
     )
@@ -151,14 +151,14 @@ export default function BookingSuccessPage() {
 
   // ── Success ──
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-3xl border border-slate-200 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
-        <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto">
+    <main className="min-h-screen bg-ivory-50 flex items-center justify-center px-4">
+      <div className="bg-white rounded-3xl border border-emerald-dark/20 p-8 max-w-sm w-full text-center space-y-5 shadow-sm">
+        <div className="w-14 h-14 bg-emerald-dark/10 rounded-2xl flex items-center justify-center mx-auto">
           <CheckCircle className="w-7 h-7 text-emerald-600" />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-slate-900">Pembayaran & Pemesanan Berhasil!</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-lg font-bold text-emerald-deep">Pembayaran & Pemesanan Berhasil!</h1>
+          <p className="text-sm text-emerald-500 mt-1">
             Pembayaran terverifikasi. Travel partner sedang menyiapkan dokumen umrah Anda.
           </p>
         </div>
@@ -166,7 +166,7 @@ export default function BookingSuccessPage() {
           <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
             Lihat Detail <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-          <p className="text-xs text-slate-400">Redirect otomatis dalam 3 detik</p>
+          <p className="text-xs text-emerald-500">Redirect otomatis dalam 3 detik</p>
         </div>
       </div>
     </main>

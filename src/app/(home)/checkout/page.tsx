@@ -191,7 +191,7 @@ body: JSON.stringify({
           window.snap.pay(snapToken, {
             onSuccess: async function (result: any) {
               console.log("Payment success:", result)
-              router.push(`/dashboard/bookings/${bookingId}`)
+              router.push(`/checkout/finish?booking_id=${bookingId}`)
             },
             onPending: async function (result: any) {
               console.log("Payment pending:", result)
@@ -210,16 +210,18 @@ body: JSON.stringify({
                   console.error("Failed to update VA:", e)
                 }
               }
-              // Redirect ke detail pesanan setelah VA ter-capture
-              router.push(`/dashboard/bookings/${bookingId}`)
+              // Redirect ke finish page untuk verifikasi sebelum ke detail
+              router.push(`/checkout/finish?booking_id=${bookingId}`)
             },
             onError: async function (result: any) {
               console.log("Payment error:", result)
-              router.push(`/dashboard/bookings/${bookingId}`)
+              // Redirect ke finish page untuk cek status
+              router.push(`/checkout/finish?booking_id=${bookingId}`)
             },
             onClose: function () {
               console.log("Payment popup closed")
-              router.push(`/dashboard/bookings/${bookingId}`)
+              // Tutup popup, kembali ke checkout (bisa juga ke finish)
+              router.push(`/checkout/finish?booking_id=${bookingId}`)
             },
           })
         } catch (snapError) {
@@ -416,13 +418,7 @@ function StepDataSingkat({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-5">
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 text-xs flex items-start gap-3">
-          <span className="text-base shrink-0 mt-0.5">ℹ️</span>
-          <p>
-            <strong>Informasi:</strong> Pada tahap ini Anda hanya perlu mengisi data kontak dasar.
-            Pengisian dokumen lengkap (Paspor, KTP, & Ukuran Baju) akan dilakukan pada Tahap 2 setelah pembayaran.
-          </p>
-        </div>
+        
 
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <label className="text-sm font-semibold flex items-center gap-2 mb-3">
@@ -569,7 +565,7 @@ function StepDataSingkat({
 
         <div className="lg:hidden flex justify-end">
           <Button onClick={() => setStep(1)} disabled={!allPilgrimsFilled} className="gap-2 px-6 h-12 w-full sm:w-auto">
-            Lanjut ke Pembayaran <ChevronRight className="w-4 h-4" />
+            Lanjutkan <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -612,18 +608,10 @@ function StepDataSingkat({
               disabled={!allPilgrimsFilled}
               className="w-full h-12 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold shadow-md shadow-emerald-200 active:scale-[0.98] transition-all"
             >
-            Lanjut <ChevronRight className="w-4 h-4" />
+            Lanjutkan <ChevronRight className="w-4 h-4" />
             </Button>
 
-            {!allPilgrimsFilled && (
-              <p className="text-[10px] text-amber-600 text-center mt-2 flex items-center justify-center gap-1">
-                <AlertCircle className="w-3 h-3" /> Isi nama & telepon semua jemaah
-              </p>
-            )}
-          </div>
-
-          <SecurityBadges />
-        </div>
+            </div>
       </div>
     </div>
   )
@@ -643,13 +631,6 @@ function StepDataSingkat({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-5">
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 text-xs flex items-start gap-3">
-          <span className="text-base shrink-0 mt-0.5">📅</span>
-          <p>
-            <strong>Pilih Keberangkatan:</strong> Pilih jadwal keberangkatan yang sesuai dengan jadwal Anda. 
-            Setiap keberangkatan memiliki kuota dan tanggal berangkat yang berbeda.
-          </p>
-        </div>
 
         <div className="space-y-3">
           {packageDepartures.map((dep) => (
@@ -708,7 +689,7 @@ function StepDataSingkat({
             disabled={!selectedDepartureId}
             className="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Lanjut ke Pembayaran <ChevronRight className="w-4 h-4 ml-1" />
+            Lanjutkan <ChevronRight className="w-4 h-4 ml-1" />
           </button>
         </div>
       </div>
@@ -745,8 +726,6 @@ function StepDataSingkat({
               <Shield className="w-3 h-3" /> Harga sudah termasuk fasilitas paket umrah lengkap
             </p>
           </div>
-
-          <SecurityBadges />
         </div>
       </div>
     </div>
@@ -834,8 +813,8 @@ function StepPayment({
             <div className="flex items-start gap-3">
               <CreditCard className="w-5 h-5 mt-0.5 shrink-0 text-emerald-600" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold">Pembayaran melalui Midtrans</p>
-                <p className="text-xs text-slate-500 mb-2">Pilih dari berbagai metode: Virtual Account, Kartu Kredit, E-Wallet, QRIS, dan lainnya</p>
+                <p className="text-sm font-semibold">Pilih metode pembayaran</p>
+                <p className="text-xs text-slate-500 mb-2">Transfer Bank / Virtual Account, Kartu Kredit, QRIS, E-Wallet</p>
                 <div className="flex flex-wrap items-center gap-1.5">
                   {["BCA", "Mandiri", "BNI", "BRI", "Permata", "GoPay", "ShopeePay", "QRIS"].map((m) => (
                     <span key={m} className="px-2 py-1 bg-white border border-slate-200 rounded-md text-[10px] font-semibold text-slate-600">
@@ -930,7 +909,6 @@ function StepPayment({
             </Button>
           </div>
 
-          <SecurityBadges />
         </div>
       </div>
     </div>
@@ -962,50 +940,6 @@ function StepReview({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-5">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3 shadow-sm">
-          <h3 className="font-semibold text-sm flex items-center gap-2">
-            <Shield className="w-4 h-4 text-emerald-600" /> Rincian Pembayaran
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-slate-500">Harga paket ({pilgrimCount} x {formatRupiah(Number(pkg.price))})</span>
-              <span className="font-medium">{formatRupiah(totalPrice)}</span>
-            </div>
-            {paymentType === "dp" && (
-              <div className="flex justify-between text-emerald-700">
-                <span className="font-medium">DP ({dpPercentage}%)</span>
-                <span className="font-semibold">-{formatRupiah(dpAmount)}</span>
-              </div>
-            )}
-            <div className="border-t border-dashed border-slate-200 pt-2 flex justify-between">
-              <span className="text-slate-500">Sisa pelunasan</span>
-              <span className="font-medium">{formatRupiah(remainingAmount)}</span>
-            </div>
-          </div>
-
-          <div className="bg-emerald-50 rounded-xl p-4">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-sm">Bayar sekarang</span>
-              <span className="text-xl font-bold text-emerald-800">{formatRupiah(amountToPayNow)}</span>
-            </div>
-          </div>
-
-          {paymentType === "dp" && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Sisa pembayaran: {100 - dpPercentage}%</p>
-                <p className="text-amber-700 mt-0.5">Anda perlu membayar {formatRupiah(remainingAmount)} lagi setelah ini</p>
-              </div>
-            </div>
-          )}
-
-          <p className="text-[10px] text-slate-400 flex items-start gap-1">
-            <CreditCard className="w-3 h-3 mt-0.5 shrink-0" />
-            Anda akan diarahkan ke halaman pembayaran Midtrans yang mendukung Virtual Account, Kartu Kredit, E-Wallet, dan QRIS.
-          </p>
-        </div>
-
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <h3 className="font-semibold text-sm mb-3">Data Jemaah</h3>
           <div className="space-y-2">
@@ -1040,7 +974,7 @@ function StepReview({
               <Button variant="ghost" size="sm" className="text-xs">Batal</Button>
             </Link>
             <Button onClick={handleSubmit} disabled={submitting} className="gap-2 px-6 h-12">
-              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Lanjut Bayar"}
+              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproces...</> : "Lanjut Bayar"}
             </Button>
           </div>
         </div>
@@ -1115,37 +1049,17 @@ function StepReview({
                 )}
               </Button>
             </div>
-
-            <div className="flex items-center justify-center gap-2 mt-3">
-              <Link href={`/package/${pkg.slug}`}>
-                <Button variant="ghost" size="sm" className="text-xs text-slate-400">Batal</Button>
-              </Link>
-              <span className="text-slate-200">|</span>
-              <Button variant="ghost" size="sm" className="text-xs text-slate-400" onClick={() => setStep(1)}>← Kembali</Button>
-            </div>
           </div>
 
-          <SecurityBadges />
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <Link href={`/package/${pkg.slug}`}>
+              <Button variant="ghost" size="sm" className="text-xs text-slate-400">Batal</Button>
+            </Link>
+            <span className="text-slate-200">|</span>
+            <Button variant="ghost" size="sm" className="text-xs text-slate-400" onClick={() => setStep(1)}>← Kembali</Button>
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-// ─── Shared: Security Badges ─────────────────────────────────────────────────
-
-function SecurityBadges() {
-  return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-      <div className="flex items-center gap-2 mb-2">
-        <Shield className="w-4 h-4 text-emerald-600" />
-        <span className="text-xs font-semibold text-slate-700">Pembayaran Aman</span>
-      </div>
-      <ul className="space-y-1.5 text-[11px] text-slate-500">
-        <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> Terenkripsi SSL 256-bit</li>
-        <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> Transaksi diproses oleh Midtrans</li>
-        <li className="flex items-center gap-2"><CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" /> PPIU Kemenhaj Terverifikasi</li>
-      </ul>
     </div>
   )
 }
