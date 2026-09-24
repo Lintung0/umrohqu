@@ -79,9 +79,9 @@ export default function CompleteProfilePage() {
       >
         <PhoneInput value={phone} onChange={setPhone} error={error} />
 
-        <div className="flex items-start gap-2.5 rounded-[12px] border border-[#F5E6A3] bg-[#FFFBF0] p-3">
-          <Phone size={16} className="mt-0.5 shrink-0 text-[#B07D00]" />
-          <p className="m-0 text-[13.5px] leading-relaxed text-[#7A5600]">
+        <div className="flex items-start gap-2.5 rounded-[12px] border border-ivory-border bg-ivory-soft p-3">
+          <Phone size={16} className="mt-0.5 shrink-0 text-emerald-dark" />
+          <p className="m-0 text-[13.5px] leading-relaxed text-ivory-ink/70">
             Nomor ini akan digunakan agen perjalanan untuk menghubungi Anda terkait paket Umrah.
           </p>
         </div>

@@ -13,8 +13,8 @@ export function GoogleButton({ onClick }: { onClick?: () => void }) {
       onMouseLeave={() => setHovered(false)}
       className="flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-[14px] border-[1.5px] bg-white text-[15.5px] font-semibold text-auth-secondary-foreground transition-[border-color,background] duration-150"
       style={{
-        borderColor: hovered ? "#2A7D4F" : "#DDE8E2",
-        background: hovered ? "#F3FAF6" : "white",
+        borderColor: hovered ? "#0D3D2B" : "#E5DBC4",
+        background: hovered ? "#FCFAF5" : "white",
       }}
     >
       <svg width="20" height="20" viewBox="0 0 20 20">

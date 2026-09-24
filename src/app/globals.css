@@ -100,19 +100,19 @@
   --radius-input: 8px;
   --radius-modal: 20px;
 
-  --color-auth-bg: #F3FAF6;
-  --color-auth-foreground: #0F1A12;
-  --color-auth-card: #FFFFFF;
-  --color-auth-primary: #047857;
-  --color-auth-primary-dark: #065F46;
-  --color-auth-primary-light: #ECFDF5;
-  --color-auth-primary-muted: #34D399;
-  --color-auth-secondary-foreground: #1A3D28;
-  --color-auth-muted-foreground: #5C7268;
-  --color-auth-border: #DDE8E2;
+  --color-auth-bg: #F5F0E6;
+  --color-auth-foreground: #1A241E;
+  --color-auth-card: #FDFBF6;
+  --color-auth-primary: #0D3D2B;
+  --color-auth-primary-dark: #0A1F16;
+  --color-auth-primary-light: #E8F0E3;
+  --color-auth-primary-muted: #E5DBC4;
+  --color-auth-secondary-foreground: #0D3D2B;
+  --color-auth-muted-foreground: #74766E;
+  --color-auth-border: #E5DBC4;
   --color-auth-error: #DC2626;
   --color-auth-error-light: #FEF2F2;
-  --color-auth-input-bg: #FAFFFE;
+  --color-auth-input-bg: #FCFAF5;
 }
 
 :root {

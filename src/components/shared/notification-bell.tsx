@@ -111,15 +111,15 @@ export default function NotificationBell() {
           setOpen((o) => !o)
         }}
         className={cn(
-          "relative flex items-center justify-center w-10 h-10 rounded-xl text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors",
-          open && "bg-emerald-50 text-emerald-700"
+          "relative flex items-center justify-center w-10 h-10 rounded-xl text-ivory-ink/60 hover:text-emerald-dark hover:bg-ivory transition-colors",
+          open && "bg-ivory text-emerald-dark"
         )}
         title="Notifikasi"
         aria-label="Notifikasi"
       >
         <ActiveIcon className="w-5 h-5" />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-red-600 text-white text-[10px] font-bold leading-none shadow-md shadow-rose-500/40 ring-2 ring-white">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-rose-600 text-white text-[10px] font-bold leading-none">
             {unread > 99 ? "99+" : unread}
           </span>
         )}
@@ -128,15 +128,15 @@ export default function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-[360px] max-w-[calc(100vw-2rem)] bg-white border border-emerald-100 rounded-2xl shadow-2xl shadow-emerald-900/10 z-50 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-150">
-            <div className="relative px-4 py-3 flex items-center justify-between border-b border-emerald-50 bg-gradient-to-br from-emerald-50/80 to-white">
+          <div className="absolute right-0 top-full mt-2 w-[360px] max-w-[calc(100vw-2rem)] bg-ivory-card border border-ivory-border rounded-2xl shadow-lg shadow-emerald-deep/10 z-50 overflow-hidden animate-in slide-in-from-top-2 fade-in duration-150">
+            <div className="relative px-4 py-3 flex items-center justify-between border-b border-ivory-border bg-ivory">
               <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-sm">
-                  <Bell className="w-4 h-4 text-white" />
+                <span className="w-8 h-8 rounded-lg bg-emerald-dark flex items-center justify-center">
+                  <Bell className="w-4 h-4 text-gold-light" />
                 </span>
                 <div>
-                  <p className="font-semibold text-sm text-slate-900">Notifikasi</p>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="font-semibold text-sm text-emerald-dark">Notifikasi</p>
+                  <p className="text-[11px] text-ivory-ink/70">
                     {unread > 0 ? `${unread} belum dibaca` : "Semua sudah dibaca"}
                   </p>
                 </div>
@@ -144,21 +144,21 @@ export default function NotificationBell() {
               {unread > 0 && (
                 <button
                   onClick={markAllRead}
-                  className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 hover:text-emerald-900 hover:underline"
+                  className="flex items-center gap-1 text-[11px] font-medium text-emerald-dark hover:text-emerald-deep hover:underline"
                 >
                   <CheckCheck className="w-3.5 h-3.5" /> Tandai dibaca
                 </button>
               )}
             </div>
 
-            <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100">
+            <div className="max-h-[380px] overflow-y-auto divide-y divide-ivory-border">
               {items.length === 0 ? (
                 <div className="px-4 py-12 text-center">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 flex items-center justify-center">
-                    <Info className="w-6 h-6 text-slate-400" />
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-ivory flex items-center justify-center">
+                    <Info className="w-6 h-6 text-ivory-ink/40" />
                   </div>
-                  <p className="text-sm font-medium text-slate-600">Belum ada notifikasi</p>
-                  <p className="text-xs text-slate-400 mt-1">Notifikasi terbaru akan muncul di sini</p>
+                  <p className="text-sm font-medium text-ivory-ink/70">Belum ada notifikasi</p>
+                  <p className="text-xs text-ivory-ink/50 mt-1">Notifikasi terbaru akan muncul di sini</p>
                 </div>
               ) : (
                 items.map((item) => (
@@ -166,19 +166,19 @@ export default function NotificationBell() {
                     key={item.id}
                     onClick={() => openItem(item)}
                     className={cn(
-                      "w-full text-left px-4 py-3 flex gap-3 transition-colors hover:bg-emerald-50/60",
-                      !item.is_read && "bg-emerald-50/40"
+                      "w-full text-left px-4 py-3 flex gap-3 transition-colors hover:bg-ivory",
+                      !item.is_read && "bg-ivory-soft"
                     )}
                   >
-                    {!item.is_read && <span className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500 shrink-0" />}
+                    {!item.is_read && <span className="mt-1.5 w-2 h-2 rounded-full bg-emerald-dark shrink-0" />}
                     <div className="min-w-0">
-                      <p className={cn("text-sm text-slate-800", !item.is_read ? "font-semibold" : "font-medium")}>
+                      <p className={cn("text-sm text-ivory-ink", !item.is_read ? "font-semibold" : "font-medium")}>
                         {item.title}
                       </p>
                       {item.body && (
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{item.body}</p>
+                        <p className="text-xs text-ivory-ink/70 mt-0.5 line-clamp-2">{item.body}</p>
                       )}
-                      <p className="text-[11px] text-slate-400 mt-1">{timeAgo(item.created_at)}</p>
+                      <p className="text-[11px] text-ivory-ink/50 mt-1">{timeAgo(item.created_at)}</p>
                     </div>
                   </button>
                 ))
@@ -188,7 +188,7 @@ export default function NotificationBell() {
             <Link
               href="/dashboard/notifications"
               onClick={() => setOpen(false)}
-              className="flex items-center justify-center gap-1.5 px-4 py-3 text-sm font-semibold text-emerald-700 bg-gradient-to-r from-emerald-50 to-white border-t border-emerald-100 hover:from-emerald-100 transition-colors"
+              className="flex items-center justify-center gap-1.5 px-4 py-3 text-sm font-semibold text-emerald-dark bg-ivory border-t border-ivory-border hover:bg-ivory-soft transition-colors"
             >
               Lihat Semua Notifikasi <ArrowRight className="w-4 h-4" />
             </Link>
