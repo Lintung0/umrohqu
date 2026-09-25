@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { Bell, BellRing, CheckCheck, RefreshCw, ChevronRight, Inbox } from "lucide-react"
+import { Bell, BellRing, CheckCheck, RefreshCw, ChevronRight, ChevronLeft, Inbox } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { timeAgo } from "@/lib/constants"
 import { emitNotificationsChanged } from "@/lib/notify/events"
@@ -26,12 +26,29 @@ const FILTERS = [
   { value: "read", label: "Dibaca" },
 ] as const
 
+const PAGE_SIZE = 10
+
+function pageNumbers(total: number, current: number): (number | "…")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const pages = new Set([1, 2, total - 1, total, current - 1, current, current + 1])
+  const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b)
+  const out: (number | "…")[] = []
+  let prev = 0
+  for (const p of sorted) {
+    if (p - prev > 1) out.push("…")
+    out.push(p)
+    prev = p
+  }
+  return out
+}
+
 export default function NotificationsPage() {
   const supabase = createClient()
   const router = useRouter()
   const [items, setItems] = useState<AppNotification[]>([])
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("semua")
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
 
   async function load() {
     setLoading(true)
@@ -63,6 +80,18 @@ export default function NotificationsPage() {
   }, [items, filter])
 
   const unreadCount = items.filter((n) => !n.is_read).length
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const paged = useMemo(
+    () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filtered, safePage]
+  )
+
+  function goPage(next: number) {
+    setPage(Math.min(Math.max(1, next), totalPages))
+    document.getElementById("notif-list")?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   async function markAllRead() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -122,7 +151,7 @@ export default function NotificationsPage() {
           {FILTERS.map((f) => (
             <button
               key={f.value}
-              onClick={() => setFilter(f.value)}
+              onClick={() => { setFilter(f.value); setPage(1) }}
               className={cn(
                 "shrink-0 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
                 filter === f.value
@@ -169,8 +198,8 @@ export default function NotificationsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((item) => (
+        <div id="notif-list" className="space-y-3 scroll-mt-24">
+          {paged.map((item) => (
             <button
               key={item.id}
               onClick={() => openItem(item)}
@@ -204,6 +233,53 @@ export default function NotificationsPage() {
               <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0 mt-1 group-hover:text-emerald-dark transition-colors" />
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && filtered.length > 0 && totalPages > 1 && (
+        <div className="bg-ivory-card border border-ivory-border rounded-2xl px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Menampilkan {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} dari {filtered.length}
+          </p>
+          <div className="flex items-center justify-center flex-wrap gap-1.5">
+            <button
+              onClick={() => goPage(safePage - 1)}
+              disabled={safePage === 1}
+              aria-label="Halaman sebelumnya"
+              className="w-11 h-11 rounded-xl border border-ivory-border bg-ivory text-emerald-deep flex items-center justify-center hover:border-emerald-dark/40 transition-colors disabled:opacity-40 disabled:cursor-default cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {pageNumbers(totalPages, safePage).map((p, i) =>
+              p === "…" ? (
+                <span key={`gap-${i}`} className="w-8 text-center text-muted-foreground text-sm">…</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => goPage(p)}
+                  aria-label={`Halaman ${p}`}
+                  aria-current={p === safePage ? "page" : undefined}
+                  className={cn(
+                    "min-w-11 h-11 px-2 rounded-xl border text-sm font-semibold transition-colors cursor-pointer",
+                    p === safePage
+                      ? "bg-emerald-dark text-ivory-soft border-emerald-dark"
+                      : "bg-ivory border-ivory-border text-emerald-deep hover:border-emerald-dark/40"
+                  )}
+                >
+                  {p}
+                </button>
+              )
+            )}
+            <button
+              onClick={() => goPage(safePage + 1)}
+              disabled={safePage === totalPages}
+              aria-label="Halaman berikutnya"
+              className="w-11 h-11 rounded-xl border border-ivory-border bg-ivory text-emerald-deep flex items-center justify-center hover:border-emerald-dark/40 transition-colors disabled:opacity-40 disabled:cursor-default cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>
