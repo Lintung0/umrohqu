@@ -60,34 +60,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (pkgErr || !pkg) {
-// Idempotency: cek apakah booking pending_payment sudah ada untuk user+package+departure
-    const existingBooking = await admin
-      .from("bookings")
-      .select("id, status, total, dp_amount, remaining_amount, dp_type")
-      .eq("customer_id", user.id)
-      .eq("package_id", packageId)
-      .eq("package_departure_id", packageDepartureId || null)
-      .eq("status", "pending_payment")
-      .maybeSingle()
-
-    if (existingBooking?.id) {
-      // Booking sudah ada — kembalikan data booking lama (hindari duplikat pesanan)
-      return NextResponse.json({
-        success: true,
-        booking_id: existingBooking.id,
-        payment_type: existingBooking.dp_type === "dp" ? "dp" : "full",
-        dp_amount: existingBooking.dp_amount || 0,
-        remaining: existingBooking.remaining_amount || 0,
-        total: existingBooking.total || 0,
-        snap: null,
-        is_duplicate: true,
-      })
-    }
       return NextResponse.json({ error: "Paket tidak ditemukan" }, { status: 404 })
     }
 
     // Idempotency: cek apakah booking pending_payment sudah ada untuk user+package+departure
-    const existingBooking = await admin
+    const { data: existingBooking } = await admin
       .from("bookings")
       .select("id, status, total, dp_amount, remaining_amount, dp_type")
       .eq("customer_id", user.id)
@@ -170,31 +147,32 @@ export async function POST(request: NextRequest) {
       .select("id, booking_code")
       .single()
 
-    // Idempotency: jika booking pending_payment sudah ada untuk user+package+departure, kembalikan booking lama
-    if (insertErr && insertErr.code === 23505) {
-      // Duplicate key violation — cek apakah booking already exists
-      const existing = await admin
-        .from("bookings")
-        .select("id, status, total, dp_amount, remaining_amount")
-        .eq("customer_id", user.id)
-        .eq("package_id", packageId)
-        .eq("package_departure_id", packageDepartureId || null)
-        .eq("status", "pending_payment")
-        .maybeSingle()
-      if (existing?.id) {
-        const exstBooking = existing
-        // Kembalikan struktur yang konsisten ke klien
-        return NextResponse.json({
-          success: true,
-          booking_id: exstBooking.id,
-          payment_type: exstBooking.dp_type === "dp" ? "dp" : "full",
-          dp_amount: exstBooking.dp_amount || 0,
-          remaining: exstBooking.remaining_amount || 0,
-          total: exstBooking.total || 0,
-          snap: null, // sudah ada Midtrans token sebelumnya, minta user cek dashboard
-          is_duplicate: true,
-        })
+    if (insertErr) {
+      // Race: dua request lolos cek di atas — kembalikan booking yang sudah ada
+      if (insertErr.code === "23505") {
+        const { data: raced } = await admin
+          .from("bookings")
+          .select("id, status, total, dp_amount, remaining_amount, dp_type")
+          .eq("customer_id", user.id)
+          .eq("package_id", packageId)
+          .eq("package_departure_id", packageDepartureId || null)
+          .eq("status", "pending_payment")
+          .maybeSingle()
+        if (raced?.id) {
+          return NextResponse.json({
+            success: true,
+            booking_id: raced.id,
+            payment_type: raced.dp_type === "dp" ? "dp" : "full",
+            dp_amount: raced.dp_amount || 0,
+            remaining: raced.remaining_amount || 0,
+            total: raced.total || 0,
+            snap: null,
+            is_duplicate: true,
+          })
+        }
       }
+      console.error("Booking insert error:", insertErr)
+      return NextResponse.json({ error: "Gagal membuat booking" }, { status: 500 })
     }
 
     // 3. Insert participants

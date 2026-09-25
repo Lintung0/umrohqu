@@ -143,7 +143,7 @@ export default function BookingSuccessPage() {
           </div>
           <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
             Lihat Pesanan <ArrowRight className="w-3.5 h-3.5" />
-          </div>
+          </Link>
         </div>
       </main>
     )

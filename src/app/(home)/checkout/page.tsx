@@ -614,6 +614,7 @@ function StepDataSingkat({
             </div>
       </div>
     </div>
+    </div>
   )
 }
 
