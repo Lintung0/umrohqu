@@ -144,7 +144,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const [activeTab, setActiveTab] = useState("overview")
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [showStickyCta, setShowStickyCta] = useState(false)
-  const [expandedItinerary, setExpandedItinerary] = useState<number | null>(null)
+  const [openDays, setOpenDays] = useState<number[]>([])
   const [singleImageLightbox, setSingleImageLightbox] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
@@ -468,16 +468,32 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                           <div className="w-10 h-10 rounded-xl bg-emerald-dark flex items-center justify-center shrink-0">
                             <Calendar className="w-5 h-5 text-ivory" />
                           </div>
-                          <div>
+                          <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-emerald-deep">Perjalanan {itineraryList.length} Hari</p>
                             <p className="text-xs text-ivory-ink/70">Ikuti langkah demi langkah perjalanan ibadah Anda</p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => setOpenDays(itineraryList.map((_, i) => i))}
+                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-emerald-dark hover:bg-emerald-dark/10 transition-colors cursor-pointer"
+                            >
+                              Buka Semua
+                            </button>
+                            <span className="text-ivory-border">|</span>
+                            <button
+                              onClick={() => setOpenDays([])}
+                              disabled={openDays.length === 0}
+                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-emerald-dark hover:bg-emerald-dark/10 transition-colors disabled:opacity-40 disabled:cursor-default cursor-pointer"
+                            >
+                              Tutup Semua
+                            </button>
                           </div>
                         </div>
 
                         {/* Timeline */}
                         <div className="relative ml-5 pr-2 sm:pr-3 border-l-2 border-ivory-border space-y-0">
                           {itineraryList.map((item, idx) => {
-                            const isOpen = expandedItinerary === idx
+                            const isOpen = openDays.includes(idx)
                             const isLast = idx === itineraryList.length - 1
                             return (
                               <div
@@ -493,7 +509,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
                                 {/* Day card */}
                                 <button
-                                  onClick={() => setExpandedItinerary(isOpen ? null : idx)}
+                                  onClick={() => setOpenDays((prev) => isOpen ? prev.filter((d) => d !== idx) : [...prev, idx])}
                                   className={`w-full text-left ml-6 p-4 rounded-xl transition-all duration-300 ${
                                     isOpen
                                       ? "bg-ivory-soft border border-ivory-border shadow-sm"
