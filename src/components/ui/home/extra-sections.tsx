@@ -49,23 +49,17 @@ export function WhyUsSection() {
           <p className="text-ivory-ink/70 mt-4 text-sm max-w-xl leading-relaxed">{t.landing.why_us_desc}</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-          {WHY_US.map((item, index) => (
+          {WHY_US.map((item) => (
             <div
               key={item.title}
-              className={`group flex gap-3.5 sm:gap-4 p-6 sm:p-7 rounded-2xl border transition-colors ${
-                index === 0
-                  ? "border-emerald-dark bg-emerald-dark text-ivory"
-                  : "border-ivory-border bg-ivory-card hover:border-gold/60 text-emerald-dark"
-              }`}
+              className="group flex gap-3.5 sm:gap-4 p-6 sm:p-7 rounded-2xl border transition-colors border-emerald-dark bg-emerald-dark text-ivory"
             >
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-                index === 0 ? "bg-ivory/10 text-gold-light" : "bg-ivory text-gold-dark"
-              }`}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-ivory/10 text-gold-light">
                 <item.icon className="w-5 h-5" />
               </div>
               <div>
-                <h3 className={`font-semibold text-[15px] mb-1.5 ${index === 0 ? "text-ivory" : "text-emerald-dark"}`}>{item.title}</h3>
-                <p className={`text-xs leading-relaxed ${index === 0 ? "text-ivory/70" : "text-ivory-ink/70"}`}>{item.desc}</p>
+                <h3 className="font-semibold text-[15px] mb-1.5 text-ivory">{item.title}</h3>
+                <p className="text-xs leading-relaxed text-ivory/70">{item.desc}</p>
               </div>
             </div>
           ))}
@@ -124,7 +118,7 @@ export function TravelAgenciesSection() {
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-emerald-dark">{t.landing.travel_section_title}</h2>
           </div>
           <Link href="/travel" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-dark hover:text-emerald-deep transition-colors group">
-            Lihat semua <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            Semua <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
 
@@ -280,7 +274,7 @@ export function TrustSection() {
           {items.map((item) => (
             <div
               key={item.title}
-              className="flex items-start sm:items-center gap-3.5 p-4 sm:p-5 rounded-2xl bg-ivory-card border border-ivory-border"
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 sm:p-5 rounded-2xl bg-ivory-card border border-ivory-border"
             >
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-ivory border border-ivory-border flex items-center justify-center shrink-0">
                 <item.icon className="w-5 h-5 text-gold-dark" />
