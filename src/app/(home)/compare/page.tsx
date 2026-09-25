@@ -82,17 +82,17 @@ function SmartBadges({ scores, index }: { scores: ReturnType<typeof calcScore>[]
   return (
     <div className="flex flex-wrap gap-1 mt-1.5">
       {index === bestValue && (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-1.5 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-emerald-dark text-ivory px-1.5 py-0.5 rounded-full">
           <Award className="w-2.5 h-2.5" /> Best Value
         </span>
       )}
       {index === cheapest && (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-gold text-emerald-deep px-1.5 py-0.5 rounded-full">
           <TrendingDown className="w-2.5 h-2.5" /> Termurah
         </span>
       )}
       {index === bestHotel && (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold bg-ivory border border-ivory-border text-emerald-deep px-1.5 py-0.5 rounded-full">
           <Star className="w-2.5 h-2.5" /> Hotel Terbaik
         </span>
       )}
@@ -163,17 +163,17 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
 
   const btnCls =
     size === "sm"
-      ? "w-7 h-7 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center shadow-sm transition-colors"
-      : "w-9 h-9 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center shadow-sm transition-colors"
+      ? "w-7 h-7 rounded-lg bg-ivory-card/90 backdrop-blur flex items-center justify-center shadow-sm transition-colors"
+      : "w-9 h-9 rounded-lg bg-ivory-card/90 backdrop-blur flex items-center justify-center shadow-sm transition-colors"
 
   return (
     <div className="absolute bottom-2 right-2 z-20 flex gap-1.5">
       <button onClick={toggleWishlist} aria-label="Tambah atau hapus dari wishlist"
-        className={`${btnCls} ${isWishlisted ? "text-rose-500" : "text-gray-600 hover:text-rose-500"}`}>
+        className={`${btnCls} ${isWishlisted ? "text-rose-500" : "text-ivory-ink/70 hover:text-rose-500"}`}>
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`} />}
       </button>
       <button onClick={handleShare} aria-label="Bagikan paket"
-        className={`${btnCls} text-gray-600 hover:text-primary`}>
+        className={`${btnCls} text-ivory-ink/70 hover:text-emerald-deep`}>
         <Share2 className="w-4 h-4" />
       </button>
     </div>
@@ -181,9 +181,9 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
 }
 
 const PKG_PALETTE = [
-  { chip: "bg-emerald-600", border: "border-emerald-500" },
-  { chip: "bg-amber-600", border: "border-amber-500" },
-  { chip: "bg-purple-600", border: "border-purple-500" },
+  { chip: "bg-emerald-dark text-ivory", border: "border-emerald-dark" },
+  { chip: "bg-gold text-emerald-deep", border: "border-gold" },
+  { chip: "bg-ivory-card text-emerald-deep border border-ivory-border", border: "border-ivory-border" },
 ]
 
 function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCompare, onOpenPicker }: {
@@ -212,12 +212,12 @@ function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCo
                     />
                   </Link>
                   {isBest(i) && (
-                    <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400" />
+                    <span className="absolute inset-x-0 top-0 h-1 bg-emerald-dark" />
                   )}
                   <button
                     onClick={() => removeFromCompare(pkg.id)}
                     aria-label={`Hapus ${pkg.name || "paket"} dari perbandingan`}
-                    className="absolute top-1 right-1 w-5 h-5 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm text-gray-600"
+                    className="absolute top-1 right-1 w-5 h-5 bg-ivory-card/90 rounded-full flex items-center justify-center hover:bg-ivory-soft hover:text-red-500 transition-colors shadow-sm text-ivory-ink/70"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -232,7 +232,7 @@ function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCo
           {emptySlots > 0 && (
             <button
               onClick={onOpenPicker}
-              className="flex-1 h-[70px] rounded-xl border-2 border-dashed border-emerald-400/60 flex flex-col items-center justify-center gap-0.5 text-emerald-700 hover:bg-emerald-50 transition-colors"
+              className="flex-1 h-[70px] rounded-xl border-2 border-dashed border-emerald-dark/40 flex flex-col items-center justify-center gap-0.5 text-emerald-deep hover:bg-ivory-soft transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span className="text-[10px] font-semibold">Tambah</span>
@@ -253,7 +253,7 @@ function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCo
                 const hl = rowHighlights[row.key]?.[0]?.[i]
                 return (
                   <div key={pkg.id} className="flex items-start gap-2">
-                    <span className={`mt-0.5 w-5 h-5 shrink-0 rounded-md ${pal.chip} text-white text-[10px] font-bold flex items-center justify-center`}>
+                    <span className={`mt-0.5 w-5 h-5 shrink-0 rounded-md ${pal.chip} text-[10px] font-bold flex items-center justify-center`}>
                       {letter(i)}
                     </span>
                     <div className="flex-1 min-w-0 text-[13px]">{renderValue(row.key, pkg, hl)}</div>
@@ -271,7 +271,7 @@ function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCo
           const pal = PKG_PALETTE[i] || PKG_PALETTE[0]
           return (
             <div key={pkg.id} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-3">
-              <span className={`w-5 h-5 shrink-0 rounded-md ${pal.chip} text-white text-[10px] font-bold flex items-center justify-center`}>
+              <span className={`w-5 h-5 shrink-0 rounded-md ${pal.chip} text-[10px] font-bold flex items-center justify-center`}>
                 {letter(i)}
               </span>
               <div className="flex-1 min-w-0">
@@ -279,7 +279,7 @@ function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCo
                 <p className="text-[11px] text-muted-foreground">{formatRupiah(Number(pkg.price) || 0)} · {pkg.duration_nights || "-"} Hari</p>
               </div>
               <Link href={`/package/${pkg.slug}`}>
-                <Button className="h-9 text-xs px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white shadow-md shadow-emerald-600/25">
+                <Button className="h-9 text-xs px-4 bg-emerald-dark text-ivory hover:bg-emerald-deep shadow-md shadow-emerald-dark/25">
                   Pilih Ini
                 </Button>
               </Link>
@@ -296,8 +296,8 @@ function renderValue(key: string, pkg: Package, highlight?: "best" | "worst") {
     if (!highlight) return node
     if (highlight === "best") {
       return (
-        <div className="relative rounded-lg bg-emerald-100/70 border border-emerald-400/60 ring-2 ring-emerald-400/40 px-2.5 py-2 mt-1 block">
-          <span className="inline-flex items-center gap-1 absolute -top-2 left-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm z-10">
+        <div className="relative rounded-lg bg-ivory-soft border border-emerald-dark/30 ring-2 ring-emerald-dark/20 px-2.5 py-2 mt-1 block">
+          <span className="inline-flex items-center gap-1 absolute -top-2 left-2 bg-emerald-dark text-ivory text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm z-10">
             <Award className="w-2 h-2" /> Terbaik
           </span>
           {node}
@@ -316,9 +316,9 @@ function renderValue(key: string, pkg: Package, highlight?: "best" | "worst") {
         </div>
       )
     case "hotel_makkah_stars":
-      return hlWrap(<span className="text-amber-500">{"★".repeat(Math.max(0, Number(pkg.hotel_makkah_stars) || 0))}</span>)
+      return hlWrap(<span className="text-gold">{"★".repeat(Math.max(0, Number(pkg.hotel_makkah_stars) || 0))}</span>)
     case "hotel_madinah_stars":
-      return hlWrap(<span className="text-amber-500">{"★".repeat(Math.max(0, Number(pkg.hotel_madinah_stars) || 0))}</span>)
+      return hlWrap(<span className="text-gold">{"★".repeat(Math.max(0, Number(pkg.hotel_madinah_stars) || 0))}</span>)
     case "duration":
       return hlWrap(<span>{pkg.duration_nights || "-"} Hari</span>)
     case "type":
@@ -425,7 +425,7 @@ function PackagePickerModal({ onClose }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
+      <div className="relative bg-ivory-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
             <h3 className="font-semibold">Pilih Paket</h3>
@@ -468,7 +468,7 @@ function PackagePickerModal({ onClose }: {
                   }}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-xl border transition-colors text-left ${
                     isSelected
-                      ? "border-emerald-200 bg-emerald-50/50 cursor-default"
+                      ? "border-emerald-dark/30 bg-ivory-soft cursor-default"
                       : noSlot
                         ? "border-border opacity-50 cursor-not-allowed"
                         : "border-border hover:border-primary/40 hover:bg-muted/30"
@@ -488,7 +488,7 @@ function PackagePickerModal({ onClose }: {
                     <p className="text-xs font-bold text-primary mt-0.5">{formatRupiah(Number(pkg.price) || 0)}</p>
                   </div>
                   {isSelected ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 shrink-0">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-deep shrink-0">
                       <Check className="w-3.5 h-3.5" /> Terpilih
                     </span>
                   ) : (
@@ -567,10 +567,10 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
   if (comparePackages.length === 0) {
     return (
       <div className="text-center py-6">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-emerald-600/30">
-          <Scale className="w-8 h-8 text-white" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-dark flex items-center justify-center shadow-lg shadow-emerald-dark/30">
+          <Scale className="w-8 h-8 text-ivory" />
         </div>
-        <h3 className="font-semibold text-lg mb-2 text-zinc-800">Belum ada paket dibandingkan</h3>
+        <h3 className="font-semibold text-lg mb-2 text-emerald-deep">Belum ada paket dibandingkan</h3>
         <p className="text-sm text-muted-foreground mb-8">Pilih hingga {MAX_COMPARE} paket umrah untuk menemukan yang terbaik versi Anda</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
@@ -578,9 +578,9 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
             <button
               key={`empty-add-slot-${slotIdx}`}
               onClick={onOpenPicker}
-              className="group rounded-2xl border-2 border-dashed border-emerald-300/70 bg-white flex flex-col items-center justify-center gap-2 text-emerald-700 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-1 transition-all duration-300 min-h-[140px]"
+              className="group rounded-2xl border-2 border-dashed border-emerald-dark/30 bg-ivory-card flex flex-col items-center justify-center gap-2 text-emerald-deep hover:border-emerald-dark hover:shadow-lg hover:shadow-emerald-dark/10 hover:-translate-y-1 transition-all duration-300 min-h-[140px]"
             >
-              <span className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+              <span className="w-12 h-12 rounded-2xl bg-ivory-soft flex items-center justify-center group-hover:bg-emerald-dark group-hover:text-ivory transition-colors">
                 <Plus className="w-7 h-7" />
               </span>
               <span className="text-sm font-semibold">Tambah Paket</span>
@@ -597,21 +597,21 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
   return (
     <div className="pb-4">
       {insightLines.length > 0 && (
-        <div className="relative overflow-hidden rounded-2xl p-3 sm:p-5 mb-4 sm:mb-6 border border-white/60 bg-white/45 backdrop-blur-xl shadow-sm shadow-emerald-900/5 dark:border-emerald-400/20 dark:bg-emerald-950/30"
+        <div className="relative overflow-hidden rounded-2xl p-3 sm:p-5 mb-4 sm:mb-6 border border-ivory-border bg-ivory-card/60 backdrop-blur-xl shadow-sm shadow-emerald-900/5 dark:border-emerald-400/20 dark:bg-emerald-950/30"
           style={{ backgroundImage: "var(--insight-card-bg)" }}>
           <div className="absolute inset-0 opacity-[0.05]"
             style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #059669 1px, transparent 0)", backgroundSize: "16px 16px" }}
             aria-hidden="true" />
           <div className="relative flex items-center gap-2 mb-1.5 sm:mb-2">
-            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-emerald-600" />
+            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-dark/10 border border-emerald-dark/20 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-emerald-dark" />
             </span>
-            <span className="text-[13px] sm:text-sm font-bold text-zinc-800 dark:text-zinc-50">Perbandingan Cerdas</span>
+            <span className="text-[13px] sm:text-sm font-bold text-emerald-deep dark:text-zinc-50">Perbandingan Cerdas</span>
           </div>
           <ul className="relative space-y-1">
             {insightLines.map((line, i) => (
-              <li key={i} className="text-xs leading-relaxed text-zinc-600 dark:text-emerald-100/80 flex items-start gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+              <li key={i} className="text-xs leading-relaxed text-ivory-ink/70 dark:text-emerald-100/80 flex items-start gap-2">
+                <Check className="w-3.5 h-3.5 text-emerald-dark shrink-0 mt-0.5" />
                 <span className="line-clamp-1 sm:line-clamp-none">{line}</span>
               </li>
             ))}
@@ -639,21 +639,21 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
                 const i = slotIdx
                 const isBest = comparePackages.length > 1 && scores[i].valueScore === maxScore && maxScore > 0
                 return (
-                  <div key={pkg.id} className={`bg-white border-2 rounded-2xl overflow-hidden transition-shadow ${isBest ? "border-emerald-500 shadow-lg shadow-emerald-200/60" : "border-primary/30 shadow-sm"}`}>
+                  <div key={pkg.id} className={`bg-ivory-card border-2 rounded-2xl overflow-hidden transition-shadow ${isBest ? "border-emerald-dark shadow-lg shadow-emerald-dark/20" : "border-ivory-border shadow-sm"}`}>
                     <div className={`relative h-28 ${isBest ? "" : ""}`}>
                       {isBest && (
-                        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-amber-400 z-10" />
+                        <div className="absolute inset-x-0 top-0 h-1.5 bg-emerald-dark z-10" />
                       )}
                       <Link href={`/package/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
                         <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover transition-transform duration-300 hover:scale-105" />
                       </Link>
-                      <button onClick={() => removeFromCompare(pkg.id)} className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors">
+                      <button onClick={() => removeFromCompare(pkg.id)} className="absolute top-2 right-2 w-6 h-6 bg-ivory-card/90 rounded-full flex items-center justify-center text-ivory-ink/70 hover:bg-ivory-soft hover:text-red-500 transition-colors">
                         <X className="w-3.5 h-3.5" />
                       </button>
                       <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                         <PackageStatusBadge status={pkg.status} />
                         {isBest && (
-                          <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md shadow-amber-500/40 flex items-center gap-1">
+                          <div className="bg-gold text-emerald-deep text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md shadow-gold/40 flex items-center gap-1">
                             <Award className="w-3 h-3" /> Pilihan Terbaik
                           </div>
                         )}
@@ -674,9 +674,9 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
                 <button
                   key={`add-slot-${slotIdx}`}
                   onClick={onOpenPicker}
-                  className="group rounded-2xl border-2 border-dashed border-emerald-300/70 bg-white flex flex-col items-center justify-center gap-2 text-emerald-700 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-100 transition-all py-10"
+                  className="group rounded-2xl border-2 border-dashed border-emerald-dark/30 bg-ivory-card flex flex-col items-center justify-center gap-2 text-emerald-deep hover:border-emerald-dark hover:shadow-lg hover:shadow-emerald-dark/10 transition-all py-10"
                 >
-                  <span className="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                  <span className="w-11 h-11 rounded-2xl bg-ivory-soft flex items-center justify-center group-hover:bg-emerald-dark group-hover:text-ivory transition-colors">
                     <Plus className="w-6 h-6" />
                   </span>
                   <span className="text-xs font-semibold">Tambah Paket</span>
@@ -707,7 +707,7 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
             <div />
             {comparePackages.map((pkg) => (
               <Link key={pkg.id} href={`/package/${pkg.slug}`}>
-                <Button className="w-full text-xs h-9 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white shadow-md shadow-emerald-600/25">Pilih Paket Ini</Button>
+                <Button className="w-full text-xs h-9 bg-emerald-dark text-ivory hover:bg-emerald-deep shadow-md shadow-emerald-dark/25">Pilih Paket Ini</Button>
               </Link>
             ))}
           </div>
@@ -756,25 +756,25 @@ function CompareContent() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-zinc-50/50 flex items-center justify-center">
+      <main className="min-h-screen bg-ivory-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50/50">
+    <main className="min-h-screen bg-ivory-50">
       {compareCount > 0 && (
-        <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/60 to-emerald-100/40 border-b border-emerald-100/60 dark:from-card dark:via-emerald-500/10 dark:to-emerald-500/5 dark:border-emerald-500/20 px-4 sm:px-6 py-6 sm:py-8">
+        <div className="relative overflow-hidden bg-ivory-card border-b border-ivory-border dark:bg-card dark:border-emerald-500/20 px-4 sm:px-6 py-6 sm:py-8">
           <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-200/20 dark:bg-emerald-500/10 blur-3xl" aria-hidden />
-          <div className="absolute -bottom-20 -left-16 w-72 h-72 rounded-full bg-amber-100/30 dark:bg-amber-400/10 blur-3xl" aria-hidden />
+          <div className="absolute -bottom-20 -left-16 w-72 h-72 rounded-full bg-gold/20 dark:bg-amber-400/10 blur-3xl" aria-hidden />
           <div className="relative max-w-6xl mx-auto">
             <div className="flex items-center gap-3">
-              <span className="w-11 h-11 rounded-2xl bg-white dark:bg-emerald-900/50 border border-emerald-200/70 dark:border-emerald-400/30 flex items-center justify-center shadow-sm">
-                <Scale className="w-5 h-5 text-emerald-600" />
+              <span className="w-11 h-11 rounded-2xl bg-ivory-card dark:bg-emerald-900/50 border border-ivory-border dark:border-emerald-400/30 flex items-center justify-center shadow-sm">
+                <Scale className="w-5 h-5 text-emerald-dark" />
               </span>
               <div>
-                <h1 className="text-lg sm:text-2xl font-bold text-zinc-900 tracking-tight">Bandingkan Paket</h1>
+                <h1 className="text-lg sm:text-2xl font-bold text-emerald-deep tracking-tight">Bandingkan Paket</h1>
               </div>
             </div>
           </div>
@@ -810,7 +810,7 @@ function CompareContent() {
 export default function ComparePage() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-zinc-50/50 flex items-center justify-center">
+      <main className="min-h-screen bg-ivory-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
       </main>
     }>

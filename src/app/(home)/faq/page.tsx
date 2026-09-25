@@ -22,7 +22,7 @@ const STATIC_FAQS: FAQItem[] = [
     id: "2",
     category: "Travel",
     question: "Bagaimana cara mendaftar sebagai travel di UmrahQu?",
-    answer: 'Travel dapat mendaftar langsung melalui halaman <a href="/register/travel" class="text-emerald-600 hover:underline font-medium">Daftar Travel</a>. Isi data travel dan admin, kemudian tim kami akan memverifikasi dalam 1-3 hari kerja. Setelah diverifikasi, travel dapat membayar setup fee untuk mengaktifkan subdomain, website, dan dashboard travel.'
+    answer: 'Travel dapat mendaftar langsung melalui halaman <a href="/register/travel" class="text-emerald-dark hover:underline font-medium">Daftar Travel</a>. Isi data travel dan admin, kemudian tim kami akan memverifikasi dalam 1-3 hari kerja. Setelah diverifikasi, travel dapat membayar setup fee untuk mengaktifkan subdomain, website, dan dashboard travel.'
   },
   {
     id: "3",
@@ -46,7 +46,7 @@ const STATIC_FAQS: FAQItem[] = [
     id: "6",
     category: "Jamaah",
     question: "Bagaimana cara memesan paket umrah?",
-    answer: 'Cukup cari paket umrah di halaman <a href="/search" class="text-emerald-600 hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Midtrans.'
+    answer: 'Cukup cari paket umrah di halaman <a href="/search" class="text-emerald-dark hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Midtrans.'
   },
   {
     id: "7",
@@ -70,13 +70,13 @@ const STATIC_FAQS: FAQItem[] = [
     id: "10",
     category: "Akun",
     question: "Bagaimana cara mendaftar akun?",
-    answer: 'Anda dapat mendaftar sebagai jamaah di halaman <a href="/register" class="text-emerald-600 hover:underline font-medium">Daftar</a>. Cukup isi nama, email, dan password. Jika Anda adalah travel dan ingin mendaftar sebagai mitra, gunakan halaman <a href="/register/travel" class="text-emerald-600 hover:underline font-medium">Daftar Travel</a>.'
+    answer: 'Anda dapat mendaftar sebagai jamaah di halaman <a href="/register" class="text-emerald-dark hover:underline font-medium">Daftar</a>. Cukup isi nama, email, dan password. Jika Anda adalah travel dan ingin mendaftar sebagai mitra, gunakan halaman <a href="/register/travel" class="text-emerald-dark hover:underline font-medium">Daftar Travel</a>.'
   },
   {
     id: "11",
     category: "Akun",
     question: "Saya sudah daftar sebagai jamaah, bisa upgrade jadi travel?",
-    answer: 'Bisa! Silakan hubungi tim kami melalui WhatsApp atau daftar ulang di halaman <a href="/register/travel" class="text-emerald-600 hover:underline font-medium">Daftar Travel</a> dengan email yang berbeda. Atau hubungi admin untuk mengubah role akun Anda.'
+    answer: 'Bisa! Silakan hubungi tim kami melalui WhatsApp atau daftar ulang di halaman <a href="/register/travel" class="text-emerald-dark hover:underline font-medium">Daftar Travel</a> dengan email yang berbeda. Atau hubungi admin untuk mengubah role akun Anda.'
   },
 ]
 
@@ -94,16 +94,16 @@ export default function FAQPage() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-ivory-50">
       {/* Hero */}
-      <div className="relative overflow-hidden bg-emerald-950 text-white py-20 px-6">
+      <div className="relative overflow-hidden bg-emerald-deep text-ivory py-20 px-6">
         {/* Makkah background */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('/images/hero-makkah.jpg')" }}
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/90 via-emerald-900/80 to-emerald-800/75" aria-hidden />
+        <div className="absolute inset-0 bg-emerald-deep/80" aria-hidden />
         {/* Islamic star pattern */}
         <svg className="absolute inset-0 w-full h-full opacity-[0.05] pointer-events-none" aria-hidden="true">
           <defs>
@@ -122,7 +122,7 @@ export default function FAQPage() {
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight drop-shadow-lg">
             Pertanyaan{" "}
-            <span className="bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-100 bg-clip-text text-transparent drop-shadow-[0_2px_20px_rgba(251,191,36,0.25)]">
+            <span className="text-gold-light drop-shadow-[0_2px_20px_rgba(251,191,36,0.25)]">
               Umum
             </span>
           </h1>
@@ -135,17 +135,17 @@ export default function FAQPage() {
       <div className="max-w-3xl mx-auto p-6 -mt-8">
         {/* Search bar glassmorphism */}
         <div className="relative mb-6">
-          <div className="absolute inset-0 bg-white/40 rounded-2xl blur-sm" aria-hidden />
-          <div className="relative flex items-center bg-white rounded-2xl shadow-[0_16px_40px_-12px_rgba(6,78,59,0.25)] ring-1 ring-emerald-100/60 border border-white/60">
-            <span className="w-11 h-11 flex items-center justify-center ml-1.5 my-1.5 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 shrink-0">
-              <Search className="w-5 h-5 text-emerald-600" />
+          <div className="absolute inset-0 bg-ivory-card/40 rounded-2xl blur-sm" aria-hidden />
+          <div className="relative flex items-center bg-ivory-card rounded-2xl shadow-[0_16px_40px_-12px_rgba(6,78,59,0.25)] ring-1 ring-ivory-border border border-ivory-border">
+            <span className="w-11 h-11 flex items-center justify-center ml-1.5 my-1.5 rounded-xl bg-ivory shrink-0">
+              <Search className="w-5 h-5 text-emerald-dark" />
             </span>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari pertanyaan..."
-              className="flex-1 min-w-0 bg-transparent pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+              className="flex-1 min-w-0 bg-transparent pr-4 py-3 text-sm text-ivory-ink placeholder:text-ivory-ink/70 focus:outline-none"
             />
           </div>
         </div>
@@ -157,8 +157,8 @@ export default function FAQPage() {
               onClick={() => setCategory(cat)}
               className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                 category === cat
-                  ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-600/25"
-                  : "bg-white border border-slate-200 text-muted-foreground hover:text-emerald-700 hover:border-emerald-300 hover:shadow-sm"
+                  ? "bg-emerald-dark text-ivory shadow-md shadow-emerald-deep/25"
+                  : "bg-ivory-card border border-ivory-border text-ivory-ink/70 hover:text-emerald-dark hover:border-emerald-dark/40 hover:shadow-sm"
               }`}
             >
               {cat}
@@ -168,36 +168,36 @@ export default function FAQPage() {
 
         <div className="space-y-3">
           {filtered.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
-                <HelpCircle className="w-7 h-7 text-emerald-500" />
+            <div className="bg-ivory-card rounded-2xl border border-ivory-border p-12 text-center shadow-sm">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-ivory flex items-center justify-center">
+                <HelpCircle className="w-7 h-7 text-emerald-dark" />
               </div>
-              <p className="text-muted-foreground">Tidak ada pertanyaan ditemukan</p>
+              <p className="text-ivory-ink/70">Tidak ada pertanyaan ditemukan</p>
               <button
                 onClick={() => { setSearch(""); setCategory("Semua") }}
-                className="mt-3 px-5 py-2 text-sm font-semibold rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-600/25 transition-all hover:-translate-y-0.5"
+                className="mt-3 px-5 py-2 text-sm font-semibold rounded-full bg-emerald-dark text-ivory shadow-md shadow-emerald-deep/25 transition-all hover:bg-emerald-deep hover:-translate-y-0.5"
               >
                 Atur Ulang Filter
               </button>
             </div>
           ) : (
             filtered.map((faq) => (
-              <div key={faq.id} className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg hover:shadow-emerald-100/50 hover:border-emerald-200 transition-all duration-300">
+              <div key={faq.id} className="group bg-ivory-card rounded-2xl border border-ivory-border overflow-hidden shadow-sm hover:shadow-lg hover:shadow-emerald-deep/5 hover:border-gold/50 transition-all duration-300">
                 <button
                   onClick={() => setOpenId(openId === faq.id ? null : faq.id)}
                   className="w-full flex items-center justify-between gap-3 p-5 text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 shrink-0 border border-emerald-100">{faq.category}</span>
-                    <span className="font-medium text-sm text-slate-800 group-hover:text-emerald-700 transition-colors">{faq.question}</span>
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-dark/10 text-emerald-dark shrink-0 border border-emerald-dark/20">{faq.category}</span>
+                    <span className="font-medium text-sm text-emerald-deep group-hover:text-emerald-dark transition-colors">{faq.question}</span>
                   </div>
-                  <span className={`w-7 h-7 shrink-0 flex items-center justify-center rounded-full transition-all duration-300 ${openId === faq.id ? "bg-gradient-to-br from-emerald-500 to-emerald-700 text-white rotate-180" : "bg-slate-100 text-slate-500 group-hover:bg-emerald-50 group-hover:text-emerald-600"}`}>
+                  <span className={`w-7 h-7 shrink-0 flex items-center justify-center rounded-full transition-all duration-300 ${openId === faq.id ? "bg-emerald-dark text-ivory rotate-180" : "bg-ivory border border-ivory-border text-ivory-ink/70 group-hover:bg-emerald-dark/10 group-hover:text-emerald-dark"}`}>
                     <ChevronDown className="w-4 h-4" />
                   </span>
                 </button>
                 {openId === faq.id && (
                   <div
-                    className="px-5 pb-5 pl-[4.5rem] text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4"
+                    className="px-5 pb-5 pl-[4.5rem] text-sm text-ivory-ink/70 leading-relaxed border-t border-ivory-border pt-4"
                     dangerouslySetInnerHTML={{ __html: faq.answer }}
                   />
                 )}

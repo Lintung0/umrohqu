@@ -93,18 +93,18 @@ function RatingBar({ star, count, total }: { star: number; count: number; total:
 
 function InfoCard({ icon: Icon, label, value, color = "primary" }: { icon: any; label: string; value: string; color?: string }) {
   const colorMap: Record<string, string> = {
-    primary: "from-primary/10 to-emerald-50 text-primary",
-    amber: "from-amber-100 to-orange-50 text-amber-600",
-    blue: "from-blue-100 to-sky-50 text-blue-600",
-    purple: "from-purple-100 to-violet-50 text-purple-600",
+    primary: "bg-emerald-dark/10 text-emerald-dark",
+    gold: "bg-emerald-dark/10 text-emerald-dark",
+    sand: "bg-emerald-dark/10 text-emerald-dark",
+    clay: "bg-emerald-dark/10 text-emerald-dark",
   }
   return (
-    <div className="group flex items-center gap-3 bg-white border border-border/60 rounded-xl p-3.5 hover:border-primary/30 hover:shadow-md transition-all duration-200">
-      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${colorMap[color]} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+    <div className="group flex items-center gap-3 bg-ivory-card border border-ivory-border rounded-xl p-3.5 hover:border-emerald-dark/30 hover:shadow-md transition-all duration-200">
+      <div className={`w-10 h-10 rounded-xl ${colorMap[color]} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
         <Icon className="w-5 h-5" />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{label}</p>
+        <p className="text-[10px] text-ivory-ink/70 uppercase tracking-wider font-medium">{label}</p>
         <p className="text-sm font-semibold line-clamp-2 [overflow-wrap:anywhere] mt-0.5">{value}</p>
       </div>
     </div>
@@ -342,13 +342,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-ivory">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-48 sm:pb-16">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-          <Link href="/" className="hover:text-primary transition-colors">Beranda</Link>
+          <Link href="/" className="hover:text-emerald-dark transition-colors">Beranda</Link>
           <ChevronRight className="w-3 h-3" />
-          <Link href="/search" className="hover:text-primary transition-colors">Cari Paket</Link>
+          <Link href="/search" className="hover:text-emerald-dark transition-colors">Cari Paket</Link>
           <ChevronRight className="w-3 h-3" />
           <span className="text-foreground truncate">{pkg.name}</span>
         </div>
@@ -356,7 +356,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* LEFT: Image Gallery */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm relative">
+            <div className="bg-ivory-card rounded-2xl border border-ivory-border overflow-hidden shadow-sm relative">
               {galleryItems && galleryItems.length > 0 ? (
                 <ImageGallery images={initialImages || []} items={galleryItems} title={pkg.name} />
               ) : (
@@ -367,8 +367,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   {initialImages?.[0] ? (
                     <Image src={initialImages[0]} alt={pkg.name} fill className="object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/10 to-emerald-50 flex items-center justify-center">
-                      <Package className="w-16 h-16 text-primary/30" />
+                    <div className="w-full h-full bg-ivory-soft flex items-center justify-center">
+                      <Package className="w-16 h-16 text-emerald-dark/40" />
                     </div>
                   )}
                   {/* Maximize button for single image */}
@@ -385,10 +385,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     <PackageStatusBadge status={displayPkg.status} />
                     {pkg.type && (
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
-                        pkg.type === "vip" ? "bg-amber-400 text-amber-900" :
-                        pkg.type === "plus" ? "bg-purple-500 text-white" :
-                        pkg.type === "furoda" ? "bg-rose-500 text-white" :
-                        "bg-emerald-500 text-white"
+                        pkg.type === "vip" ? "bg-gold text-emerald-deep" :
+                        pkg.type === "plus" ? "bg-emerald-dark text-ivory" :
+                        pkg.type === "furoda" ? "bg-emerald-dark text-ivory" :
+                        "bg-emerald-dark text-ivory"
                       }`}>
                         {pkg.type === "vip" ? "★ VIP" : pkg.type === "plus" ? "+ Plus" : pkg.type === "furoda" ? "Furoda" : "Reguler"}
                       </span>
@@ -398,29 +398,29 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               )}
               {/* Floating Actions — always visible on top of image */}
               <div className="absolute top-3 right-3 z-20 flex gap-1.5">
-                <button onClick={handleShare} className="w-10 h-10 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center text-gray-600 hover:bg-white hover:text-primary transition-all shadow-sm">
+                <button onClick={handleShare} className="w-10 h-10 rounded-lg bg-ivory-card/90 backdrop-blur flex items-center justify-center text-ivory-ink/70 hover:bg-ivory-card hover:text-emerald-dark transition-all shadow-sm">
                   <Share2 className="w-4 h-4" />
                 </button>
-                <button onClick={toggleWishlist} className={`w-10 h-10 rounded-lg bg-white/90 backdrop-blur flex items-center justify-center transition-all shadow-sm ${isWishlisted ? "text-rose-500" : "text-gray-600 hover:bg-white hover:text-rose-500"}`}>
+                <button onClick={toggleWishlist} className={`w-10 h-10 rounded-lg bg-ivory-card/90 backdrop-blur flex items-center justify-center transition-all shadow-sm ${isWishlisted ? "text-rose-500" : "text-ivory-ink/70 hover:bg-ivory-card hover:text-rose-500"}`}>
                   {togglingWishlist ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`} />}
                 </button>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="bg-white rounded-2xl border border-border/60 overflow-hidden shadow-sm mt-4">
-              <div className="flex border-b border-border/50 overflow-x-auto scrollbar-hide">
+            <div className="bg-ivory-card rounded-2xl border border-ivory-border overflow-hidden shadow-sm mt-4">
+              <div className="flex border-b border-ivory-border overflow-x-auto scrollbar-hide">
                 {TAB_ITEMS.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`relative flex items-center gap-1.5 px-4 sm:px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-all ${
-                      activeTab === tab.id ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                      activeTab === tab.id ? "text-emerald-dark" : "text-ivory-ink/70 hover:text-emerald-deep"
                     }`}
                   >
                     <tab.icon className="w-4 h-4" />
                     {tab.label}
-                    {activeTab === tab.id && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
+                    {activeTab === tab.id && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-dark rounded-full" />}
                   </button>
                 ))}
               </div>
@@ -430,26 +430,26 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 {activeTab === "overview" && (
                   <div className="space-y-4 animate-in fade-in duration-200">
                     {pkg.description && (
-                      <div className="bg-white border-l-4 border-primary/60 rounded-r-xl border border-border/50 p-4">
-                        <p className="text-sm text-muted-foreground leading-relaxed">{pkg.description}</p>
+                      <div className="bg-ivory-card border border-ivory-border border-l-4 border-l-emerald-dark rounded-r-xl p-4">
+                        <p className="text-sm text-ivory-ink/70 leading-relaxed">{pkg.description}</p>
                       </div>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {pkg.airline && <InfoCard icon={Plane} label="Maskapai" value={decodeUnicodeEscapes(pkg.airline)} color="blue" />}
+                      {pkg.airline && <InfoCard icon={Plane} label="Maskapai" value={decodeUnicodeEscapes(pkg.airline)} color="sand" />}
                       {pkg.duration_nights && <InfoCard icon={Clock} label="Durasi" value={`${pkg.duration_nights} Hari`} />}
                       {pkg.departure_city && <InfoCard icon={MapPin} label="Kota Berangkat" value={pkg.departure_city} />}
                       {pkg.departure_date && <InfoCard icon={Calendar} label="Tanggal Berangkat" value={new Date(pkg.departure_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} />}
-                      {pkg.hotel_makkah && <InfoCard icon={Hotel} label="Hotel Makkah" value={pkg.hotel_makkah} color="amber" />}
-                      {pkg.hotel_madinah && <InfoCard icon={Hotel} label="Hotel Madinah" value={pkg.hotel_madinah} color="amber" />}
+                      {pkg.hotel_makkah && <InfoCard icon={Hotel} label="Hotel Makkah" value={pkg.hotel_makkah} color="gold" />}
+                      {pkg.hotel_madinah && <InfoCard icon={Hotel} label="Hotel Madinah" value={pkg.hotel_madinah} color="gold" />}
                     </div>
                     {includesList.length > 0 && (
                       <div className="pt-1">
-                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                          <TrendingUp className="w-3.5 h-3.5 text-primary" /> Fasilitas Utama
+                        <p className="text-[11px] font-bold text-ivory-ink/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <TrendingUp className="w-3.5 h-3.5 text-emerald-dark" /> Fasilitas Utama
                         </p>
                         <div className="flex flex-wrap gap-1.5">
                           {includesList.slice(0, 6).map((inc) => (
-                            <span key={inc} className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-2.5 py-1">
+                            <span key={inc} className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-deep bg-emerald-dark/10 border border-ivory-border rounded-full px-2.5 py-1">
                               <CheckCircle className="w-3 h-3 shrink-0" /> {inc}
                             </span>
                           ))}
@@ -464,18 +464,18 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     {itineraryList.length > 0 ? (
                       <div className="relative">
                         {/* Header summary */}
-                        <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100">
-                          <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
-                            <Calendar className="w-5 h-5 text-white" />
+                        <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-ivory-card border border-ivory-border">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-dark flex items-center justify-center shrink-0">
+                            <Calendar className="w-5 h-5 text-ivory" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-emerald-800">Perjalanan {itineraryList.length} Hari</p>
-                            <p className="text-xs text-emerald-600">Ikuti langkah demi langkah perjalanan ibadah Anda</p>
+                            <p className="text-sm font-semibold text-emerald-deep">Perjalanan {itineraryList.length} Hari</p>
+                            <p className="text-xs text-ivory-ink/70">Ikuti langkah demi langkah perjalanan ibadah Anda</p>
                           </div>
                         </div>
 
                         {/* Timeline */}
-                        <div className="relative ml-5 pr-2 sm:pr-3 border-l-2 border-emerald-200 space-y-0">
+                        <div className="relative ml-5 pr-2 sm:pr-3 border-l-2 border-ivory-border space-y-0">
                           {itineraryList.map((item, idx) => {
                             const isOpen = expandedItinerary === idx
                             const isLast = idx === itineraryList.length - 1
@@ -487,8 +487,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                 {/* Timeline dot */}
                                 <div className={`absolute -left-[1.35rem] top-4 w-3 h-3 rounded-full border-2 transition-all duration-300 ${
                                   isOpen
-                                    ? "bg-emerald-500 border-emerald-500 scale-125 shadow-md shadow-emerald-200"
-                                    : "bg-white border-emerald-300 group-hover:border-emerald-500 group-hover:bg-emerald-50"
+                                    ? "bg-emerald-dark border-emerald-dark scale-125 shadow-md"
+                                    : "bg-ivory-card border-ivory-border group-hover:border-emerald-dark group-hover:bg-ivory-soft"
                                 }`} />
 
                                 {/* Day card */}
@@ -496,33 +496,33 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                   onClick={() => setExpandedItinerary(isOpen ? null : idx)}
                                   className={`w-full text-left ml-6 p-4 rounded-xl transition-all duration-300 ${
                                     isOpen
-                                      ? "bg-emerald-50/80 border border-emerald-200 shadow-sm"
-                                      : "hover:bg-gray-50/80 border border-transparent hover:border-gray-100"
+                                      ? "bg-ivory-soft border border-ivory-border shadow-sm"
+                                      : "hover:bg-ivory-soft border border-transparent hover:border-ivory-border"
                                   }`}
                                 >
                                   <div className="flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3 min-w-0">
                                       <span className={`shrink-0 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
                                         isOpen
-                                          ? "bg-emerald-600 text-white"
-                                          : "bg-emerald-100 text-emerald-700"
+                                          ? "bg-emerald-dark text-ivory"
+                                          : "bg-emerald-dark/10 text-emerald-dark"
                                       }`}>
                                         Hari {item.day}
                                       </span>
                                       <h3 className={`text-sm font-semibold truncate transition-colors ${
-                                        isOpen ? "text-emerald-800" : "text-foreground group-hover:text-emerald-700"
+                                        isOpen ? "text-emerald-deep" : "text-emerald-deep group-hover:text-emerald-dark"
                                       }`}>
                                         {item.title || `Hari ke-${item.day}`}
                                       </h3>
                                     </div>
-                                    <ChevronRight className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-300 ${
-                                      isOpen ? "rotate-90 text-emerald-600" : ""
+                                    <ChevronRight className={`w-4 h-4 shrink-0 text-ivory-ink/70 transition-transform duration-300 ${
+                                      isOpen ? "rotate-90 text-emerald-dark" : ""
                                     }`} />
                                   </div>
 
                                   {/* Expandable description */}
                                   <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-3" : "max-h-0"}`}>
-                                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line break-words border-t border-emerald-100 pt-3">
+                                    <p className="text-sm text-ivory-ink/70 leading-relaxed whitespace-pre-line break-words border-t border-ivory-border pt-3">
                                       {item.description || ""}
                                     </p>
                                   </div>
@@ -534,10 +534,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                       </div>
                     ) : (
                       <div className="text-center py-16">
-                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                          <Calendar className="w-8 h-8 text-gray-300" />
+                        <div className="w-16 h-16 rounded-2xl bg-ivory-soft flex items-center justify-center mx-auto mb-4">
+                          <Calendar className="w-8 h-8 text-ivory-ink/30" />
                         </div>
-                        <p className="text-muted-foreground text-sm">Tidak ada informasi itinerary</p>
+                        <p className="text-ivory-ink/70 text-sm">Tidak ada informasi itinerary</p>
                       </div>
                     )}
                   </div>
@@ -548,19 +548,19 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   <div className="space-y-6 animate-in fade-in duration-200">
                     {includesList.length > 0 && (
                       <div>
-                        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-emerald-deep">
+                          <div className="w-6 h-6 rounded-lg bg-emerald-dark/10 flex items-center justify-center">
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-dark" />
                           </div>
                           Termasuk
                         </h3>
                         <div className="grid sm:grid-cols-2 gap-2">
                           {includesList.map((item: string) => (
-                            <div key={item} className="flex items-center gap-3 text-sm bg-emerald-50/80 border border-emerald-100 rounded-xl px-4 py-3 hover:bg-emerald-50 transition-colors">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                            <div key={item} className="flex items-center gap-3 text-sm bg-ivory-card border border-ivory-border rounded-xl px-4 py-3 hover:bg-ivory-soft transition-colors">
+                              <div className="w-8 h-8 rounded-lg bg-emerald-dark/10 flex items-center justify-center shrink-0">
+                                <CheckCircle className="w-4 h-4 text-emerald-dark" />
                               </div>
-                              <span className="text-emerald-800">{item}</span>
+                              <span className="text-emerald-deep">{item}</span>
                             </div>
                           ))}
                         </div>
@@ -568,7 +568,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     )}
                     {excludesList.length > 0 && (
                       <div>
-                        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                        <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-emerald-deep">
                           <div className="w-6 h-6 rounded-lg bg-red-100 flex items-center justify-center">
                             <XCircle className="w-3.5 h-3.5 text-red-500" />
                           </div>
@@ -588,10 +588,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     )}
                     {includesList.length === 0 && excludesList.length === 0 && facilitiesList.length === 0 && (
                       <div className="text-center py-12">
-                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                          <Info className="w-8 h-8 text-gray-300" />
+                        <div className="w-16 h-16 rounded-2xl bg-ivory-soft flex items-center justify-center mx-auto mb-4">
+                          <Info className="w-8 h-8 text-ivory-ink/30" />
                         </div>
-                        <p className="text-sm text-muted-foreground">Belum ada info fasilitas</p>
+                        <p className="text-sm text-ivory-ink/70">Belum ada info fasilitas</p>
                       </div>
                     )}
                   </div>
@@ -602,15 +602,15 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   <div className="space-y-4 animate-in fade-in duration-200">
                     {initialReviews.length > 0 ? (
                       <>
-                        <div className="flex items-center gap-4 p-4 bg-amber-50 rounded-xl border border-amber-200/50">
+                        <div className="flex items-center gap-4 p-4 bg-ivory-card rounded-xl border border-ivory-border">
                           <div className="text-center">
-                            <div className="text-4xl font-bold text-amber-600">{avgRating.toFixed(1)}</div>
+                            <div className="text-4xl font-bold text-emerald-deep">{avgRating.toFixed(1)}</div>
                             <div className="flex gap-0.5 justify-center mt-1" role="img" aria-label={`Rating ${avgRating.toFixed(1)} dari 5 bintang`}>
                               {[1,2,3,4,5].map((s) => (
                                 <Star key={s} className={`w-4 h-4 ${s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} aria-hidden="true" />
                               ))}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">{initialReviews.length} ulasan</div>
+                            <div className="text-xs text-ivory-ink/70 mt-1">{initialReviews.length} ulasan</div>
                           </div>
                           <div className="flex-1 space-y-1">
                             {ratingBreakdown.map(({ star, count }) => (
@@ -621,8 +621,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
                         {/* Review Form */}
                         {canReview === true && (
-                          <div className="p-4 bg-white rounded-xl border border-border/60 shadow-sm">
-                            <h4 className="text-sm font-semibold mb-3">Tulis Ulasan Anda</h4>
+                          <div className="p-4 bg-ivory-card rounded-xl border border-ivory-border shadow-sm">
+                            <h4 className="text-sm font-semibold mb-3 text-emerald-deep">Tulis Ulasan Anda</h4>
                             <div className="flex gap-1 mb-3">
                               {[1, 2, 3, 4, 5].map((s) => (
                                 <button
@@ -651,13 +651,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                               onChange={(e) => setReviewText(e.target.value)}
                               placeholder="Ceritakan pengalaman Anda (opsional)"
                               rows={3}
-                              className="w-full text-sm border border-border/60 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                              className="w-full text-sm border border-ivory-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-dark/30 resize-none"
                             />
                             <button
                               type="button"
                               onClick={handleSubmitReview}
                               disabled={submittingReview || reviewRating === 0}
-                              className="mt-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+                              className="mt-2 px-4 py-2 text-sm font-medium rounded-lg bg-emerald-dark text-ivory hover:bg-emerald-deep disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
                             >
                               {submittingReview && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                               Kirim Ulasan
@@ -665,8 +665,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                           </div>
                         )}
                         {canReview === false && eligibleBookingId && (
-                          <div className="p-3 bg-gray-50 rounded-xl border border-border/40 text-center">
-                            <p className="text-xs text-muted-foreground">Anda sudah memberikan ulasan untuk paket ini.</p>
+                          <div className="p-3 bg-ivory-soft rounded-xl border border-ivory-border text-center">
+                            <p className="text-xs text-ivory-ink/70">Anda sudah memberikan ulasan untuk paket ini.</p>
                           </div>
                         )}
 
@@ -674,10 +674,10 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                           {initialReviews.map((r) => {
                             const reviewerName = r.customer_id ? (reviewerMap[r.customer_id] || "Pengguna") : "Pengguna"
                             return (
-                            <div key={r.id} className="border-b border-border/50 pb-3 last:border-0">
+                            <div key={r.id} className="border-b border-ivory-border pb-3 last:border-0">
                               <div className="flex items-center gap-2.5 mb-1.5">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                  <span className="text-xs font-bold text-primary">{reviewerName.charAt(0)}</span>
+                                <div className="w-8 h-8 rounded-full bg-emerald-dark/10 flex items-center justify-center">
+                                  <span className="text-xs font-bold text-emerald-dark">{reviewerName.charAt(0)}</span>
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium">{reviewerName}</p>
@@ -687,11 +687,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                         <Star key={s} className={`w-2.5 h-2.5 ${s <= r.rating ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} aria-hidden="true" />
                                       ))}
                                     </div>
-                                    <span className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString("id-ID")}</span>
+                                    <span className="text-[10px] text-ivory-ink/70">{new Date(r.created_at).toLocaleDateString("id-ID")}</span>
                                   </div>
                                 </div>
                               </div>
-                              {r.review && <p className="text-sm text-muted-foreground ml-10">{r.review}</p>}
+                              {r.review && <p className="text-sm text-ivory-ink/70 ml-10">{r.review}</p>}
                             </div>
                           )
                           })}
@@ -701,8 +701,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                       <div className="space-y-4">
                         {/* Review Form (also shown when no reviews yet) */}
                         {canReview === true && (
-                          <div className="p-4 bg-white rounded-xl border border-border/60 shadow-sm">
-                            <h4 className="text-sm font-semibold mb-3">Jadilah yang pertama memberikan ulasan</h4>
+                          <div className="p-4 bg-ivory-card rounded-xl border border-ivory-border shadow-sm">
+                            <h4 className="text-sm font-semibold mb-3 text-emerald-deep">Jadilah yang pertama memberikan ulasan</h4>
                             <div className="flex gap-1 mb-3">
                               {[1, 2, 3, 4, 5].map((s) => (
                                 <button
@@ -731,13 +731,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                               onChange={(e) => setReviewText(e.target.value)}
                               placeholder="Ceritakan pengalaman Anda (opsional)"
                               rows={3}
-                              className="w-full text-sm border border-border/60 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                              className="w-full text-sm border border-ivory-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-dark/30 resize-none"
                             />
                             <button
                               type="button"
                               onClick={handleSubmitReview}
                               disabled={submittingReview || reviewRating === 0}
-                              className="mt-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+                              className="mt-2 px-4 py-2 text-sm font-medium rounded-lg bg-emerald-dark text-ivory hover:bg-emerald-deep disabled:opacity-50 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
                             >
                               {submittingReview && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                               Kirim Ulasan
@@ -745,16 +745,16 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                           </div>
                         )}
                         <div className="text-center py-8">
-                          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center mx-auto mb-4 border border-amber-100">
+                          <div className="w-20 h-20 rounded-2xl bg-ivory-card flex items-center justify-center mx-auto mb-4 border border-ivory-border">
                             <div className="relative">
                               <Star className="w-10 h-10 text-amber-300" />
-                              <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center">
-                                <span className="text-[8px] font-bold text-amber-600">?</span>
+                              <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-ivory-card border-2 border-ivory-border flex items-center justify-center">
+                                <span className="text-[8px] font-bold text-emerald-deep">?</span>
                               </div>
                             </div>
                           </div>
-                          <h4 className="font-semibold text-foreground mb-1">Belum ada ulasan</h4>
-                          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                          <h4 className="font-semibold text-emerald-deep mb-1">Belum ada ulasan</h4>
+                          <p className="text-sm text-ivory-ink/70 max-w-xs mx-auto">
                             {canReview === false
                               ? "Booking dan selesaikan perjalanan untuk bisa memberikan ulasan."
                               : "Ulasan Anda akan muncul di sini setelah perjalanan selesai."}
@@ -772,11 +772,11 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
           <div className="lg:col-span-1" ref={sidebarRef}>
             <div className="lg:sticky lg:top-24 space-y-3">
             {/* Booking Card — title + price + seats + CTA (satu kartu) */}
-            <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm">
+            <div className="bg-ivory-card rounded-2xl border border-ivory-border p-5 shadow-sm">
               <div className="flex flex-wrap items-center gap-1.5 mb-2">
                 <PackageStatusBadge status={displayPkg.status} />
                 {pkg.type && pkg.type !== "haji" && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary uppercase tracking-wide">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-dark/10 text-emerald-dark uppercase tracking-wide">
                     {pkg.type}
                   </span>
                 )}
@@ -788,26 +788,26 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 )}
               </div>
 
-              <h1 className="text-xl font-bold leading-tight line-clamp-2 mb-2">{pkg.name}</h1>
+              <h1 className="text-xl font-bold leading-tight line-clamp-2 mb-2 text-emerald-deep">{pkg.name}</h1>
 
               <div className="flex items-end justify-between gap-2 mb-1">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-baseline gap-1.5">
-                    <p className="text-2xl font-extrabold text-primary">{formatRupiah(pkg.price)}</p>
-                    <span className="text-xs text-muted-foreground">/ orang</span>
+                    <p className="text-2xl font-extrabold text-emerald-deep">{formatRupiah(pkg.price)}</p>
+                    <span className="text-xs text-ivory-ink/70">/ orang</span>
                   </div>
                   {Number(pkg.cashback_amount) > 0 && (
                     <TooltipProvider delay={100}>
                       <Tooltip>
-                        <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit text-xs font-bold text-amber-900 bg-gradient-to-r from-yellow-300 to-amber-400 border border-yellow-400 rounded-full px-2.5 py-1 shadow-sm">
-                          <BadgePercent className="w-3.5 h-3.5 text-amber-800" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                        <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit text-xs font-bold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
+                          <BadgePercent className="w-3.5 h-3.5 text-emerald-deep" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                         </span>} />
                         <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   )}
                   {Number(pkg.cashback_amount) > 0 && (
-                    <p className="text-[11px] text-muted-foreground max-w-[220px] leading-relaxed">
+                    <p className="text-[11px] text-ivory-ink/70 max-w-[220px] leading-relaxed">
                       Ditangani langsung oleh travel saat keberangkatan sesuai kebijakan travel.
                     </p>
                   )}
@@ -815,52 +815,52 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               </div>
 
               {/* Seat — bar bawaan: label "Sisa kursi" + jumlah + progress (satu sumber) */}
-              <div className="mt-4 pt-4 border-t border-border/50">
+              <div className="mt-4 pt-4 border-t border-ivory-border">
                 <SeatAvailabilityBar available={displayPkg.available} quota={displayPkg.quota} quotaTaken={displayPkg.quota_taken} variant="compact" soldOut={soldOut} />
               </div>
 
               {/* CTA */}
               <div className="mt-4 space-y-2.5">
                 {blocked ? (
-                  <div className="relative overflow-hidden rounded-2xl border border-emerald-900/20 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 p-4 text-white shadow-lg shadow-emerald-950/20">
+                  <div className="relative overflow-hidden rounded-2xl border border-emerald-deep bg-emerald-deep p-4 text-ivory shadow-lg">
                     {/* Decorative glow */}
-                    <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber-400/20 blur-3xl" />
-                    <div className="pointer-events-none absolute -bottom-12 -left-8 w-32 h-32 rounded-full bg-emerald-500/20 blur-3xl" />
+                    <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-gold/20 blur-3xl" />
+                    <div className="pointer-events-none absolute -bottom-12 -left-8 w-32 h-32 rounded-full bg-emerald-dark/40 blur-3xl" />
 
                     {/* Ribbon */}
                     <div className="relative flex items-center justify-between">
                       <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
                         {displayPkg.status === "ongoing" ? "Sedang Berlangsung" : "Kursi Penuh"}
                       </span>
-                      <Plane className="w-5 h-5 text-amber-300/80" />
+                      <Plane className="w-5 h-5 text-gold/80" />
                     </div>
 
                     {/* Title */}
                     <div className="relative flex items-center gap-3 mt-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
-                        <Timer className="w-5 h-5 text-emerald-950" />
+                      <div className="w-10 h-10 rounded-xl bg-gold flex items-center justify-center shrink-0 shadow-md">
+                        <Timer className="w-5 h-5 text-emerald-deep" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-bold leading-tight">
                           {displayPkg.status === "ongoing" ? "Paket telah berangkat" : "Paket sudah habis"}
                         </p>
-                        <p className="text-xs text-emerald-100/80 leading-tight mt-0.5">Keberangkatan ini sudah tidak bisa dipesan</p>
+                        <p className="text-xs text-ivory/80 leading-tight mt-0.5">Keberangkatan ini sudah tidak bisa dipesan</p>
                       </div>
                     </div>
 
                     {/* Realtime stats */}
                     {displayPkg.status === "ongoing" && (
                       <div className="relative mt-4 pt-3.5 border-t border-white/10">
-                        <div className="flex items-center text-[11px] text-emerald-100/80 mb-1.5">
+                        <div className="flex items-center text-[11px] text-ivory/80 mb-1.5">
                           <span className="inline-flex items-center gap-1.5">
-                            <Users className="w-3.5 h-3.5 text-amber-300" />
+                            <Users className="w-3.5 h-3.5 text-gold" />
                             {departedCount} dari {displayPkg.quota} jamaah berangkat
                           </span>
                         </div>
                         <div className="h-1.5 bg-white/15 rounded-full overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-700"
+                            className="h-full rounded-full bg-gold transition-all duration-700"
                             style={{ width: `${departedPercent}%` }}
                           />
                         </div>
@@ -870,13 +870,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 ) : (
                   <>
                     <button onClick={handleCheckout} className="w-full block">
-                      <Button className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]">
+                      <Button className="w-full h-12 font-bold text-sm bg-gold text-emerald-deep hover:bg-emerald-deep hover:text-ivory shadow-lg transition-all active:scale-[0.98]">
                         Pesan
                       </Button>
                     </button>
                     <Button
                       variant="outline"
-                      className="w-full h-11 text-xs gap-2 font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
+                      className="w-full h-11 text-xs gap-2 font-semibold border-ivory-border hover:bg-ivory-soft transition-all"
                       onClick={() => {
                         if (comparePackages.some((p) => p.id === pkg.id)) return
                         if (isFull) {
@@ -891,35 +891,35 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                     </Button>
                   </>
                 )}
-                <p className="text-[10px] text-muted-foreground text-center">Bayar via saldo dompet, transfer, atau pembayaran lainnya</p>
+                <p className="text-[10px] text-ivory-ink/70 text-center">Bayar via saldo dompet, transfer, atau pembayaran lainnya</p>
               </div>
             </div>
 
             {/* Travel */}
             {pkg.travel && (
-              <div className="bg-white rounded-2xl border border-border/60 p-5 shadow-sm mb-3">
+              <div className="bg-ivory-card rounded-2xl border border-ivory-border p-5 shadow-sm mb-3">
                 <Link href={`/travel/${pkg.travel.slug}`} className="group flex items-center gap-3">
                   {pkg.travel.logo_url ? (
                     <div className="w-12 h-12 rounded-2xl bg-white ring-2 ring-white shadow-sm overflow-hidden flex items-center justify-center shrink-0">
                       <Image src={pkg.travel.logo_url} alt={pkg.travel.name} width={48} height={48} unoptimized className="w-full h-full object-contain" />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shrink-0">
-                      <span className="text-base font-bold text-white">{pkg.travel.name.charAt(0)}</span>
+                    <div className="w-12 h-12 rounded-xl bg-emerald-dark flex items-center justify-center shrink-0">
+                      <span className="text-base font-bold text-ivory">{pkg.travel.name.charAt(0)}</span>
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                      <span className="text-sm font-bold group-hover:text-primary transition-colors truncate">{pkg.travel.name}</span>
-                      {pkg.travel.is_verified && <BadgeCheck className="w-4 h-4 text-primary shrink-0" />}
+                      <span className="text-sm font-bold group-hover:text-emerald-dark transition-colors truncate">{pkg.travel.name}</span>
+                      {pkg.travel.is_verified && <BadgeCheck className="w-4 h-4 text-emerald-dark shrink-0" />}
                     </div>
-                    {pkg.travel.city && <p className="text-[11px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-3 h-3" />{pkg.travel.city}</p>}
+                    {pkg.travel.city && <p className="text-[11px] text-ivory-ink/70 flex items-center gap-0.5"><MapPin className="w-3 h-3" />{pkg.travel.city}</p>}
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
+                  <ChevronRight className="w-4 h-4 text-ivory-ink/70 shrink-0 group-hover:text-emerald-dark transition-colors" />
                 </Link>
                 {pkg.travel.phone && (
                   <a href={`https://wa.me/${pkg.travel.phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="mt-3 block">
-                    <Button className="w-full h-11 text-xs font-bold gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition-all">
+                    <Button className="w-full h-11 text-xs font-bold gap-2 bg-emerald-dark hover:bg-emerald-deep text-ivory shadow-md transition-all">
                       <MessageCircle className="w-4 h-4" /> Tanya via WhatsApp
                     </Button>
                   </a>
@@ -928,17 +928,17 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             )}
 
             {/* Trust */}
-            <div className="bg-white rounded-2xl border border-border/60 p-5">
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Keamanan & Jaminan</p>
+            <div className="bg-ivory-card rounded-2xl border border-ivory-border p-5">
+              <p className="text-[11px] font-bold text-ivory-ink/70 uppercase tracking-wider mb-3">Keamanan & Jaminan</p>
               <div className="space-y-2.5">
                 {[
                   { icon: Shield, text: "Pembayaran aman & terenkripsi", highlight: false },
                   { icon: BadgeCheck, text: "Travel partner terverifikasi", highlight: false },
                   { icon: CheckCircle, text: "Jaminan keberangkatan", highlight: false },
                 ].map((item) => (
-                  <div key={item.text} className="flex items-center gap-2.5 text-xs text-muted-foreground bg-gray-50/80 border border-border/40 rounded-xl px-3 py-2.5">
-                    <span className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                      <item.icon className="w-3.5 h-3.5 text-emerald-600" />
+                  <div key={item.text} className="flex items-center gap-2.5 text-xs text-ivory-ink/70 bg-ivory-soft border border-ivory-border rounded-xl px-3 py-2.5">
+                    <span className="w-6 h-6 rounded-lg bg-emerald-dark/10 flex items-center justify-center shrink-0">
+                      <item.icon className="w-3.5 h-3.5 text-emerald-dark" />
                     </span>
                     {item.text}
                   </div>
@@ -952,32 +952,32 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
       {/* Sticky Mobile CTA */}
       {showStickyCta && !blocked && (
-        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border/50 px-3 pt-3 pb-3 z-50 lg:hidden">
+        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 bg-ivory-card/95 backdrop-blur-md border-t border-ivory-border px-3 pt-3 pb-3 z-50 lg:hidden">
           <div className="max-w-lg mx-auto flex items-center gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-lg font-bold text-primary truncate">{formatRupiah(pkg.price)}</p>
-              <p className="text-[10px] text-muted-foreground">per orang</p>
+              <p className="text-lg font-bold text-emerald-deep truncate">{formatRupiah(pkg.price)}</p>
+              <p className="text-[10px] text-ivory-ink/70">per orang</p>
             </div>
             <button onClick={handleCheckout}>
-              <Button className="h-10 px-5 font-semibold text-sm bg-primary shadow-lg shadow-primary/20">Pesan</Button>
+              <Button className="h-10 px-5 font-semibold text-sm bg-gold text-emerald-deep shadow-lg">Pesan</Button>
             </button>
           </div>
         </div>
       )}
       {showStickyCta && blocked && (
-        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 lg:hidden px-3 pt-3 pb-3 bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-800 border-t border-emerald-800 text-white">
+        <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 lg:hidden px-3 pt-3 pb-3 bg-emerald-deep border-t border-emerald-deep text-ivory">
           <div className="max-w-lg mx-auto flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/30">
-              <Timer className="w-4.5 h-4.5 text-emerald-950" />
+            <div className="w-9 h-9 rounded-xl bg-gold flex items-center justify-center shrink-0 shadow-md">
+              <Timer className="w-4.5 h-4.5 text-emerald-deep" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold leading-tight">
                 {displayPkg.status === "ongoing" ? "Paket telah berangkat" : "Paket sudah habis"}
               </p>
-              <p className="text-[11px] text-emerald-100/80 truncate">Tidak bisa dipesan lagi</p>
+              <p className="text-[11px] text-ivory/80 truncate">Tidak bisa dipesan lagi</p>
             </div>
             <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/10 ring-1 ring-white/20 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
               {displayPkg.status === "ongoing" ? "Berlangsung" : "Penuh"}
             </span>
           </div>
@@ -988,7 +988,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
       {showScrollTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom))] right-4 w-10 h-10 rounded-full bg-white border border-border shadow flex items-center justify-center text-muted-foreground hover:text-primary transition-all z-40"
+          className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom))] right-4 w-10 h-10 rounded-full bg-ivory-card border border-ivory-border shadow flex items-center justify-center text-ivory-ink/70 hover:text-emerald-dark transition-all z-40"
         >
           <ArrowUp className="w-4 h-4" />
         </button>
