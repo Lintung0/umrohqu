@@ -975,7 +975,7 @@ function StepReview({
               <Button variant="ghost" size="sm" className="text-xs">Batal</Button>
             </Link>
             <Button onClick={handleSubmit} disabled={submitting} className="gap-2 px-6 h-12">
-              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproces...</> : "Lanjut Bayar"}
+              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Bayar"}
             </Button>
           </div>
         </div>
@@ -1044,9 +1044,9 @@ function StepReview({
                 className="w-full h-12 gap-2 bg-emerald-dark hover:bg-emerald-deep text-ivory py-3 rounded-xl font-semibold shadow-md shadow-emerald-deep/20 active:scale-[0.98] transition-all"
               >
                 {submitting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Mengarahkan ke pembayaran...</>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
                 ) : (
-                  <>Lanjut Bayar <ChevronRight className="w-4 h-4" /></>
+                  <>Bayar <ChevronRight className="w-4 h-4" /></>
                 )}
               </Button>
             </div>
