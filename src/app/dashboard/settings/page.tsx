@@ -244,14 +244,14 @@ export default function SettingsPage() {
             {/* Langit siang */}
             <div
               className={cn(
-                "absolute inset-0 bg-gradient-to-br from-sky-300 via-sky-100 to-amber-200 transition-opacity duration-700",
+                "absolute inset-0 bg-gold-light transition-opacity duration-700",
                 isDark ? "opacity-0" : "opacity-100"
               )}
             />
             {/* Langit malam */}
             <div
               className={cn(
-                "absolute inset-0 bg-gradient-to-br from-indigo-950 via-[#1c2054] to-slate-800 transition-opacity duration-700",
+                "absolute inset-0 bg-emerald-deep transition-opacity duration-700",
                 isDark ? "opacity-100" : "opacity-0"
               )}
             />
@@ -261,7 +261,7 @@ export default function SettingsPage() {
               {STARS.map((s, i) => (
                 <div
                   key={i}
-                  className="absolute rounded-full bg-slate-100"
+                  className="absolute rounded-full bg-gold-light"
                   style={{
                     top: s.top,
                     left: s.left,
@@ -281,8 +281,8 @@ export default function SettingsPage() {
 
             {/* Awan malam */}
             <div className={cn("absolute inset-0 transition-opacity duration-700", isDark ? "opacity-60" : "opacity-0")}>
-              <Cloud fill="#2a2f5e" className="absolute -left-3 bottom-0 w-28 h-16" />
-              <Cloud fill="#303568" className="absolute left-[45%] -top-2 w-20 h-12" />
+              <Cloud fill="rgba(13,61,43,0.55)" className="absolute -left-3 bottom-0 w-28 h-16" />
+              <Cloud fill="rgba(13,61,43,0.65)" className="absolute left-[45%] -top-2 w-20 h-12" />
             </div>
 
             {/* Knob */}
@@ -295,23 +295,23 @@ export default function SettingsPage() {
               {/* Knob matahari */}
               <div
                 className={cn(
-                  "absolute inset-0 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 flex items-center justify-center transition-[opacity,transform] duration-500",
+                  "absolute inset-0 rounded-full bg-gold flex items-center justify-center transition-[opacity,transform] duration-500",
                   isDark ? "opacity-0 scale-90" : "opacity-100 scale-100"
                 )}
               >
                 <Sun
-                  className="w-7 h-7 text-white"
+                  className="w-7 h-7 text-emerald-deep"
                   style={{ animation: "spin 18s linear infinite" }}
                 />
               </div>
               {/* Knob bulan sabit */}
               <div
                 className={cn(
-                  "absolute inset-0 rounded-full bg-gradient-to-br from-indigo-900/90 to-slate-900/90 flex items-center justify-center transition-[opacity,transform] duration-500 scale-90",
+                  "absolute inset-0 rounded-full bg-emerald-dark flex items-center justify-center transition-[opacity,transform] duration-500 scale-90",
                   isDark ? "opacity-100 scale-100" : "opacity-0"
                 )}
               >
-                <Moon className="w-7 h-7 text-amber-100 fill-amber-100" />
+                <Moon className="w-7 h-7 text-gold fill-gold" />
               </div>
             </div>
           </button>

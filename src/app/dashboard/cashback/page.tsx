@@ -169,7 +169,7 @@ export default function CashbackPage() {
               disabled={currentPage <= 1}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-dark bg-ivory-card border border-ivory-border hover:bg-ivory transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              <ChevronLeft className="w-4 h-4" /> Prev
+              <ChevronLeft className="w-4 h-4" /> Sebelumnya
             </button>
             <span className="text-sm font-medium text-muted-foreground">
               {currentPage} / {totalPages}
@@ -179,7 +179,7 @@ export default function CashbackPage() {
               disabled={currentPage >= totalPages}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-dark bg-ivory-card border border-ivory-border hover:bg-ivory transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Next <ChevronRight className="w-4 h-4" />
+              Berikutnya <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>

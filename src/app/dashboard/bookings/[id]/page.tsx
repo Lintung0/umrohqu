@@ -108,7 +108,7 @@ const STATUS_ACCENT: Record<string, string> = {
   cancellation_pending: "bg-gold",
   confirmed: "bg-emerald-dark",
   completed: "bg-emerald-dark",
-  refunded: "bg-slate-400",
+  refunded: "bg-ivory-border",
   cancelled: "bg-red-500",
 }
 
@@ -615,7 +615,7 @@ const TIMELINE_STEPS = [
             <p className="text-muted-foreground mt-1">{pkg?.name || t("booking.package")}</p>
           </div>
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
-            <span className={`w-2 h-2 rounded-full ${STATUS_ACCENT[booking.status] ?? "bg-slate-400"}`} />
+            <span className={`w-2 h-2 rounded-full ${STATUS_ACCENT[booking.status] ?? "bg-ivory-border"}`} />
             <span className={`text-[11px] uppercase tracking-[0.18em] font-medium ${STATUS_ACCENT_TEXT[booking.status] ?? "text-muted-foreground"}`}>
               {getStatusLabel(booking.status, "booking")}
             </span>
@@ -641,12 +641,12 @@ const TIMELINE_STEPS = [
               ? "w-4 h-4 bg-emerald-dark ring-[5px] ring-emerald-dark/10"
               : isDone
                 ? "w-2.5 h-2.5 bg-emerald-dark/70"
-                : "w-2.5 h-2.5 bg-ivory border border-slate-300"
+                : "w-2.5 h-2.5 bg-ivory border border-ivory-border"
 
             return (
               <div key={step.key} className="flex-1 flex flex-col items-center relative">
                 {i > 0 && (
-                  <div className={`absolute top-[7px] right-1/2 w-full h-px ${isActive ? "bg-emerald-dark/40" : "bg-slate-200"}`} />
+                  <div className={`absolute top-[7px] right-1/2 w-full h-px ${isActive ? "bg-emerald-dark/40" : "bg-ivory-border"}`} />
                 )}
                 <div className={`relative transition-all duration-300 ${isCurrent ? "z-10" : ""} ${nodeCls} rounded-full flex items-center justify-center`}>
                   {isCurrent && <span className="w-1 h-1 rounded-full bg-white" />}
