@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BookOpen, Heart, Package, Clock, ChevronRight, Calendar } from "lucide-react"
@@ -36,7 +37,7 @@ export default function DashboardOverview() {
 
         if (user) {
           const [bookingsRes, allBookingsRes, wishlistRes] = await Promise.all([
-            supabase.from("bookings").select("id, status, total, created_at, package:packages(name, slug)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
+            supabase.from("bookings").select("id, status, total, created_at, package:packages(name, slug, image_url)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
             supabase.from("bookings").select("id, status, created_at").eq("customer_id", user.id),
             supabase.from("wishlists").select("id", { count: "exact" }).eq("user_id", user.id),
           ])
@@ -155,8 +156,14 @@ export default function DashboardOverview() {
                   href={`/dashboard/bookings/${booking.id}`}
                   className="flex items-center gap-4 -mx-6 px-6 py-3 hover:bg-ivory transition-colors first:rounded-t-xl last:rounded-b-xl"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-dark/10 flex items-center justify-center shrink-0">
-                    <BookOpen className="w-4 h-4 text-emerald-dark" />
+                  <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 relative">
+                    {booking.package?.image_url ? (
+                      <Image src={booking.package.image_url} alt={booking.package?.name || "Paket umrah"} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-emerald-dark/10 flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-emerald-dark" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     <p className="text-sm font-medium truncate text-emerald-deep">{booking.package?.name || "Paket umrah"}</p>

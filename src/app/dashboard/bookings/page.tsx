@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
@@ -16,7 +17,7 @@ interface BookingRow {
   total: number
   booking_channel: string
   created_at: string
-  package: { name: string; slug: string } | null
+  package: { name: string; slug: string; image_url: string | null } | null
 }
 
 const PAGE_SIZE = 8
@@ -43,7 +44,7 @@ export default function BookingsPage() {
       if (user) {
         const { data } = await supabase
           .from("bookings")
-          .select("id, status, pilgrim_count, price, total, booking_channel, created_at, package:packages(name, slug)")
+          .select("id, status, pilgrim_count, price, total, booking_channel, created_at, package:packages(name, slug, image_url)")
           .eq("customer_id", user.id)
           .is("deleted_at", null)
           .order("created_at", { ascending: false })
@@ -199,8 +200,14 @@ export default function BookingsPage() {
                         href={`/dashboard/bookings/${booking.id}`}
                         className="flex items-center gap-4 p-4 hover:bg-ivory transition-colors first:rounded-t-2xl last:rounded-b-2xl"
                       >
-                        <div className="w-14 h-14 rounded-xl bg-emerald-dark/10 shrink-0 flex items-center justify-center">
-                          <BookOpen className="w-5 h-5 text-emerald-dark" />
+                        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 relative">
+                          {booking.package?.image_url ? (
+                            <Image src={booking.package.image_url} alt={booking.package?.name || t("booking.package")} fill className="object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-emerald-dark/10 flex items-center justify-center">
+                              <BookOpen className="w-5 h-5 text-emerald-dark" />
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate text-sm text-emerald-deep">{booking.package?.name || t("booking.package")}</p>
