@@ -76,6 +76,7 @@ interface BookingDetail {
   payment_status?: string
   cancel_reason?: string | null
   refund: { id: string; amount: number; reason?: string | null; status: string; method: string | null; completed_at: string | null } | null
+  active_payment?: { id: string; status: string; gateway_reference: string | null; va_number: string | null; payment_provider: string | null; payment_type: string | null; amount: number | null } | null
   package: {
     name: string
     slug: string
@@ -150,6 +151,7 @@ const TIMELINE_STEPS = [
     rt_rw: "",
   })
   const [savingParticipant, setSavingParticipant] = useState(false)
+  const [verifying, setVerifying] = useState(false)
 
   // Track auth state with onAuthStateChange — handles hydration delay after Midtrans redirect
   useEffect(() => {
@@ -231,6 +233,7 @@ const TIMELINE_STEPS = [
       const shouldVerify = bookingData.status === "pending_payment" ||
         (bookingData.status === "processing" && bookingData.dp_type === "dp" && (bookingData.remaining_amount || 0) > 0)
       if (shouldVerify) {
+        setVerifying(true)
         try {
           const res = await fetch("/api/booking/verify-payment", {
             method: "POST",
@@ -243,6 +246,8 @@ const TIMELINE_STEPS = [
           }
         } catch (e) {
           console.error("Verify payment error:", e)
+        } finally {
+          if (!cancelled) setVerifying(false)
         }
       }
     }
@@ -858,6 +863,8 @@ const TIMELINE_STEPS = [
         paidAt={booking.paid_at}
         paymentMethod={booking.payment_method}
         createdAt={booking.created_at}
+        activePayment={booking.active_payment ?? null}
+        verifying={verifying}
       />
     </div>
   )
@@ -1093,6 +1100,7 @@ function PaymentStatusSection({
   bookingId, status, total, paidAmount, remainingBalance,
   paymentType, dpAmount, dpPercentage, remainingAmount,
   remainingDueDate, paidAt, paymentMethod, createdAt,
+  activePayment, verifying,
 }: {
   bookingId: string
   status: string
@@ -1107,6 +1115,8 @@ function PaymentStatusSection({
   paidAt: string | null
   paymentMethod: string | null
   createdAt: string
+  activePayment: { id: string; status: string; gateway_reference: string | null; va_number: string | null; payment_provider: string | null; payment_type: string | null; amount: number | null } | null
+  verifying: boolean
 }) {
   const { t } = useTranslation()
 
@@ -1115,6 +1125,30 @@ function PaymentStatusSection({
 
   // Helper: check if fully paid (no remaining balance)
   const isFullyPaid = effectiveRemaining <= 0
+
+  // Transaksi gateway aktif (VA sudah terbit, uang belum masuk)
+  const hasActiveVA = !!activePayment && activePayment.status === "pending" && !!activePayment.gateway_reference
+
+  const handleRecheck = () => window.location.reload()
+
+  // ── KONDISI 0: Sedang verifikasi status ke gateway (tombol disembunyikan) ──
+  if (verifying && status === "pending_payment" && !hasActiveVA) {
+    return (
+      <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center shrink-0">
+            <Loader2 className="w-6 h-6 text-gold-dark animate-spin" />
+          </div>
+          <div>
+            <h3 className="font-bold text-emerald-deep">Memeriksa Pembayaran</h3>
+            <p className="text-sm text-gold-dark mt-0.5">
+              Kami sedang memastikan status pembayaran Anda ke gateway. Tunggu sebentar...
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // ── KONDISI 1: LUNAS (Fully Paid) ──
   // Prioritaskan cek pembayaran penuh sebelum cek status
@@ -1283,7 +1317,53 @@ function PaymentStatusSection({
     )
   }
 
-  // ── KONDISI 4: Belum Bayar ──
+  // ── KONDISI 3B: VA sudah terbit, uang belum masuk ──
+  // Tombol "Bayar" baru disembunyikan; user lanjutkan pembayaran yang sama
+  if (status === "pending_payment" && hasActiveVA && activePayment) {
+    return (
+      <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center shrink-0">
+            <Clock className="w-6 h-6 text-gold-dark" />
+          </div>
+          <div>
+            <h3 className="font-bold text-emerald-deep">Menunggu Pembayaran</h3>
+            <p className="text-sm text-gold-dark mt-0.5">
+              Selesaikan pembayaran Anda. Jangan buat pembayaran baru.
+            </p>
+          </div>
+        </div>
+        <div className="bg-ivory rounded-xl p-4">
+          <p className="text-xs text-muted-foreground mb-1">
+            {activePayment.payment_provider ? `${activePayment.payment_provider} Virtual Account` : "Virtual Account"}
+          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-mono font-bold text-lg">{activePayment.va_number || "Menyiapkan nomor VA..."}</p>
+            {activePayment.va_number && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(activePayment.va_number as string)
+                  toast.success("Nomor VA disalin")
+                }}
+                className="p-1 hover:bg-ivory rounded transition-colors cursor-pointer"
+              >
+                <Copy className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+          <p className="text-sm font-semibold mt-1">{formatRupiah(activePayment.amount || total)}</p>
+        </div>
+        <button
+          onClick={handleRecheck}
+          className="w-full bg-emerald-dark text-white py-3 rounded-xl font-semibold hover:bg-emerald-deep transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
+        >
+          <><Loader2 className="w-4 h-4" /> Cek Status Pembayaran</>
+        </button>
+      </div>
+    )
+  }
+
+  // ── KONDISI 4: Belum Bayar (belum ada transaksi gateway) ──
   if (status === "pending_payment") {
     return (
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">

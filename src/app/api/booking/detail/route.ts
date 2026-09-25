@@ -35,7 +35,15 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .maybeSingle()
 
-    return NextResponse.json({ data: { ...booking, refund: refund || null } })
+    const { data: latestPayment } = await admin
+      .from("payments")
+      .select("id, status, gateway_reference, va_number, payment_provider, payment_type, amount")
+      .eq("booking_id", bookingId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    return NextResponse.json({ data: { ...booking, refund: refund || null, active_payment: latestPayment || null } })
   } catch (err) {
     console.error("Booking detail API error:", err)
     return NextResponse.json({ error: "Gagal memuat detail booking" }, { status: 500 })
