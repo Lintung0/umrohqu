@@ -173,7 +173,7 @@ export default function PackageSection() {
             <div className="h-8 w-72 bg-ivory-border/70 rounded animate-pulse" />
             <div className="h-4 w-48 bg-ivory-border/50 rounded animate-pulse" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-2xl overflow-hidden bg-ivory-card border border-ivory-border animate-shimmer-skeleton">
                 <div className="h-44 bg-ivory/60" />
@@ -220,7 +220,7 @@ export default function PackageSection() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4">
           {packages.map((pkg, index) => (
             <div
               key={pkg.id}

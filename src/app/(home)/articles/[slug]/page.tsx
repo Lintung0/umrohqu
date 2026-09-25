@@ -89,7 +89,7 @@ export default function ArticleDetailPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-bold">{article.title}</h1>
+            <h1 className="text-2xl font-bold first-letter:uppercase">{article.title}</h1>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" /> {article.author || "Redaksi UmrahQu"}</span>
             </div>

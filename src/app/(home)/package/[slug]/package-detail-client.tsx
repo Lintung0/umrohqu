@@ -804,7 +804,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                 )}
               </div>
 
-              <h1 className="text-xl font-bold leading-tight line-clamp-2 mb-2 text-emerald-deep">{pkg.name}</h1>
+              <h1 className="text-xl font-bold leading-tight line-clamp-2 mb-2 text-emerald-deep first-letter:uppercase">{pkg.name}</h1>
 
               <div className="flex items-end justify-between gap-2 mb-1">
                 <div className="flex flex-col gap-1">

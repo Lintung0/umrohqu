@@ -177,7 +177,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                   </div>
                 )}
                 <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold drop-shadow-lg leading-tight">{tenantData.name}</h1>
+                  <h1 className="text-3xl sm:text-4xl font-bold drop-shadow-lg leading-tight first-letter:uppercase">{tenantData.name}</h1>
                   <p className="text-white/85 text-lg mt-0.5 font-medium">
                     {tenantData.is_verified ? "Travel Partner Terverifikasi" : "Travel Partner UmrahQu"}
                   </p>

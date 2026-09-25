@@ -180,7 +180,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         href={`/package/${pkg.slug}`}
         className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:shadow-md hover:shadow-emerald-deep/5 hover:border-gold/50 transition-all group cursor-pointer"
       >
-        <div className="relative aspect-video w-full overflow-hidden">
+        <div className="relative aspect-square w-full overflow-hidden">
           <Image
             src={imgSrc}
             alt={pkg.name}
@@ -189,7 +189,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             onError={handleError}
             unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
 
           <div className="absolute top-2.5 left-2.5 flex gap-1.5 pointer-events-none">
             {pkg.duration_nights && (
@@ -231,91 +230,24 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
           </div>
         </div>
 
-        <div className="flex flex-col flex-1 p-3.5">
-          <h3 title={pkg.name} className="font-semibold text-xl leading-snug text-emerald-dark group-hover:text-emerald-deep transition-colors line-clamp-1 mb-[1.375em]">
+        <div className="flex flex-col flex-1 p-2.5">
+          <h3 title={pkg.name} className="font-medium text-sm leading-snug text-emerald-dark line-clamp-2 min-h-[2.5rem]">
             {pkg.name}
           </h3>
 
-          {showTravel && travel && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                router.push(`/travel/${travel.slug}`)
-              }}
-              className="inline-flex items-center gap-1.5 mb-3 w-fit pointer-events-auto cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-md"
-            >
-              {travel.logo_url ? (
-                <Image
-                  src={travel.logo_url}
-                  alt={travel.name}
-                  width={16}
-                  height={16}
-                  unoptimized
-                  className="rounded-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
-                />
-              ) : (
-                <div className="w-4 h-4 rounded-full bg-ivory border border-ivory-border flex items-center justify-center">
-                  <span className="text-[6px] font-bold text-emerald-dark">{travel.name.charAt(0)}</span>
-                </div>
-              )}
-              <span className="text-[11px] text-ivory-ink/70 hover:text-emerald-dark transition-colors truncate max-w-[160px] font-medium">
-                {travel.name}
-              </span>
-            </button>
-          )}
-
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-ivory-ink/70 mb-3">
-            <span className="inline-flex items-center gap-0.5 max-w-full">
-              <MapPin className="w-3 h-3 text-emerald-dark shrink-0" />
-<span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
-            </span>
-            <span className="text-ivory-border">·</span>
-            <span>{pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</span>
-            {airline && (
-              <>
-                <span className="text-ivory-border">·</span>
-                <span className="truncate">{decodeUnicodeEscapes(airline)}</span>
-              </>
-            )}
-            <>
-              <span className="text-ivory-border">·</span>
-              {hotelStars ? (
-                <span className="inline-flex items-center gap-0.5">
-                  <Hotel className="w-3 h-3 text-emerald-dark shrink-0" />
-                  <span>Hotel</span>
-                  <span className="text-emerald-dark">{"★".repeat(hotelStars)}</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-0.5">
-                  <Hotel className="w-3 h-3 text-emerald-dark shrink-0" />
-                  <span>-</span>
-                </span>
-              )}
-            </>
-          </div>
-
-<div className="flex items-center gap-1 mb-2 h-4">
           {avgRating !== null && (
-            <>
-              <Star className="w-3.5 h-3.5 text-gold-dark fill-gold" />
-              <span className="text-xs font-semibold text-emerald-dark">{avgRating}</span>
-              <span className="text-[11px] text-ivory-ink/70">({reviewCount})</span>
-            </>
+            <div className="flex items-center gap-1 mt-1">
+              <Star className="w-3 h-3 text-gold-dark fill-gold" />
+              <span className="text-[11px] font-semibold text-emerald-dark">{avgRating}</span>
+              <span className="text-[10px] text-ivory-ink/70">({reviewCount})</span>
+            </div>
           )}
-        </div>
 
-          <div className="mb-3">
-            <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
+          <div className="flex items-baseline gap-1 mt-1">
+            <p className="text-base font-bold text-emerald-dark">{formatRupiah(pkg.price)}</p>
+            <p className="text-[10px] text-ivory-ink/70">{t("card.per_person")}</p>
           </div>
-
-          <div className="flex items-end justify-between pt-2.5 border-t border-ivory-border mt-auto">
-            <div>
-              <div className="flex items-baseline gap-1">
-                <p className="text-lg font-bold text-emerald-dark">{formatRupiah(pkg.price)}</p>
-                <p className="text-[10px] text-ivory-ink/70">{t("card.per_person")}</p>
-              </div>
+          <p className="text-[11px] text-ivory-ink/70 truncate mt-0.5">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"} · {pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</p>
               {Number(pkg.cashback_amount) > 0 && (
                 <TooltipProvider delay={100}>
                   <Tooltip>
@@ -326,8 +258,9 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
                   </Tooltip>
                 </TooltipProvider>
               )}
-            </div>
-          </div>
+              <div className="mt-2">
+                <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
+              </div>
         </div>
 
       </Link>
@@ -386,7 +319,7 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
 
           <div className="flex-1 p-4 flex flex-col justify-between">
             <div>
-              <h3 title={pkg.name} className="font-semibold text-xl leading-snug group-hover:text-emerald-deep transition-colors line-clamp-1 mb-[1.375em]">{pkg.name}</h3>
+              <h3 title={pkg.name} className="font-semibold text-base leading-snug group-hover:text-emerald-deep transition-colors line-clamp-1">{pkg.name}</h3>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 mb-2">
                 <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
                   <MapPin className="w-3 h-3 text-emerald-dark shrink-0" />
@@ -435,7 +368,7 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
       href={`/package/${pkg.slug}`}
       className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:border-gold/50 transition-colors group cursor-pointer"
     >
-      <div className="relative aspect-video w-full overflow-hidden">
+      <div className="relative aspect-square w-full overflow-hidden">
         <Image
           src={imgSrc}
           alt={pkg.name}
@@ -444,7 +377,6 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
           onError={handleError}
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
         <div className="absolute top-2.5 left-2.5 flex gap-1 pointer-events-none">
           {pkg.duration_nights && (
@@ -487,101 +419,36 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
 
       </div>
 
-      <div className="flex flex-col flex-1 p-3.5">
-        <h3 className="font-semibold text-xl leading-snug group-hover:text-emerald-deep transition-colors line-clamp-2 mb-3 min-h-[3.5rem]">
+      <div className="flex flex-col flex-1 p-2.5">
+        <h3 className="font-medium text-sm leading-snug text-emerald-deep line-clamp-2 min-h-[2.5rem]">
           {pkg.name}
         </h3>
 
-        {showTravel && travel && (
-          <Link
-            href={`/travel/${travel.slug}`}
-            onClick={handleTravelClick}
-            className="inline-flex items-center gap-1 mb-3 w-fit pointer-events-auto"
-          >
-            {travel.logo_url ? (
-              <Image
-                src={travel.logo_url}
-                alt={travel.name}
-                width={14}
-                height={14}
-                unoptimized
-                className="rounded-full object-cover shrink-0"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
-              />
-            ) : (
-              <div className="w-3.5 h-3.5 rounded-full bg-ivory border border-ivory-border flex items-center justify-center shrink-0">
-                <span className="text-[6px] font-bold text-emerald-dark">{travel.name.charAt(0)}</span>
-              </div>
-            )}
-            <span className="text-ivory-ink/70 font-medium truncate hover:text-emerald-dark transition-colors text-[11px]">
-              {travel.name}
-            </span>
-          </Link>
-        )}
-
-        <div className="space-y-1.5 mb-3 text-xs text-ivory-ink/70">
-          <div className="flex items-center gap-1.5">
-            <MapPin className="w-3 h-3 text-emerald-dark shrink-0" />
-            <span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Plane className="w-3 h-3 text-emerald-dark shrink-0" />
-            <span className="truncate">{airline ? decodeUnicodeEscapes(airline) : "-"}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Hotel className="w-3 h-3 text-emerald-dark shrink-0" />
-            <span className="truncate">{hotelName ? `${hotelName}${hotelStars ? ` ${"★".repeat(hotelStars)}` : ""}` : hotelStars ? `Hotel ${"★".repeat(hotelStars)}` : "-"}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3 h-3 text-emerald-dark shrink-0" />
-            <span className="truncate">{departureLabel || "-"}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1 mb-2 h-4">
-          {avgRating !== null && (
-            <>
-              <Star className="w-3.5 h-3.5 text-gold-dark fill-gold" />
-              <span className="text-xs font-semibold text-emerald-dark">{avgRating}</span>
-              <span className="text-[11px] text-ivory-ink/70">({reviewCount} ulasan)</span>
-            </>
-          )}
-        </div>
-
-        <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
-
-        {pkg.facilities && pkg.facilities.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2 h-6 overflow-hidden">
-            {(pkg.facilities as string[]).slice(0, 3).map((f) => (
-              <span key={f} className="px-2 py-0.5 text-[10px] rounded-md bg-ivory border border-ivory-border text-emerald-dark whitespace-nowrap">
-                {f}
-              </span>
-            ))}
-            {pkg.facilities.length > 3 && (
-              <span className="px-2 py-0.5 text-[10px] rounded-md bg-ivory border border-ivory-border text-ivory-ink/70 whitespace-nowrap">
-                +{pkg.facilities.length - 3}
-              </span>
-            )}
+        {avgRating !== null && (
+          <div className="flex items-center gap-1 mt-1">
+            <Star className="w-3 h-3 text-gold-dark fill-gold" />
+            <span className="text-[11px] font-semibold text-emerald-dark">{avgRating}</span>
+            <span className="text-[10px] text-ivory-ink/70">({reviewCount})</span>
           </div>
         )}
 
-        <div className="flex items-end justify-between pt-3 border-t border-ivory-border mt-auto">
-          <div>
-            <div className="flex items-baseline gap-1">
-              <p className="text-lg font-extrabold text-emerald-dark">{formatRupiah(pkg.price)}</p>
-              <p className="text-[10px] text-ivory-ink/70">{t("card.per_person")}</p>
-            </div>
-            {Number(pkg.cashback_amount) > 0 && (
-              <TooltipProvider delay={100}>
-                <Tooltip>
-<TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
-                    <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
-                  </span>} />
-                  <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
+        <div className="flex items-baseline gap-1 mt-1">
+          <p className="text-base font-bold text-emerald-dark">{formatRupiah(pkg.price)}</p>
+          <p className="text-[10px] text-ivory-ink/70">{t("card.per_person")}</p>
+        </div>
+        <p className="text-[11px] text-ivory-ink/70 truncate mt-0.5">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"} · {pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</p>
+        {Number(pkg.cashback_amount) > 0 && (
+          <TooltipProvider delay={100}>
+            <Tooltip>
+              <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
+                <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+              </span>} />
+              <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        <div className="mt-2">
+          <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
         </div>
       </div>
 
