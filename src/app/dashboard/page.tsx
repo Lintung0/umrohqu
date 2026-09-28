@@ -8,6 +8,7 @@ import { User } from "@supabase/supabase-js"
 import { BookOpen, Heart, Package, Clock, ChevronRight, Calendar } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
 import { getStatusLabel, formatRupiah } from "@/lib/constants"
+import { enrichEmbeddedPackageCovers } from "@/lib/package-covers"
 
 function getBookingStatusColor(status: string): string {
   const colors: Record<string, string> = {
@@ -37,13 +38,14 @@ export default function DashboardOverview() {
 
         if (user) {
           const [bookingsRes, allBookingsRes, wishlistRes] = await Promise.all([
-            supabase.from("bookings").select("id, status, total, created_at, package:packages(name, slug, image_url)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
+            supabase.from("bookings").select("id, status, total, created_at, package:packages(id, name, slug)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
             supabase.from("bookings").select("id, status, created_at").eq("customer_id", user.id),
             supabase.from("wishlists").select("id", { count: "exact" }).eq("user_id", user.id),
           ])
 
           const allBookings = allBookingsRes.data || []
-          setRecentBookings(bookingsRes.data || [])
+          const enriched = await enrichEmbeddedPackageCovers(supabase, (bookingsRes.data as any) || [])
+          setRecentBookings(enriched || [])
 
           const thisMonth = allBookings.filter((b: any) => {
             const d = new Date(b.created_at)

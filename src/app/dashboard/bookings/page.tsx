@@ -8,6 +8,7 @@ import { User } from "@supabase/supabase-js"
 import { BookOpen, ChevronRight, ChevronLeft, CalendarCheck2, ClipboardList, Package, CalendarRange } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import { BOOKING_STATUSES, formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
+import { enrichEmbeddedPackageCovers } from "@/lib/package-covers"
 
 interface BookingRow {
   id: string
@@ -17,7 +18,7 @@ interface BookingRow {
   total: number
   booking_channel: string
   created_at: string
-  package: { name: string; slug: string; image_url: string | null } | null
+  package: { id: string; name: string; slug: string; image_url?: string | null } | null
 }
 
 const PAGE_SIZE = 8
@@ -44,11 +45,11 @@ export default function BookingsPage() {
       if (user) {
         const { data } = await supabase
           .from("bookings")
-          .select("id, status, pilgrim_count, price, total, booking_channel, created_at, package:packages(name, slug, image_url)")
+          .select("id, status, pilgrim_count, price, total, booking_channel, created_at, package:packages(id, name, slug)")
           .eq("customer_id", user.id)
           .is("deleted_at", null)
           .order("created_at", { ascending: false })
-        setBookings((data as any) || [])
+        setBookings(((await enrichEmbeddedPackageCovers(supabase, (data as any) || [])) as any) || [])
       }
       setLoading(false)
     }
