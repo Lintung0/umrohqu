@@ -968,16 +968,10 @@ function StepReview({
           </div>
         )}
 
-        <div className="lg:hidden flex justify-between">
-          <Button variant="outline" onClick={() => setStep(1)}>← Kembali</Button>
-          <div className="flex gap-2">
-            <Link href={`/package/${pkg.slug}`}>
-              <Button variant="ghost" size="sm" className="text-xs">Batal</Button>
-            </Link>
-            <Button onClick={handleSubmit} disabled={submitting} className="gap-2 px-6 h-12">
-              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Bayar"}
-            </Button>
-          </div>
+        <div className="lg:hidden flex justify-end">
+          <Button onClick={handleSubmit} disabled={submitting} className="gap-2 px-6 h-12 w-full sm:w-auto">
+            {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Bayar"}
+          </Button>
         </div>
       </div>
 
@@ -1050,14 +1044,6 @@ function StepReview({
                 )}
               </Button>
             </div>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 mt-3">
-            <Link href={`/package/${pkg.slug}`}>
-              <Button variant="ghost" size="sm" className="text-xs text-ivory-ink/70">Batal</Button>
-            </Link>
-            <span className="text-ivory-border">|</span>
-            <Button variant="ghost" size="sm" className="text-xs text-ivory-ink/70" onClick={() => setStep(1)}>← Kembali</Button>
           </div>
         </div>
       </div>
