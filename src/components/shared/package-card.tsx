@@ -180,7 +180,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
         href={`/package/${pkg.slug}`}
         className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:shadow-md hover:shadow-emerald-deep/5 hover:border-gold/50 transition-all group cursor-pointer"
       >
-        <div className="relative aspect-square w-full overflow-hidden">
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
           <Image
             src={imgSrc}
             alt={pkg.name}
@@ -368,7 +368,7 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
       href={`/package/${pkg.slug}`}
       className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:border-gold/50 transition-colors group cursor-pointer"
     >
-      <div className="relative aspect-square w-full overflow-hidden">
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
         <Image
           src={imgSrc}
           alt={pkg.name}
