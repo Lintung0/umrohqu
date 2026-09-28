@@ -144,7 +144,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const [activeTab, setActiveTab] = useState("overview")
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [showStickyCta, setShowStickyCta] = useState(false)
-  const [openDays, setOpenDays] = useState<number[]>([])
+  const [openDays, setOpenDays] = useState<number[]>([0])
   const [singleImageLightbox, setSingleImageLightbox] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
@@ -821,11 +821,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  )}
-                  {Number(pkg.cashback_amount) > 0 && (
-                    <p className="text-[11px] text-ivory-ink/70 max-w-[220px] leading-relaxed">
-                      Ditangani langsung oleh travel saat keberangkatan sesuai kebijakan travel.
-                    </p>
                   )}
                 </div>
               </div>
