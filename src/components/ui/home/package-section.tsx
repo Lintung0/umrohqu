@@ -203,7 +203,7 @@ export default function PackageSection() {
             href="/search"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-dark hover:text-emerald-deep transition-colors group"
           >
-            {t.common.view_all}
+            Semua
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
