@@ -180,29 +180,36 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const cleanItineraryTitle = (raw: string) =>
     raw.replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "").trim()
 
+  // Pembersih tunggal: hapus SEMUA label hari (Hari ke-N, Hari N, HariN,
+  // Day N, DayN) dari mana saja — dipakai title maupun description,
+  // supaya badge "Hari X" jadi satu-satunya label hari di tampilan
+  const cleanItineraryText = (raw: string) =>
+    String(raw || "")
+      // 1. Hapus SEMUA "Hari ke-N" dari mana saja (global)
+      .replace(/hari\s*ke\s*\d+/gi, "")
+      // 2. Ekstra hapus "Hari1"/"Hari 1" tanpa "ke"
+      .replace(/\bHari\d+\b/gi, "")
+      // 3. Hapus "Day N" dan "DayN"
+      .replace(/\bDay\d+\b/gi, "")
+      // 4. Strip prefix "Hari ke-N"/"Day N" dari START (safety)
+      .replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "")
+      // 5. Rapikan sisa tanda baca & spasi ganda
+      .replace(/^[:.\-–—\s]+/, "")
+      .replace(/\s{2,}/g, " ")
+      .trim()
+
   const parseItinerary = (raw: any): { day: number; title: string; description: string }[] => {
     if (Array.isArray(raw)) {
       return raw.map((item: any, idx: number) => {
-        if (typeof item === "string") return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: item }
+        if (typeof item === "string") return { day: idx + 1, title: "", description: cleanItineraryText(item) }
         if (item && typeof item === "object") {
-          let description = String(item.description || item.details || item.text || "")
-            // 1. Hapus SEMUA "Hari ke-N" dan "Hari N" dari mana saja (global) — INI YANG KUNCI biar "umrah AWAL MUSIM Hari ke-1" jadi bersih
-            .replace(/hari\s*ke\s*\d+/gi, "")
-            // 2. Ekstra hapus "Hari1"/"Hari 1" tanpa "ke"
-            .replace(/\bHari\d+\b/gi, "")
-            // 3. Hapus "Day N" dan "DayN"
-            .replace(/\bDay\d+\b/gi, "")
-            // 4. Strip prefix "Hari ke-N"/"Day N" dari START of description (jika ada, sebagai safety)
-            .replace(/^\s*(?:Hari\s*(?:ke)?[-: ]*\s?\d+|Day\s*\d+)\s*[:.-]?\s*/i, "")
-            // 5. Trim sisa spasi
-            .trim()
           return {
             day: Number(item.day) || idx + 1,
-            title: cleanItineraryTitle(item.title ? String(item.title) : ""),
-            description,
+            title: cleanItineraryText(item.title ? String(item.title) : ""),
+            description: cleanItineraryText(item.description || item.details || item.text || ""),
           }
         }
-        return { day: idx + 1, title: `Hari ke-${idx + 1}`, description: "" }
+        return { day: idx + 1, title: "", description: "" }
       })
     }
     if (typeof raw === "string" && raw.trim()) {
@@ -214,7 +221,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         .split(/\n+/)
         .map((line: string) => line.trim())
         .filter(Boolean)
-        .map((line: string, idx: number) => ({ day: idx + 1, title: `Hari ke-${idx + 1}`, description: line }))
+        .map((line: string, idx: number) => ({ day: idx + 1, title: "", description: cleanItineraryText(line) }))
     }
     return []
   }
@@ -496,6 +503,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                           {itineraryList.map((item, idx) => {
                             const isOpen = openDays.includes(idx)
                             const isLast = idx === itineraryList.length - 1
+                            const displayTitle = item.title || item.description
+                            const displayDesc = item.title ? item.description : ""
                             return (
                               <div
                                 key={idx}
@@ -529,7 +538,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                       <h3 className={`text-sm font-semibold truncate transition-colors ${
                                         isOpen ? "text-emerald-deep" : "text-emerald-deep group-hover:text-emerald-dark"
                                       }`}>
-                                        {item.title || `Hari ke-${item.day}`}
+                                        {displayTitle}
                                       </h3>
                                     </div>
                                     <ChevronRight className={`w-4 h-4 shrink-0 text-ivory-ink/70 transition-transform duration-300 ${
@@ -538,11 +547,13 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                   </div>
 
                                   {/* Expandable description */}
-                                  <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-3" : "max-h-0"}`}>
-                                    <p className="text-sm text-ivory-ink/70 leading-relaxed whitespace-pre-line break-words border-t border-ivory-border pt-3">
-                                      {item.description || ""}
-                                    </p>
-                                  </div>
+                                  {displayDesc ? (
+                                    <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-3" : "max-h-0"}`}>
+                                      <p className="text-sm text-ivory-ink/70 leading-relaxed whitespace-pre-line break-words border-t border-ivory-border pt-3">
+                                        {displayDesc}
+                                      </p>
+                                    </div>
+                                  ) : null}
                                 </button>
                               </div>
                             )
