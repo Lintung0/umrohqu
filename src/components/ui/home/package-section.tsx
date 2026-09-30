@@ -11,7 +11,7 @@ import { enrichPackagesWithDetail } from "@/lib/package-detail-fields";
 import PackageCard from "@/components/shared/package-card";
 import type { Package, Tenant } from "@/lib/types";
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 10;
 
 function packagesEqual(a: Package[], b: Package[]): boolean {
   if (a.length !== b.length) return false;

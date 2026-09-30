@@ -13,7 +13,7 @@ import SearchSidebar from "@/components/search/search-sidebar"
 import { Pagination } from "@/components/ui/pagination"
 import { rankTravels, RankingFactors, DEFAULT_RANKING_CONFIG } from "@/lib/business-logic/bidding"
 
-const PAGE_SIZE = 9
+const PAGE_SIZE = 8
 
 const QUICK_CATEGORIES = [
   { label: "Semua", preset: {} },
