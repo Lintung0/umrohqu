@@ -504,14 +504,26 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                             const isOpen = openDays.includes(idx)
                             const isLast = idx === itineraryList.length - 1
                             const hasTitle = item.title.length > 0
-                            const hasDesc = item.description.length > 0
+                            // Potong awalan deskripsi yang mengulang judul (abaikan kapital
+                            // & tanda baca) supaya judul vs deskripsi tidak tampil ganda
+                            const stripLeadingTitle = (desc: string, title: string) => {
+                              const t = desc.trim()
+                              const p = title.trim()
+                              if (p.length >= 5 && t.toLowerCase().startsWith(p.toLowerCase())) {
+                                const rest = t.slice(p.length).replace(/^[:.\-–—\s]+/, "").trim()
+                                if (rest) return rest
+                              }
+                              return t
+                            }
+                            const bodyText = stripLeadingTitle(item.description, item.title)
+                            const hasDesc = bodyText.length > 0
                             const isEmpty = !hasTitle && !hasDesc
                             // Expand selalu memunculkan deskripsi: tanpa judul pakai
                             // 60 karakter pertama sebagai judul, tanpa deskripsi = judul penuh
                             const preview = hasTitle
                               ? item.title
-                              : (item.description.length > 60 ? `${item.description.slice(0, 60)}…` : item.description)
-                            const fullDesc = hasDesc ? item.description : item.title
+                              : (bodyText.length > 60 ? `${bodyText.slice(0, 60)}…` : bodyText)
+                            const fullDesc = hasDesc ? bodyText : item.title
                             const canExpand = fullDesc.length > 0
                             return (
                               <div
