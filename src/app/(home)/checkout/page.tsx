@@ -15,6 +15,16 @@ import { SNAP_SCRIPT_URL, MIDTRANS_CLIENT_KEY, vtWebUrl } from "@/lib/services/m
 
 const DP_OPTIONS = [30, 40, 50]
 
+// Single source of truth untuk peringatan pelunasan DP H-30
+function DpReminder({ amount, className }: { amount: number; className?: string }) {
+  return (
+    <p className={`flex items-start gap-1.5 text-amber-600 ${className || ""}`}>
+      <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
+      Sisa pelunasan ({formatRupiah(amount)}) wajib dibayarkan maksimal H-30 keberangkatan.
+    </p>
+  )
+}
+
 function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -800,10 +810,7 @@ function StepPayment({
                   )
                 })}
               </div>
-              <p className="text-[11px] text-amber-600 mt-2 flex items-start gap-1.5">
-                <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
-                Sisa pelunasan ({formatRupiah(totalPrice - Math.round(totalPrice * dpPercentage / 100))}) wajib dibayarkan maksimal H-30 keberangkatan.
-              </p>
+              <DpReminder amount={totalPrice - Math.round(totalPrice * dpPercentage / 100)} className="text-[11px] mt-2" />
             </div>
           )}
         </div>
@@ -896,10 +903,7 @@ function StepPayment({
             </div>
 
             {paymentType === "dp" && (
-              <p className="text-[10px] text-amber-600 mb-3 flex items-start gap-1.5">
-                <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
-                Sisa pelunasan ({formatRupiah(remainingAmount)}) wajib dibayarkan maksimal H-30 keberangkatan.
-              </p>
+              <DpReminder amount={remainingAmount} className="text-[10px] mb-3" />
             )}
 
             <Button
@@ -1025,10 +1029,7 @@ function StepReview({
             </div>
 
             {paymentType === "dp" && (
-              <p className="text-[10px] text-amber-600 mb-3 flex items-start gap-1.5">
-                <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
-                Sisa pelunasan ({formatRupiah(remainingAmount)}) wajib dibayarkan maksimal H-30 keberangkatan.
-              </p>
+              <DpReminder amount={remainingAmount} className="text-[10px] mb-3" />
             )}
 
             <div className="hidden lg:block">

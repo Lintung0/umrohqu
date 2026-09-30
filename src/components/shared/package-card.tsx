@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Clock, MapPin, Plane, Hotel, Calendar, Scale, Heart, Loader2, Star, Timer, BadgePercent } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
+import { CASHBACK_INFO } from "@/lib/constants"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
 import { createClient } from "@/lib/supabase/client"
@@ -254,7 +255,7 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
                     <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
                       <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                     </span>} />
-                    <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+                    <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               )}
@@ -350,7 +351,7 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
                       <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
                           <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                         </span>} />
-                      <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+                      <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 )}
@@ -443,7 +444,7 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
               <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
                 <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
               </span>} />
-              <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+              <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}

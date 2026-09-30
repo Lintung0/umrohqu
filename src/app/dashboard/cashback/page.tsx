@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { BadgePercent, Banknote, ChevronLeft, ChevronRight, Info, RefreshCcw } from "lucide-react"
-import { formatRupiah } from "@/lib/constants"
+import { formatRupiah, CASHBACK_INFO } from "@/lib/constants"
 
 interface BookingRow {
   id: string
@@ -20,8 +20,7 @@ interface MineResponse {
   totals: Record<string, number>
 }
 
-const CASHBACK_EXPLANATION =
-  "Cashback (pengembalian sebagian dana) dari biaya umrah akan ditangani langsung oleh travel. Biasanya dikembalikan berupa uang cash Riyal atau lainnya sesuai kebijakan travel."
+const CASHBACK_EXPLANATION = CASHBACK_INFO
 
 const PAGE_SIZE = 8
 

@@ -13,6 +13,7 @@ import {
   BadgePercent, Users,
 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
+import { CASHBACK_INFO } from "@/lib/constants"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { decodeUnicodeEscapes } from "@/lib/utils"
 import ImageGallery from "@/components/shared/image-gallery"
@@ -818,7 +819,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit text-xs font-bold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
                           <BadgePercent className="w-3.5 h-3.5 text-emerald-deep" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
                         </span>} />
-                        <TooltipContent className="max-w-xs">Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel.</TooltipContent>
+                        <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   )}

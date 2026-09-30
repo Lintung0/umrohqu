@@ -2,7 +2,7 @@
 
 import { useTranslation } from "@/lib/i18n"
 import Link from "next/link"
-import { Star, Shield, Headphones, Award, Users, CheckCircle, ArrowRight, TrendingUp, Lock } from "lucide-react"
+import { Star, Shield, Headphones, Award, CheckCircle, ArrowRight, TrendingUp, Lock, Wallet } from "lucide-react"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase/client"
 import type { Tenant } from "@/lib/types"
@@ -249,22 +249,11 @@ export function TestimonialSection() {
 }
 
 export function TrustSection() {
-  const [stats, setStats] = useState({ packages: 0, travels: 0 })
-
-  useEffect(() => {
-    Promise.all([
-      supabase.from("packages").select("id", { count: "exact", head: true }).in("status", ["active", "ongoing"]),
-      supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "active"),
-    ]).then(([pkgs, tnts]) => {
-      setStats({ packages: pkgs.count || 0, travels: tnts.count || 0 })
-    })
-  }, [])
-
   const items = [
     { icon: Lock, title: "Pembayaran Aman", desc: "Dana tersimpan hingga perjalanan terkonfirmasi" },
     { icon: Shield, title: "Travel Terverifikasi", desc: "Semua mitra terdaftar & berizin resmi Kemenhaj RI" },
     { icon: TrendingUp, title: "Harga Transparan", desc: "Tidak ada biaya tersembunyi" },
-    { icon: Users, title: `${stats.travels} Travel Mitra`, desc: `${stats.packages} paket tersedia saat ini` },
+    { icon: Wallet, title: "Bayar Bertahap", desc: "DP dulu, pelunasan maksimal H-30 keberangkatan" },
   ]
 
   return (
