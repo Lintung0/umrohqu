@@ -503,8 +503,8 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                           {itineraryList.map((item, idx) => {
                             const isOpen = openDays.includes(idx)
                             const isLast = idx === itineraryList.length - 1
-                            const displayTitle = item.title || item.description
-                            const displayDesc = item.title ? item.description : ""
+                            const displayTitle = item.title || (item.description.length > 60 ? `${item.description.slice(0, 60)}…` : item.description)
+                            const displayDesc = item.title ? item.description : (item.description.length > 60 ? item.description : "")
                             return (
                               <div
                                 key={idx}
