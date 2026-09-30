@@ -503,8 +503,16 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                           {itineraryList.map((item, idx) => {
                             const isOpen = openDays.includes(idx)
                             const isLast = idx === itineraryList.length - 1
-                            const displayTitle = item.title || (item.description.length > 60 ? `${item.description.slice(0, 60)}…` : item.description)
-                            const displayDesc = item.title ? item.description : (item.description.length > 60 ? item.description : "")
+                            const hasTitle = item.title.length > 0
+                            const hasDesc = item.description.length > 0
+                            const isEmpty = !hasTitle && !hasDesc
+                            // Expand selalu memunculkan deskripsi: tanpa judul pakai
+                            // 60 karakter pertama sebagai judul, tanpa deskripsi = judul penuh
+                            const preview = hasTitle
+                              ? item.title
+                              : (item.description.length > 60 ? `${item.description.slice(0, 60)}…` : item.description)
+                            const fullDesc = hasDesc ? item.description : item.title
+                            const canExpand = fullDesc.length > 0
                             return (
                               <div
                                 key={idx}
@@ -519,41 +527,38 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
 
                                 {/* Day card */}
                                 <button
-                                  onClick={() => setOpenDays((prev) => isOpen ? prev.filter((d) => d !== idx) : [...prev, idx])}
+                                  onClick={() => { if (canExpand) setOpenDays((prev) => isOpen ? prev.filter((d) => d !== idx) : [...prev, idx]) }}
                                   className={`w-full text-left ml-6 p-4 rounded-xl transition-all duration-300 ${
-                                    isOpen
+                                    isOpen && canExpand
                                       ? "bg-ivory-soft border border-ivory-border shadow-sm"
                                       : "hover:bg-ivory-soft border border-transparent hover:border-ivory-border"
-                                  }`}
+                                  } ${!canExpand ? "cursor-default" : ""}`}
                                 >
-                                  <div className="flex items-center justify-between gap-3">
-                                    <div className="flex items-center gap-3 min-w-0">
-                                      <span className={`shrink-0 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
-                                        isOpen
-                                          ? "bg-emerald-dark text-ivory"
-                                          : "bg-emerald-dark/10 text-emerald-dark"
-                                      }`}>
-                                        Hari {item.day}
+                                  <span className={`inline-flex text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                                    isOpen && canExpand
+                                      ? "bg-emerald-dark text-ivory"
+                                      : "bg-emerald-dark/10 text-emerald-dark"
+                                  }`}>
+                                    Hari {item.day}
+                                  </span>
+                                  {isEmpty ? (
+                                    <p className="text-sm text-ivory-ink/40 mt-2">Detail itinerary menyusul.</p>
+                                  ) : !canExpand ? (
+                                    <h3 className="text-sm font-semibold text-emerald-deep mt-2 leading-relaxed">{preview}</h3>
+                                  ) : (
+                                    <>
+                                      <h3 className="text-sm font-semibold text-emerald-deep mt-2 leading-snug line-clamp-2">{preview}</h3>
+                                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-dark mt-1.5">
+                                        {isOpen ? "Tutup" : "Selengkapnya"}
+                                        <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} />
                                       </span>
-                                      <h3 className={`text-sm font-semibold truncate transition-colors ${
-                                        isOpen ? "text-emerald-deep" : "text-emerald-deep group-hover:text-emerald-dark"
-                                      }`}>
-                                        {displayTitle}
-                                      </h3>
-                                    </div>
-                                    <ChevronRight className={`w-4 h-4 shrink-0 text-ivory-ink/70 transition-transform duration-300 ${
-                                      isOpen ? "rotate-90 text-emerald-dark" : ""
-                                    }`} />
-                                  </div>
-
-                                  {/* Expandable description */}
-                                  {displayDesc ? (
-                                    <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-3" : "max-h-0"}`}>
-                                      <p className="text-sm text-ivory-ink/70 leading-relaxed whitespace-pre-line break-words border-t border-ivory-border pt-3">
-                                        {displayDesc}
-                                      </p>
-                                    </div>
-                                  ) : null}
+                                      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-2" : "max-h-0"}`}>
+                                        <p className="text-sm text-ivory-ink/70 leading-relaxed whitespace-pre-line break-words border-t border-ivory-border pt-2">
+                                          {fullDesc}
+                                        </p>
+                                      </div>
+                                    </>
+                                  )}
                                 </button>
                               </div>
                             )
