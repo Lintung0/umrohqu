@@ -1,17 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { User as UserIcon, Lock, Bell, CreditCard, Save, Upload, Loader2 } from "lucide-react"
-import { formatRupiah } from "@/lib/utils"
+import { User as UserIcon, Lock, Save, Loader2 } from "lucide-react"
+
 import { toast } from "sonner"
 import { useTranslation } from "@/lib/i18n"
 
 export default function TravelSettingsPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const { t } = useTranslation()
-  const [user, setUser] = useState<User | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [tenantName, setTenantName] = useState("")
   const [tenantEmail, setTenantEmail] = useState("")
@@ -39,7 +39,7 @@ export default function TravelSettingsPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function handleSaveProfile() {
     if (!tenantId) return
@@ -163,7 +163,7 @@ export default function TravelSettingsPage() {
 
 function PasswordTab({ onChangePassword }: { onChangePassword: (pw: string) => Promise<void> }) {
   const { t } = useTranslation()
-  const [current, setCurrent] = useState("")
+  const [_current, setCurrent] = useState("")
   const [newPw, setNewPw] = useState("")
   const [confirm, setConfirm] = useState("")
   const [saving, setSaving] = useState(false)

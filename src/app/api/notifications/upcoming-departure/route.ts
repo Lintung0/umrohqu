@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { createNotification } from "@/lib/notify/create-notification"
 
+interface UpcomingBookingRow {
+  id: string
+  tenant_id: string
+  package: { name: string | null; departure_date: string | null } | { name: string | null; departure_date: string | null }[] | null
+}
+
 // Dipicu dari client (bell/halaman notifikasi) untuk generate notifikasi
 // "segera berangkat" untuk booking yang keberangkatannya ≤ 7 hari lagi.
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -24,8 +30,8 @@ export async function POST(request: NextRequest) {
       .in("status", ["confirmed", "processing"])
 
     let created = 0
-    for (const booking of (bookings as any) || []) {
-      const pkg = booking.package
+    for (const booking of ((bookings as UpcomingBookingRow[]) || [])) {
+      const pkg = Array.isArray(booking.package) ? booking.package[0] : booking.package
       if (!pkg?.departure_date) continue
       const dep = new Date(pkg.departure_date)
       if (dep < now || dep > in7days) continue

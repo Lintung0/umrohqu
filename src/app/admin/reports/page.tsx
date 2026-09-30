@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { BarChart3, TrendingUp, Download, DollarSign, Building2, Users, Package, Loader2 } from "lucide-react"
+import { TrendingUp, Download, DollarSign, Building2, Users, Package } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 
@@ -18,6 +18,11 @@ interface RevenueRow {
   month: string
   revenue: number
   bookings: number
+}
+
+interface BookingRevenueRow {
+  total: number | null
+  created_at: string
 }
 
 export default function AdminReportsPage() {
@@ -43,7 +48,7 @@ export default function AdminReportsPage() {
 
       if (bkgs) {
         const monthly: Record<string, { revenue: number; bookings: number }> = {}
-        bkgs.forEach((b: any) => {
+        bkgs.forEach((b: BookingRevenueRow) => {
           const date = new Date(b.created_at)
           const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
           if (!monthly[key]) monthly[key] = { revenue: 0, bookings: 0 }

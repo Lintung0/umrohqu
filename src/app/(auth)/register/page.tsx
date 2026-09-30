@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { User, Mail, AlertCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { User, Mail } from "lucide-react"
 import { PasswordInput } from "@/components/auth/password-input"
 import { PrimaryButton } from "@/components/auth/primary-button"
 import { Divider } from "@/components/auth/divider"
@@ -20,6 +21,7 @@ type RegisterErrors = {
 
 export default function RegisterPage() {
   const { t } = useTranslation()
+  const router = useRouter()
 
   const registerSchema = z
     .object({
@@ -89,7 +91,7 @@ export default function RegisterPage() {
         return
       }
 
-      window.location.href = `/verify-email?email=${encodeURIComponent(form.email.trim().toLowerCase())}`
+      router.push(`/verify-email?email=${encodeURIComponent(form.email.trim().toLowerCase())}`)
     } catch {
       setAuthError(t.auth.email_invalid)
     } finally {

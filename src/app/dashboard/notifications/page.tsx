@@ -1,7 +1,6 @@
 "use client"
 
-import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Bell, BellRing, CheckCheck, RefreshCw, ChevronRight, ChevronLeft, Inbox } from "lucide-react"
@@ -43,16 +42,16 @@ function pageNumbers(total: number, current: number): (number | "…")[] {
 }
 
 export default function NotificationsPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
   const [items, setItems] = useState<AppNotification[]>([])
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("semua")
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
 
-  async function load() {
-    setLoading(true)
+  const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
+    setLoading(true)
     if (!user) {
       setItems([])
       setLoading(false)
@@ -67,11 +66,13 @@ export default function NotificationsPage() {
       .limit(100)
     setItems((data as unknown as AppNotification[]) || [])
     setLoading(false)
-  }
+  }, [supabase])
 
   useEffect(() => {
-    load()
-  }, [])
+    ;(async () => {
+      await load()
+    })()
+  }, [load])
 
   const filtered = useMemo(() => {
     if (filter === "unread") return items.filter((n) => !n.is_read)

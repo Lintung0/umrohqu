@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Search, Eye, Check, X, Ban, Mail, Phone, MapPin, Loader2 } from "lucide-react"
-import { formatRupiah } from "@/lib/utils"
+import { Search, Check, X, Ban, Mail, Phone, MapPin, Loader2 } from "lucide-react"
+
 import { toast } from "sonner"
 
 interface TenantRow {
@@ -14,7 +14,7 @@ interface TenantRow {
   contact_email: string | null
   contact_phone: string | null
   status: string
-  config: any
+  config: Record<string, unknown> | null
   package_count?: number
   booking_count?: number
 }
@@ -27,7 +27,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 }
 
 export default function AdminTravelsPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [tenants, setTenants] = useState<TenantRow[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -42,10 +42,10 @@ export default function AdminTravelsPage() {
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
 
-      const tenantsList = (data as any) || []
+      const tenantsList = (data as unknown as TenantRow[]) || []
 
       const counts = await Promise.all(
-        tenantsList.map(async (t: any) => {
+        tenantsList.map(async (t) => {
           const [pkgRes, bookRes] = await Promise.all([
             supabase.from("packages").select("id", { count: "exact", head: true }).eq("tenant_id", t.id).is("deleted_at", null),
             supabase.from("bookings").select("id", { count: "exact", head: true }).eq("tenant_id", t.id).is("deleted_at", null),
@@ -58,7 +58,7 @@ export default function AdminTravelsPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function updateStatus(tenantId: string, newStatus: string) {
     setUpdatingId(tenantId)

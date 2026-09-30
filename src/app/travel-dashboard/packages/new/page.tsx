@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -48,8 +48,6 @@ const packageSchema = z.object({
   cancellation_policy: z.string().optional().nullable(),
   image_url: z.string().url("URL tidak valid").optional().or(z.literal("")),
 })
-
-type PackageFormData = z.infer<typeof packageSchema>
 
 const PACKAGE_TYPES = [
   { value: "reguler", label: "Reguler" },
@@ -99,7 +97,7 @@ function slugify(text: string): string {
 
 export default function NewPackagePage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -145,7 +143,7 @@ export default function NewPackagePage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

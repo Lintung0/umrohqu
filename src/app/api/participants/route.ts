@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server"
 
 const UNAVAILABLE = { error: "Modul data peserta tidak tersedia pada skema baru" }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { Search, UserPlus, Shield, Mail, Phone, X, Loader2, UserX, UserCheck } from "lucide-react"
@@ -40,8 +40,8 @@ function getRoleLabel(role: string) {
 }
 
 export default function TravelStaffPage() {
-  const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
+  const supabase = useMemo(() => createClient(), [])
+  const [_user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [staff, setStaff] = useState<StaffMember[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -74,7 +74,7 @@ export default function TravelStaffPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   const filtered = staff.filter((s) => {
     const q = searchQuery.toLowerCase()
@@ -109,7 +109,7 @@ export default function TravelStaffPage() {
       }, ...prev])
       setShowInvite(false)
       setInviteForm({ email: "", full_name: "", phone: "", role: "travel_operational" })
-    } catch (e) {
+    } catch {
       alert("Terjadi kesalahan")
     } finally {
       setInviting(false)
@@ -123,7 +123,7 @@ export default function TravelStaffPage() {
       const now = new Date().toISOString()
       await supabase.from("users").update({ deleted_at: now }).eq("id", staffId)
       setStaff((prev) => prev.map((s) => s.id === staffId ? { ...s, deleted_at: now } : s))
-    } catch (e) {
+    } catch {
       alert("Gagal menonaktifkan akun")
     } finally {
       setActionLoading(null)
@@ -135,7 +135,7 @@ export default function TravelStaffPage() {
     try {
       await supabase.from("users").update({ deleted_at: null }).eq("id", staffId)
       setStaff((prev) => prev.map((s) => s.id === staffId ? { ...s, deleted_at: null } : s))
-    } catch (e) {
+    } catch {
       alert("Gagal mengaktifkan kembali")
     } finally {
       setActionLoading(null)

@@ -62,8 +62,37 @@ export default function CashbackRequestsPage() {
   }, [router])
 
   useEffect(() => {
-    load()
-  }, [load])
+    // Mount fetch as an async continuation: every setState below runs only
+    // after an await (never synchronously at effect start). `load` is kept
+    // for the refresh button / row actions where a sync setLoading is fine.
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch("/api/cashback/requests")
+        if (cancelled) return
+        if (!res.ok) {
+          if (res.status === 401) {
+            router.push("/login")
+            return
+          }
+          if (res.status === 403) {
+            router.push("/admin")
+            return
+          }
+          throw new Error("Gagal memuat data")
+        }
+        const data = await res.json()
+        if (!cancelled) setRows(data.data || [])
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Terjadi kesalahan")
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [router])
 
   const runAction = async (id: string, action: "approve" | "disburse" | "reject", note?: string) => {
     setBusyId(id)

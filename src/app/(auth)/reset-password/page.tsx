@@ -73,8 +73,8 @@ export default function ResetPasswordPage() {
       }
       setSuccess(true)
       setTimeout(() => router.push("/login"), 2000)
-    } catch (err: any) {
-      setAuthError(err.message || "Terjadi kesalahan saat menyimpan kata sandi baru.")
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error && err.message ? err.message : "Terjadi kesalahan saat menyimpan kata sandi baru.")
     } finally {
       setLoading(false)
     }

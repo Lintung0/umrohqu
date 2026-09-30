@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, CheckCircle, AlertCircle, Building2 } from "lucide-react"
+import { CheckCircle, AlertCircle, Building2 } from "lucide-react"
 
 export default function SetupFeePage() {
   const router = useRouter()

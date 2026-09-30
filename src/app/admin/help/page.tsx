@@ -1,6 +1,6 @@
 "use client"
 
-import { LifeBuoy, Search, BookOpen, MessageSquare, Phone, Mail, ExternalLink } from "lucide-react"
+import { LifeBuoy, Search, BookOpen, MessageSquare, Phone, Mail } from "lucide-react"
 
 const FAQ_DATA = [
   { q: "Bagaimana cara mendaftarkan travel baru?", a: "Travel dapat mendaftar langsung melalui halaman pendaftaran. Isi data lengkap, upload dokumen, dan tim kami akan memverifikasi dalam 1-3 hari kerja." },

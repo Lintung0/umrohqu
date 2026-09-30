@@ -51,7 +51,7 @@ export default function AdminSidebar({ currentRole }: AdminSidebarProps) {
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userName, setUserName] = useState("")
-  const [userEmail, setUserEmail] = useState("")
+  const [_userEmail, setUserEmail] = useState("")
   const visibleNav = ADMIN_NAV.filter((item) => item.roles.includes(currentRole))
 
   useEffect(() => {

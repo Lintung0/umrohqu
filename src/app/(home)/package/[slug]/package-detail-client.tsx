@@ -25,7 +25,7 @@ import { getPackageAvailable } from "@/lib/utils"
 import { useCompare } from "@/lib/compare-context"
 import type { Package as PackageType } from "@/lib/types"
 
-interface PackageDetail {
+export interface PackageDetail {
   id: string
   name: string
   slug: string
@@ -57,7 +57,7 @@ interface PackageDetail {
   travel: { id: string; name: string; slug: string; is_verified?: boolean; logo_url?: string | null; city?: string | null; description?: string | null; phone?: string | null; contact_email?: string | null } | null
 }
 
-interface ReviewRow {
+export interface ReviewRow {
   id: string
   rating: number
   review: string | null

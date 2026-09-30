@@ -31,7 +31,7 @@ import {
   X,
   AlertTriangle,
   Clock,
-  Activity,
+  
   Check,
   Loader,
 } from "lucide-react";
@@ -76,10 +76,10 @@ interface TaskRow {
 }
 
 interface DataTableProps {
-  data?: any;
+  data?: ActionCenterData | null;
 }
 
-export function DataTable({ data: initialData }: DataTableProps) {
+export function DataTable({ data: _initialData }: DataTableProps) {
   const [data, setData] = React.useState<ActionCenterData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [activeTaskType, setActiveTaskType] = React.useState<
@@ -96,7 +96,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
       if (!res.ok) throw new Error("Gagal mengambil data Action Center");
       const json = await res.json();
       setData(json);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
     } finally {
       setLoading(false);
@@ -155,7 +155,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
     });
 
     // Refund
-    data.refund.items.forEach((item, idx) => {
+    data.refund.items.forEach((item, _idx) => {
       mappedRows.push({
         id: item.id,
         category: "refund",
@@ -172,7 +172,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
     });
 
     // Bidding
-    data.bidding.items.forEach((item, idx) => {
+    data.bidding.items.forEach((item, _idx) => {
       mappedRows.push({
         id: item.id,
         category: "bidding",
@@ -337,6 +337,9 @@ export function DataTable({ data: initialData }: DataTableProps) {
     [],
   );
 
+  // TanStack's useReactTable returns memo-unsafe functions by design, so no
+  // structural fix exists that keeps the table working — suppress only this line.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: filteredRows,
     columns,
@@ -582,7 +585,7 @@ export function DataTable({ data: initialData }: DataTableProps) {
                               Alasan:
                             </span>
                             <span className="col-span-2 text-foreground font-medium leading-relaxed font-sans">
-                              "{item.reason}"
+                              &quot;{item.reason}&quot;
                             </span>
                           </div>
                         </>

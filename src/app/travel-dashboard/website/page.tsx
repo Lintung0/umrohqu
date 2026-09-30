@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Globe, Palette, Save, Loader2, Check, Layout, ExternalLink, Eye, Sparkles } from "lucide-react"
 import { toast } from "sonner"
@@ -20,7 +20,7 @@ interface TemplateRow {
 
 export default function TravelWebsitePage() {
   const { t } = useTranslation()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [subdomain, setSubdomain] = useState("")
   const [customDomain, setCustomDomain] = useState("")
@@ -61,9 +61,9 @@ export default function TravelWebsitePage() {
         setTenantSlug(tenantRes.data.slug || "")
         setCustomDomain(tenantRes.data.custom_domain || "")
         setTenantData(tenantRes.data as Tenant)
-        const config = (tenantRes.data.config || {}) as any
-        if (config.brand_color) setBrandColor(config.brand_color)
-        if (config.description) setDescription(config.description)
+        const config = (tenantRes.data.config || {}) as Record<string, unknown>
+        if (typeof config.brand_color === "string") setBrandColor(config.brand_color)
+        if (typeof config.description === "string") setDescription(config.description)
       }
 
       if (websiteRes.data) {
@@ -75,7 +75,7 @@ export default function TravelWebsitePage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function handleSave() {
     if (!tenantId) return

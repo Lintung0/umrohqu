@@ -5,7 +5,15 @@
   "scripts": {
     "dev": "NODE_OPTIONS=\"--dns-result-order=ipv4first\" next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "eslint --max-warnings 0 --fix"
+    ]
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -45,12 +53,15 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "^5.15.13",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "^16.3.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
     "supabase": "^2.109.1",
     "tailwindcss": "^4",
     "typescript": "^5"

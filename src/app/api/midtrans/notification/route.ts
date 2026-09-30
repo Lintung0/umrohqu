@@ -8,11 +8,11 @@ import {
 
 export const dynamic = "force-dynamic"
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   const admin = createAdminClient()
 
   try {
-    const notification = await request.json()
+    const notification = await _request.json()
 
     const orderId: string = notification.order_id || notification.transaction_id || ""
     const rawStatus: string = notification.transaction_status || ""

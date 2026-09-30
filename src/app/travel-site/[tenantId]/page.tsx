@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
@@ -13,7 +13,7 @@ import type { Tenant, Package } from "@/lib/types"
 export default function TravelSitePage() {
   const params = useParams()
   const tenantId = params.tenantId as string
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const [tenant, setTenant] = useState<(Tenant & Record<string, unknown>) | null>(null)
   const [packages, setPackages] = useState<Package[]>([])
@@ -45,7 +45,7 @@ export default function TravelSitePage() {
       setLoading(false)
     }
     fetchData()
-  }, [tenantId])
+  }, [tenantId, supabase])
 
   if (loading) {
     return (

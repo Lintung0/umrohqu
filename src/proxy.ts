@@ -30,7 +30,7 @@ const PUBLIC_ROUTES = [
 const SKIP_SUBDOMAIN_HOSTS = ["www", "api", "localhost", "127.0.0.1"]
 
 const CUSTOM_DOMAIN_CACHE = new Map<string, { tenantId: string; expiresAt: number }>()
-const CACHE_TTL_MS = 60_000
+const _CACHE_TTL_MS = 60_000
 
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.some((route) => {
@@ -63,8 +63,8 @@ function isIpOrLocalhost(hostname: string): boolean {
   return false
 }
 
-export async function middleware(request: NextRequest) {
-  const { hostname, protocol } = request.nextUrl
+export async function proxy(request: NextRequest) {
+  const { hostname, protocol: _protocol } = request.nextUrl
   const { pathname } = request.nextUrl
 
   const subdomain = getSubdomain(hostname)

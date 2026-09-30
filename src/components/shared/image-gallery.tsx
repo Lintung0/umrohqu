@@ -29,7 +29,7 @@ interface ImageGalleryProps {
   title?: string
 }
 
-export default function ImageGallery({ images, items, alt = "Gallery", title }: ImageGalleryProps) {
+export default function ImageGallery({ images, items, alt = "Gallery", title: _title }: ImageGalleryProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
   const [selectedIndex, setSelectedIndex] = useState(0)
 

@@ -15,7 +15,7 @@ interface TemplateProps {
 
 export default function CleanMinimalTemplate({ tenant, packages, themeConfig }: TemplateProps) {
   const primary = (themeConfig?.primary_color as string) || tenant.brand_color || "#111827"
-  const accent = (themeConfig?.secondary_color as string) || primary
+  const _accent = (themeConfig?.secondary_color as string) || primary
 
   return (
     <div className="min-h-screen bg-white">
@@ -125,7 +125,7 @@ export default function CleanMinimalTemplate({ tenant, packages, themeConfig }: 
   )
 }
 
-function PackageCard({ pkg, primary }: { pkg: Package; primary: string }) {
+function PackageCard({ pkg, primary: _primary }: { pkg: Package; primary: string }) {
   return (
     <Link href={`/package/${pkg.slug}`} className="group block bg-white border border-border/60 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
       <div className="relative h-44 overflow-hidden">

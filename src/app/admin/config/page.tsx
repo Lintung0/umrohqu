@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DollarSign, Save, Info, Loader2 } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
@@ -18,7 +18,7 @@ interface FeeConfig {
 }
 
 export default function AdminConfigPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [config, setConfig] = useState<FeeConfig | null>(null)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -30,7 +30,7 @@ export default function AdminConfigPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function handleSave() {
     if (!config) return

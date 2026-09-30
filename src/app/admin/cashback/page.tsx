@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Search, Save, Loader2, BadgePercent, TrendingUp } from "lucide-react"
 import { formatRupiah } from "@/lib/utils"
@@ -16,8 +16,18 @@ interface CashbackRow {
   travel_name: string | null
 }
 
+interface PackageCashbackRow {
+  id: string
+  name: string
+  type: string
+  price: number | string
+  cashback_amount: number | string | null
+  status: string
+  travel: { name: string | null } | { name: string | null }[] | null
+}
+
 export default function AdminCashbackPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [rows, setRows] = useState<CashbackRow[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -36,7 +46,7 @@ export default function AdminCashbackPage() {
       if (error) {
         toast.error("Gagal memuat data paket")
       } else {
-        const list: CashbackRow[] = (data as any[] | null || []).map((p) => ({
+        const list: CashbackRow[] = ((data as unknown as PackageCashbackRow[] | null) || []).map((p) => ({
           id: p.id,
           name: p.name,
           type: p.type,
@@ -50,7 +60,7 @@ export default function AdminCashbackPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   const filtered = rows.filter((r) => {
     const q = searchQuery.toLowerCase()

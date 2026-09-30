@@ -2,21 +2,34 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
-import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Clock, Loader2, Search, ArrowRight } from "lucide-react";
+import { Loader2, Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import { formatRupiah, decodeUnicodeEscapes } from "@/lib/utils";
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields";
 import PackageCard from "@/components/shared/package-card";
 import type { Package, Tenant } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 
+type PackageWithRating = Package & {
+  avg_rating: number | null;
+  review_count: number;
+};
+
+interface BookingPackageRef {
+  id: string;
+  package_id: string;
+}
+
+interface ReviewRatingRow {
+  rating: number;
+  booking_id: string;
+}
+
 function packagesEqual(a: Package[], b: Package[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
-    if (a[i].id !== b[i].id || (a[i] as any).image_url !== (b[i] as any).image_url) return false;
+    if (a[i].id !== b[i].id || a[i].image_url !== b[i].image_url) return false;
   }
   return true;
 }
@@ -76,16 +89,16 @@ export default function PackageSection() {
           .from("bookings")
           .select("id, package_id")
           .in("package_id", ids);
-        const bookingIds = (bookings || []).map((b: any) => b.id);
+        const bookingIds = (bookings || []).map((b: BookingPackageRef) => b.id);
         const bookingPkgMap = new Map<string, string>();
-        (bookings || []).forEach((b: any) => { bookingPkgMap.set(b.id, b.package_id); });
+        (bookings || []).forEach((b: BookingPackageRef) => { bookingPkgMap.set(b.id, b.package_id); });
 
         const { data: reviews } = bookingIds.length > 0
           ? await supabase.from("reviews").select("rating, booking_id").in("booking_id", bookingIds)
           : { data: null };
 
         const ratingMap = new Map<string, { sum: number; count: number }>();
-        (reviews || []).forEach((r: any) => {
+        (reviews || []).forEach((r: ReviewRatingRow) => {
           const pkgId = bookingPkgMap.get(r.booking_id);
           if (pkgId) {
             const existing = ratingMap.get(pkgId) || { sum: 0, count: 0 };
@@ -95,7 +108,7 @@ export default function PackageSection() {
           }
         });
 
-        (pkgs as any).forEach((p: any) => {
+        (pkgs as PackageWithRating[]).forEach((p: PackageWithRating) => {
           const r = ratingMap.get(p.id);
           p.avg_rating = r ? Math.round((r.sum / r.count) * 10) / 10 : null;
           p.review_count = r ? r.count : 0;
@@ -142,7 +155,7 @@ export default function PackageSection() {
     fetchPackages(next);
   }
 
-  const toggleCompare = (id: string) => {
+  const _toggleCompare = (id: string) => {
     setCompared((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : prev.length < 3 ? [...prev, id] : prev
     );

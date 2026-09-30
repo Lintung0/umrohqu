@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, Clock } from "lucide-react"
+import { Search } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 interface ArticleRow {

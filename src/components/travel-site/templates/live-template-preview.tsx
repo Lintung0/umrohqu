@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { X, ExternalLink, Loader2 } from "lucide-react"
+import { X } from "lucide-react"
 import { TEMPLATE_BY_ID, MOCK_TENANT, MOCK_PACKAGES } from "./template-registry"
 import type { Tenant, Package } from "@/lib/types"
 

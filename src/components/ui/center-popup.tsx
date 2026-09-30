@@ -16,31 +16,39 @@ interface CenterPopupProps {
 }
 
 export function CenterPopup({ show, message, onClose, duration = 2200, variant = "success", actionLabel, actionHref }: CenterPopupProps) {
-  const [visible, setVisible] = useState(false)
+  const [open, setOpen] = useState(show)
   const [animatingOut, setAnimatingOut] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    if (show) {
-      setVisible(true)
-      setAnimatingOut(false)
-      const timer = setTimeout(() => {
-        setAnimatingOut(true)
-        setTimeout(() => {
-          setVisible(false)
-          onClose?.()
-        }, 300)
-      }, duration)
-      return () => clearTimeout(timer)
-    }
-  }, [show, duration, onClose])
+  // Mirror `show` becoming true during render (render-phase update) instead
+  // of syncing it with setState inside an effect. A fading popup is left to
+  // finish its own timers, matching the previous behavior.
+  if (show && !open) {
+    setOpen(true)
+    setAnimatingOut(false)
+  }
 
-  if (!visible) return null
+  useEffect(() => {
+    if (!open) return
+    const timer = setTimeout(() => setAnimatingOut(true), duration)
+    return () => clearTimeout(timer)
+  }, [open, duration])
+
+  useEffect(() => {
+    if (!animatingOut) return
+    const timer = setTimeout(() => {
+      setOpen(false)
+      onClose?.()
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [animatingOut, onClose])
+
+  if (!open) return null
 
   const isWarning = variant === "warning"
 
   function handleAction() {
-    setVisible(false)
+    setOpen(false)
     onClose?.()
     if (actionHref) router.push(actionHref)
   }

@@ -2,9 +2,11 @@ import type { Tenant } from "@/lib/types"
 import type { SupabaseClient } from "@supabase/supabase-js"
 
 export type TravelTenant = Tenant & {
-  city?: string
-  phone?: string
-  contact_email?: string
+  city?: string | null
+  phone?: string | null
+  contact_email?: string | null
+  ppiu_number?: string | null
+  accredited_at?: string | null
   total_jamaah?: number
 }
 
@@ -33,7 +35,7 @@ export async function enrichTenantsWithDetail(
 
   return tenants.map((t) => {
     if (!t) return t
-    const next = { ...t } as any
+    const next: TravelTenant = { ...t }
     const contact = contactMap.get(t.id)
     if (contact?.email) next.contact_email = contact.email
     if (contact?.phone) next.phone = contact.phone

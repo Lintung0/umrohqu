@@ -9,7 +9,33 @@ const AIRLINE_QUALITY: Record<string, number> = {
   "Royal Jordanian": 4, "Batik Air": 3, "Lion Air": 2, "Citilink": 1,
 }
 
-function buildPackageContext(packages: any[]) {
+interface ComparePackage {
+  id: string
+  name: string
+  travel_name?: string | null
+  price: number
+  original_price?: number | null
+  type?: string | null
+  duration_nights?: number | null
+  departure_month?: string | null
+  departure_year?: number | string | null
+  airline?: string | null
+  hotel_makkah?: string | null
+  hotel_makkah_stars?: number | null
+  hotel_madinah?: string | null
+  hotel_madinah_stars?: number | null
+  facilities?: string[] | null
+  quota?: number | null
+  available?: number | null
+  quota_taken?: number | null
+}
+
+interface ChatHistoryEntry {
+  role: string
+  content: string
+}
+
+function buildPackageContext(packages: ComparePackage[]) {
   return packages.map((p, i) => `
 Paket ${i + 1}: "${p.name}" (ID: ${p.id})
 - Travel: ${p.travel_name || "-"}
@@ -27,7 +53,7 @@ Paket ${i + 1}: "${p.name}" (ID: ${p.id})
 `).join("\n---\n")
 }
 
-function calcScore(pkg: any) {
+function calcScore(pkg: ComparePackage) {
   const pricePerDay = pkg.price / (pkg.duration_nights || 1)
   const makkahStars = pkg.hotel_makkah_stars || 0
   const madinahStars = pkg.hotel_madinah_stars || 0
@@ -42,7 +68,7 @@ function formatRupiah(num: number) {
   return "Rp " + Math.round(num).toLocaleString("id-ID")
 }
 
-function generateFallbackResponse(packages: any[], message: string, history: any[]): string {
+function generateFallbackResponse(packages: ComparePackage[], message: string, _history: ChatHistoryEntry[]): string {
   const scores = packages.map(calcScore)
   const msg = message.toLowerCase()
 
@@ -113,7 +139,7 @@ function generateFallbackResponse(packages: any[], message: string, history: any
     let text = intro
     text += `📅 **Paket terlama:** **${byDuration[0].name}** — ${byDuration[0].duration_nights} hari\n`
     text += `📅 **Paket terpendek:** **${byDuration[byDuration.length - 1].name}** — ${byDuration[byDuration.length - 1].duration_nights} hari\n\n`
-    byDuration.forEach((p, i) => {
+    byDuration.forEach((p, _i) => {
       text += `• ${p.name}: ${p.duration_nights} hari — ${formatRupiah(Math.round(scores[packages.indexOf(p)].pricePerDay))}/hari\n`
     })
     text += `\n💡 Makin lama biasanya lebih hemat per hari, tapi pertimbangkan jadwal libur Anda.`
@@ -145,7 +171,7 @@ function generateFallbackResponse(packages: any[], message: string, history: any
 }
 
 export async function POST(req: Request) {
-  let body: { packages: any[]; message: string; history?: any[] }
+  let body: { packages: ComparePackage[]; message: string; history?: ChatHistoryEntry[] }
 
   try {
     body = await req.json()
@@ -227,7 +253,7 @@ Selamat membantu! 🕋`
               controller.enqueue(new TextEncoder().encode(text))
             }
           }
-        } catch (e) {
+        } catch (_e) {
           controller.enqueue(new TextEncoder().encode("\n\nMaaf, terjadi kesalahan saat memproses jawaban. Silakan coba lagi."))
         } finally {
           controller.close()
@@ -241,7 +267,7 @@ Selamat membantu! 🕋`
         "Cache-Control": "no-cache",
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("AI recommend error:", error)
 
     const fallback = generateFallbackResponse(packages, message, history || [])

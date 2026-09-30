@@ -109,9 +109,12 @@ export default function AiChatPanel({ packages }: AiChatPanelProps) {
       const { done, value } = await reader.read()
       if (done) break
       accumulated += decoder.decode(value, { stream: true })
+      // Snapshot into a fresh const so the updater below only reads an
+      // immutable binding and always produces a new message object.
+      const snapshot = accumulated
       setMessages((prev) => {
         const updated = [...prev]
-        updated[updated.length - 1] = { role: "assistant", content: accumulated }
+        updated[updated.length - 1] = { role: "assistant", content: snapshot }
         return updated
       })
     }

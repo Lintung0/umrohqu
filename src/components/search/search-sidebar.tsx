@@ -1,6 +1,7 @@
 "use client"
 
-import { RotateCcw, MapPin, Clock, Banknote, SlidersHorizontal } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { RotateCcw, MapPin, Clock, Banknote, ChevronDown, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
 

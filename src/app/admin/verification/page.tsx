@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Shield, Check, X, Building2, Loader2 } from "lucide-react"
+import { Shield, Check, X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 interface TenantPending {
@@ -16,7 +16,7 @@ interface TenantPending {
 }
 
 export default function AdminVerificationPage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [tenants, setTenants] = useState<TenantPending[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
@@ -24,11 +24,11 @@ export default function AdminVerificationPage() {
   useEffect(() => {
     async function load() {
       const { data } = await supabase.from("tenants").select("id, name, slug, status, created_at").is("deleted_at", null).order("created_at", { ascending: false })
-      setTenants((data as any) || [])
+      setTenants((data as unknown as TenantPending[]) || [])
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function updateStatus(id: string, status: string) {
     setUpdatingId(id)

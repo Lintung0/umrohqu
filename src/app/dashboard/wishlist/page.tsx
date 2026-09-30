@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { enrichEmbeddedPackageCovers } from "@/lib/package-covers"
 import { User } from "@supabase/supabase-js"
@@ -9,7 +9,13 @@ import { formatRupiah } from "@/lib/utils"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import Link from "next/link"
 import Image from "next/image"
+import type { Package } from "@/lib/types"
 import { toast } from "sonner"
+
+interface WishlistRow {
+  id: string
+  package: Package | null
+}
 
 interface WishlistItem {
   id: string
@@ -26,8 +32,8 @@ interface WishlistItem {
 }
 
 export default function WishlistPage() {
-  const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
+  const supabase = useMemo(() => createClient(), [])
+  const [_user, setUser] = useState<User | null>(null)
   const [items, setItems] = useState<WishlistItem[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -42,13 +48,13 @@ export default function WishlistPage() {
           .select("id, package:packages(id, name, slug, price, duration_nights, tenant_id, status)")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
-        const enriched = await enrichEmbeddedPackageCovers(supabase, data as any)
-        setItems((enriched as any) || [])
+        const enriched = await enrichEmbeddedPackageCovers(supabase, data as unknown as WishlistRow[])
+        setItems((enriched as unknown as WishlistItem[]) || [])
       }
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function confirmRemove() {
     if (!deletingId) return

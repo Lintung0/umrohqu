@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { Search, Eye, Check, X, Download, Users } from "lucide-react"
+import { Search, Check, X } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel, BOOKING_STATUSES } from "@/lib/constants"
 import { toast } from "sonner"
 import { useTranslation } from "@/lib/i18n"
@@ -23,9 +23,9 @@ interface BookingRow {
 
 export default function TravelBookingsPage() {
   const { t } = useTranslation()
-  const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
-  const [tenantId, setTenantId] = useState<string | null>(null)
+  const supabase = useMemo(() => createClient(), [])
+  const [_user, setUser] = useState<User | null>(null)
+  const [_tenantId, setTenantId] = useState<string | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [statusFilter, setStatusFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -48,11 +48,11 @@ export default function TravelBookingsPage() {
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
 
-      setBookings((data as any) || [])
+      setBookings((data as unknown as BookingRow[]) || [])
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   async function updateBookingStatus(bookingId: string, newStatus: string) {
     if (newStatus === "confirmed" || newStatus === "cancelled") {
@@ -72,7 +72,7 @@ export default function TravelBookingsPage() {
       return
     }
 
-    const updateData: Record<string, any> = { status: newStatus }
+    const updateData: Record<string, string> = { status: newStatus }
     const { error } = await supabase.from("bookings").update(updateData).eq("id", bookingId)
     if (error) {
       toast.error(t("travel_dashboard.status_update_failed"))

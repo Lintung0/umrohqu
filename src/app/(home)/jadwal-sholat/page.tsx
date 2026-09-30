@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Clock, MapPin, Loader2, Landmark, Sun, Moon, Sunrise, Sunset } from "lucide-react"
+import { MapPin, Loader2, Landmark, Sun, Moon, Sunrise, Sunset } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 
@@ -55,8 +55,10 @@ export default function JadwalSholatPage() {
   }, [])
 
   useEffect(() => {
-    fetchTimes(city)
-  }, [])
+    ;(async () => {
+      await fetchTimes("Jakarta")
+    })()
+  }, [fetchTimes])
 
   useEffect(() => {
     if (!times) return
@@ -76,7 +78,6 @@ export default function JadwalSholatPage() {
 
       for (const prayer of prayers) {
         if (prayer.name === "Terbit") continue
-        const [h, m] = prayer.time.split(":").map(Number)
         const prayerDate = new Date(`${todayStr}T${prayer.time}:00`)
         if (prayerDate > now) {
           const diff = prayerDate.getTime() - now.getTime()

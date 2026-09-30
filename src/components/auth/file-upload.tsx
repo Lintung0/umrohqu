@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useRef } from "react"
 import { Upload, FileText, X, AlertCircle, Loader2, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -114,9 +115,12 @@ export function FileUpload({
         <div className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-auth-primary/30 bg-auth-primary-light/50 px-4 py-3">
           {(isImage || (isDocOrImage && value && /\.(jpg|jpeg|png|webp)$/i.test(value))) ? (
             <a href={value} target="_blank" rel="noopener noreferrer" className="shrink-0">
-              <img
+              <Image
                 src={value}
                 alt={fileName || "Pratinjau"}
+                width={48}
+                height={48}
+                unoptimized
                 className="h-12 w-12 rounded-lg object-cover hover:opacity-80 transition-opacity"
               />
             </a>

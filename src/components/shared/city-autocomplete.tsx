@@ -29,9 +29,13 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  // Mirror external `value` changes during render (render-phase update, the
+  // sanctioned alternative to a syncing effect) instead of setInput in useEffect.
+  const [prevValue, setPrevValue] = useState(value)
+  if (prevValue !== value) {
+    setPrevValue(value)
     setInput(value)
-  }, [value])
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -80,7 +84,7 @@ export default function CityAutocomplete({ value, onChange, placeholder = "Cari 
       }
       const data = await res.json()
 
-      const results: Suggestion[] = (data.features || []).map((f: any) => ({
+      const results: Suggestion[] = (data.features || []).map((f: { properties: { city?: string; name?: string; country?: string; country_code?: string; formatted?: string; lat?: number; lon?: number } }) => ({
         name: f.properties.city || f.properties.name || "",
         country: f.properties.country || "",
         country_code: f.properties.country_code || "",

@@ -1,8 +1,8 @@
 "use client"
 
-import { useRef, useMemo } from "react"
+import { useRef, useMemo, useState } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { Float, MeshDistortMaterial, Environment } from "@react-three/drei"
+import { Float, Environment } from "@react-three/drei"
 import * as THREE from "three"
 
 function KaabaBody() {
@@ -110,7 +110,7 @@ function KaabaBody() {
 
 function Particles() {
   const count = 60
-  const positions = useMemo(() => {
+  const [positions] = useState(() => {
     const pos = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
       pos[i * 3] = (Math.random() - 0.5) * 10
@@ -118,7 +118,7 @@ function Particles() {
       pos[i * 3 + 2] = (Math.random() - 0.5) * 10
     }
     return pos
-  }, [])
+  })
 
   const pointsRef = useRef<THREE.Points>(null)
   const ptTimeRef = useRef(0)

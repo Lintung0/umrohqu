@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { Package, BookOpen, Users, DollarSign, TrendingUp, CheckCircle, ArrowRight, ClipboardCheck } from "lucide-react"
@@ -9,12 +9,25 @@ import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
 import StatCard from "@/components/shared/stat-card"
 import { getTravelTenantId } from "@/lib/get-travel-tenant"
 
+interface BookingSummaryRow {
+  id: string
+  status: string
+  pilgrim_count: number
+  total: number
+}
+
+interface RecentBookingRow extends BookingSummaryRow {
+  package: { name: string } | null
+  customer: { full_name: string } | null
+  created_at: string
+}
+
 interface TravelStats {
   packageCount: number
   bookingCount: number
   totalRevenue: number
   totalPilgrims: number
-  recentBookings: any[]
+  recentBookings: RecentBookingRow[]
 }
 
 const ONBOARDING_STEPS = [
@@ -26,9 +39,9 @@ const ONBOARDING_STEPS = [
 ]
 
 export default function TravelDashboardOverview() {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [user, setUser] = useState<User | null>(null)
-  const [tenantId, setTenantId] = useState<string | null>(null)
+  const [_tenantId, setTenantId] = useState<string | null>(null)
   const [stats, setStats] = useState<TravelStats>({ packageCount: 0, bookingCount: 0, totalRevenue: 0, totalPilgrims: 0, recentBookings: [] })
   const [onboardingStep, setOnboardingStep] = useState(1)
   const [loading, setLoading] = useState(true)
@@ -52,7 +65,7 @@ export default function TravelDashboardOverview() {
         ])
 
         if (tenantRes.data) {
-          const config = (tenantRes.data.config || {}) as any
+          const config = (tenantRes.data.config || {}) as { onboarding_step?: string | number }
           const step = Number(config.onboarding_step)
           if (step >= 1 && step <= 5) {
             setOnboardingStep(step)
@@ -61,15 +74,15 @@ export default function TravelDashboardOverview() {
           }
         }
 
-        const bookings = bookingsRes.data || []
-        const allBookings = allBookingsRes.data || []
+        const bookings = (bookingsRes.data || []) as unknown as RecentBookingRow[]
+        const allBookings = (allBookingsRes.data || []) as unknown as BookingSummaryRow[]
 
         const totalRevenue = allBookings
-          .filter((b: any) => b.status === "confirmed" || b.status === "completed")
-          .reduce((sum: number, b: any) => sum + (b.total || 0), 0)
+          .filter((b) => b.status === "confirmed" || b.status === "completed")
+          .reduce((sum: number, b) => sum + (b.total || 0), 0)
         const totalPilgrims = allBookings
-          .filter((b: any) => b.status !== "cancelled")
-          .reduce((sum: number, b: any) => sum + (b.pilgrim_count || 0), 0)
+          .filter((b) => b.status !== "cancelled")
+          .reduce((sum: number, b) => sum + (b.pilgrim_count || 0), 0)
 
         setStats({
           packageCount: packagesRes.count || 0,
@@ -85,7 +98,7 @@ export default function TravelDashboardOverview() {
       }
     }
     load()
-  }, [])
+  }, [supabase])
 
   if (loading) {
     return (
@@ -175,7 +188,7 @@ export default function TravelDashboardOverview() {
           <div className="divide-y divide-border">
             {stats.recentBookings.length === 0 ? (
               <p className="p-8 text-center text-muted-foreground text-sm">Belum ada booking</p>
-            ) : stats.recentBookings.slice(0, 5).map((booking: any) => (
+            ) : stats.recentBookings.slice(0, 5).map((booking) => (
               <div key={booking.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{booking.customer?.full_name || "Pelanggan"}</p>

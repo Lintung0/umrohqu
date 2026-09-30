@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, Eye, Edit, Trash2, Users, X, Loader2, Search, Filter, Layout, Sparkles, Globe } from "lucide-react"
+import { Plus, Eye, Edit, Trash2, Users, X, Loader2, Search, Filter, Layout, Sparkles } from "lucide-react"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -54,7 +54,16 @@ export default function AdminTemplatesPage() {
   }, [])
 
   useEffect(() => {
-    fetchTemplates().finally(() => setLoading(false))
+    // Mount fetch as an async continuation: setLoading(false) runs only after
+    // the fetch resolves, never synchronously at effect start.
+    let cancelled = false
+    ;(async () => {
+      await fetchTemplates()
+      if (!cancelled) setLoading(false)
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [fetchTemplates])
 
   // Realtime subscription

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BarChart3, TrendingUp, DollarSign, Package, Users } from "lucide-react"
@@ -17,9 +17,9 @@ interface BookingRow {
 }
 
 export default function TravelReportsPage() {
-  const supabase = createClient()
-  const [user, setUser] = useState<User | null>(null)
-  const [tenantId, setTenantId] = useState<string | null>(null)
+  const supabase = useMemo(() => createClient(), [])
+  const [_user, setUser] = useState<User | null>(null)
+  const [_tenantId, setTenantId] = useState<string | null>(null)
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [depositBalance, setDepositBalance] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -49,11 +49,11 @@ export default function TravelReportsPage() {
       ])
       setDepositBalance(Number(depositRes.data?.balance || 0))
 
-      setBookings((data as any) || [])
+      setBookings((data as unknown as BookingRow[]) || [])
       setLoading(false)
     }
     load()
-  }, [])
+  }, [supabase])
 
   const paidBookings = bookings.filter((b) => b.status === "confirmed" || b.status === "completed")
   const totalRevenue = paidBookings.reduce((s, b) => s + (b.price || 0), 0)

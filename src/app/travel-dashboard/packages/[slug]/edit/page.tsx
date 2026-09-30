@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
@@ -25,6 +25,7 @@ import Link from "next/link"
 import { ImageUpload } from "@/components/shared/image-upload"
 import CommaInput from "@/components/shared/comma-input"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
+import type { Package as PackageRow } from "@/lib/types"
 
 const packageSchema = z.object({
   name: z.string().min(1, "Nama paket wajib diisi"),
@@ -90,7 +91,7 @@ export default function EditPackagePage() {
   const router = useRouter()
   const params = useParams()
   const slug = params.slug as string
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [packageId, setPackageId] = useState<string | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -98,7 +99,7 @@ export default function EditPackagePage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [originalSlug, setOriginalSlug] = useState("")
+  const [_originalSlug, setOriginalSlug] = useState("")
 
   const [name, setName] = useState("")
   const [type, setType] = useState<string>("reguler")
@@ -180,7 +181,7 @@ export default function EditPackagePage() {
       setExcludes(pkg.excludes || [])
       setTerms(pkg.terms || [])
       setCancellationPolicy(pkg.cancellation_policy || "")
-      setImageUrl((pkg as any).image_url || "")
+      setImageUrl((pkg as PackageRow).image_url || "")
       setIsActive(pkg.status === "active")
       setPkgStatus(pkg.status || null)
 
@@ -203,13 +204,15 @@ export default function EditPackagePage() {
       if (videoRow?.image_url) setVideoUrl(videoRow.image_url)
 
       if (pkg.itinerary && Array.isArray(pkg.itinerary)) {
-        const lines = pkg.itinerary.map((item: any) => {
+        const lines = (pkg.itinerary as unknown[]).map((item: unknown) => {
           if (typeof item === "string") return item
           if (item && typeof item === "object") {
-            const title = item.title ? `Hari ke-${item.day ?? ""}: ${item.title}`.replace(":  ", ": ") : `Hari ${item.day ?? ""}`
-            return item.description ? `${title} - ${item.description}` : title
+            const entry = item as { title?: string; day?: string | number; description?: string; text?: string }
+            const title = entry.title ? `Hari ke-${entry.day ?? ""}: ${entry.title}`.replace(":  ", ": ") : `Hari ${entry.day ?? ""}`
+            return entry.description ? `${title} - ${entry.description}` : title
           }
-          return item.text || item.day || JSON.stringify(item)
+          const entry = item as { text?: string; day?: string | number }
+          return entry.text || entry.day || JSON.stringify(item)
         })
         setItinerary(lines.join("\n"))
       }
@@ -217,7 +220,7 @@ export default function EditPackagePage() {
       setLoading(false)
     }
     load()
-  }, [slug])
+  }, [slug, supabase])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

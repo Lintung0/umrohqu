@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   // Modul setup fee invoice sudah dihapus pada skema baru.
   // Endpoint ini dipertahankan agar callback lama tidak menghasilkan error.
   return NextResponse.json({ received: true })

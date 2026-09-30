@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Calendar } from "lucide-react"
 
 interface TimeLeft {
@@ -86,29 +86,22 @@ function getTimeLeft(target: Date): TimeLeft {
 }
 
 export default function CountdownWidget() {
-  const [events, setEvents] = useState<IslamicEvent[]>([])
-  const [selected, setSelected] = useState<IslamicEvent | null>(null)
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+  // Derived during render: the static event list needs no syncing effect.
+  const events = useMemo(() => getUpcomingEvents(), [])
+  const [selected, setSelected] = useState<IslamicEvent | null>(() => events[0] ?? null)
+  // Tick forces a re-render every second so the countdown derived below stays live.
+  const [, setNow] = useState(() => Date.now())
 
   useEffect(() => {
-    const upcoming = getUpcomingEvents()
-    setEvents(upcoming)
-    if (upcoming.length > 0) {
-      setSelected(upcoming[0])
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!selected) return
-
-    setTimeLeft(getTimeLeft(selected.date))
-
     const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(selected.date))
+      setNow(Date.now())
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [selected])
+  }, [])
+
+  // Derived during render from the selected event.
+  const timeLeft: TimeLeft = selected ? getTimeLeft(selected.date) : { days: 0, hours: 0, minutes: 0, seconds: 0 }
 
   if (!selected) return null
 

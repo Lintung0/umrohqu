@@ -160,7 +160,7 @@ export function calculateCTR(clicks: number, impressions: number): number {
 
 export function estimateCTR(
   position: number,
-  category: string = "umroh"
+  _category: string = "umroh"
 ): number {
   // Industry average CTR by position
   const baseCTR: Record<number, number> = {

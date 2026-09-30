@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { LayoutDashboard, BookOpen, Heart, Settings, LogOut, Home, Menu, X, Bell, BadgePercent } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { onNotificationsChanged } from "@/lib/notify/events"
@@ -22,7 +22,7 @@ const NAV_ITEMS = [
 export default function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [user, setUser] = useState<User | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -42,7 +42,7 @@ export default function DashboardSidebar() {
         loadUnread()
       }
     })
-  }, [pathname])
+  }, [pathname, supabase])
 
   useEffect(() => {
     return onNotificationsChanged(() => {

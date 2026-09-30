@@ -115,7 +115,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
   )
 }
 
-function PackageCard({ pkg, primary, secondary }: { pkg: Package; primary: string; secondary: string }) {
+function PackageCard({ pkg, primary, secondary: _secondary }: { pkg: Package; primary: string; secondary: string }) {
   return (
     <Link href={`/package/${pkg.slug}`} className="group block bg-white border border-border/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1">
       <div className="relative h-48 overflow-hidden">

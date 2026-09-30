@@ -1,4 +1,3 @@
-import { createServerClient } from "@supabase/ssr"
 import { type NextRequest } from "next/server"
 
 export interface TenantContext {

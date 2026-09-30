@@ -84,8 +84,8 @@ export async function POST(request: NextRequest) {
           .update({ gateway_reference: orderId })
           .eq("id", paymentId)
       }
-    } catch (merr: any) {
-      console.error("Midtrans Snap remaining error:", merr.message)
+    } catch (merr: unknown) {
+      console.error("Midtrans Snap remaining error:", merr instanceof Error ? merr.message : merr)
       return NextResponse.json({ error: "Gagal membuat transaksi pembayaran" }, { status: 500 })
     }
 

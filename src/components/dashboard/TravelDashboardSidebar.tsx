@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { LayoutDashboard, Package, BookOpen, Users, BarChart3, Globe, Settings, LogOut, Home, Menu, X, Shield, Building2, UserCheck, MapPin, Plane, Hotel, Building, Bus, Bed, Calendar, Box, UsersRound, ClipboardList, PackageCheck, ChevronDown, ChevronRight } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
@@ -67,13 +67,13 @@ const OPERATIONAL_NAV_GROUPS = [
 export default function TravelDashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [user, setUser] = useState<User | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
-  }, [])
+  }, [supabase.auth])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

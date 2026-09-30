@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useRef } from "react"
 import { Upload, Image as ImageIcon, X, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
@@ -37,9 +38,9 @@ export function ImageUpload({ value, onChange, bucket = "packages", folder = "im
       const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath)
       onChange(urlData.publicUrl)
       setPreviewError(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Upload error:", err)
-      alert("Gagal mengupload gambar: " + (err.message || "Unknown error"))
+      alert("Gagal mengupload gambar: " + (err instanceof Error ? err.message : "Unknown error"))
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = ""
@@ -73,10 +74,13 @@ export function ImageUpload({ value, onChange, bucket = "packages", folder = "im
               </div>
             </div>
           ) : (
-            <img
+            <Image
               src={value}
               alt="Pratinjau"
-              className="w-full h-full object-cover"
+              fill
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
               onError={() => setPreviewError(true)}
               onLoad={() => setPreviewError(false)}
             />

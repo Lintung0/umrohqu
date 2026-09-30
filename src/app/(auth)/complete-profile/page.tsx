@@ -48,8 +48,8 @@ export default function CompleteProfilePage() {
         return
       }
       router.push("/dashboard")
-    } catch (err: any) {
-      setError(err.message || "Terjadi kesalahan saat menyimpan nomor telepon.")
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : "Terjadi kesalahan saat menyimpan nomor telepon.")
     } finally {
       setLoading(false)
     }

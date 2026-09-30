@@ -6,15 +6,16 @@ import { formatRupiah } from "@/lib/utils"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
-interface FeeConfigRow {
-  service_fee_percent: number
-  service_fee_flat: number
-}
-
 interface BookingRow {
   id: string
   total: number
   status: string
+}
+
+interface FeeConfigRow {
+  id: string
+  service_fee_percent: number | null
+  service_fee_flat: number | null
 }
 
 export default function AdminServiceFeesPage() {
@@ -35,9 +36,10 @@ export default function AdminServiceFeesPage() {
         .single()
 
       if (feeConfig) {
-        setConfigId(feeConfig.id)
-        setPercent((feeConfig as any).service_fee_percent || 2)
-        setFlatFee((feeConfig as any).service_fee_flat || 250000)
+        const config = feeConfig as FeeConfigRow
+        setConfigId(config.id)
+        setPercent(config.service_fee_percent || 2)
+        setFlatFee(config.service_fee_flat || 250000)
       }
 
       const { data: bkgs } = await supabase
@@ -70,15 +72,7 @@ export default function AdminServiceFeesPage() {
     }
   }
 
-  const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
-
   const paidBookings = bookings.filter((b) => b.status === "confirmed")
-  const monthBookings = bookings.filter((b) => {
-    const created = new Date(b.id ? b.id : Date.now())
-    return b.status === "confirmed"
-  })
   const totalServiceFee = paidBookings.reduce((s, b) => s + Math.max(b.total * (percent / 100), flatFee), 0)
 
   if (loading) {

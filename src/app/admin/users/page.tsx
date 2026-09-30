@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Search, Shield, ShieldAlert, UserCog, Loader2, AlertCircle, CheckCircle, XCircle } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { Search, Shield, ShieldAlert, UserCog, Loader2, AlertCircle, CheckCircle, XCircle, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatRupiah } from "@/lib/utils"
+
 
 const ROLES = [
   { value: "all", label: "Semua Role" },
@@ -16,7 +16,7 @@ const ROLES = [
   { value: "customer", label: "Pelanggan" },
 ]
 
-const ROLE_BADGES: Record<string, { icon: any; class: string }> = {
+const ROLE_BADGES: Record<string, { icon: LucideIcon; class: string }> = {
   admin: { icon: ShieldAlert, class: "bg-red-100 text-red-700" },
   finance: { icon: UserCog, class: "bg-amber-100 text-amber-700" },
   operational: { icon: UserCog, class: "bg-blue-100 text-blue-700" },
@@ -26,28 +26,43 @@ const ROLE_BADGES: Record<string, { icon: any; class: string }> = {
   customer: { icon: UserCog, class: "bg-gray-100 text-gray-700" },
 }
 
+interface AdminUserRow {
+  id: string
+  full_name: string | null
+  email: string
+  role: string
+  status: string | null
+  created_at: string | null
+  tenant: { name: string } | null
+}
+
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<AdminUserRow[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
+  const searchRef = useRef(search)
   const [roleFilter, setRoleFilter] = useState("all")
   const [page, setPage] = useState(1)
   const [saving, setSaving] = useState<string | null>(null)
   const [error, setError] = useState("")
 
-  const fetchUsers = async () => {
-    setLoading(true)
+  const fetchUsers = useCallback(async () => {
     const params = new URLSearchParams({ role: roleFilter, page: String(page), limit: "50" })
-    if (search) params.set("search", search)
+    const query = searchRef.current
+    if (query) params.set("search", query)
     const res = await fetch(`/api/admin/users?${params}`)
     const json = await res.json()
-    if (json.data) setUsers(json.data)
-    if (json.count) setTotal(json.count)
+    if (json.data) setUsers(json.data as AdminUserRow[])
+    if (json.count) setTotal(json.count as number)
     setLoading(false)
-  }
+  }, [roleFilter, page])
 
-  useEffect(() => { fetchUsers() }, [roleFilter, page])
+  useEffect(() => {
+    ;(async () => {
+      await fetchUsers()
+    })()
+  }, [fetchUsers])
 
   const updateRole = async (userId: string, newRole: string) => {
     setSaving(userId)
@@ -59,7 +74,10 @@ export default function AdminUsersPage() {
     })
     const json = await res.json()
     if (json.error) setError(json.error)
-    else await fetchUsers()
+    else {
+      setLoading(true)
+      await fetchUsers()
+    }
     setSaving(null)
   }
 
@@ -85,20 +103,20 @@ export default function AdminUsersPage() {
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && fetchUsers()}
+              onChange={(e) => { setSearch(e.target.value); searchRef.current = e.target.value }}
+              onKeyDown={(e) => { if (e.key === "Enter") { setLoading(true); fetchUsers() } }}
               placeholder="Cari nama atau email..."
               className="w-full border border-border rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
           <select
             value={roleFilter}
-            onChange={(e) => { setRoleFilter(e.target.value); setPage(1) }}
+            onChange={(e) => { setRoleFilter(e.target.value); setPage(1); setLoading(true) }}
             className="border border-border rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           >
             {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
           </select>
-          <Button variant="outline" onClick={fetchUsers} size="sm" className="gap-1.5">
+          <Button variant="outline" onClick={() => { setLoading(true); fetchUsers() }} size="sm" className="gap-1.5">
             <Search className="w-4 h-4" /> Cari
           </Button>
         </div>

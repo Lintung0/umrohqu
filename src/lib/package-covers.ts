@@ -26,7 +26,7 @@ export async function enrichPackagesWithCovers(
     }
   })
   return pkgs.map((p) => {
-    const next = { ...p } as any
+    const next = { ...p }
     if (imagesMap.has(p.id)) next.images = imagesMap.get(p.id)
     if (coverMap.has(p.id)) next.image_url = coverMap.get(p.id)
     if (videoMap.has(p.id)) {
