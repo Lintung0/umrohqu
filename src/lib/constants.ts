@@ -2,6 +2,11 @@
 
 export { formatRupiah } from "@/lib/utils"
 
+// Single source of truth untuk penjelasan cashback (dipakai tooltip card paket,
+// halaman detail paket, dan halaman cashback dashboard)
+export const CASHBACK_INFO =
+  "Cashback (pengembalian sebagian dana) dari biaya umrah ditangani langsung oleh travel, biasanya berupa uang cash Riyal sesuai kebijakan travel."
+
 export const COST_RANGES = [
   "Semua Biaya",
   "< Rp 25 Juta",

@@ -16,16 +16,7 @@ const I18nContext = createContext<I18nContext | null>(null)
 const LOCALE_COOKIE = "umrahqu_locale"
 
 function getInitialLocale(): Locale {
-  if (typeof window === "undefined") return "id"
-  const cookie = document.cookie
-    .split("; ")
-    .find((r) => r.startsWith(LOCALE_COOKIE + "="))
-  if (cookie) {
-    const val = cookie.split("=")[1] as Locale
-    if (["id", "en", "ar"].includes(val)) return val
-  }
-  const browserLang = navigator.language?.slice(0, 2)
-  if (["id", "en", "ar"].includes(browserLang)) return browserLang as Locale
+  // Market Indonesia — bahasa terkunci ke Bahasa Indonesia.
   return "id"
 }
 

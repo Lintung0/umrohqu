@@ -32,13 +32,13 @@ export function PrimaryButton({
       onMouseUp={() => setPressed(false)}
       onMouseLeave={() => setPressed(false)}
       className={cn(
-        "flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[14px] border-none text-[16px] font-bold text-white transition-[background,transform] duration-150",
-        loading || disabled ? "cursor-not-allowed bg-auth-primary-muted" : "cursor-pointer",
+        "flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[14px] border-none text-[16px] font-bold transition-[background,transform] duration-150",
+        loading || disabled ? "cursor-not-allowed bg-auth-primary-muted text-ivory-ink/60" : "cursor-pointer text-ivory",
         className,
       )}
       style={{
-        background: loading || disabled ? undefined : pressed ? "#1E5E3B" : "#2A7D4F",
-        boxShadow: pressed || loading || disabled ? "none" : "0 2px 12px rgba(42,125,79,0.27)",
+        background: loading || disabled ? undefined : pressed ? "#0A1F16" : "#0D3D2B",
+        boxShadow: pressed || loading || disabled ? "none" : "0 1px 3px rgba(10,31,22,0.2)",
         transform: pressed ? "scale(0.99)" : "scale(1)",
       }}
     >

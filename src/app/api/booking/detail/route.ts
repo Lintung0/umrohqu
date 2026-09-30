@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error } = await admin
       .from("bookings")
-      .select("*, package:packages(name, slug, departure_city, duration_nights), participants:booking_participants(id, full_name, national_id, passport_number, gender, phone, relation)")
+      .select("*, package:packages(name, slug, duration_nights, departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city))), participants(id, full_name, national_id, passport_number, passport_expiry, birth_date, birth_place, gender, phone, relation, emergency_contact_name, emergency_contact_phone, street, city, province, postal_code, village, district, rt_rw)")
       .eq("id", bookingId)
       .single()
 
@@ -28,14 +28,22 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: refund } = await admin
-      .from("booking_refunds")
+      .from("refunds")
       .select("id, amount, status, reason, method, reference, note, completed_at")
       .eq("booking_id", bookingId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle()
 
-    return NextResponse.json({ data: { ...booking, refund: refund || null } })
+    const { data: latestPayment } = await admin
+      .from("payments")
+      .select("id, status, gateway_reference, va_number, payment_provider, payment_type, amount")
+      .eq("booking_id", bookingId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    return NextResponse.json({ data: { ...booking, refund: refund || null, active_payment: latestPayment || null } })
   } catch (err) {
     console.error("Booking detail API error:", err)
     return NextResponse.json({ error: "Gagal memuat detail booking" }, { status: 500 })

@@ -61,12 +61,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .maybeSingle()) || { data: null }
 
   const travelRef = Array.isArray(pkg.travel) ? pkg.travel[0] : pkg.travel
-  const travelName = travelRef?.name || "UmrahQu"
-  const description = pkg.description || "Paket umroh " + pkg.name + " dari " + travelName + " mulai dari Rp " + (pkg.price || 0).toLocaleString("id-ID")
+  const travelName = (travelRef as any)?.name || "UmrahQu"
+  const description = pkg.description || "Paket umrah " + pkg.name + " dari " + travelName + " mulai dari Rp " + (pkg.price || 0).toLocaleString("id-ID")
   const ogImage = coverImg?.image_url
 
   return {
-    title: pkg.name + " - UmrahQu",
+    title: pkg.name,
     description,
     openGraph: {
       title: pkg.name,

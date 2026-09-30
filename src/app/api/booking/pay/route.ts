@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error: bErr } = await admin
       .from("bookings")
-      .select("id, status, total, remaining_amount, dp_amount, gateway_invoice_id, booking_code, package_id, pilgrim_count, tenant_id")
+      .select("id, status, total, remaining_amount, dp_amount, booking_code, package_id, pilgrim_count, tenant_id")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -41,28 +41,22 @@ export async function POST(request: NextRequest) {
     }
 
     const payAmount = Number(booking.total)
-    const orderId = booking.booking_code || `booking-${booking.id}`
 
-    // Pastikan record transaksi ada (payments)
-    const { data: existingPayment } = await admin
-      .from("payments")
-      .select("id")
-      .eq("booking_id", booking.id)
-      .eq("status", "pending")
-      .maybeSingle()
-
-    let paymentId: string | null = existingPayment?.id || null
-    if (!paymentId) {
-      const { data: newPaymentId } = await admin.rpc("create_payment", {
-        p_booking_id: booking.id,
-        p_tenant_id: booking.tenant_id,
-        p_status: "pending",
-        p_gateway: "midtrans",
-        p_amount: payAmount,
-        p_currency: "IDR",
-      })
-      paymentId = newPaymentId || null
+    // Catat transaksi payments via RPC create_payment (trigger menuntut app.booking_id)
+    const { data: paymentId, error: payErr } = await admin.rpc("create_payment", {
+      p_booking_id: booking.id,
+      p_tenant_id: booking.tenant_id,
+      p_status: "pending",
+      p_gateway: "midtrans",
+      p_amount: payAmount,
+      p_currency: "IDR",
+    })
+    if (payErr) {
+      console.error("Payment insert error:", payErr)
     }
+
+    // order_id unik per klik, ≤ 50 char (batas Midtrans)
+    const orderId = paymentId ? `pay-${paymentId}` : `pay-${booking.id.slice(0, 8)}-${Date.now()}`
 
     let snap: { token: string; redirect_url: string } | null = null
     try {
@@ -76,11 +70,6 @@ export async function POST(request: NextRequest) {
         unfinishUrl: appUrl(`checkout/finish?booking_id=${bookingId}&status=unfinish`),
         errorUrl: appUrl(`checkout/finish?booking_id=${bookingId}&status=error`),
       })
-
-      await admin
-        .from("bookings")
-        .update({ gateway_invoice_id: orderId })
-        .eq("id", booking.id)
 
       if (paymentId) {
         await admin

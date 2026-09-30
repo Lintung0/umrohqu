@@ -34,7 +34,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="font-semibold text-foreground mb-2">5. Tanggung Jawab Travel</h2>
-            <p>UmrahQu bertindak sebagai marketplace yang menghubungkan jamaah dengan travel. Travel penyelenggara bertanggung jawab penuh atas pelaksanaan perjalanan umroh.</p>
+            <p>UmrahQu bertindak sebagai marketplace yang menghubungkan jamaah dengan travel. Travel penyelenggara bertanggung jawab penuh atas pelaksanaan perjalanan umrah.</p>
           </section>
 
           <section>

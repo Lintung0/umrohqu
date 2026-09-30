@@ -1,30 +1,33 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { BookOpen, Heart, Package, Clock, Search, ChevronRight, Calendar, Bell, UserRound } from "lucide-react"
+import { BookOpen, Heart, Package, Clock, ChevronRight, Calendar } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
-import { getStatusColor, getStatusLabel } from "@/lib/constants"
+import { getStatusLabel, formatRupiah } from "@/lib/constants"
+import { enrichEmbeddedPackageCovers } from "@/lib/package-covers"
 
-interface RecentBooking {
-  id: string
-  status: string
-  total: number
-  created_at: string
-  package: { name: string; slug: string } | null
-}
-
-interface BookingStatusRow {
-  status: string
+function getBookingStatusColor(status: string): string {
+  const colors: Record<string, string> = {
+    pending_payment: "bg-gold/15 text-gold-dark",
+    processing: "bg-emerald-dark/15 text-emerald-dark",
+    confirmed: "bg-emerald-dark/15 text-emerald-dark",
+    completed: "bg-emerald-dark/15 text-emerald-dark",
+    cancellation_pending: "bg-gold/15 text-gold-dark",
+    refunded: "bg-ivory-border text-emerald-deep",
+    cancelled: "bg-red-50 text-red-700",
+  }
+  return colors[status] || "bg-ivory-border text-emerald-deep"
 }
 
 export default function DashboardOverview() {
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [stats, setStats] = useState({ bookings: 0, wishlist: 0, completed: 0 })
-  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([])
+  const [recentBookings, setRecentBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -35,18 +38,25 @@ export default function DashboardOverview() {
 
         if (user) {
           const [bookingsRes, allBookingsRes, wishlistRes] = await Promise.all([
-            supabase.from("bookings").select("id, status, total, created_at, package:packages(name, slug)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
+            supabase.from("bookings").select("id, status, total, created_at, package:packages(id, name, slug)").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(5),
             supabase.from("bookings").select("id, status, created_at").eq("customer_id", user.id),
             supabase.from("wishlists").select("id", { count: "exact" }).eq("user_id", user.id),
           ])
 
-          const allBookings = (allBookingsRes.data as unknown as BookingStatusRow[]) || []
-          setRecentBookings((bookingsRes.data as unknown as RecentBooking[]) || [])
+          const allBookings = allBookingsRes.data || []
+          const enriched = await enrichEmbeddedPackageCovers(supabase, (bookingsRes.data as any) || [])
+          setRecentBookings(enriched || [])
+
+          const thisMonth = allBookings.filter((b: any) => {
+            const d = new Date(b.created_at)
+            const now = new Date()
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+          }).length
 
           setStats({
-            bookings: allBookings.filter((b) => b.status === "pending_payment" || b.status === "confirmed").length,
+            bookings: allBookings.filter((b: any) => b.status === "pending_payment" || b.status === "confirmed").length,
             wishlist: wishlistRes.count || 0,
-            completed: allBookings.filter((b) => b.status === "completed").length,
+            completed: allBookings.filter((b: any) => b.status === "completed").length,
           })
         }
       } catch (error) {
@@ -56,7 +66,7 @@ export default function DashboardOverview() {
       }
     }
     load()
-  }, [supabase])
+  }, [])
 
   if (loading) {
     return (
@@ -78,14 +88,13 @@ export default function DashboardOverview() {
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Jamaah"
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Selamat Datang, {firstName}</h1>
-          <p className="text-muted-foreground mt-1">Kelola perjalanan ibadah Anda dari sini</p>
+          <h1 className="text-2xl font-bold tracking-tight text-emerald-deep">Salam, {firstName}</h1>
         </div>
-        <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground bg-white border border-border rounded-lg px-3 py-2 shadow-sm">
+        <div className="hidden sm:flex items-center gap-2 text-xs text-emerald-dark bg-ivory-card border border-ivory-border rounded-lg px-3 py-2">
           <Calendar className="w-4 h-4" />
           {new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
         </div>
@@ -95,132 +104,77 @@ export default function DashboardOverview() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           icon={BookOpen}
-          label="Pesan Aktif"
+          label="Pesanan Aktif"
           value={stats.bookings}
-          color="bg-emerald-100 text-emerald-600"
+          color="bg-gold/15 text-gold-dark"
           href="/dashboard/bookings"
-          subtitle={`${stats.bookings} pesanan sedang diproses`}
+          hideFooter
+          className="bg-ivory-card border-ivory-border shadow-none hover:shadow-none"
         />
         <StatCard
           icon={Heart}
           label="Daftar Keinginan"
           value={stats.wishlist}
-          color="bg-rose-100 text-rose-600"
+          color="bg-emerald-dark/10 text-emerald-dark"
           href="/dashboard/wishlist"
-          subtitle={`${stats.wishlist} paket tersimpan`}
+          hideFooter
+          className="bg-ivory-card border-ivory-border shadow-none hover:shadow-none"
         />
         <StatCard
           icon={Package}
           label="Selesai"
           value={stats.completed}
-          color="bg-blue-100 text-blue-600"
-          subtitle={`${stats.completed} perjalanan selesai`}
+          color="bg-emerald-dark/10 text-emerald-dark"
+          href="/dashboard/bookings"
+          hideFooter
+          className="bg-ivory-card border-ivory-border shadow-none hover:shadow-none"
         />
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <Link
-          href="/search"
-          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-emerald-200"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
-              <Search className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Cari Paket Umroh</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Temukan paket terbaik untuk Anda</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-600 transition-colors" />
-          </div>
-        </Link>
-        <Link
-          href="/dashboard/wishlist"
-          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-rose-200"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 group-hover:bg-rose-200 transition-colors">
-              <Heart className="w-5 h-5 text-rose-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Lihat Wishlist</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{stats.wishlist} paket yang Anda simpan</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-rose-600 transition-colors" />
-          </div>
-        </Link>
-        <Link
-          href="/dashboard/notifications"
-          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-amber-200"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 group-hover:bg-amber-200 transition-colors">
-              <Bell className="w-5 h-5 text-amber-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Notifikasi</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Pengumuman dan pengingat perjalanan</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-amber-600 transition-colors" />
-          </div>
-        </Link>
-        <Link
-          href="/dashboard/data-diri"
-          className="group bg-white border border-border rounded-xl p-5 hover:shadow-md transition-all hover:border-sky-200"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center shrink-0 group-hover:bg-sky-200 transition-colors">
-              <UserRound className="w-5 h-5 text-sky-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm">Data Diri</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Lengkapi data pribadi jamaah</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-sky-600 transition-colors" />
-          </div>
-        </Link>
-      </div>
-
       {/* Recent Bookings */}
-      <div className="bg-white border border-border rounded-xl shadow-sm">
+      <div className="bg-ivory-card border border-ivory-border rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between p-6 pb-0">
           <div>
-            <h2 className="font-semibold">Pesan Terakhir</h2>
-            <p className="text-sm text-muted-foreground mt-1">Aktivitas booking terbaru Anda</p>
+            <h2 className="font-semibold text-emerald-deep">Pesanan Terakhir</h2>
           </div>
-          <Link href="/dashboard/bookings" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1">
-            Lihat Semua <ChevronRight className="w-4 h-4" />
+          <Link href="/dashboard/bookings" className="text-sm text-emerald-dark hover:text-emerald-deep font-medium flex items-center gap-0.5">
+            Semua <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
         <div className="p-6 pt-4">
           {recentBookings.length === 0 ? (
             <div className="text-center py-10">
-              <Clock className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground font-medium">Belum ada booking</p>
-              <Link href="/search" className="text-sm text-emerald-600 hover:underline mt-2 inline-flex items-center gap-1">
+              <Clock className="w-10 h-10 text-emerald-dark/25 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground font-medium">Belum ada pesanan</p>
+              <Link href="/search" className="text-sm text-emerald-dark hover:underline mt-2 inline-flex items-center gap-1">
                 Mulai Cari Paket <ChevronRight className="w-3 h-3" />
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {recentBookings.map((booking) => (
+            <div className="divide-y divide-ivory-border">
+              {recentBookings.map((booking: any) => (
                 <Link
                   key={booking.id}
                   href={`/dashboard/bookings/${booking.id}`}
-                  className="flex items-center gap-4 py-4 first:pt-0 last:pb-0 hover:bg-muted/50 -mx-2 px-2 rounded-lg transition-colors"
+                  className="flex items-center gap-4 -mx-6 px-6 py-3 hover:bg-ivory transition-colors first:rounded-t-xl last:rounded-b-xl"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                    <BookOpen className="w-4 h-4 text-emerald-600" />
+                  <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 relative">
+                    {booking.package?.image_url ? (
+                      <Image src={booking.package.image_url} alt={booking.package?.name || "Paket umrah"} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-emerald-dark/10 flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-emerald-dark" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
-                    <p className="text-sm font-medium truncate">{booking.package?.name || "Paket Umroh"}</p>
+                    <p className="text-sm font-medium truncate text-emerald-deep">{booking.package?.name || "Paket umrah"}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(booking.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-medium ${getStatusColor(booking.status, "booking")}`}>
+                  <div className="shrink-0">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBookingStatusColor(booking.status)}`}>
                       {getStatusLabel(booking.status, "booking")}
                     </span>
                   </div>

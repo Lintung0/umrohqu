@@ -4,7 +4,6 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useState, useEffect, useRef, useCallback, Suspense } from "react"
 import { Search, SearchX, X, SlidersHorizontal, MapPin } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getAseanCountryByCode } from "@/lib/constants"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import { getPackageAvailable } from "@/lib/utils"
@@ -14,14 +13,14 @@ import SearchSidebar from "@/components/search/search-sidebar"
 import { Pagination } from "@/components/ui/pagination"
 import { rankTravels, RankingFactors, DEFAULT_RANKING_CONFIG } from "@/lib/business-logic/bidding"
 
-const PAGE_SIZE = 9
+const PAGE_SIZE = 8
 
 const QUICK_CATEGORIES = [
   { label: "Semua", preset: {} },
   { label: "Bulan Ramadhan", preset: { month: "Ramadhan" } },
   { label: "Promo Terbaik", preset: { cost: "< Rp 25 Juta" } },
-  { label: "Umroh Reguler", preset: { type: "reguler" } },
-  { label: "Umroh VIP", preset: { type: "vip" } },
+  { label: "umrah Reguler", preset: { type: "reguler" } },
+  { label: "umrah VIP", preset: { type: "vip" } },
   { label: "Haji Furoda", preset: { type: "furoda" } },
 ]
 
@@ -30,23 +29,6 @@ interface GeoapifySuggestion {
   country: string
   country_code: string
   formatted: string
-}
-
-interface GeoapifyFeature {
-  properties: {
-    city?: string
-    name?: string
-    country?: string
-    country_code?: string
-    formatted?: string
-  }
-}
-
-interface BidRow {
-  tenant_id: string
-  bid_value: number | null
-  impressions: number | null
-  clicks: number | null
 }
 
 function SearchContent() {
@@ -64,7 +46,6 @@ function SearchContent() {
   const [loadingCitySuggestions, setLoadingCitySuggestions] = useState(false)
 
   const departure = searchParams.get("departure") ?? ""
-  const country = searchParams.get("country") ?? ""
   const month = searchParams.get("month") ?? ""
   const cost = searchParams.get("cost") ?? ""
   const type = searchParams.get("type") ?? "semua"
@@ -90,17 +71,13 @@ function SearchContent() {
   const [searchInput, setSearchInput] = useState(searchQuery)
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
-  const searchParamsString = searchParams.toString()
-  const [prevSearchParam, setPrevSearchParam] = useState(searchQuery)
-  if (prevSearchParam !== searchQuery) {
-    setPrevSearchParam(searchQuery)
-    setSearchInput(searchQuery)
-  }
-  const [prevSearchParamsString, setPrevSearchParamsString] = useState(searchParamsString)
-  if (prevSearchParamsString !== searchParamsString) {
-    setPrevSearchParamsString(searchParamsString)
+  useEffect(() => {
+    setSearchInput(searchParams.get("search") ?? "")
+  }, [searchParams.get("search")])
+
+  useEffect(() => {
     setPage(1)
-  }
+  }, [searchParams.toString()])
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -146,7 +123,7 @@ function SearchContent() {
       const data = await res.json()
 
       const results: GeoapifySuggestion[] = (data.features || [])
-        .map((f: GeoapifyFeature) => ({
+        .map((f: any) => ({
           name: f.properties.city || f.properties.name || "",
           country: f.properties.country || "",
           country_code: f.properties.country_code || "",
@@ -182,7 +159,6 @@ function SearchContent() {
   )
 
   const setDeparture = useCallback((v: string) => setUrl({ departure: v }), [setUrl])
-  const setCountry = useCallback((v: string) => setUrl({ country: v }), [setUrl])
   const setMonth = useCallback((v: string) => setUrl({ month: v }), [setUrl])
   const setCost = useCallback((v: string) => setUrl({ cost: v === "Semua Biaya" ? null : v }), [setUrl])
   const setType = useCallback((v: string) => setUrl({ type: v === "semua" ? null : v }), [setUrl])
@@ -247,7 +223,7 @@ function SearchContent() {
           query = query.or(
             `name.ilike.*${searchQueryParam}*,` +
             `description.ilike.*${searchQueryParam}*,` +
-            `departure_city.ilike.*${searchQueryParam}*,` +
+            `departure_date.cast(text).ilike.*${searchQueryParam}*,` +
             `slug.ilike.*${searchQueryParam}*`
           )
         }
@@ -281,14 +257,14 @@ function SearchContent() {
               .eq("status", "active")
 
             if (bids && bids.length > 0) {
-              const entries = bids.map((b: BidRow) => ({
+              const entries = bids.map((b: any) => ({
                 travelId: b.tenant_id,
                 factors: {
                   bidScore: b.bid_value || 0,
                   rating: 0,
                   reviewCount: 0,
                   totalBookings: 0,
-                  conversionRate: (b.impressions ?? 0) > 0 ? ((b.clicks ?? 0) / (b.impressions ?? 1)) * 100 : 0,
+                  conversionRate: b.impressions > 0 ? (b.clicks / b.impressions) * 100 : 0,
                   isVerified: tenantMap.get(b.tenant_id)?.is_verified ?? false,
                   hasPromo: false,
                   sponsored: false,
@@ -337,13 +313,9 @@ function SearchContent() {
 
   const filtered = packages
     .filter((pkg) => {
-      if (country) {
-        const pkgCountryCode = pkg.country_code || ""
-        if (pkgCountryCode.toLowerCase() !== country.toLowerCase()) return false
-      }
       if (departure) {
         const dep = departure.toLowerCase()
-        const cities = [pkg.departure_city].filter(Boolean).map((c) => c?.toLowerCase() || "")
+        const cities = (pkg.departure_cities || []).map((c) => c?.toLowerCase() || "")
         if (!cities.some((c) => c.includes(dep))) return false
       }
       if (month && month !== "") {
@@ -398,55 +370,54 @@ function SearchContent() {
     router.replace("/search", { scroll: false })
   }
 
-  const hasActiveFilters = Boolean(departure || country || month || cost || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
+  const hasActiveFilters = Boolean(departure || month || cost || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
 
-  const activeFilterChips: { id: string; label: string; onRemove: () => void }[] = []
-  if (departure) activeFilterChips.push({ id: "departure", label: departure, onRemove: () => setDeparture("") })
-  if (country) activeFilterChips.push({ id: "country", label: getAseanCountryByCode(country)?.name || country, onRemove: () => setCountry("") })
-  if (month) activeFilterChips.push({ id: "month", label: month, onRemove: () => setMonth("") })
-  if (cost && cost !== "Semua Biaya") activeFilterChips.push({ id: "cost", label: cost, onRemove: () => setCost("") })
-  if (type !== "semua") activeFilterChips.push({ id: "type", label: type, onRemove: () => setType("semua") })
-  if (duration) activeFilterChips.push({ id: "duration", label: duration, onRemove: () => setDuration("") })
-  if (searchQuery) activeFilterChips.push({ id: "search", label: `"${searchQuery}"`, onRemove: () => {} })
+  const activeFilterChips: { label: string; onRemove: () => void }[] = []
+  if (departure) activeFilterChips.push({ label: departure, onRemove: () => setDeparture("") })
+  if (month) activeFilterChips.push({ label: month, onRemove: () => setMonth("") })
+  if (cost && cost !== "Semua Biaya") activeFilterChips.push({ label: cost, onRemove: () => setCost("") })
+  if (type !== "semua") activeFilterChips.push({ label: type, onRemove: () => setType("semua") })
+  if (duration) activeFilterChips.push({ label: duration, onRemove: () => setDuration("") })
+  if (searchQuery) activeFilterChips.push({ label: `"${searchQuery}"`, onRemove: () => handleSearchInput("") })
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-50">
-        <div className="sticky top-16 z-40 bg-slate-50/80">
+      <main className="min-h-screen bg-ivory-50">
+        <div className="sticky top-16 z-40 bg-ivory-50/80">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
               <div className="w-11 shrink-0" />
-              <div className="h-11 flex-1 bg-white border border-slate-200 rounded-full animate-pulse" />
-              <div className="w-11 h-11 bg-slate-200 rounded-full animate-pulse" />
+              <div className="h-11 flex-1 bg-ivory-card border border-ivory-border rounded-full animate-pulse" />
+              <div className="w-11 h-11 bg-ivory-border rounded-full animate-pulse" />
             </div>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex gap-2 mb-6 overflow-hidden">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-8 w-20 bg-slate-100 rounded-full animate-pulse shrink-0" />
+              <div key={i} className="h-8 w-20 bg-ivory-border rounded-full animate-pulse shrink-0" />
             ))}
-            <div className="hidden lg:block h-10 w-40 ml-auto bg-slate-100 rounded-full animate-pulse" />
+            <div className="hidden lg:block h-10 w-40 ml-auto bg-ivory-border rounded-full animate-pulse" />
           </div>
           <div className="flex gap-8">
             <div className="hidden lg:block w-64 shrink-0">
               <div className="space-y-6">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="space-y-2.5">
-                    <div className="h-3 w-24 bg-slate-200 rounded animate-pulse" />
-                    <div className="h-10 bg-slate-100 rounded-xl animate-pulse" />
+                    <div className="h-3 w-24 bg-ivory-border rounded animate-pulse" />
+                    <div className="h-10 bg-ivory-border rounded-xl animate-pulse" />
                   </div>
                 ))}
               </div>
             </div>
             <div className="flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-xl overflow-hidden border border-slate-200/70 shadow-sm">
-                    <div className="aspect-[4/3] bg-slate-100 animate-pulse" />
+                  <div key={i} className="bg-ivory-card rounded-xl overflow-hidden border border-ivory-border shadow-sm">
+                    <div className="aspect-[4/3] bg-ivory-border animate-pulse" />
                     <div className="p-4 space-y-3">
-                      <div className="h-4 bg-slate-100 rounded animate-pulse w-3/4" />
-                      <div className="h-3 bg-slate-100 rounded animate-pulse w-1/2" />
+                      <div className="h-4 bg-ivory-border rounded animate-pulse w-3/4" />
+                      <div className="h-3 bg-ivory-border rounded animate-pulse w-1/2" />
                     </div>
                   </div>
                 ))}
@@ -459,19 +430,19 @@ function SearchContent() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-ivory-50">
 
       {/* ── Sticky search toolbar ── */}
-      <div className="sticky top-16 z-40 bg-slate-50/80 backdrop-blur-md border-b border-slate-200/60">
+      <div className="sticky top-16 z-40 bg-ivory-50/80 backdrop-blur-md border-b border-ivory-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
             <button
               onClick={() => setShowMobileFilter(true)}
               aria-label="Buka filter pencarian"
-              className="lg:hidden relative w-11 h-11 shrink-0 flex items-center justify-center bg-white border border-slate-200 text-slate-700 rounded-full shadow-sm hover:border-emerald-300 hover:text-emerald-700 hover:shadow-md transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+              className="lg:hidden relative w-11 h-11 shrink-0 flex items-center justify-center bg-ivory-card border border-ivory-border text-ivory-ink/70 rounded-full shadow-sm hover:border-emerald-dark hover:text-emerald-deep hover:shadow-md transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-dark/30"
             >
               <SlidersHorizontal className="w-5 h-5" />
-              {hasActiveFilters && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-amber-200" />}
+              {hasActiveFilters && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-gold ring-2 ring-gold-light" />}
             </button>
             <div className="relative flex-1" ref={suggestionsContainerRef}>
               <div className="relative">
@@ -482,8 +453,8 @@ function SearchContent() {
                   onChange={(e) => handleSearchInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
                   onFocus={() => { if (citySuggestions.length > 0) setShowCitySuggestions(true) }}
-                  aria-label="Cari paket umroh"
-                  className={`w-full pl-5 ${searchInput ? "pr-10" : "pr-4"} h-11 bg-white border border-slate-200 shadow-sm rounded-full text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all`}
+                  aria-label="Cari paket umrah"
+                  className={`w-full pl-5 ${searchInput ? "pr-10" : "pr-4"} h-11 bg-ivory-card border border-ivory-border shadow-sm rounded-full text-sm text-ivory-ink placeholder:text-ivory-ink/50 focus:outline-none focus:border-emerald-dark focus:ring-4 focus:ring-emerald-dark/15 transition-all`}
                 />
                 {searchInput && !loadingCitySuggestions && (
                   <button
@@ -495,7 +466,7 @@ function SearchContent() {
                       setShowCitySuggestions(false)
                       setCitySuggestions([])
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-ivory-ink/50 hover:text-emerald-deep hover:bg-ivory-soft transition-colors"
                     aria-label="Hapus pencarian"
                   >
                     <X className="w-4 h-4" />
@@ -503,23 +474,23 @@ function SearchContent() {
                 )}
                 {loadingCitySuggestions && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-ivory-border border-t-emerald-dark" />
                   </div>
                 )}
               </div>
               {showCitySuggestions && citySuggestions.length > 0 && (
-                <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-xl border border-ivory-border bg-ivory-card shadow-lg">
                   {citySuggestions.map((s, i) => (
                     <li
                       key={i}
                       onClick={() => handleSelectCitySuggestion(s)}
-                      className="flex cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-emerald-50/60 transition-colors"
+                      className="flex cursor-pointer items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-ivory-soft transition-colors"
                     >
-                      <MapPin size={14} className="shrink-0 text-emerald-500" />
+                      <MapPin size={14} className="shrink-0 text-emerald-dark" />
                       <div className="min-w-0 flex-1">
-                        <span className="font-medium text-slate-900">{s.name}</span>
+                        <span className="font-medium text-emerald-deep">{s.name}</span>
                         {s.country && (
-                          <span className="ml-1.5 text-xs text-slate-500">· {s.country}</span>
+                          <span className="ml-1.5 text-xs text-ivory-ink/70">· {s.country}</span>
                         )}
                       </div>
                     </li>
@@ -529,8 +500,8 @@ function SearchContent() {
             </div>
             <button
               onClick={handleSearchSubmit}
-              aria-label="Cari paket umroh"
-              className="w-11 h-11 shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70"
+              aria-label="Cari paket umrah"
+              className="w-11 h-11 shrink-0 flex items-center justify-center bg-emerald-dark hover:bg-emerald-deep text-ivory rounded-full shadow-lg shadow-emerald-dark/30 hover:shadow-xl hover:shadow-emerald-dark/40 transition-all active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-dark/50"
             >
               <Search className="w-5 h-5" />
             </button>
@@ -567,10 +538,10 @@ function SearchContent() {
                     })
                   }}
                   aria-pressed={isActive}
-                  className={`shrink-0 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
+                  className={`shrink-0 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-dark/30 ${
                     isActive
-                      ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-600/25"
-                      : "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-emerald-dark text-ivory shadow-md shadow-emerald-dark/25"
+                      : "bg-ivory border border-ivory-border text-ivory-ink/70 hover:bg-ivory-soft hover:text-emerald-deep"
                   }`}
                 >
                   {q.label}
@@ -582,7 +553,7 @@ function SearchContent() {
             <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
               <SelectTrigger
                 aria-label="Urutkan hasil pencarian"
-                className="h-10 w-36 sm:w-40 text-sm bg-white border-slate-200 text-slate-700 shadow-sm rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                className="h-10 w-36 sm:w-40 text-sm bg-ivory-card border-ivory-border text-ivory-ink/70 shadow-sm rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-dark/30"
               >
                 <SelectValue>{SORT_LABELS[sortBy] ?? sortBy}</SelectValue>
               </SelectTrigger>
@@ -600,15 +571,15 @@ function SearchContent() {
         {/* Active Filter Chips */}
         {activeFilterChips.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-5">
-            {activeFilterChips.map((chip) => (
-              <span key={chip.id} className="inline-flex items-center gap-1.5 pl-3 pr-0 py-1 bg-white text-emerald-800 text-xs font-medium rounded-full border border-emerald-200 shadow-sm">
+            {activeFilterChips.map((chip, i) => (
+              <span key={i} className="inline-flex items-center gap-1.5 pl-3 pr-0 py-1 bg-emerald-dark text-ivory text-xs font-medium rounded-full border border-emerald-dark shadow-sm">
                 {chip.label}
-                <button onClick={chip.id === "search" ? () => handleSearchInput("") : chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="-my-1 p-1.5 flex items-center justify-center min-w-8 min-h-8 text-emerald-500 hover:text-emerald-900 hover:bg-emerald-50 rounded-full transition-colors cursor-pointer">
+                <button onClick={chip.onRemove} aria-label={`Hapus filter ${chip.label}`} className="-my-1 p-1.5 flex items-center justify-center min-w-8 min-h-8 text-ivory/80 hover:text-ivory hover:bg-emerald-deep rounded-full transition-colors cursor-pointer">
                   <X className="w-3 h-3" />
                 </button>
               </span>
             ))}
-            <button onClick={clearFilters} className="text-xs text-slate-500 hover:text-slate-700 underline ml-1 self-center">
+            <button onClick={clearFilters} className="text-xs text-ivory-ink/70 hover:text-emerald-deep underline ml-1 self-center">
               Hapus semua
             </button>
           </div>
@@ -621,8 +592,6 @@ function SearchContent() {
             <SearchSidebar
               departure={departure}
               setDeparture={setDeparture}
-              country={country}
-              setCountry={setCountry}
               priceRange={priceRange}
               setPriceRange={setPriceRange}
               duration={duration}
@@ -636,20 +605,18 @@ function SearchContent() {
           {showMobileFilter && (
             <div className="lg:hidden fixed inset-0 z-50">
               <div className="absolute inset-0 bg-black/40 animate-in fade-in-0 duration-300" onClick={() => setShowMobileFilter(false)} />
-              <div className="absolute left-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl overflow-y-auto p-4 pb-28 animate-in slide-in-from-left duration-300">
+              <div className="absolute left-0 top-0 bottom-0 w-full max-w-xs sm:max-w-sm bg-ivory-card shadow-2xl overflow-y-auto p-4 pb-28 animate-in slide-in-from-left duration-300">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+                  <span className="inline-flex items-center gap-1.5 bg-emerald-dark text-ivory px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
                     <SlidersHorizontal className="w-3.5 h-3.5" /> Filter Pencarian
                   </span>
-                  <button onClick={() => setShowMobileFilter(false)} aria-label="Tutup filter" className="min-h-11 min-w-11 flex items-center justify-center hover:bg-slate-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50">
+                  <button onClick={() => setShowMobileFilter(false)} aria-label="Tutup filter" className="min-h-11 min-w-11 flex items-center justify-center text-ivory-ink/70 hover:bg-ivory-soft rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-dark/30">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
                 <SearchSidebar
                   departure={departure}
                   setDeparture={setDeparture}
-                  country={country}
-                  setCountry={setCountry}
                   priceRange={priceRange}
                   setPriceRange={setPriceRange}
                   duration={duration}
@@ -664,19 +631,19 @@ function SearchContent() {
           {/* Package Grid */}
           <div ref={resultsRef} className="lg:col-span-3 min-w-0 scroll-mt-28">
             {filtered.length === 0 ? (
-              <div className="text-center py-16 px-6 bg-white rounded-2xl border border-slate-200/70 shadow-sm">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
-                  <SearchX className="w-8 h-8 text-emerald-500" />
+              <div className="text-center py-16 px-6 bg-ivory-card rounded-2xl border border-ivory-border shadow-sm">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-ivory-soft border border-ivory-border flex items-center justify-center">
+                  <SearchX className="w-8 h-8 text-emerald-dark" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-slate-900">Paket tidak ditemukan</h3>
-                <p className="text-sm text-slate-500 mb-6">Coba ubah kata kunci atau filter pencarian Anda</p>
-                <button onClick={clearFilters} className="px-6 py-2.5 text-sm font-semibold rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/30 hover:shadow-xl hover:shadow-emerald-600/40 hover:-translate-y-0.5 transition-all cursor-pointer">
+                <h3 className="font-semibold text-lg mb-2 text-emerald-deep">Paket tidak ditemukan</h3>
+                <p className="text-sm text-ivory-ink/70 mb-6">Coba ubah kata kunci atau filter pencarian Anda</p>
+                <button onClick={clearFilters} className="px-6 py-2.5 text-sm font-semibold rounded-full bg-emerald-dark text-ivory shadow-lg shadow-emerald-dark/30 hover:bg-emerald-deep hover:shadow-xl hover:shadow-emerald-dark/40 hover:-translate-y-0.5 transition-all cursor-pointer">
                   Lihat Semua Paket
                 </button>
               </div>
             ) : (
               <>
-                <div key={currentPage} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+                <div key={currentPage} className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
                   {paginated.map((pkg) => (
                     <SharedPackageCard key={pkg.id} pkg={pkg} travel={tenants.get(pkg.tenant_id)} showTravel={true} />
                   ))}

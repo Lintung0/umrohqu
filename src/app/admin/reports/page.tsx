@@ -74,7 +74,7 @@ export default function AdminReportsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <div className="h-8 bg-muted rounded animate-pulse w-48 mb-2" />
         <div className="h-4 bg-muted rounded animate-pulse w-64" />
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
@@ -91,7 +91,7 @@ export default function AdminReportsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Laporan Sistem</h1>
@@ -106,7 +106,7 @@ export default function AdminReportsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
           { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
-          { icon: Package, label: "Total Pesan", value: totalBookings, color: "bg-blue-100 text-blue-700" },
+          { icon: Package, label: "Total Pesanan", value: totalBookings, color: "bg-blue-100 text-blue-700" },
           { icon: Building2, label: "Total Travel", value: tenants.length, color: "bg-purple-100 text-purple-700" },
           { icon: Users, label: "Travel Aktif", value: activeTravels.length, color: "bg-amber-100 text-amber-700" },
           { icon: TrendingUp, label: "Rata-rata/Travel", value: formatRupiah(activeTravels.length > 0 ? Math.round(totalRevenue / activeTravels.length) : 0), color: "bg-pink-100 text-pink-700" },

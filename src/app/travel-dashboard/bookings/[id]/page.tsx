@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { formatRupiah } from "@/lib/utils"
 import { enrichPackagesWithCovers } from "@/lib/package-covers"
 import {
-  ArrowLeft, User, CreditCard, Plane, Hotel, Calendar,
+  ArrowLeft, User, CreditCard, Plane, Hotel, Calendar, MapPin,
   CheckCircle, Clock, XCircle, Loader2, Phone, Mail, FileText,
   RotateCcw, X,
 } from "lucide-react"
@@ -26,11 +26,15 @@ interface Participant {
 }
 
 interface BookingDetail extends Booking {
-  packages?: Package
+  packages?: Package & {
+    departures?: { departure_city: string | null; departure_date: string | null }[]
+    flights?: { airline_name: string | null; flight_number: string | null; departure_city: string | null }[]
+    package_hotels?: { night_count: number | null; sort_order: number | null; hotel: { name: string | null; rating: number | null; city: string | null } | null }[]
+  }
   users?: { full_name: string; email: string; phone: string }
-  booking_participants?: Participant[]
+  participants?: Participant[]
   cancel_reason?: string | null
-  booking_refunds?: {
+  refunds?: {
     id: string
     amount: number
     status: string
@@ -68,10 +72,10 @@ export default function TravelBookingDetailPage() {
         .from("bookings")
         .select(`
           *,
-          packages(name, slug, duration_nights, price, departure_city),
+          packages(name, slug, duration_nights, price, departures:package_departures(departure_city, departure_date), flights:package_flights(airline_name, flight_number, departure_city), package_hotels:package_hotels(night_count, sort_order, hotel:hotels(name, rating, city))),
           users(full_name, email, phone),
-          booking_participants(*),
-          booking_refunds(id, amount, status, method, reference, reason, note)
+          participants(*),
+          refunds(id, amount, status, method, reference, reason, note)
         `)
         .eq("id", id)
         .single()
@@ -223,11 +227,13 @@ export default function TravelBookingDetailPage() {
                   <p className="font-semibold">{booking.packages.name}</p>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {booking.packages.duration_nights} {t("package.day")}</span>
-                    {booking.packages.airline && <span className="flex items-center gap-1"><Plane className="w-3.5 h-3.5" /> {booking.packages.airline}</span>}
+                    {booking.packages.departures?.[0]?.departure_city && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {booking.packages.departures[0].departure_city}</span>}
+                    {booking.packages.flights?.[0]?.airline_name && <span className="flex items-center gap-1"><Plane className="w-3.5 h-3.5" /> {booking.packages.flights[0].airline_name}</span>}
                   </div>
-                  {booking.packages.hotel_makkah && (
+                  {(booking.packages.package_hotels ?? []).filter((ph) => ph.hotel?.name).length > 0 && (
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Hotel className="w-3.5 h-3.5" /> {booking.packages.hotel_makkah}
+                      <Hotel className="w-3.5 h-3.5" />{" "}
+                      {booking.packages.package_hotels!.map((ph) => ph.hotel?.name).filter(Boolean).join(" · ")}
                     </p>
                   )}
                   <p className="font-bold text-primary">{formatRupiah(booking.packages.price)} / {t("booking.participants")}</p>
@@ -239,11 +245,11 @@ export default function TravelBookingDetailPage() {
           {/* Participants */}
           <div className="bg-white rounded-2xl border border-border p-6">
             <h2 className="font-semibold mb-4">
-              {t("booking.participants")} ({booking.booking_participants?.length || 0})
+              {t("booking.participants")} ({booking.participants?.length || 0})
             </h2>
-            {booking.booking_participants && booking.booking_participants.length > 0 ? (
+            {booking.participants && booking.participants.length > 0 ? (
               <div className="space-y-3">
-                {booking.booking_participants.map((p, i) => (
+                {booking.participants.map((p, i) => (
                   <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-muted/30 border border-border/50">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
                       {i + 1}
@@ -351,7 +357,7 @@ function RefundCard({
   const [note, setNote] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
-  const refund = detail.booking_refunds?.[0]
+  const refund = detail.refunds?.[0]
 
   const callRefundApi = async (action: string, payload?: Record<string, unknown>) => {
     const res = await fetch("/api/booking/refund", {

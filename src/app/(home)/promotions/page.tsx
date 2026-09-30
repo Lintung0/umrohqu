@@ -11,7 +11,6 @@ export default function PromotionsPage() {
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <Gift className="w-12 h-12 mx-auto opacity-80" />
           <h1 className="text-3xl font-bold">Promo & Diskon</h1>
-          <p className="text-emerald-100">Temukan penawaran terbaik untuk perjalanan umrah Anda</p>
         </div>
       </div>
 

@@ -44,7 +44,7 @@ export default function RoyalGoldTemplate({ tenant, packages, themeConfig }: Tem
           )}
           <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight">{tenant.name}</h1>
           <p className="text-lg max-w-xl mx-auto mb-8" style={{ color: `${gold}99` }}>
-            {tenant.description || "Biro perjalanan umroh & haji premium. Pelayanan eksklusif untuk perjalanan ibadah Anda."}
+            {tenant.description || "Biro perjalanan umrah & haji premium. Pelayanan eksklusif untuk perjalanan ibadah Anda."}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
             {tenant.city && (
@@ -75,7 +75,7 @@ export default function RoyalGoldTemplate({ tenant, packages, themeConfig }: Tem
             <span className="text-xs font-medium uppercase tracking-widest" style={{ color: gold }}>Koleksi Paket</span>
             <div className="h-px w-8" style={{ background: `${gold}44` }} />
           </div>
-          <h2 className="text-3xl font-bold text-white">Paket Umroh Premium</h2>
+          <h2 className="text-3xl font-bold text-white">Paket umrah Premium</h2>
           <p className="text-sm mt-2 max-w-md mx-auto" style={{ color: `${gold}88` }}>
             Pilihan paket terbaik dari {tenant.name} untuk perjalanan ibadah yang tak terlupakan
           </p>
@@ -151,7 +151,7 @@ function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; go
           <div className="space-y-1.5">
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <MapPin className="w-3 h-3 shrink-0" style={{ color: gold }} />
-            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
+            <span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs" style={{ color: `${gold}77` }}>
             <Plane className="w-3 h-3 shrink-0" style={{ color: gold }} />

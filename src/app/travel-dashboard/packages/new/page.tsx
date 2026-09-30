@@ -256,7 +256,7 @@ export default function NewPackagePage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-8 w-48 bg-muted rounded animate-pulse" />
         <div className="h-96 bg-muted rounded-2xl animate-pulse" />
       </div>
@@ -269,7 +269,7 @@ export default function NewPackagePage() {
     ) : null
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
         <Link
           href="/travel-dashboard/packages"
@@ -280,7 +280,7 @@ export default function NewPackagePage() {
         <div>
           <h1 className="text-2xl font-bold">Tambah Paket Baru</h1>
           <p className="text-muted-foreground mt-1">
-            Buat paket umroh baru untuk travel Anda
+            Buat paket umrah baru untuk travel Anda
           </p>
         </div>
       </div>
@@ -301,7 +301,7 @@ export default function NewPackagePage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Contoh: Umroh Reguler 12 Hari"
+                placeholder="Contoh: umrah Reguler 12 Hari"
                 className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground"
               />
               {fieldError("name")}
@@ -616,7 +616,7 @@ export default function NewPackagePage() {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Deskripsi singkat tentang paket umroh..."
+                placeholder="Deskripsi singkat tentang paket umrah..."
                 rows={3}
                 className="w-full px-4 py-2.5 bg-white border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 placeholder:text-muted-foreground resize-none"
               />

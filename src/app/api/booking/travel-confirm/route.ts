@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, tenant_id, customer_id, price, pilgrim_count, booking_source, package_id")
+      .select("id, status, tenant_id, customer_id, price, pilgrim_count, booking_channel, package_id")
       .eq("id", bookingId)
       .single()
 
@@ -102,12 +102,7 @@ export async function POST(request: NextRequest) {
       .update({ status: "confirmed", updated_at: new Date().toISOString() })
       .eq("id", bookingId)
 
-    const channel =
-      booking.booking_source === "subdomain"
-        ? "subdomain"
-        : booking.booking_source === "custom_domain"
-          ? "custom_domain"
-          : "portal"
+    const channel = booking.booking_channel === "subdomain" ? "subdomain" : booking.booking_channel === "custom_domain" ? "custom_domain" : "portal"
 
     const credited = await creditTravelCommission(admin, {
       tenantId: booking.tenant_id,

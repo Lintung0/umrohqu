@@ -51,7 +51,7 @@ export default function TravelWebsitePage() {
 
       const [tenantRes, websiteRes, templatesRes, pkgRes] = await Promise.all([
         supabase.from("tenants").select("*").eq("id", profile.tenant_id).single(),
-        supabase.from("tenant_websites").select("template_id").eq("tenant_id", profile.tenant_id).single(),
+        supabase.from("websites").select("template_id").eq("tenant_id", profile.tenant_id).single(),
         supabase.from("website_templates").select("id, name, description, preview_url, is_active, category").eq("is_active", true).order("created_at", { ascending: false }),
         supabase.from("packages").select("*").eq("tenant_id", profile.tenant_id).in("status", ["active", "ongoing"]).order("created_at", { ascending: false }),
       ])
@@ -96,7 +96,7 @@ export default function TravelWebsitePage() {
     if (!tenantId || savingTemplate) return
     setSavingTemplate(true)
 
-    const { error } = await supabase.from("tenant_websites").upsert(
+    const { error } = await supabase.from("websites").upsert(
       { tenant_id: tenantId, template_id: templateId },
       { onConflict: "tenant_id" }
     )
@@ -112,7 +112,7 @@ export default function TravelWebsitePage() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
         <div className="h-8 w-56 bg-muted rounded animate-pulse" />
         <div className="h-48 bg-muted rounded-2xl animate-pulse" />
         <div className="h-64 bg-muted rounded-2xl animate-pulse" />
@@ -121,7 +121,7 @@ export default function TravelWebsitePage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">{t("nav.website")}</h1>
         <p className="text-muted-foreground mt-1">Atur tampilan website travel Anda</p>

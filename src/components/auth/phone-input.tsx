@@ -27,7 +27,7 @@ export function PhoneInput({ value, onChange, error, hideLabel }: PhoneInputProp
           error
             ? "border-auth-error"
             : focused
-              ? "border-auth-primary shadow-[0_0_0_3px_rgba(42,125,79,0.13)]"
+              ? "border-auth-primary shadow-[0_0_0_3px_rgba(13,61,43,0.12)]"
               : "border-auth-border",
         )}
       >

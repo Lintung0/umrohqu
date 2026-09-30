@@ -94,7 +94,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
     const bookingIds = (bookingIdsResult.data ?? []).map((b) => b.id)
     if (bookingIds.length > 0) {
       const participantsResult = await supabase
-        .from("booking_participants")
+        .from("participants")
         .select("id", { count: "exact", head: true })
         .in("booking_id", bookingIds)
       totalJamaah = participantsResult.count ?? 0
@@ -177,7 +177,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                   </div>
                 )}
                 <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold drop-shadow-lg leading-tight">{tenantData.name}</h1>
+                  <h1 className="text-3xl sm:text-4xl font-bold drop-shadow-lg leading-tight first-letter:uppercase">{tenantData.name}</h1>
                   <p className="text-white/85 text-lg mt-0.5 font-medium">
                     {tenantData.is_verified ? "Travel Partner Terverifikasi" : "Travel Partner UmrahQu"}
                   </p>
@@ -255,7 +255,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               <div className="rounded-2xl bg-gradient-to-br from-white to-emerald-50/60 border border-gray-100 p-5 sm:p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-emerald-500/60 via-emerald-400/60 to-amber-300/60" aria-hidden />
                 <p className="text-gray-600 leading-relaxed">
-                  {tenantData.description || "Biro perjalanan umroh & haji terpercaya."}
+                  {tenantData.description || "Biro perjalanan umrah & haji terpercaya."}
                 </p>
               </div>
 
@@ -320,7 +320,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
                   {tenantData.phone ? (
                     <>
                       <a
-                        href={`https://wa.me/${tenantData.phone.replace(/[^0-9]/g, "")}?text=Assalamualaikum,%20saya%20tertarik%20dengan%20paket%20umroh%20${encodeURIComponent(tenantData.name)}`}
+                        href={`https://wa.me/${tenantData.phone.replace(/[^0-9]/g, "")}?text=Assalamualaikum,%20saya%20tertarik%20dengan%20paket%20umrah%20${encodeURIComponent(tenantData.name)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"

@@ -153,8 +153,8 @@ export default function ForgotPasswordPage() {
             <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
               Kode OTP
             </label>
-            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-[#DDE8E2] bg-[#FAFFFE]">
-              <div className="flex items-center pl-3.5 text-[#5C7268]">
+            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-auth-border bg-auth-input-bg">
+              <div className="flex items-center pl-3.5 text-auth-muted-foreground">
                 <KeyRound size={18} />
               </div>
               <input
@@ -173,8 +173,8 @@ export default function ForgotPasswordPage() {
             <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
               Kata Sandi Baru
             </label>
-            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-[#DDE8E2] bg-[#FAFFFE]">
-              <div className="flex items-center pl-3.5 text-[#5C7268]">
+            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-auth-border bg-auth-input-bg">
+              <div className="flex items-center pl-3.5 text-auth-muted-foreground">
                 <Lock size={18} />
               </div>
               <input
@@ -192,8 +192,8 @@ export default function ForgotPasswordPage() {
             <label className="text-[15px] font-semibold tracking-tight text-auth-secondary-foreground">
               Konfirmasi Kata Sandi Baru
             </label>
-            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-[#DDE8E2] bg-[#FAFFFE]">
-              <div className="flex items-center pl-3.5 text-[#5C7268]">
+            <div className="flex h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] border-auth-border bg-auth-input-bg">
+              <div className="flex items-center pl-3.5 text-auth-muted-foreground">
                 <Lock size={18} />
               </div>
               <input

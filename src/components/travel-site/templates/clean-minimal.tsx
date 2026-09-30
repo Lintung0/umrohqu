@@ -50,7 +50,7 @@ export default function CleanMinimalTemplate({ tenant, packages, themeConfig }: 
             {tenant.name}
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-            {tenant.description || "Biro perjalanan umroh & haji terpercaya. Melayani keberangkatan dengan pelayanan terbaik dan harga terjangkau."}
+            {tenant.description || "Biro perjalanan umrah & haji terpercaya. Melayani keberangkatan dengan pelayanan terbaik dan harga terjangkau."}
           </p>
           <div className="flex flex-wrap items-center gap-3 mb-8 text-sm text-muted-foreground">
             {tenant.city && (
@@ -153,7 +153,7 @@ function PackageCard({ pkg, primary: _primary }: { pkg: Package; primary: string
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 shrink-0 text-gray-400" />
-            <span className="truncate">{(pkg.departure_cities || [pkg.departure_city]).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
+            <span className="truncate">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Hotel className="w-3 h-3 shrink-0 text-gray-400" />

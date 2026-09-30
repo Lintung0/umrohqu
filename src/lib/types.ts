@@ -1,5 +1,12 @@
 export type AdminRole = "admin" | "finance" | "operational"
 
+// ─── Enums Baru (Operasional Travel) ──────────────────────────────────────────
+export type UserRole = "customer" | "admin" | "finance" | "operational" | "travel_admin" | "travel_operational" | "travel_finance" | "travel_agent" | "travel_muthawif"
+export type AgentCommissionTrigger = "on_dp" | "on_paid" | "on_departure"
+export type ManasikAttendanceStatus = "present" | "absent" | "excused"
+export type EquipmentStatus = "pending" | "ready" | "distributed" | "returned"
+export type RoomType = "single" | "double" | "triple" | "quad"
+
 // ─── Database Row Types ────────────────────────────────────────────────────────
 // These mirror the Supabase schema exactly (snake_case column names)
 
@@ -35,8 +42,9 @@ export interface User {
   email: string
   phone: string | null
   full_name: string | null
-  role: string
+  role: UserRole
   tenant_id: string | null
+  branch_id: string | null
   profile: Record<string, unknown>
   created_at: string
   updated_at: string
@@ -51,11 +59,9 @@ export interface Package {
   description: string | null
   type: string
   price: number
-  currency: string
   quota: number
   quota_taken: number | null
   available: number | null
-  departure_city: string | null
   departure_date: string | null
   duration_nights: number | null
   itinerary: unknown[] | null
@@ -66,7 +72,6 @@ export interface Package {
   is_shared_to_marketplace: boolean
   status: string
   min_dp_amount: number | null
-  doc_drive_link: string | null
   completed_at: string | null
   rating_avg: number | null
   rating_count: number
@@ -98,6 +103,9 @@ export interface Booking {
   tenant_id: string
   customer_id: string
   package_id: string
+  package_departure_id: string | null
+  agent_id: string | null
+  referral_code: string | null
   booking_channel: string
   booking_code: string | null
   status: string
@@ -105,12 +113,9 @@ export interface Booking {
   price: number
   total: number
   dp_type: string | null
-  dp_percentage: number | null
   dp_amount: number | null
   remaining_amount: number | null
   remaining_due_date: string | null
-  gateway_invoice_id: string | null
-  booking_source: string
   notes: string | null
   created_at: string
   updated_at: string
@@ -128,9 +133,19 @@ export interface BookingParticipant {
   passport_number: string | null
   passport_expiry: string | null
   birth_date: string | null
+  birth_place: string | null
   gender: string | null
   phone: string | null
   relation: string
+  emergency_contact_name: string | null
+  emergency_contact_phone: string | null
+  street: string | null
+  city: string | null
+  province: string | null
+  postal_code: string | null
+  village: string | null
+  district: string | null
+  rt_rw: string | null
   created_at: string
 }
 
@@ -301,6 +316,208 @@ export interface ContactMessage {
   message: string
   is_read: boolean
   created_at: string
+}
+
+// ─── Tabel Baru Operasional Travel (19 tabel) ──────────────────────────────────
+
+// A. SDM, Mitra, & Struktur Cabang
+export interface Branch {
+  id: string
+  tenant_id: string
+  name: string
+  city: string
+  address: string
+  phone: string | null
+  is_primary: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Agent {
+  id: string
+  user_id: string
+  branch_id: string | null
+  referral_code: string
+  commission_amount: number
+  commission_trigger: AgentCommissionTrigger
+  created_at: string
+  updated_at: string
+}
+
+export interface Muthawif {
+  id: string
+  user_id: string
+  branch_id: string | null
+  certification_no: string | null
+  specialization: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface AgentCommission {
+  id: string
+  agent_id: string
+  booking_id: string
+  amount: number
+  status: "pending" | "paid" | "cancelled"
+  trigger: AgentCommissionTrigger
+  created_at: string
+  updated_at: string
+}
+
+// B. Multi-Kota Keberangkatan & Akomodasi
+export interface PackageDeparture {
+  id: string
+  package_id: string
+  branch_id: string | null
+  departure_city: string
+  departure_date: string
+  quota: number
+  price_adjustment: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Hotel {
+  id: string
+  tenant_id: string
+  name: string
+  city: string
+  address: string
+  facilities: string[] | null
+  distance_to_haram_meters: number | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface Airline {
+  id: string
+  name: string
+  iata_code: string | null
+  logo_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PackageHotel {
+  id: string
+  package_id: string
+  hotel_id: string
+  check_in_date: string
+  check_out_date: string
+  night_count: number
+  sort_order: number
+  created_at: string
+}
+
+export interface PackageFlight {
+  id: string
+  package_id: string
+  airline_id: string | null
+  flight_type: "outbound" | "return"
+  departure_city: string
+  arrival_city: string
+  departure_time: string
+  arrival_time: string
+  flight_number: string | null
+  created_at: string
+  updated_at: string
+}
+
+// C. Rooming & Bus (Plotting Lapangan)
+export interface RoomTemplate {
+  id: string
+  package_id: string
+  hotel_id: string | null
+  room_number: string
+  room_type: RoomType
+  capacity: number
+  floor: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface BusTemplate {
+  id: string
+  package_id: string
+  bus_number: string
+  capacity: number
+  created_at: string
+  updated_at: string
+}
+
+export interface BusSeat {
+  id: string
+  bus_template_id: string
+  seat_number: string
+  created_at: string
+}
+
+export interface RoomAssignment {
+  id: string
+  participant_id: string
+  room_template_id: string
+  location: "makkah" | "madinah"
+  created_at: string
+}
+
+export interface SeatAssignment {
+  id: string
+  participant_id: string
+  bus_seat_id: string
+  created_at: string
+}
+
+// D. Bimbingan Manasik & Logistik Perlengkapan
+export interface ManasikProgram {
+  id: string
+  package_id: string
+  name: string
+  lead_muthawif_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ManasikSession {
+  id: string
+  program_id: string
+  session_date: string
+  start_time: string
+  location: string
+  muthawif_id: string | null
+  materials_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ManasikAttendance {
+  id: string
+  session_id: string
+  participant_id: string
+  status: ManasikAttendanceStatus
+  created_at: string
+}
+
+export interface EquipmentTemplate {
+  id: string
+  package_id: string
+  name: string
+  requires_size: boolean
+  size_options: string[] | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ParticipantEquipment {
+  id: string
+  participant_id: string
+  equipment_template_id: string
+  size: string | null
+  quantity: number
+  status: EquipmentStatus
+  created_at: string
+  updated_at: string
 }
 
 // ─── Dashboard-friendly display types ──────────────────────────────────────────

@@ -102,7 +102,7 @@ export default function TravelDashboardOverview() {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         <div className="h-8 w-56 bg-muted rounded animate-pulse" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1,2,3,4].map((i) => <div key={i} className="h-24 bg-muted rounded-2xl animate-pulse" />)}
@@ -115,10 +115,9 @@ export default function TravelDashboardOverview() {
   const isComplete = onboardingStep >= 5
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard Travel</h1>
-        <p className="text-muted-foreground mt-1">Selamat datang, {displayName}</p>
       </div>
 
       {!isComplete && (
@@ -172,7 +171,7 @@ export default function TravelDashboardOverview() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { icon: Package, label: "Paket Aktif", value: stats.packageCount, color: "bg-emerald-100 text-emerald-600" },
-          { icon: BookOpen, label: "Total Pesan", value: stats.bookingCount, color: "bg-blue-100 text-blue-600" },
+          { icon: BookOpen, label: "Total Pesanan", value: stats.bookingCount, color: "bg-blue-100 text-blue-600" },
           { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(stats.totalRevenue), color: "bg-purple-100 text-purple-600" },
           { icon: Users, label: "Total Jamaah", value: stats.totalPilgrims, color: "bg-amber-100 text-amber-600" },
         ].map((s) => (
@@ -183,7 +182,7 @@ export default function TravelDashboardOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-2xl border border-border">
           <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="font-semibold">Pesan Terbaru</h2>
+            <h2 className="font-semibold">Pesanan Terbaru</h2>
             <Link href="/travel-dashboard/bookings" className="text-sm text-emerald-600 hover:underline">Lihat Semua</Link>
           </div>
           <div className="divide-y divide-border">

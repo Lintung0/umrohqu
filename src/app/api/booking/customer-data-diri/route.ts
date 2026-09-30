@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         .eq("id", booking.customer_id)
         .maybeSingle(),
       admin
-        .from("user_addresses")
+        .from("addresses")
         .select("*")
         .eq("user_id", booking.customer_id)
         .maybeSingle(),

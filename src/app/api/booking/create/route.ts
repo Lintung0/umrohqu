@@ -17,11 +17,13 @@ const pilgrimSchema = z.object({
 
 const schema = z.object({
   packageId: z.string().uuid(),
+  packageDepartureId: z.string().uuid().nullable().optional(),
   pilgrimCount: z.number().min(1).max(99),
   pilgrims: z.array(pilgrimSchema).optional(),
   paymentType: z.enum(["full", "dp"]),
   dpPercentage: z.number().min(10).max(90).optional(),
   feeChannel: z.enum(["portal", "subdomain", "custom_domain"]).default("portal"),
+  referralCode: z.string().optional(),
   notes: z.string().optional(),
 })
 
@@ -45,7 +47,7 @@ export async function POST(_request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Data tidak valid" }, { status: 400 })
     }
 
-    const { packageId, pilgrimCount, pilgrims, paymentType, dpPercentage, feeChannel, notes } = parsed.data
+    const { packageId, packageDepartureId, pilgrimCount, pilgrims, paymentType, dpPercentage, feeChannel, referralCode, notes } = parsed.data
     const admin = createAdminClient()
 
     // 1. Get package (harga SELALU dari database, bukan dari client)
@@ -59,6 +61,30 @@ export async function POST(_request: NextRequest) {
 
     if (pkgErr || !pkg) {
       return NextResponse.json({ error: "Paket tidak ditemukan" }, { status: 404 })
+    }
+
+    // Idempotency: cek apakah booking pending_payment sudah ada untuk user+package+departure
+    const { data: existingBooking } = await admin
+      .from("bookings")
+      .select("id, status, total, dp_amount, remaining_amount, dp_type")
+      .eq("customer_id", user.id)
+      .eq("package_id", packageId)
+      .eq("package_departure_id", packageDepartureId || null)
+      .eq("status", "pending_payment")
+      .maybeSingle()
+
+    if (existingBooking?.id) {
+      // Booking sudah ada — kembalikan data booking lama (hindari duplikat pesanan)
+      return NextResponse.json({
+        success: true,
+        booking_id: existingBooking.id,
+        payment_type: existingBooking.dp_type === "dp" ? "dp" : "full",
+        dp_amount: existingBooking.dp_amount || 0,
+        remaining: existingBooking.remaining_amount || 0,
+        total: existingBooking.total || 0,
+        snap: null,
+        is_duplicate: true,
+      })
     }
 
     const feeConfig = await getFeeConfig(admin)
@@ -85,23 +111,36 @@ export async function POST(_request: NextRequest) {
     const payNow = dpAmount
 
     // 2. Insert booking
+    // Resolve agent_id from referral_code if provided
+    let agentId: string | null = null
+    if (referralCode) {
+      const { data: agent } = await admin
+        .from("agents")
+        .select("id")
+        .eq("referral_code", referralCode)
+        .eq("status", "active")
+        .maybeSingle()
+      agentId = agent?.id || null
+    }
+
     const { data: booking, error: insertErr } = await admin
       .from("bookings")
       .insert({
         package_id: packageId,
+        package_departure_id: packageDepartureId,
         tenant_id: pkg.tenant_id,
         customer_id: user.id,
+        agent_id: agentId,
+        referral_code: referralCode || null,
         status: "pending_payment",
         booking_channel: toBookingChannel(feeChannel),
         pilgrim_count: pilgrimCount,
         price: pkg.price,
         total: payNow,
         dp_type: paymentType === "dp" ? "dp" : "full",
-        dp_percentage: paymentType === "dp" ? dpPercentage : null,
         dp_amount: paymentType === "dp" ? dpAmount : 0,
         remaining_amount: paymentType === "dp" ? remainingAmount : 0,
         remaining_due_date: remainingDueDate,
-        booking_source: feeChannel,
         cashback_amount: Number(pkg.cashback_amount || 0),
         notes: notes || null,
       })
@@ -109,11 +148,34 @@ export async function POST(_request: NextRequest) {
       .single()
 
     if (insertErr) {
+      // Race: dua request lolos cek di atas — kembalikan booking yang sudah ada
+      if (insertErr.code === "23505") {
+        const { data: raced } = await admin
+          .from("bookings")
+          .select("id, status, total, dp_amount, remaining_amount, dp_type")
+          .eq("customer_id", user.id)
+          .eq("package_id", packageId)
+          .eq("package_departure_id", packageDepartureId || null)
+          .eq("status", "pending_payment")
+          .maybeSingle()
+        if (raced?.id) {
+          return NextResponse.json({
+            success: true,
+            booking_id: raced.id,
+            payment_type: raced.dp_type === "dp" ? "dp" : "full",
+            dp_amount: raced.dp_amount || 0,
+            remaining: raced.remaining_amount || 0,
+            total: raced.total || 0,
+            snap: null,
+            is_duplicate: true,
+          })
+        }
+      }
       console.error("Booking insert error:", insertErr)
       return NextResponse.json({ error: "Gagal membuat booking" }, { status: 500 })
     }
 
-    // 3. Insert booking_participants
+    // 3. Insert participants
     if (pilgrims && pilgrims.length > 0) {
       const participantRecords = pilgrims.map((p) => ({
         booking_id: booking.id,
@@ -124,7 +186,7 @@ export async function POST(_request: NextRequest) {
         phone: p.phone || null,
         relation: p.relation || "self",
       }))
-      await admin.from("booking_participants").insert(participantRecords)
+      await admin.from("participants").insert(participantRecords)
     }
 
     // 4. Update package quota (reserved on booking creation)
@@ -151,7 +213,7 @@ export async function POST(_request: NextRequest) {
 
       const [{ data: userRow }, { data: addrRow }] = await Promise.all([
         admin.from("users").select("profile").eq("id", user.id).maybeSingle(),
-        admin.from("user_addresses").select("*").eq("user_id", user.id).maybeSingle(),
+        admin.from("addresses").select("*").eq("user_id", user.id).maybeSingle(),
       ])
       const profile = (userRow?.profile || {}) as DataDiriProfile
       const address = {
@@ -175,7 +237,7 @@ export async function POST(_request: NextRequest) {
       console.error("[notify booking create]", notifErr)
     }
 
-    // 6. Catat transaksi payments wajib ada di database — booking_id diisi otomatis oleh database (fungsi create_payment + trigger)
+    // 6. Catat transaksi payments via RPC create_payment (trigger menuntut app.booking_id)
     const { data: paymentId, error: payErr } = await admin.rpc("create_payment", {
       p_booking_id: booking.id,
       p_tenant_id: pkg.tenant_id,
@@ -193,7 +255,7 @@ export async function POST(_request: NextRequest) {
     let snap: { token: string; redirect_url: string } | null = null
     try {
       const { createSnapTransaction } = await import("@/lib/services/midtrans")
-      const orderId = booking.booking_code || `booking-${booking.id}`
+      const orderId = paymentId ? `pay-${paymentId}` : `pay-${booking.id.slice(0, 8)}-${Date.now()}`
       const finishBase = appUrl(`checkout/finish?booking_id=${booking.id}`)
       snap = await createSnapTransaction({
         orderId,
@@ -212,11 +274,6 @@ export async function POST(_request: NextRequest) {
         unfinishUrl: appUrl(`checkout/finish?booking_id=${booking.id}&status=unfinish`),
         errorUrl: appUrl(`checkout/finish?booking_id=${booking.id}&status=error`),
       })
-
-      await admin
-        .from("bookings")
-        .update({ gateway_invoice_id: orderId })
-        .eq("id", booking.id)
 
       if (paymentId) {
         await admin

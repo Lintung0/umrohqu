@@ -35,17 +35,17 @@ export default function AuthInputField({
       <div
         className="flex min-h-[52px] items-center overflow-hidden rounded-[14px] border-[1.5px] transition-[border-color,box-shadow] duration-150"
         style={{
-          borderColor: error ? "#DC2626" : focused ? "#2A7D4F" : "#DDE8E2",
-          background: error ? "#FEF2F2" : "#FAFFFE",
+          borderColor: error ? "#DC2626" : focused ? "#0D3D2B" : "#E5DBC4",
+          background: error ? "#FEF2F2" : "#FCFAF5",
           boxShadow:
             focused && !error
-              ? "0 0 0 3px rgba(42,125,79,0.13)"
+              ? "0 0 0 3px rgba(13,61,43,0.12)"
               : error && focused
               ? "0 0 0 3px rgba(220,38,38,0.09)"
               : "none",
         }}
       >
-        <div className="flex items-center pl-3.5" style={{ color: focused ? "#2A7D4F" : "#5C7268" }}>
+        <div className="flex items-center pl-3.5" style={{ color: focused ? "#0D3D2B" : "#74766E" }}>
           <Icon size={18} />
         </div>
         <input

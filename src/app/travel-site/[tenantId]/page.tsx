@@ -26,8 +26,8 @@ export default function TravelSitePage() {
     const fetchData = async () => {
       const [tenantRes, pkgRes, websiteRes] = await Promise.all([
         supabase.from("tenants").select("*").eq("id", tenantId).single(),
-        supabase.from("packages").select("*").eq("tenant_id", tenantId).neq("type", "haji").or("status.in.(active,ongoing,completed),doc_drive_link.not.is.null").order("created_at", { ascending: false }),
-        supabase.from("tenant_websites").select("template_id, theme_config").eq("tenant_id", tenantId).single(),
+        supabase.from("packages").select("*").eq("tenant_id", tenantId).neq("type", "haji").in("status", ["active", "ongoing", "completed"]).order("created_at", { ascending: false }),
+        supabase.from("websites").select("template_id, theme_config").eq("tenant_id", tenantId).single(),
       ])
 
       const baseTenant = tenantRes.data as Tenant | null
@@ -35,7 +35,7 @@ export default function TravelSitePage() {
       setTenant(enrichedTenant as (Tenant & Record<string, unknown>) | null)
       const allPackages = ((await enrichPackagesWithDetail(supabase, (pkgRes.data as Package[]) || [])) || []) as Package[]
       setPackages(allPackages.filter((p) => p.status === "active" || p.status === "ongoing"))
-      setDocPackages(allPackages.filter((p) => p.doc_drive_link))
+      setDocPackages(allPackages.filter((p) => p.images && p.images.length > 0))
 
       if (websiteRes.data) {
         setTemplateId(websiteRes.data.template_id)

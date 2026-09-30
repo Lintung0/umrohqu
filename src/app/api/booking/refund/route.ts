@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: refundRow } = await admin
-      .from("booking_refunds")
+      .from("refunds")
       .select("id, status, reason, previous_status, amount")
       .eq("booking_id", bookingId)
       .order("created_at", { ascending: false })
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
 
       // 3. Optimistis: siap proses refund manual
       await admin
-        .from("booking_refunds")
+        .from("refunds")
         .update({
           status: "processing",
           updated_at: new Date().toISOString(),
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
         .eq("id", bookingId)
 
       await admin
-        .from("booking_refunds")
+        .from("refunds")
         .update({
           status: "rejected",
           note: note || null,
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Belum ada proses refund" }, { status: 400 })
       }
       await admin
-        .from("booking_refunds")
+        .from("refunds")
         .update({
           status: "completed",
           completed_at: new Date().toISOString(),
@@ -208,9 +208,9 @@ export async function POST(request: NextRequest) {
     if (note) updates.note = note
 
     if (refundId) {
-      await admin.from("booking_refunds").update({ ...updates, status: "processing" }).eq("id", refundId)
+      await admin.from("refunds").update({ ...updates, status: "processing" }).eq("id", refundId)
     } else {
-      await admin.from("booking_refunds").insert({
+      await admin.from("refunds").insert({
         booking_id: bookingId,
         amount: amount || Number(booking.total || 0),
         method: method || null,

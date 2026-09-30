@@ -8,7 +8,7 @@ interface DocPackage {
   name: string
   slug: string
   image_url?: string | null
-  doc_drive_link: string | null
+  images?: string[] | null
   status?: string
 }
 
@@ -24,7 +24,7 @@ export function PackageDocumentationSection({ packages, title }: { packages: Doc
           </div>
           <div>
             <h2 className="font-semibold text-sm">{title || "Dokumentasi Jamaah"}</h2>
-            <p className="text-xs text-muted-foreground">Foto & video dokumentasi perjalanan umroh</p>
+            <p className="text-xs text-muted-foreground">Foto & video dokumentasi perjalanan umrah</p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -38,7 +38,7 @@ export function PackageDocumentationSection({ packages, title }: { packages: Doc
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold truncate">{pkg.name}</p>
                 <a
-                  href={pkg.doc_drive_link || "#"}
+                  href={pkg.images?.[0] || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-0.5"
