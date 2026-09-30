@@ -383,6 +383,32 @@
   --tw-gradient-via-stops: var(--tw-gradient-from), color-mix(in oklab, var(--primary) 14%, transparent), var(--tw-gradient-to);
 }
 
+/* ===== Mode gelap: tukar palet ivory/gold/emerald (DESIGN.md) =====
+   Putih/ivory → hijau gelap, hijau gelap → terang. Karena yang ditukar
+   ISI variabelnya, semua turunan (border, /opacity, ring, focus) ikut
+   otomatis tanpa ubah komponen. Mode terang TIDAK disentuh. */
+.dark {
+  --color-ivory: #0B1A13;
+  --color-ivory-soft: #0E2018;
+  --color-ivory-card: #12251C;
+  --color-ivory-border: #2A3D31;
+  --color-ivory-ink: #F1EFE6;
+  --color-emerald-deep: #EDE9DC;
+  --color-emerald-dark: #3E9B6F;
+  --color-gold-dark: #E3C26A;
+  --color-auth-bg: #0B1A13;
+  --color-auth-foreground: #F1EFE6;
+  --color-auth-card: #12251C;
+  --color-auth-primary: #3E9B6F;
+  --color-auth-primary-dark: #EDE9DC;
+  --color-auth-primary-light: #1A2E23;
+  --color-auth-primary-muted: #2A3D31;
+  --color-auth-secondary-foreground: #3E9B6F;
+  --color-auth-muted-foreground: #9DB3A6;
+  --color-auth-border: #2A3D31;
+  --color-auth-input-bg: #0E2018;
+}
+
 /* ===== Optimasi tema gelap — varian opasitas yang luput dari blok di atas =====
    Mode terang TIDAK disentuh; semua aturan hanya aktif di dalam .dark. */
 
