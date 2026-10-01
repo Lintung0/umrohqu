@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, Package, BadgeCheck, Search, X, ArrowRight, Building2, Star } from "lucide-react"
+import { MapPin, Package, BadgeCheck, Search, X, ArrowRight, Building2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 interface TravelRow {
@@ -29,7 +29,6 @@ export default function TravelListPage() {
   const [travels, setTravels] = useState<TravelRow[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [verifiedOnly, setVerifiedOnly] = useState(false)
   const [sort, setSort] = useState<SortKey>("nama")
 
   useEffect(() => {
@@ -78,7 +77,6 @@ export default function TravelListPage() {
 
   const filtered = useMemo(() => {
     let list = travels
-    if (verifiedOnly) list = list.filter((t) => t.is_verified)
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       list = list.filter(
@@ -91,7 +89,7 @@ export default function TravelListPage() {
     if (sort === "paket") sorted.sort((a, b) => b.packages_count - a.packages_count)
     else sorted.sort((a, b) => a.name.localeCompare(b.name, "id"))
     return sorted
-  }, [travels, searchQuery, verifiedOnly, sort])
+  }, [travels, searchQuery, sort])
 
   if (loading) {
     return (
@@ -134,9 +132,6 @@ export default function TravelListPage() {
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <div className="text-center mb-8">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold mb-3">
-              Mitra resmi · Terdaftar PPIU
-            </p>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-ivory tracking-tight first-letter:uppercase">
               Travel Partner{" "}
               <span className="text-gold-light">
@@ -179,17 +174,6 @@ export default function TravelListPage() {
             {filtered.length} travel ditemukan
           </p>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setVerifiedOnly((v) => !v)}
-              aria-pressed={verifiedOnly}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
-                verifiedOnly
-                  ? "bg-emerald-dark text-ivory border-emerald-dark"
-                  : "bg-ivory-card text-emerald-dark border-ivory-border hover:border-emerald-dark/40"
-              }`}
-            >
-              <BadgeCheck className="w-3.5 h-3.5" /> Terverifikasi saja
-            </button>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
@@ -209,7 +193,7 @@ export default function TravelListPage() {
             </div>
             <p className="text-sm text-ivory-ink/70">Tidak ada travel yang cocok dengan filter ini.</p>
             <button
-              onClick={() => { setSearchQuery(""); setVerifiedOnly(false) }}
+              onClick={() => { setSearchQuery("") }}
               className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-ivory bg-emerald-dark hover:bg-emerald-deep px-4 py-2 rounded-xl transition-colors"
             >
               Atur Ulang Filter
@@ -221,11 +205,7 @@ export default function TravelListPage() {
               <Link
                 key={travel.id}
                 href={`/travel/${travel.slug}`}
-                className={`group bg-ivory-card border rounded-2xl p-5 flex items-center gap-4 transition-colors ${
-                  travel.is_featured
-                    ? "border-gold/60 hover:border-gold"
-                    : "border-ivory-border hover:border-emerald-dark/40"
-                }`}
+                className="group bg-ivory-card border border-ivory-border hover:border-emerald-dark/40 rounded-2xl p-5 flex items-center gap-4 transition-colors"
               >
                 <div className="relative shrink-0">
                   <div className="w-14 h-14 rounded-2xl bg-ivory border border-ivory-border overflow-hidden flex items-center justify-center">
@@ -249,11 +229,6 @@ export default function TravelListPage() {
                     <h3 className="font-bold text-sm text-emerald-deep truncate">
                       {travel.name}
                     </h3>
-                    {travel.is_featured && (
-                      <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-deep bg-gold px-2 py-0.5 rounded-full">
-                        <Star className="w-2.5 h-2.5" /> Unggulan
-                      </span>
-                    )}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-ivory-ink/70 mt-0.5">
                     {travel.city && (
