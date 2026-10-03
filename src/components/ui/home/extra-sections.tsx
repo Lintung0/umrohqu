@@ -154,7 +154,7 @@ export function TestimonialSection() {
             if (users) nameMap = Object.fromEntries(users.map((u: any) => [u.id, u.full_name]))
           }
           const bookingIds = [...new Set(data.map((r: any) => r.booking_id).filter(Boolean))]
-          let pkgMap: Record<string, string> = {}
+          const pkgMap: Record<string, string> = {}
           if (bookingIds.length > 0) {
             const { data: bookings } = await supabase.from("bookings").select("id, package_id").in("id", bookingIds)
             const bookingToPkg = new Map<string, string>()

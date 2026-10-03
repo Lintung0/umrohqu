@@ -197,7 +197,7 @@ body: JSON.stringify({
         try {
           await loadSnapScript()
 
-          // @ts-ignore - Midtrans Snap types
+          // @ts-expect-error - Midtrans Snap types tidak ada di TS
           window.snap.pay(snapToken, {
             onSuccess: async function (result: any) {
               console.log("Payment success:", result)
