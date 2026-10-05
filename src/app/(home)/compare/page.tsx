@@ -768,8 +768,6 @@ function CompareContent() {
     <main className="min-h-screen bg-ivory-50">
       {compareCount > 0 && (
         <div className="relative overflow-hidden bg-ivory-card border-b border-ivory-border dark:bg-card dark:border-emerald-500/20 px-4 sm:px-6 py-6 sm:py-8">
-          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-200/20 dark:bg-emerald-500/10 blur-3xl" aria-hidden />
-          <div className="absolute -bottom-20 -left-16 w-72 h-72 rounded-full bg-gold/20 dark:bg-amber-400/10 blur-3xl" aria-hidden />
           <div className="relative max-w-6xl mx-auto">
             <div className="flex items-center gap-3">
               <span className="w-11 h-11 rounded-2xl bg-ivory-card dark:bg-emerald-900/50 border border-ivory-border dark:border-emerald-400/30 flex items-center justify-center shadow-sm">

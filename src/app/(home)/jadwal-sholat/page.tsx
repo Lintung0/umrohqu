@@ -118,15 +118,15 @@ export default function JadwalSholatPage() {
   ] : []
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
+    <main className="min-h-screen bg-ivory-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
+          <div className="inline-flex items-center gap-2 bg-emerald-dark/10 text-emerald-dark text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
             <Landmark className="w-3.5 h-3.5" />
             Jadwal Sholat
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Jadwal Sholat</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-emerald-deep mb-2 first-letter:uppercase">Jadwal Sholat</h1>
         </div>
 
         {/* City Search */}
@@ -141,10 +141,10 @@ export default function JadwalSholatPage() {
             }}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             onFocus={() => setShowSuggestions(true)}
-            className="pl-10 bg-white border-blue-200 focus:border-blue-400 focus:ring-blue-400/20"
+            className="pl-10 bg-ivory-card border-ivory-border focus:border-emerald-dark focus:ring-emerald-dark/20"
           />
           {showSuggestions && filteredSuggestions.length > 0 && (
-            <div className="absolute top-full mt-1 w-full bg-white border border-blue-100 rounded-xl shadow-lg z-10 overflow-hidden">
+            <div className="absolute top-full mt-1 w-full bg-ivory-card border border-ivory-border rounded-xl shadow-lg z-10 overflow-hidden">
               {filteredSuggestions.map((s) => (
                 <button
                   key={s}
@@ -153,7 +153,7 @@ export default function JadwalSholatPage() {
                     fetchTimes(s)
                     setShowSuggestions(false)
                   }}
-                  className="w-full px-4 py-2.5 text-sm text-left hover:bg-blue-50 transition-colors"
+                  className="w-full px-4 py-2.5 text-sm text-left text-emerald-deep hover:bg-ivory transition-colors"
                 >
                   {s}
                 </button>
@@ -164,18 +164,18 @@ export default function JadwalSholatPage() {
 
         {loading ? (
           <div className="text-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-3" />
+            <Loader2 className="w-6 h-6 animate-spin text-emerald-dark mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">Memuat jadwal sholat...</p>
           </div>
         ) : times ? (
           <>
             {/* Countdown Card */}
-            <Card className="p-6 mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0">
+            <Card className="p-6 mb-6 bg-emerald-deep text-ivory border-0">
               <div className="text-center">
-                <p className="text-blue-200 text-sm mb-1">Sholat Berikutnya</p>
+                <p className="text-ivory/70 text-sm mb-1">Sholat Berikutnya</p>
                 <p className="text-3xl font-bold mb-1">{nextPrayer || "-"}</p>
-                <p className="text-2xl font-mono text-blue-100">{countdown}</p>
-                <p className="text-xs text-blue-300 mt-2">{city} • {times.Date}</p>
+                <p className="text-2xl font-mono text-gold-light">{countdown}</p>
+                <p className="text-xs text-ivory/60 mt-2">{city} • {times.Date}</p>
               </div>
             </Card>
 
@@ -186,27 +186,27 @@ export default function JadwalSholatPage() {
                   key={prayer.name}
                   className={`p-4 rounded-2xl border text-center transition-all ${
                     nextPrayer === prayer.name
-                      ? "bg-blue-50 border-blue-300 shadow-md"
-                      : "bg-white border-gray-100"
+                      ? "bg-emerald-dark/10 border-emerald-dark/40 shadow-md"
+                      : "bg-ivory-card border-ivory-border"
                   }`}
                 >
-                  {prayer.name === "Subuh" && <Sunrise className={`w-6 h-6 mx-auto mb-2 ${prayer.color}`} />}
-                  {prayer.name === "Dzuhur" && <Sun className={`w-6 h-6 mx-auto mb-2 ${prayer.color}`} />}
-                  {prayer.name === "Ashar" && <Sun className={`w-6 h-6 mx-auto mb-2 ${prayer.color}`} />}
-                  {prayer.name === "Maghrib" && <Sunset className={`w-6 h-6 mx-auto mb-2 ${prayer.color}`} />}
-                  {prayer.name === "Isya" && <Moon className={`w-6 h-6 mx-auto mb-2 ${prayer.color}`} />}
-                  <p className="text-sm font-semibold text-gray-800">{prayer.name}</p>
-                  <p className="text-xl font-bold text-gray-900 mt-1">{prayer.time}</p>
+                  {prayer.name === "Subuh" && <Sunrise className={`w-6 h-6 mx-auto mb-2 text-emerald-dark`} />}
+                  {prayer.name === "Dzuhur" && <Sun className={`w-6 h-6 mx-auto mb-2 text-gold-dark`} />}
+                  {prayer.name === "Ashar" && <Sun className={`w-6 h-6 mx-auto mb-2 text-gold-dark`} />}
+                  {prayer.name === "Maghrib" && <Sunset className={`w-6 h-6 mx-auto mb-2 text-emerald-dark`} />}
+                  {prayer.name === "Isya" && <Moon className={`w-6 h-6 mx-auto mb-2 text-emerald-dark`} />}
+                  <p className="text-sm font-semibold text-emerald-deep">{prayer.name}</p>
+                  <p className="text-xl font-bold text-emerald-deep mt-1">{prayer.time}</p>
                 </div>
               ))}
             </div>
 
             {/* Sunrise */}
-            <Card className="mt-3 p-4">
+            <Card className="mt-3 p-4 bg-ivory-card border-ivory-border">
               <div className="flex items-center justify-center gap-3">
-                <Sunrise className="w-5 h-5 text-amber-500" />
+                <Sunrise className="w-5 h-5 text-gold-dark" />
                 <span className="text-sm text-muted-foreground">Terbit Matahari</span>
-                <span className="text-sm font-bold">{times.Sunrise}</span>
+                <span className="text-sm font-bold text-emerald-deep">{times.Sunrise}</span>
               </div>
             </Card>
           </>

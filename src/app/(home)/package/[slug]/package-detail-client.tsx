@@ -863,9 +863,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               <div className="mt-4 space-y-2.5">
                 {blocked ? (
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-deep bg-emerald-deep p-4 text-ivory shadow-lg">
-                    {/* Decorative glow */}
-                    <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-gold/20 blur-3xl" />
-                    <div className="pointer-events-none absolute -bottom-12 -left-8 w-32 h-32 rounded-full bg-emerald-dark/40 blur-3xl" />
 
                     {/* Ribbon */}
                     <div className="relative flex items-center justify-between">
