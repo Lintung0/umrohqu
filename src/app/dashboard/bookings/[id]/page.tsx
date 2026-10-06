@@ -1129,13 +1129,15 @@ function PaymentStatusSection({
   // Helper: check if fully paid (no remaining balance)
   const isFullyPaid = effectiveRemaining <= 0
 
-  // Transaksi gateway aktif (VA sudah terbit, uang belum masuk)
+  // Transaksi gateway aktif (Snap token dibuat)
   const hasActiveVA = !!activePayment && activePayment.status === "pending" && !!activePayment.gateway_reference
+  // VA sudah terbit = user sudah pilih metode, tinggal transfer
+  const hasVaNumber = hasActiveVA && !!activePayment?.va_number
 
   const handleRecheck = () => window.location.reload()
 
   // ── KONDISI 0: Sedang verifikasi status ke gateway (tombol disembunyikan) ──
-  if (verifying && status === "pending_payment" && !hasActiveVA) {
+  if (verifying && status === "pending_payment" && !hasVaNumber) {
     return (
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
         <div className="flex items-center gap-4">
@@ -1322,7 +1324,7 @@ function PaymentStatusSection({
 
   // ── KONDISI 3B: VA sudah terbit, uang belum masuk ──
   // Tombol "Bayar" baru disembunyikan; user lanjutkan pembayaran yang sama
-  if (status === "pending_payment" && hasActiveVA && activePayment) {
+  if (status === "pending_payment" && hasVaNumber && activePayment) {
     return (
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
         <div className="flex items-center gap-4">
