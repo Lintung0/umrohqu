@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error: bErr } = await admin
       .from("bookings")
-      .select("id, status, dp_type, remaining_amount, total, customer_id, tenant_id, booking_code")
+      .select("id, status, payment_scheme, remaining_amount, total, customer_id, tenant_id, booking_code")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 
-    if (booking.dp_type !== "dp") {
+    if (booking.payment_scheme !== "down_payment") {
       return NextResponse.json({ error: "Bukan booking DP" }, { status: 400 })
     }
 

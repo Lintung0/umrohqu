@@ -114,6 +114,9 @@ export interface Booking {
   total: number
   dp_type: string | null
   dp_amount: number | null
+  payment_scheme: string | null
+  down_payment_amount: number | null
+  installment_option_id: string | null
   remaining_amount: number | null
   remaining_due_date: string | null
   notes: string | null

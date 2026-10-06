@@ -66,7 +66,7 @@ export async function POST(_request: NextRequest) {
     // Idempotency: cek apakah booking pending_payment sudah ada untuk user+package+departure
     const { data: existingBooking } = await admin
       .from("bookings")
-      .select("id, status, total, dp_amount, remaining_amount, dp_type")
+      .select("id, status, total, down_payment_amount, remaining_amount, payment_scheme")
       .eq("customer_id", user.id)
       .eq("package_id", packageId)
       .eq("package_departure_id", packageDepartureId || null)
@@ -78,8 +78,8 @@ export async function POST(_request: NextRequest) {
       return NextResponse.json({
         success: true,
         booking_id: existingBooking.id,
-        payment_type: existingBooking.dp_type === "dp" ? "dp" : "full",
-        dp_amount: existingBooking.dp_amount || 0,
+        payment_type: existingBooking.payment_scheme === "down_payment" ? "dp" : "full",
+        dp_amount: existingBooking.down_payment_amount || 0,
         remaining: existingBooking.remaining_amount || 0,
         total: existingBooking.total || 0,
         snap: null,
@@ -137,8 +137,8 @@ export async function POST(_request: NextRequest) {
         pilgrim_count: pilgrimCount,
         price: pkg.price,
         total: payNow,
-        dp_type: paymentType === "dp" ? "dp" : "full",
-        dp_amount: paymentType === "dp" ? dpAmount : 0,
+        payment_scheme: paymentType === "dp" ? "down_payment" : "full_payment",
+        down_payment_amount: paymentType === "dp" ? dpAmount : 0,
         remaining_amount: paymentType === "dp" ? remainingAmount : 0,
         remaining_due_date: remainingDueDate,
         cashback_amount: Number(pkg.cashback_amount || 0),
@@ -152,7 +152,7 @@ export async function POST(_request: NextRequest) {
       if (insertErr.code === "23505") {
         const { data: raced } = await admin
           .from("bookings")
-          .select("id, status, total, dp_amount, remaining_amount, dp_type")
+          .select("id, status, total, down_payment_amount, remaining_amount, payment_scheme")
           .eq("customer_id", user.id)
           .eq("package_id", packageId)
           .eq("package_departure_id", packageDepartureId || null)
@@ -162,8 +162,8 @@ export async function POST(_request: NextRequest) {
           return NextResponse.json({
             success: true,
             booking_id: raced.id,
-            payment_type: raced.dp_type === "dp" ? "dp" : "full",
-            dp_amount: raced.dp_amount || 0,
+            payment_type: raced.payment_scheme === "down_payment" ? "dp" : "full",
+            dp_amount: raced.down_payment_amount || 0,
             remaining: raced.remaining_amount || 0,
             total: raced.total || 0,
             snap: null,

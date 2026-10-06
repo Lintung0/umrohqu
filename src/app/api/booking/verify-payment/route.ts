@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await admin
       .from("bookings")
-      .select("id, status, dp_type, remaining_amount, total, tenant_id, price, pilgrim_count, booking_source, package_id")
+      .select("id, status, payment_scheme, remaining_amount, total, tenant_id, price, pilgrim_count, booking_source, package_id")
       .eq("id", bookingId)
       .eq("customer_id", user.id)
       .single()
