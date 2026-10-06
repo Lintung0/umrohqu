@@ -1,3 +1,5 @@
+import { createHash, timingSafeEqual } from "node:crypto"
+
 const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || ""
 const MIDTRANS_IS_PRODUCTION = process.env.MIDTRANS_IS_PRODUCTION === "true"
 
@@ -99,6 +101,31 @@ export function isSuccessStatus(status: string): boolean {
 
 export function isPendingStatus(status: string): boolean {
   return ["pending", "authorize", "capture", "settlement", "challenge"].includes(status)
+}
+
+// Verifikasi signatureKey notifikasi Midtrans:
+// SHA512(order_id + status_code + gross_amount + serverKey).
+// WAJIB lolos sebelum notifikasi diproses — tanpa ini siapa pun bisa
+// POST settlement palsu dan booking jadi terbayar tanpa uang masuk.
+export function verifyNotificationSignature(notification: {
+  order_id?: string
+  status_code?: string
+  gross_amount?: string | number
+  signature_key?: string
+}): boolean {
+  const { order_id, status_code, gross_amount, signature_key } = notification
+  if (!order_id || !status_code || gross_amount === undefined || !signature_key || !MIDTRANS_SERVER_KEY) {
+    return false
+  }
+  const expected = createHash("sha512")
+    .update(`${order_id}${status_code}${gross_amount}${MIDTRANS_SERVER_KEY}`)
+    .digest("hex")
+  if (expected.length !== signature_key.length) return false
+  try {
+    return timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(signature_key, "hex"))
+  } catch {
+    return false
+  }
 }
 
 export function stablePaymentType(raw: string): string {
