@@ -1,7 +1,7 @@
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
@@ -35,6 +35,7 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const submittingRef = useRef(false)
   const [result, setResult] = useState<{ success: boolean; bookingId?: string; error?: string } | null>(null)
 
   const [step, setStep] = useState(0)
@@ -160,8 +161,29 @@ function CheckoutContent() {
 
   const handleSubmit = useCallback(async () => {
     if (!pkg) return
+    // Guard anti double-klik: state saja tidak cukup (2 klik dalam 1 tick
+    // lolos sebelum re-render). Ref sinkron, tidak bisa ditembus.
+    if (submittingRef.current) return
+    submittingRef.current = true
     setSubmitting(true)
     setResult(null)
+    // Verifikasi diam-diam ke gateway, lalu langsung ke detail pesanan.
+    // TIDAK lewat halaman finish/loading — popup Snap cukup overlay.
+    const verifyNow = async (bookingId: string) => {
+      try {
+        await fetch("/api/booking/verify-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId }),
+        })
+      } catch (e) {
+        console.error("Verify payment error:", e)
+      }
+    }
+    const done = () => {
+      submittingRef.current = false
+      setSubmitting(false)
+    }
     try {
       const res = await fetch("/api/booking/create", {
         method: "POST",
@@ -259,6 +281,7 @@ body: JSON.stringify({
     } catch {
       setResult({ success: false, error: "Terjadi kesalahan jaringan. Silakan coba lagi." })
     }
+    done()
     setSubmitting(false)
   }, [pkg, pilgrimCount, pilgrims, paymentType, dpPercentage, notes, router])
 

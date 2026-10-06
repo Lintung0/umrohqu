@@ -4,6 +4,7 @@ import {
   isSuccessStatus,
   isPendingStatus,
   stablePaymentType,
+  verifyNotificationSignature,
 } from "@/lib/services/midtrans"
 
 export const dynamic = "force-dynamic"
@@ -13,6 +14,13 @@ export async function POST(_request: NextRequest) {
 
   try {
     const notification = await _request.json()
+
+    // Keamanan dana: tolak notifikasi tanpa signature valid. Tanpa ini,
+    // siapa pun bisa POST settlement palsu dan booking jadi terbayar.
+    if (!verifyNotificationSignature(notification)) {
+      console.error("[midtrans] invalid signature for order:", notification?.order_id || notification?.transaction_id || "?")
+      return NextResponse.json({ error: "invalid_signature" }, { status: 403 })
+    }
 
     const orderId: string = notification.order_id || notification.transaction_id || ""
     const rawStatus: string = notification.transaction_status || ""
@@ -91,7 +99,7 @@ export async function POST(_request: NextRequest) {
       ? { data: { id: paymentId } as any }
       : await admin
           .from("payments")
-          .select("id, status")
+          .select("id, status, amount")
           .eq("booking_id", bookingId)
           .order("created_at", { ascending: false })
           .limit(1)
@@ -100,6 +108,19 @@ export async function POST(_request: NextRequest) {
     const paidAt = notification.transaction_time
       ? new Date(notification.transaction_time).toISOString()
       : new Date().toISOString()
+
+    // Keamanan dana: nominal Midtrans harus sama dengan tagihan kita.
+    // Mencegah kurang-bayar/kelebihan-bayar tercatat sebagai lunas.
+    const notifiedGross = Math.round(Number(notification.gross_amount || 0))
+    const expectedGross = (payment as any)?.amount != null
+      ? Math.round(Number((payment as any).amount))
+      : isRemaining
+        ? Math.round(Number(booking.remaining_amount || 0))
+        : Math.round(Number(booking.total || 0))
+    if (notifiedGross > 0 && expectedGross > 0 && notifiedGross !== expectedGross) {
+      console.error("[midtrans] gross_amount mismatch:", { orderId, notifiedGross, expectedGross, bookingId })
+      return NextResponse.json({ error: "amount_mismatch" }, { status: 403 })
+    }
 
     if (isSuccessStatus(rawStatus)) {
       if (isRemaining) {

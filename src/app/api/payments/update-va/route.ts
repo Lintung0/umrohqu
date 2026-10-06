@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient } from "@/lib/supabase/server"
+import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { z } from "zod"
 
 const schema = z.object({
@@ -10,6 +10,12 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: "Silakan login terlebih dahulu" }, { status: 401 })
+    }
+
     const body = await request.json()
     const parsed = schema.safeParse(body)
     if (!parsed.success) {
@@ -19,11 +25,12 @@ export async function POST(request: NextRequest) {
     const { bookingId, vaNumber, bank } = parsed.data
     const admin = createAdminClient()
 
-    // Verify booking exists and get payment record
+    // Booking harus milik user yang login
     const { data: booking, error: bookingError } = await admin
       .from("bookings")
-      .select("id, gateway_invoice_id")
+      .select("id")
       .eq("id", bookingId)
+      .eq("customer_id", user.id)
       .single()
 
     if (bookingError || !booking) {
@@ -39,6 +46,7 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq("booking_id", bookingId)
+      .eq("status", "pending")
 
     if (paymentError) {
       console.error("Update VA error:", paymentError)
