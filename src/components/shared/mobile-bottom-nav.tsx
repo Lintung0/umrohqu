@@ -23,8 +23,8 @@ export default function MobileBottomNav() {
   if (pathname.startsWith("/admin") || pathname.startsWith("/travel-dashboard") || pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/checkout") || pathname.startsWith("/travel-site")) return null
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border safe-area-bottom pb-safe lg:hidden">
-      <div className="flex items-center justify-around h-16">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-ivory-card border-t border-ivory-border safe-area-bottom pb-safe lg:hidden">
+      <div className="flex items-stretch h-16">
         {NAV_ITEMS.map((item) => {
           const isActive = item.href === "/"
             ? pathname === "/"
@@ -35,13 +35,13 @@ export default function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
-                isActive ? "text-emerald-600" : "text-muted-foreground hover:text-foreground"
+              className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-1 transition-colors ${
+                isActive ? "text-emerald-dark" : "text-ivory-ink/60 hover:text-emerald-dark"
               }`}
             >
               <item.icon className="w-5 h-5" />
               {item.href === "/compare" && compareCount > 0 && (
-                <span className="absolute top-0 right-1 w-4 h-4 flex items-center justify-center rounded-full bg-emerald-600 text-white text-[8px] font-bold leading-none">
+                <span className="absolute top-1 right-1/2 translate-x-4 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-gold text-emerald-deep text-[10px] font-bold leading-none">
                   {compareCount}
                 </span>
               )}

@@ -718,9 +718,9 @@ function StepDataSingkat({
           <button
             onClick={() => setStep(2)}
             disabled={!selectedDepartureId}
-            className="px-6 py-2.5 rounded-xl bg-emerald-dark text-ivory font-semibold hover:bg-emerald-deep transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-xl bg-emerald-dark text-ivory font-semibold hover:bg-emerald-deep transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5"
           >
-            Lanjutkan <ChevronRight className="w-4 h-4 ml-1" />
+            Lanjutkan <ChevronRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
       </div>
