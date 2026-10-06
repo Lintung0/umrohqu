@@ -6,7 +6,7 @@ import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Clock, MapPin, Plane, Hotel, Calendar, Scale, Heart, Loader2, Star, Timer, BadgePercent } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { formatRupiah, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
+import { formatRupiah, formatRupiahCompact, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
 import { CASHBACK_INFO } from "@/lib/constants"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -246,8 +246,8 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
               {Number(pkg.cashback_amount) > 0 && (
                 <TooltipProvider delay={100}>
                   <Tooltip>
-                    <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
-                      <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                    <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap overflow-hidden mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2 py-1">
+                      <BadgePercent className="w-3.5 h-3.5 shrink-0" /> <span className="truncate min-w-0">Cashback <span className="sm:hidden">{formatRupiahCompact(Number(pkg.cashback_amount))}</span><span className="hidden sm:inline">{formatRupiah(Number(pkg.cashback_amount))}</span></span>
                     </span>} />
                     <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
                   </Tooltip>
@@ -334,8 +334,8 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
                 {Number(pkg.cashback_amount) > 0 && (
                   <TooltipProvider delay={100}>
                     <Tooltip>
-                      <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
-                          <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+                      <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap overflow-hidden mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2 py-1">
+                          <BadgePercent className="w-3.5 h-3.5 shrink-0" /> <span className="truncate min-w-0">Cashback <span className="sm:hidden">{formatRupiahCompact(Number(pkg.cashback_amount))}</span><span className="hidden sm:inline">{formatRupiah(Number(pkg.cashback_amount))}</span></span>
                         </span>} />
                       <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
                     </Tooltip>
@@ -421,8 +421,8 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
         {Number(pkg.cashback_amount) > 0 && (
           <TooltipProvider delay={100}>
             <Tooltip>
-              <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2.5 py-1">
-                <BadgePercent className="w-3.5 h-3.5" /> Cashback {formatRupiah(Number(pkg.cashback_amount))}
+              <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap overflow-hidden mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2 py-1">
+                <BadgePercent className="w-3.5 h-3.5 shrink-0" /> <span className="truncate min-w-0">Cashback <span className="sm:hidden">{formatRupiahCompact(Number(pkg.cashback_amount))}</span><span className="hidden sm:inline">{formatRupiah(Number(pkg.cashback_amount))}</span></span>
               </span>} />
               <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
             </Tooltip>

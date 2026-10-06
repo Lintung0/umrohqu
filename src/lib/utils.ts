@@ -23,6 +23,23 @@ export function formatRupiah(amount: number): string {
   }).format(amount)
 }
 
+// Format ringkas untuk ruang sempit (badge HP): Rp1,5 jt / Rp28 jt / Rp900 rb
+export function formatRupiahCompact(amount: number): string {
+  const n = Math.round(Math.abs(amount))
+  const sign = amount < 0 ? "-" : ""
+  if (n >= 1_000_000) {
+    const v = n / 1_000_000
+    const s = Number.isInteger(v) ? String(v) : String(Math.round(v * 10) / 10).replace(".", ",")
+    return `${sign}Rp${s} jt`
+  }
+  if (n >= 1_000) {
+    const v = n / 1_000
+    const s = Number.isInteger(v) ? String(v) : String(Math.round(v * 10) / 10).replace(".", ",")
+    return `${sign}Rp${s} rb`
+  }
+  return `${sign}Rp${n}`
+}
+
 export function formatRupiahInput(value: number): string {
   return new Intl.NumberFormat("id-ID").format(value)
 }
