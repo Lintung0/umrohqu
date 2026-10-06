@@ -930,7 +930,7 @@ function StepPayment({
               onClick={() => setStep(reviewStep)}
               className="w-full h-12 gap-2 bg-emerald-dark hover:bg-emerald-deep text-ivory py-3 rounded-xl font-semibold shadow-md shadow-emerald-deep/20 active:scale-[0.98] transition-all"
             >
-              Proses Pembayaran <ChevronRight className="w-4 h-4" />
+              Bayar <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
 
