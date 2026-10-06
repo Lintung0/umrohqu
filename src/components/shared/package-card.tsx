@@ -192,12 +192,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           />
 
           <div className="absolute top-2.5 left-2.5 flex gap-1.5 pointer-events-none">
-            {pkg.duration_nights && (
-              <span className="bg-emerald-deep/60 text-ivory text-[10px] font-medium px-2 py-0.5 rounded-md">
-                <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
-                {pkg.duration_nights} {t("card.days")}
-              </span>
-            )}
             {soldOut && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-deep/80 text-ivory flex items-center gap-1">
                 <Timer className="w-2.5 h-2.5" /> Paket ini penuh
@@ -284,14 +278,6 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
               onError={handleError}
               unoptimized
             />
-            <div className="absolute top-2 left-2 flex gap-1 pointer-events-none">
-              {pkg.duration_nights && (
-                <span className="bg-emerald-deep/60 text-ivory text-[10px] font-medium px-2 py-0.5 rounded-md">
-                  <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
-                  {pkg.duration_nights} {t("card.days")}
-                </span>
-              )}
-            </div>
             <div className="absolute top-2 right-2 z-10 flex gap-1.5">
               <button
                 onClick={handleWishlist}
@@ -380,12 +366,6 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
         />
 
         <div className="absolute top-2.5 left-2.5 flex gap-1 pointer-events-none">
-          {pkg.duration_nights && (
-            <span className="bg-emerald-deep/60 text-ivory text-[10px] font-medium px-2 py-0.5 rounded-md">
-              <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5" />
-              {pkg.duration_nights} {t("card.days")}
-            </span>
-          )}
           {soldOut && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-deep/80 text-ivory flex items-center gap-1">
               <Timer className="w-2.5 h-2.5" /> Paket ini penuh
