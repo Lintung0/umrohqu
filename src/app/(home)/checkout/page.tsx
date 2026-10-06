@@ -54,6 +54,17 @@ function CheckoutContent() {
     { id: "confirm", label: "Selesai" },
   ], [])
 
+  const hasDepartures = packageDepartures.length > 0
+  const resolveStep = (i: number) => (!hasDepartures && i >= 2 ? i - 1 : i)
+  const canGoTo = (i: number) => {
+    const t = resolveStep(i)
+    if (t <= step) return true
+    if (!allPilgrimsFilled) return false
+    if (t <= 1) return true
+    return !hasDepartures || !!selectedDepartureId
+  }
+  const goToStep = (i: number) => { if (canGoTo(i)) setStep(resolveStep(i)) }
+
   const supabase = useMemo(() => createClient(), [])
 
   // Fetch package data
@@ -122,7 +133,7 @@ function CheckoutContent() {
     setPilgrims((prev) => {
       const next = [...prev]
       while (next.length < pilgrimCount) {
-        next.push({ full_name: "", phone: "", relation: "self", gender: "" })
+        next.push({ full_name: "", phone: "", relation: "self", gender: "male" })
       }
       return next.slice(0, pilgrimCount)
     })
@@ -311,29 +322,38 @@ body: JSON.stringify({
         ) : (
           <div className="space-y-5">
             {/* Stepper */}
-            <div className="bg-ivory-card border border-ivory-border rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center justify-center max-w-lg mx-auto">
-                {STEPS.map((s, i) => (
-                  <div key={s.id} className="flex items-center">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                        i < step ? "bg-emerald-dark text-ivory" :
-                        i === step ? "bg-emerald-dark text-ivory ring-4 ring-gold/50 shadow-md shadow-emerald-deep/20" :
-                        "bg-ivory text-ivory-ink/50 border border-ivory-border"
-                      }`}>
-                        {i < step ? <CheckCircle className="w-4 h-4" /> : i + 1}
-                      </div>
-                      <span className={`text-[11px] font-semibold mt-1.5 hidden sm:block ${
-                        i <= step ? "text-emerald-deep" : "text-ivory-ink/50"
-                      }`}>{s.label}</span>
+            <div className="bg-ivory-card border border-ivory-border rounded-2xl p-3 sm:p-4 shadow-sm">
+              <div className="flex items-start justify-center max-w-lg mx-auto">
+                {STEPS.map((s, i) => {
+                  const allowed = canGoTo(i)
+                  return (
+                    <div key={s.id} className="flex items-start">
+                      <button
+                        type="button"
+                        onClick={() => goToStep(i)}
+                        disabled={!allowed}
+                        aria-label={`Ke langkah ${s.label}`}
+                        className={`flex flex-col items-center min-h-[44px] min-w-[44px] px-0.5 ${allowed ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
+                      >
+                        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                          i < step ? "bg-emerald-dark text-ivory" :
+                          i === step ? "bg-emerald-dark text-ivory ring-4 ring-gold/50 shadow-md shadow-emerald-deep/20" :
+                          "bg-ivory text-ivory-ink/50 border border-ivory-border"
+                        }`}>
+                          {i < step ? <CheckCircle className="w-4 h-4" /> : i + 1}
+                        </div>
+                        <span className={`text-[10px] sm:text-[11px] font-semibold mt-1 whitespace-nowrap ${
+                          i <= step ? "text-emerald-deep" : "text-ivory-ink/50"
+                        }`}>{s.label}</span>
+                      </button>
+                      {i < STEPS.length - 1 && (
+                        <div className={`flex-1 min-w-3 sm:min-w-0 sm:w-20 h-[3px] mx-1 sm:mx-3 mt-4 sm:mt-[18px] rounded-full transition-colors ${
+                          i < step ? "bg-emerald-dark" : "bg-ivory-border"
+                        }`} />
+                      )}
                     </div>
-                    {i < STEPS.length - 1 && (
-                      <div className={`w-14 sm:w-20 h-[3px] mx-2 sm:mx-3 rounded-full transition-colors ${
-                        i < step ? "bg-emerald-dark" : "bg-ivory-border"
-                      }`} />
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
 
