@@ -63,18 +63,18 @@ export async function POST(_request: NextRequest) {
       bookingCode = isRemaining ? orderId.slice(0, -2) : orderId
     }
 
-    let booking: { id: string; status: string; tenant_id: string; price: number; pilgrim_count: number; booking_source: string; package_id: string; dp_type: string; total: number; remaining_amount: number } | null = null
+    let booking: { id: string; status: string; tenant_id: string; price: number; pilgrim_count: number; booking_source: string; package_id: string; payment_scheme: string; total: number; remaining_amount: number } | null = null
     if (bookingId) {
       const { data: b } = await admin
         .from("bookings")
-        .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, dp_type, total, remaining_amount")
+        .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, payment_scheme, total, remaining_amount")
         .eq("id", bookingId)
         .single()
       booking = b
     } else {
       const bookingQuery = admin
         .from("bookings")
-        .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, dp_type, total, remaining_amount")
+        .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, payment_scheme, total, remaining_amount")
       const { data: b } = bookingCode
         ? await bookingQuery.eq("booking_code", bookingCode).single()
         : await bookingQuery.eq("id", bookingId).single()

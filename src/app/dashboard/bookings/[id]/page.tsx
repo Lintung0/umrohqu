@@ -70,6 +70,9 @@ interface BookingDetail {
   dp_type: string | null
   dp_percentage: number | null
   dp_amount: number | null
+  payment_scheme: string | null
+  down_payment_amount: number | null
+  installment_option_id: string | null
   remaining_amount: number | null
   remaining_due_date: string | null
   booking_source?: string
@@ -231,7 +234,7 @@ const TIMELINE_STEPS = [
 
       // Step 4: Verify Midtrans payment status if applicable
       const shouldVerify = bookingData.status === "pending_payment" ||
-        (bookingData.status === "processing" && bookingData.dp_type === "dp" && (bookingData.remaining_amount || 0) > 0)
+        (bookingData.status === "processing" && bookingData.payment_scheme === "down_payment" && (bookingData.remaining_amount || 0) > 0)
       if (shouldVerify) {
         setVerifying(true)
         try {
@@ -731,14 +734,14 @@ const TIMELINE_STEPS = [
               <span className="text-muted-foreground">{t("booking.package")} ({booking.pilgrim_count})</span>
               <span>{formatRupiah(booking.price)}</span>
             </div>
-            {booking.dp_type === "dp" && (
+            {booking.payment_scheme === "down_payment" && (
               <>
                 <div className="border-t border-ivory-border pt-2 flex justify-between text-emerald-dark">
                   <span className="font-medium flex items-center gap-1">
                     <CreditCard className="w-3.5 h-3.5" />
-                    DP {booking.dp_percentage}%
+                    DP {Number(booking.price || 0) * (booking.pilgrim_count || 1) > 0 ? Math.round(Number(booking.down_payment_amount || 0) / (Number(booking.price || 0) * (booking.pilgrim_count || 1)) * 100) : 0}%
                   </span>
-                  <span className="font-bold">{formatRupiah(booking.dp_amount || 0)}</span>
+                  <span className="font-bold">{formatRupiah(booking.down_payment_amount || 0)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("booking.dp_remaining", { percent: "" })}</span>
@@ -855,9 +858,9 @@ const TIMELINE_STEPS = [
         total={booking.total}
         paidAmount={booking.paid_amount}
         remainingBalance={booking.remaining_balance}
-        paymentType={booking.dp_type}
-        dpAmount={booking.dp_amount}
-        dpPercentage={booking.dp_percentage}
+        paymentType={booking.payment_scheme === "down_payment" ? "dp" : "full"}
+        dpAmount={booking.down_payment_amount}
+        dpPercentage={Number(booking.price || 0) * (booking.pilgrim_count || 1) > 0 ? Math.round(Number(booking.down_payment_amount || 0) / (Number(booking.price || 0) * (booking.pilgrim_count || 1)) * 100) : 0}
         remainingAmount={booking.remaining_amount}
         remainingDueDate={booking.remaining_due_date}
         paidAt={booking.paid_at}
