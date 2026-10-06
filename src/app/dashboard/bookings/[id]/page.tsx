@@ -105,6 +105,58 @@ export default function BookingDetailPage() {
     router.refresh()
   }
 
+  // ── State checking status otomatis ──
+  const [checkStatus, setCheckStatus] = useState<
+    | "loading"
+    | "paid"
+    | "processing"
+    | "timeout"
+  >("loading")
+
+  // ── Polling: 5 detik per check, max 5x (25s timeout) ──
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    let elapsed = 0
+    const interval = 5000
+    const timeout = 25000
+
+    async function poll() {
+      try {
+        const { data } = await supabase
+          .from("bookings")
+          .select("id, status, payment_status, total, paid_amount, remaining_balance, updated_at, active_payment")
+          .eq("id", params.id!)
+          .single()
+
+        if (data?.status === "confirmed" || data?.status === "completed") {
+          setCheckStatus("paid")
+          return
+        }
+        if (data?.status === "processing") {
+          setCheckStatus("processing")
+          return
+        }
+        if (elapsed >= timeout) {
+          setCheckStatus("timeout")
+          return
+        }
+      } catch (err) {
+        console.error("Auto-check error:", err)
+      }
+      elapsed += interval
+      timer = setTimeout(poll, interval)
+    }
+    poll()
+    return () => clearTimeout(timer)
+  }, [checkStatus, params.id])
+
+  // ── Auto-redirect on paid (3s) ──
+  useEffect(() => {
+    if (checkStatus !== "paid") return
+    const t = setTimeout(() => router.push(`/dashboard/bookings/${params.id}`), 3000)
+    return () => clearTimeout(t)
+  }, [checkStatus, params.id, router])
+
 const STATUS_ACCENT: Record<string, string> = {
   pending_payment: "bg-gold-dark",
   processing: "bg-gold",
@@ -154,7 +206,6 @@ const TIMELINE_STEPS = [
     rt_rw: "",
   })
   const [savingParticipant, setSavingParticipant] = useState(false)
-  const [verifying, setVerifying] = useState(false)
 
   // Track auth state with onAuthStateChange — handles hydration delay after Midtrans redirect
   useEffect(() => {
@@ -232,27 +283,8 @@ const TIMELINE_STEPS = [
       setBooking(bookingData)
       setLoading(false)
 
-      // Step 4: Verify Midtrans payment status if applicable
-      const shouldVerify = bookingData.status === "pending_payment" ||
-        (bookingData.status === "processing" && bookingData.payment_scheme === "down_payment" && (bookingData.remaining_amount || 0) > 0)
-      if (shouldVerify) {
-        setVerifying(true)
-        try {
-          const res = await fetch("/api/booking/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ bookingId: params.id }),
-          })
-          const result = await res.json()
-          if (!cancelled && result.status && result.status !== bookingData.status) {
-            setBooking((prev) => prev ? { ...prev, status: result.status, remaining_amount: result.status === "confirmed" ? 0 : prev.remaining_amount } : prev)
-          }
-        } catch (e) {
-          console.error("Verify payment error:", e)
-        } finally {
-          if (!cancelled) setVerifying(false)
-        }
-      }
+      // Step 4: Cek status otomatis via polling (5 detik) — sudah ada di atas
+      // Batal verifikasi manual lewat API, cukup tunggu polling selesai
     }
     load()
     return () => { cancelled = true }
@@ -867,7 +899,7 @@ const TIMELINE_STEPS = [
         paymentMethod={booking.payment_method}
         createdAt={booking.created_at}
         activePayment={booking.active_payment ?? null}
-        verifying={verifying}
+        checkStatus={checkStatus}
       />
     </div>
   )
@@ -1103,7 +1135,7 @@ function PaymentStatusSection({
   bookingId, status, total, paidAmount, remainingBalance,
   paymentType, dpAmount, dpPercentage, remainingAmount,
   remainingDueDate, paidAt, paymentMethod, createdAt,
-  activePayment, verifying,
+  activePayment, checkStatus,
 }: {
   bookingId: string
   status: string
@@ -1119,7 +1151,7 @@ function PaymentStatusSection({
   paymentMethod: string | null
   createdAt: string
   activePayment: { id: string; status: string; gateway_reference: string | null; va_number: string | null; payment_provider: string | null; payment_type: string | null; amount: number | null } | null
-  verifying: boolean
+  checkStatus: "loading" | "paid" | "processing" | "timeout"
 }) {
   const { t } = useTranslation()
 
@@ -1136,8 +1168,8 @@ function PaymentStatusSection({
 
   const handleRecheck = () => window.location.reload()
 
-  // ── KONDISI 0: Sedang verifikasi status ke gateway (tombol disembunyikan) ──
-  if (verifying && status === "pending_payment" && !hasVaNumber) {
+  // ── KONDISI 0: Sedang cek status otomatis (dari polling) ──
+  if (checkStatus === "loading") {
     return (
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
         <div className="flex items-center gap-4">
