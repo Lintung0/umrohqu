@@ -546,13 +546,20 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                       : "hover:bg-ivory-soft border border-transparent hover:border-ivory-border"
                                   } ${!canExpand ? "cursor-default" : ""}`}
                                 >
-                                  <span className={`inline-flex text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${
-                                    isOpen && canExpand
-                                      ? "bg-emerald-dark text-ivory"
-                                      : "bg-emerald-dark/10 text-emerald-dark"
-                                  }`}>
-                                    Hari {item.day}
-                                  </span>
+                                  <div className="flex items-start justify-between gap-3">
+                                    <span className={`inline-flex text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md mt-1.5 ${
+                                      isOpen && canExpand
+                                        ? "bg-emerald-dark text-ivory"
+                                        : "bg-emerald-dark/10 text-emerald-dark"
+                                    }`}>
+                                      Hari {item.day}
+                                    </span>
+                                    {canExpand && !isEmpty && (
+                                      <span className="w-11 h-11 shrink-0 rounded-xl border border-ivory-border bg-ivory flex items-center justify-center">
+                                        <ChevronDown className={`w-5 h-5 text-emerald-dark transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                                      </span>
+                                    )}
+                                  </div>
                                   {isEmpty ? (
                                     <p className="text-sm text-ivory-ink/40 mt-2">Detail itinerary menyusul.</p>
                                   ) : !canExpand ? (
@@ -560,10 +567,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                                   ) : (
                                     <>
                                       <h3 className="text-sm font-semibold text-emerald-deep mt-2 leading-snug line-clamp-2">{preview}</h3>
-                                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-dark mt-1.5">
-                                        {isOpen ? "Tutup" : "Selengkapnya"}
-                                        <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} />
-                                      </span>
                                       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-2" : "max-h-0"}`}>
                                         <p className="text-sm text-ivory-ink/70 leading-relaxed whitespace-pre-line break-words border-t border-ivory-border pt-2">
                                           {fullDesc}
