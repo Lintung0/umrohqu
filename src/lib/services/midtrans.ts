@@ -81,6 +81,26 @@ export async function createSnapTransaction(params: {
   return { token: json.token, redirect_url: json.redirect_url }
 }
 
+export function isProductionEnv(): boolean {
+  return MIDTRANS_IS_PRODUCTION
+}
+
+// Probe satu-kali ke Midtrans untuk memastikan server key DITERIMA.
+// Memakai order_id yang pasti tidak ada: 401 = kunci ditolak (rusak),
+// 404 = kunci OK (order memang tidak ada). Tanpa efek samping.
+export async function probeServerKey(): Promise<{ valid: boolean; httpStatus: number; detail: string; env: string }> {
+  const res = await fetch(`${baseUrl()}/v2/probe-nonexistent-${Date.now()}/status`, {
+    headers: { Authorization: authHeader() },
+  })
+  const body = await res.text()
+  return {
+    valid: res.status !== 401,
+    httpStatus: res.status,
+    detail: body.slice(0, 160),
+    env: MIDTRANS_IS_PRODUCTION ? "production" : "sandbox",
+  }
+}
+
 export async function getTransactionStatus(orderId: string) {
   const res = await fetch(`${baseUrl()}/v2/${orderId}/status`, {
     headers: { Authorization: authHeader() },

@@ -23,6 +23,23 @@ function FinishContent() {
   const [pollLeft, setPollLeft] = useState(0)
   const [retryKey, setRetryKey] = useState(0)
 
+  const handleManualCheck = useCallback(async () => {
+    const bookingId = searchParams.get("booking_id")
+    if (bookingId) {
+      // Rekonsiliasi dulu (sembuhkan yang bisa disembuhkan), baru cek ulang
+      try {
+        await fetch("/api/booking/reconcile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId }),
+        })
+      } catch {
+        // lanjut cek ulang walau reconcile gagal
+      }
+    }
+    setRetryKey((k) => k + 1)
+  }, [searchParams])
+
   // Mengembalikan respons verify apa adanya agar UI bisa jujur:
   // WTO "Belum ada transaksi gateway" = Snap tidak pernah terbentuk.
   const verify = useCallback(
@@ -158,7 +175,7 @@ function FinishContent() {
         {view.bookingId && (view.kind === "pending" || view.kind === "nogateway") && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             {view.kind === "pending" ? (
-              <Button onClick={() => setRetryKey((k) => k + 1)} className="gap-2 px-6 h-12 bg-emerald-dark hover:bg-emerald-deep text-ivory">
+              <Button onClick={handleManualCheck} className="gap-2 px-6 h-12 bg-emerald-dark hover:bg-emerald-deep text-ivory">
                 Cek Status
               </Button>
             ) : (

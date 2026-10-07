@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, IdCard, PhoneCall, UserRound, ChevronDown, ChevronUp, Ban, X, ChevronRight } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
@@ -1151,7 +1151,69 @@ function PaymentStatusSection({
   // VA sudah terbit = user sudah pilih metode, tinggal transfer
   const hasVaNumber = hasActiveVA && !!activePayment?.va_number
 
-  const handleRecheck = () => window.location.reload()
+  // Hasil cek live ke gateway (bukan tebakan dari DB lokal)
+  const [liveMsg, setLiveMsg] = useState<string | null>(null)
+  const [checking, setChecking] = useState(false)
+  const autoCheckedRef = useRef(false)
+
+  // Tanya langsung ke Midtrans: order ini sudah bayar atau belum?
+  // Kalau ternyata sudah lunas tapi belum tercatat → reconcile + reload.
+  const runGatewayCheck = useCallback(async () => {
+    setChecking(true)
+    setLiveMsg("Mengecek ke gateway...")
+    try {
+      const res = await fetch(`/api/booking/payment-check?bookingId=${bookingId}`)
+      const data = await res.json()
+      if (data?.server && data.server.valid === false) {
+        setLiveMsg("⚠ Konfigurasi gateway bermasalah — pembayaran tidak bisa diverifikasi. Hubungi support.")
+        return
+      }
+      const c = data?.conclusion as string | undefined
+      if (c === "settled_unrecorded") {
+        setLiveMsg("Ditemukan pelunasan di gateway — menyinkronkan...")
+        await fetch("/api/booking/reconcile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId }),
+        })
+        window.location.reload()
+        return
+      }
+      const map: Record<string, string> = {
+        no_gateway_transaction: "Gateway: tidak ada transaksi untuk booking ini.",
+        pending_at_gateway: "Gateway: menunggu transfer Anda.",
+        recorded_waiting_travel: "Sudah tercatat — menunggu verifikasi travel.",
+        no_pending_payment_row: "Tidak ada tagihan aktif.",
+      }
+      setLiveMsg(map[c || ""] || `Gateway: ${data?.live?.transaction_status || "tidak diketahui"}.`)
+    } catch {
+      setLiveMsg("Gagal menghubungi pemeriksa. Coba lagi.")
+    } finally {
+      setChecking(false)
+    }
+  }, [bookingId])
+
+  // Cek otomatis sekali saat kartu pending dibuka — user LIHAT sistem mengecek
+  useEffect(() => {
+    if (status === "pending_payment" && !autoCheckedRef.current) {
+      autoCheckedRef.current = true
+      runGatewayCheck()
+    }
+  }, [status, runGatewayCheck])
+
+  // "Cek Status" = reconcile (menyembuhkan) lalu reload — bukan reload buta
+  const handleRecheck = async () => {
+    try {
+      await fetch("/api/booking/reconcile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId }),
+      })
+    } catch {
+      // tetap reload agar status terbaru tampil
+    }
+    window.location.reload()
+  }
 
   // ── KONDISI 1: LUNAS (Fully Paid) ──
   // Prioritaskan cek pembayaran penuh sebelum cek status
@@ -1357,11 +1419,17 @@ function PaymentStatusSection({
           <p className="text-sm font-semibold mt-1">{formatRupiah(activePayment.amount || total)}</p>
         </div>
         <PaymentTimeline snapCreated methodChosen />
+        {liveMsg && (
+          <p className="text-xs text-emerald-deep bg-emerald-dark/5 border border-emerald-dark/20 rounded-xl p-3">
+            {liveMsg}
+          </p>
+        )}
         <button
           onClick={handleRecheck}
-          className="w-full bg-emerald-dark text-white py-3 rounded-xl font-semibold hover:bg-emerald-deep transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
+          disabled={checking}
+          className="w-full bg-emerald-dark text-white py-3 rounded-xl font-semibold hover:bg-emerald-deep transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer disabled:opacity-60"
         >
-          <><Loader2 className="w-4 h-4" /> Cek Status Pembayaran</>
+          <><Loader2 className={`w-4 h-4 ${checking ? "animate-spin" : ""}`} /> Cek Status Pembayaran</>
         </button>
       </div>
     )
@@ -1392,6 +1460,18 @@ function PaymentStatusSection({
             Belum ada transaksi di gateway — tekan Bayar untuk memulai pembayaran.
           </p>
         )}
+        {liveMsg && (
+          <p className="text-xs text-emerald-deep bg-emerald-dark/5 border border-emerald-dark/20 rounded-xl p-3">
+            {liveMsg}
+          </p>
+        )}
+        <button
+          onClick={runGatewayCheck}
+          disabled={checking}
+          className="w-full py-3 rounded-xl font-semibold border border-emerald-dark/30 text-emerald-dark hover:bg-emerald-dark/5 transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer disabled:opacity-60"
+        >
+          <><Loader2 className={`w-4 h-4 ${checking ? "animate-spin" : ""}`} /> Sudah bayar? Cek ke Gateway</>
+        </button>
         <PayNowSection bookingId={bookingId} total={total} />
       </div>
     )

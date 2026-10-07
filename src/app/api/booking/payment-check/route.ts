@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
-import { getTransactionStatus, isSuccessStatus, isPendingStatus } from "@/lib/services/midtrans"
+import { getTransactionStatus, isSuccessStatus, isPendingStatus, probeServerKey } from "@/lib/services/midtrans"
 
 export const dynamic = "force-dynamic"
 
@@ -90,6 +90,9 @@ export async function GET(request: NextRequest) {
       payments: payments ?? [],
       live,
       conclusion,
+      // Kesehatan koneksi server → gateway. Kalau key_valid false,
+      // verify/reconcile/webhook SEMUA buta — masalah konfigurasi.
+      server: await probeServerKey().catch(() => ({ valid: false, httpStatus: 0, detail: "probe_failed", env: "unknown" })),
     })
   } catch (err) {
     console.error("payment-check error:", err)
