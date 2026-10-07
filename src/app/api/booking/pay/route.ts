@@ -40,6 +40,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking sudah dibayar atau dibatalkan" }, { status: 400 })
     }
 
+    // Anti-spam klik Bayar: payment row pending yang baru dibuat (< 60 dtk)
+    // berarti transaksi sebelumnya masih disiapkan — jangan buat order baru.
+    // (Unique index DB ditunda karena data testing lama masih duplikat.)
+    const { data: recent } = await admin
+      .from("payments")
+      .select("id, created_at")
+      .eq("booking_id", bookingId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (recent && Date.now() - new Date(recent.created_at).getTime() < 60_000) {
+      return NextResponse.json(
+        { error: "Transaksi pembayaran sedang disiapkan. Tunggu sebentar lalu coba lagi." },
+        { status: 429 }
+      )
+    }
+
     const payAmount = Number(booking.total)
 
     // Catat transaksi payments via RPC create_payment (trigger menuntut app.booking_id)

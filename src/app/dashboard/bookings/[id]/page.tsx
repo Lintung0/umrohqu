@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, IdCard, PhoneCall, UserRound, ChevronDown, ChevronUp, Ban, X, ChevronRight } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
@@ -1093,6 +1093,30 @@ function CancelBookingModal({ bookingId, onClose }: { bookingId: string; onClose
 
 // ─── Payment Status Section (4-condition rendering) ──────────────────────────
 
+// Timeline tahap pembayaran — jujur menunjukkan macetnya di mana,
+// agar user/support tidak menebak-nebak status.
+function PaymentTimeline({ snapCreated, methodChosen }: { snapCreated: boolean; methodChosen: boolean }) {
+  const steps = [
+    { label: "Transaksi dibuat", done: snapCreated },
+    { label: "Metode dipilih", done: methodChosen },
+    { label: "Dibayar", done: false },
+    { label: "Verifikasi travel", done: false },
+  ]
+  return (
+    <div className="bg-ivory rounded-xl p-4 space-y-2.5">
+      <p className="text-xs font-semibold text-emerald-deep">Tahap Pembayaran</p>
+      {steps.map((s) => (
+        <div key={s.label} className="flex items-center gap-2.5">
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${s.done ? "bg-emerald-dark text-ivory" : "bg-ivory-border/60 text-muted-foreground"}`}>
+            {s.done ? "✓" : "○"}
+          </span>
+          <span className={`text-xs ${s.done ? "text-emerald-deep font-medium" : "text-muted-foreground"}`}>{s.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function PaymentStatusSection({
   bookingId, status, total, paidAmount, remainingBalance,
   paymentType, dpAmount, dpPercentage, remainingAmount,
@@ -1332,6 +1356,7 @@ function PaymentStatusSection({
           </div>
           <p className="text-sm font-semibold mt-1">{formatRupiah(activePayment.amount || total)}</p>
         </div>
+        <PaymentTimeline snapCreated methodChosen />
         <button
           onClick={handleRecheck}
           className="w-full bg-emerald-dark text-white py-3 rounded-xl font-semibold hover:bg-emerald-deep transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
@@ -1357,6 +1382,16 @@ function PaymentStatusSection({
             </p>
           </div>
         </div>
+        <PaymentTimeline snapCreated={hasActiveVA} methodChosen={false} />
+        {hasActiveVA ? (
+          <p className="text-xs text-gold-dark bg-gold/10 border border-gold/30 rounded-xl p-3">
+            Transaksi sempat dibuat tapi metode belum dipilih (popup tertutup?) — tekan Bayar di bawah untuk mengulang. Tidak perlu buat booking baru.
+          </p>
+        ) : (
+          <p className="text-xs text-gold-dark bg-gold/10 border border-gold/30 rounded-xl p-3">
+            Belum ada transaksi di gateway — tekan Bayar untuk memulai pembayaran.
+          </p>
+        )}
         <PayNowSection bookingId={bookingId} total={total} />
       </div>
     )
@@ -1371,8 +1406,12 @@ function PaymentStatusSection({
 function PayNowSection({ bookingId, total }: { bookingId: string; total: number }) {
   const { t } = useTranslation()
   const [submitting, setSubmitting] = useState(false)
+  // Guard anti double-klik se-tick (state saja bisa ditembus 2 klik cepat)
+  const submittingRef = useRef(false)
 
   const handlePay = async () => {
+    if (submittingRef.current) return
+    submittingRef.current = true
     setSubmitting(true)
     try {
       const res = await fetch("/api/booking/pay", {
@@ -1389,6 +1428,7 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
     } catch {
       toast.error(t("checkout.network_error"))
     }
+    submittingRef.current = false
     setSubmitting(false)
   }
 
