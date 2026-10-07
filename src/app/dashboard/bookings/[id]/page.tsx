@@ -105,58 +105,6 @@ export default function BookingDetailPage() {
     router.refresh()
   }
 
-  // ── State checking status otomatis ──
-  const [checkStatus, setCheckStatus] = useState<
-    | "loading"
-    | "paid"
-    | "processing"
-    | "timeout"
-  >("loading")
-
-  // ── Polling: 3s interval, max 4x (12s timeout) ──
-  useEffect(() => {
-    let timer: NodeJS.Timeout
-    let elapsed = 0
-    const interval = 3000
-    const timeout = 12000
-
-    async function poll() {
-      try {
-        const { data } = await supabase
-          .from("bookings")
-          .select("id, status, payment_status, total, paid_amount, remaining_balance, updated_at, active_payment")
-          .eq("id", params.id!)
-          .single()
-
-        if (data?.status === "confirmed" || data?.status === "completed") {
-          setCheckStatus("paid")
-          return
-        }
-        if (data?.status === "processing") {
-          setCheckStatus("processing")
-          return
-        }
-        if (elapsed >= timeout) {
-          setCheckStatus("timeout")
-          return
-        }
-      } catch (err) {
-        console.error("Auto-check error:", err)
-      }
-      elapsed += interval
-      timer = setTimeout(poll, interval)
-    }
-    poll()
-    return () => clearTimeout(timer)
-  }, [checkStatus, params.id])
-
-  // ── Auto-redirect on paid (2s) ──
-  useEffect(() => {
-    if (checkStatus !== "paid") return
-    const t = setTimeout(() => router.push(`/dashboard/bookings/${params.id}`), 2000)
-    return () => clearTimeout(t)
-  }, [checkStatus, params.id, router])
-
 const STATUS_ACCENT: Record<string, string> = {
   pending_payment: "bg-gold-dark",
   processing: "bg-gold",
@@ -283,8 +231,23 @@ const TIMELINE_STEPS = [
       setBooking(bookingData)
       setLoading(false)
 
-      // Step 4: Cek status otomatis via polling (5 detik) — sudah ada di atas
-      // Batal verifikasi manual lewat API, cukup tunggu polling selesai
+      // Verify sekali diam-diam saat halaman dibuka (tanpa loading gate):
+      // kalau gateway sudah mencatat sukses, status langsung diperbarui.
+      if (!cancelled && bookingData.status === "pending_payment") {
+        try {
+          const res = await fetch("/api/booking/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bookingId: params.id }),
+          })
+          const result = await res.json()
+          if (!cancelled && result.status && result.status !== bookingData.status) {
+            setBooking((prev) => prev ? { ...prev, status: result.status, remaining_amount: result.status === "confirmed" ? 0 : prev.remaining_amount } : prev)
+          }
+        } catch (e) {
+          console.error("Verify payment error:", e)
+        }
+      }
     }
     load()
     return () => { cancelled = true }
@@ -899,7 +862,6 @@ const TIMELINE_STEPS = [
         paymentMethod={booking.payment_method}
         createdAt={booking.created_at}
         activePayment={booking.active_payment ?? null}
-        checkStatus={checkStatus}
       />
     </div>
   )
@@ -1135,7 +1097,7 @@ function PaymentStatusSection({
   bookingId, status, total, paidAmount, remainingBalance,
   paymentType, dpAmount, dpPercentage, remainingAmount,
   remainingDueDate, paidAt, paymentMethod, createdAt,
-  activePayment, checkStatus,
+  activePayment,
 }: {
   bookingId: string
   status: string
@@ -1151,7 +1113,6 @@ function PaymentStatusSection({
   paymentMethod: string | null
   createdAt: string
   activePayment: { id: string; status: string; gateway_reference: string | null; va_number: string | null; payment_provider: string | null; payment_type: string | null; amount: number | null } | null
-  checkStatus: "loading" | "paid" | "processing" | "timeout"
 }) {
   const { t } = useTranslation()
 
@@ -1167,25 +1128,6 @@ function PaymentStatusSection({
   const hasVaNumber = hasActiveVA && !!activePayment?.va_number
 
   const handleRecheck = () => window.location.reload()
-
-  // ── KONDISI 0: Sedang cek status otomatis (dari polling) ──
-  if (checkStatus === "loading") {
-    return (
-      <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center shrink-0">
-            <Loader2 className="w-6 h-6 text-gold-dark animate-spin" />
-          </div>
-          <div>
-            <h3 className="font-bold text-emerald-deep">Memeriksa Pembayaran</h3>
-            <p className="text-sm text-gold-dark mt-0.5">
-              Kami sedang memastikan status pembayaran Anda ke gateway. Tunggu sebentar...
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   // ── KONDISI 1: LUNAS (Fully Paid) ──
   // Prioritaskan cek pembayaran penuh sebelum cek status

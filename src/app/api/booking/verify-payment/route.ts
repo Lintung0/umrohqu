@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (!payment?.gateway_reference) {
-      return NextResponse.json({ error: "Belum ada transaksi gateway" }, { status: 400 })
+      return NextResponse.json({ error: "Belum ada transaksi gateway", gateway_found: false }, { status: 400 })
     }
 
     let txn: Awaited<ReturnType<typeof getTransactionStatus>> | null = null
@@ -66,6 +66,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         status: txn && isPendingStatus(txn.transaction_status) ? "pending_payment" : booking.status,
         midtrans_status: txn?.transaction_status ?? null,
+        // Jujur ke UI: false = order_id tidak dikenal Midtrans
+        // (transaksi Snap tidak pernah terbentuk).
+        gateway_found: !!txn,
       })
     }
 
@@ -100,14 +103,14 @@ await admin
         status: "paid",
         paid_at: paidAt,
         payment_type: stablePaymentType(txn.payment_type) as never,
-        payment_provider: stablePaymentType(txn.payment_type) as never,
+        payment_provider: txn.va_numbers?.[0]?.bank || (txn as any).bank || null,
         va_number: txn.va_numbers?.[0]?.va_number || txn.payment_code || "",
         gateway_reference: txn.transaction_id || payment.gateway_reference,
         updated_at: new Date().toISOString(),
       })
       .eq("booking_id", bookingId)
 
-    return NextResponse.json({ status: "processing", just_verified: true })
+    return NextResponse.json({ status: "processing", just_verified: true, gateway_found: true })
   } catch (err) {
     console.error("Verify payment error:", err)
     return NextResponse.json({ error: "Gagal memverifikasi pembayaran" }, { status: 500 })

@@ -7,7 +7,7 @@ import { Loader2, CheckCircle, Clock, AlertCircle, XCircle, ChevronRight } from 
 import { Button } from "@/components/ui/button"
 
 type ViewState = {
-  kind: "loading" | "processing" | "success" | "pending" | "canceled" | "error"
+  kind: "loading" | "processing" | "received" | "success" | "pending" | "nogateway" | "canceled" | "error"
   title: string
   description: string
   bookingId: string | null
@@ -23,6 +23,8 @@ function FinishContent() {
   const [pollLeft, setPollLeft] = useState(0)
   const [retryKey, setRetryKey] = useState(0)
 
+  // Mengembalikan respons verify apa adanya agar UI bisa jujur:
+  // WTO "Belum ada transaksi gateway" = Snap tidak pernah terbentuk.
   const verify = useCallback(
     async (bookingId: string) => {
       const res = await fetch("/api/booking/verify-payment", {
@@ -31,7 +33,7 @@ function FinishContent() {
         body: JSON.stringify({ bookingId }),
       })
       const data = await res.json()
-      return data.status as string | undefined
+      return data as { status?: string; error?: string; gateway_found?: boolean; midtrans_status?: string | null }
     },
     [],
   )
@@ -51,9 +53,12 @@ function FinishContent() {
 
     let cancelled = false
     let timer: ReturnType<typeof setTimeout> | undefined
-    const MAX_ATTEMPTS = 10
+    // Cek cepat: tiap 2 detik, maks 3x (±6 detik). Setelah itu berhenti dan
+    // serahkan ke tombol "Cek Status" manual — jangan polling buta 30 detik.
+    const MAX_ATTEMPTS = 3
+    const POLL_INTERVAL_MS = 2000
 
-    setView({ kind: "processing", title: "Memproses Pembayaran", description: "Kami sedang memverifikasi status pembayaran Anda...", bookingId })
+    setView({ kind: "processing", title: "Memeriksa Pembayaran", description: "Harap tunggu sebentar...", bookingId })
 
     const showPending = (left: number) => {
       setPollLeft(left)
@@ -63,13 +68,30 @@ function FinishContent() {
     const attempt = async (n: number) => {
       if (cancelled) return
       try {
-        const verifiedStatus = await verify(bookingId)
+        const v = await verify(bookingId)
         if (cancelled) return
+
+        // Jujur: tidak ada transaksi gateway = Snap tidak pernah terbentuk
+        // (popup ditutup sebelum pilih metode / Snap gagal dimuat).
+        if (v.error === "Belum ada transaksi gateway" || v.gateway_found === false) {
+          setPollLeft(0)
+          setView({ kind: "nogateway", title: "Transaksi Tidak Ditemukan", description: "Tidak ada transaksi pembayaran untuk booking ini — kemungkinan popup pembayaran tertutup sebelum Anda memilih metode. Silakan kembali dan tekan Bayar ulang. Tidak perlu buat booking baru.", bookingId })
+          return
+        }
+
+        const verifiedStatus = v.status
 
         if (verifiedStatus === "confirmed" || (isSuccessFromMidtrans && verifiedStatus === "processing")) {
           setPollLeft(0)
-          setView({ kind: "success", title: "Pembayaran Berhasil", description: "Pembayaran Anda telah kami terima. Travel partner akan memverifikasi dan mengonfirmasi booking Anda. Mengarahkan ke halaman booking...", bookingId })
-          setTimeout(() => { if (!cancelled) router.push(`/dashboard/bookings/${bookingId}`) }, 2200)
+          setView({ kind: "success", title: "Pembayaran Anda Sukses!", description: "Pembayaran telah kami terima. Travel partner akan memverifikasi dan mengonfirmasi booking Anda. Mengarahkan ke pesanan...", bookingId })
+          setTimeout(() => { if (!cancelled) router.push(`/dashboard/bookings/${bookingId}`) }, 2000)
+          return
+        }
+
+        // Webhook sudah lebih dulu mencatat pembayaran (antri verifikasi travel)
+        if (verifiedStatus === "processing" && !isSuccessFromMidtrans) {
+          setPollLeft(0)
+          setView({ kind: "received", title: "Pembayaran Diterima", description: "Pembayaran telah kami terima. Travel partner sedang memverifikasi dana — booking akan dikonfirmasi setelah diverifikasi.", bookingId })
           return
         }
 
@@ -81,7 +103,7 @@ function FinishContent() {
 
         if (n < MAX_ATTEMPTS) {
           showPending(MAX_ATTEMPTS - n)
-          timer = setTimeout(() => attempt(n + 1), 3000)
+          timer = setTimeout(() => attempt(n + 1), POLL_INTERVAL_MS)
           return
         }
 
@@ -91,7 +113,7 @@ function FinishContent() {
         if (cancelled) return
         if (n < MAX_ATTEMPTS) {
           showPending(MAX_ATTEMPTS - n)
-          timer = setTimeout(() => attempt(n + 1), 3000)
+          timer = setTimeout(() => attempt(n + 1), POLL_INTERVAL_MS)
           return
         }
         setPollLeft(0)
@@ -106,20 +128,24 @@ function FinishContent() {
 
   const Icon =
     view.kind === "success" ? CheckCircle
+    : view.kind === "received" ? CheckCircle
     : view.kind === "pending" || view.kind === "processing" ? Clock
+    : view.kind === "nogateway" ? AlertCircle
     : view.kind === "canceled" ? XCircle
     : AlertCircle
 
   const iconColor =
-    view.kind === "success" ? "bg-emerald-100 text-emerald-600"
-    : view.kind === "pending" || view.kind === "processing" ? "bg-amber-100 text-amber-600"
+    view.kind === "success" ? "bg-emerald-dark/10 text-emerald-dark"
+    : view.kind === "received" ? "bg-emerald-dark/10 text-emerald-dark"
+    : view.kind === "pending" || view.kind === "processing" ? "bg-gold/15 text-gold-dark"
+    : view.kind === "nogateway" ? "bg-gold/15 text-gold-dark"
     : view.kind === "canceled" ? "bg-red-100 text-red-500"
     : "bg-red-100 text-red-500"
 
   return (
-    <main className="min-h-screen bg-ivory-50/50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full text-center space-y-4">
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${iconColor}`}>
+    <main className="min-h-screen bg-ivory-50 flex items-center justify-center px-4">
+      <div className="bg-ivory-card rounded-2xl border border-ivory-border shadow-sm p-8 max-w-md w-full text-center space-y-4">
+        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto ${iconColor}`}>
           {view.kind === "processing" ? (
             <Loader2 className="w-8 h-8 animate-spin" />
           ) : (
@@ -127,30 +153,38 @@ function FinishContent() {
           )}
         </div>
         <h2 className="text-xl font-bold text-emerald-deep">{view.title}</h2>
-        <p className="text-sm text-slate-500 leading-relaxed">{view.description}</p>
+        <p className="text-sm text-ivory-ink/70 leading-relaxed">{view.description}</p>
 
-        {view.bookingId && view.kind === "pending" && (
+        {view.bookingId && (view.kind === "pending" || view.kind === "nogateway") && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button onClick={() => setRetryKey((k) => k + 1)} className="gap-2 px-6 h-12 bg-emerald-600 hover:bg-emerald-700 text-white">
-              Cek Status
-            </Button>
+            {view.kind === "pending" ? (
+              <Button onClick={() => setRetryKey((k) => k + 1)} className="gap-2 px-6 h-12 bg-emerald-dark hover:bg-emerald-deep text-ivory">
+                Cek Status
+              </Button>
+            ) : (
+              <Link href={`/dashboard/bookings/${view.bookingId}`}>
+                <Button className="gap-2 px-6 h-12 bg-emerald-dark hover:bg-emerald-deep text-ivory">
+                  Kembali & Bayar Ulang
+                </Button>
+              </Link>
+            )}
             <Link href={`/dashboard/bookings/${view.bookingId}`}>
-              <Button variant="outline" className="h-12 px-6 text-emerald-600 hover:bg-emerald-100">
-                Lihat Status Booking <ChevronRight className="w-4 h-4" />
+              <Button variant="outline" className="h-12 px-6 border-emerald-dark/30 text-emerald-dark hover:bg-emerald-dark/5">
+                Lihat Pesanan <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
         )}
 
-        {view.bookingId && view.kind !== "pending" && (
+        {view.bookingId && view.kind !== "pending" && view.kind !== "nogateway" && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link href={`/dashboard/bookings/${view.bookingId}`}>
-              <Button className="gap-2 px-6 h-12 bg-emerald-600 hover:bg-emerald-700 text-white">
-                Lihat Status Booking <ChevronRight className="w-4 h-4" />
+              <Button className="gap-2 px-6 h-12 bg-emerald-dark hover:bg-emerald-deep text-ivory">
+                Lihat Pesanan <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
             <Link href="/search">
-              <Button variant="outline" className="h-12 px-6 text-emerald-600 hover:bg-emerald-100">
+              <Button variant="outline" className="h-12 px-6 border-emerald-dark/30 text-emerald-dark hover:bg-emerald-dark/5">
                 ← Cari Paket
               </Button>
             </Link>
@@ -158,11 +192,11 @@ function FinishContent() {
         )}
 
         {view.kind === "pending" && pollLeft > 0 && (
-          <p className="text-xs text-slate-400 animate-pulse">Mengecek otomatis... ({pollLeft * 3} detik)</p>
+          <p className="text-xs text-ivory-ink/50 animate-pulse">Mengecek otomatis... ({pollLeft * 2} detik)</p>
         )}
 
         {view.kind === "success" && (
-          <p className="text-xs text-slate-400 animate-pulse">Mengarahkan dalam beberapa saat...</p>
+          <p className="text-xs text-ivory-ink/50 animate-pulse">Mengarahkan ke pesanan...</p>
         )}
       </div>
     </main>
@@ -173,10 +207,10 @@ export default function CheckoutFinishPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-zinc-50/50 flex items-center justify-center">
+        <main className="min-h-screen bg-ivory-50 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-slate-500 animate-pulse">Memuat hasil pembayaran...</p>
+            <div className="w-8 h-8 border-2 border-emerald-dark border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-ivory-ink/60 animate-pulse">Memuat hasil pembayaran...</p>
           </div>
         </main>
       }
