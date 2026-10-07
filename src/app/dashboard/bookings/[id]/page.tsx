@@ -113,12 +113,12 @@ export default function BookingDetailPage() {
     | "timeout"
   >("loading")
 
-  // ── Polling: 5 detik per check, max 5x (25s timeout) ──
+  // ── Polling: 3s interval, max 4x (12s timeout) ──
   useEffect(() => {
     let timer: NodeJS.Timeout
     let elapsed = 0
-    const interval = 5000
-    const timeout = 25000
+    const interval = 3000
+    const timeout = 12000
 
     async function poll() {
       try {
@@ -150,10 +150,10 @@ export default function BookingDetailPage() {
     return () => clearTimeout(timer)
   }, [checkStatus, params.id])
 
-  // ── Auto-redirect on paid (3s) ──
+  // ── Auto-redirect on paid (2s) ──
   useEffect(() => {
     if (checkStatus !== "paid") return
-    const t = setTimeout(() => router.push(`/dashboard/bookings/${params.id}`), 3000)
+    const t = setTimeout(() => router.push(`/dashboard/bookings/${params.id}`), 2000)
     return () => clearTimeout(t)
   }, [checkStatus, params.id, router])
 
