@@ -169,13 +169,13 @@ export default function Home() {
 
         <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 text-center text-ivory">
           <p className="text-sm text-ivory/90 mb-5 font-medium">
-            Marketplace Umrah Resmi PPIU Kemenhaj
+            Marketplace Umrah, Haji, Wisata Halal
           </p>
 
           <h1 className="relative whitespace-normal sm:whitespace-nowrap text-[clamp(24px,4.5vw,28px)] sm:text-4xl md:text-5xl lg:text-[3.4rem] font-bold tracking-tight mb-8 sm:mb-10 leading-[1.1]">
             Cari, Bandingkan &amp; Pesan{" "}
             <span className="text-gold-light">
-              Paket Umrah
+              Langsung
             </span>
           </h1>
 

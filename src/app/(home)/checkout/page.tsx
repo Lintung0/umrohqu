@@ -184,6 +184,9 @@ function CheckoutContent() {
       submittingRef.current = false
       setSubmitting(false)
     }
+    // True jika popup Snap sempat dibuka — selama popup terbuka / proses
+    // verify berjalan, tombol Bayar tetap terkunci (anti double order).
+    let snapOpened = false
     try {
       const res = await fetch("/api/booking/create", {
         method: "POST",
@@ -232,9 +235,12 @@ body: JSON.stringify({
 
           // @ts-expect-error - Midtrans Snap types tidak ada di TS
           window.snap.pay(snapToken, {
+            // Sukses (kartu/QRIS/e-wallet instan): verify diam-diam,
+            // lalu LANGSUNG ke detail pesanan — tanpa halaman finish/loading.
             onSuccess: async function (result: any) {
               console.log("Payment success:", result)
-              router.push(`/checkout/finish?booking_id=${bookingId}`)
+              await verifyNow(bookingId)
+              router.push(`/dashboard/bookings/${bookingId}`)
             },
             onPending: async function (result: any) {
               console.log("Payment pending:", result)
@@ -253,20 +259,24 @@ body: JSON.stringify({
                   console.error("Failed to update VA:", e)
                 }
               }
-              // Redirect ke finish page untuk verifikasi sebelum ke detail
-              router.push(`/checkout/finish?booking_id=${bookingId}`)
+              // VA/e-wallet pending: verify diam-diam, lalu LANGSUNG ke
+              // detail pesanan (kartu VA menanti di sana). Tanpa finish.
+              await verifyNow(bookingId)
+              router.push(`/dashboard/bookings/${bookingId}`)
             },
             onError: async function (result: any) {
               console.log("Payment error:", result)
-              // Redirect ke finish page untuk cek status
-              router.push(`/checkout/finish?booking_id=${bookingId}`)
+              // Gagal: TETAP di checkout, tampilkan pesan — user bisa coba lagi.
+              done()
+              setResult({ success: false, error: "Pembayaran gagal. Silakan coba lagi atau pilih metode lain." })
             },
             onClose: function () {
               console.log("Payment popup closed")
-              // Tutup popup, kembali ke checkout (bisa juga ke finish)
-              router.push(`/checkout/finish?booking_id=${bookingId}`)
+              // Popup ditutup tanpa bayar: TETAP di checkout, tombol aktif lagi.
+              done()
             },
           })
+          snapOpened = true
         } catch (snapError) {
           console.error("Snap JS error:", snapError)
           // Fallback ke redirect biasa jika Snap JS gagal
@@ -281,8 +291,11 @@ body: JSON.stringify({
     } catch {
       setResult({ success: false, error: "Terjadi kesalahan jaringan. Silakan coba lagi." })
     }
-    done()
-    setSubmitting(false)
+    // Popup Snap terbuka = alur dilanjutkan oleh callback (sukses/pending/
+    // error/close). Jangan buka kunci tombol di sini — anti double order.
+    if (!snapOpened) {
+      done()
+    }
   }, [pkg, pilgrimCount, pilgrims, paymentType, dpPercentage, notes, router])
 
   if (loading) {

@@ -3,9 +3,9 @@ import { createAdminClient } from "@/lib/supabase/server"
 import {
   isSuccessStatus,
   isPendingStatus,
-  stablePaymentType,
   verifyNotificationSignature,
 } from "@/lib/services/midtrans"
+import { applyPaymentEvent, type GatewayMoneyEvent } from "@/lib/services/payment-events"
 
 export const dynamic = "force-dynamic"
 
@@ -17,8 +17,10 @@ export async function POST(_request: NextRequest) {
 
     // Keamanan dana: tolak notifikasi tanpa signature valid. Tanpa ini,
     // siapa pun bisa POST settlement palsu dan booking jadi terbayar.
+    // Kegagalan dicatat dengan prefix khusus agar kunci yang salah
+    // ketahuan dalam menit, bukan hari.
     if (!verifyNotificationSignature(notification)) {
-      console.error("[midtrans] invalid signature for order:", notification?.order_id || notification?.transaction_id || "?")
+      console.error("[PAYMENT-SECURITY] invalid signature for order:", notification?.order_id || notification?.transaction_id || "?")
       return NextResponse.json({ error: "invalid_signature" }, { status: 403 })
     }
 
@@ -105,10 +107,6 @@ export async function POST(_request: NextRequest) {
           .limit(1)
           .maybeSingle()
 
-    const paidAt = notification.transaction_time
-      ? new Date(notification.transaction_time).toISOString()
-      : new Date().toISOString()
-
     // Keamanan dana: nominal Midtrans harus sama dengan tagihan kita.
     // Mencegah kurang-bayar/kelebihan-bayar tercatat sebagai lunas.
     const notifiedGross = Math.round(Number(notification.gross_amount || 0))
@@ -118,58 +116,45 @@ export async function POST(_request: NextRequest) {
         ? Math.round(Number(booking.remaining_amount || 0))
         : Math.round(Number(booking.total || 0))
     if (notifiedGross > 0 && expectedGross > 0 && notifiedGross !== expectedGross) {
-      console.error("[midtrans] gross_amount mismatch:", { orderId, notifiedGross, expectedGross, bookingId })
+      console.error("[PAYMENT-SECURITY] gross_amount mismatch:", { orderId, notifiedGross, expectedGross, bookingId })
       return NextResponse.json({ error: "amount_mismatch" }, { status: 403 })
     }
 
+    // Satu-satunya jalan perubahan status: state machine tunggal.
+    let event: GatewayMoneyEvent
     if (isSuccessStatus(rawStatus)) {
-      if (isRemaining) {
-        // Pelunasan sisa DP — booking lunas; status mengikuti verifikasi travel (jika sudah confirmed, tetap confirmed)
-        await admin
-          .from("bookings")
-          .update({
-            remaining_amount: 0,
-            total: Number(booking.total || 0) + Number(booking.remaining_amount || 0),
-            updated_at: paidAt,
-          })
-          .eq("id", bookingId)
-      } else if (booking.status === "pending_payment") {
-        // Pembayaran awal sukses → booking masuk antrian verifikasi travel (DO NOT auto-confirm)
-        await admin
-          .from("bookings")
-          .update({ status: "processing", updated_at: paidAt })
-          .eq("id", bookingId)
+      event = {
+        kind: "success",
+        transactionId: notification.transaction_id || orderId,
+        transactionTime: notification.transaction_time,
+        paymentType,
+        vaNumber: vaNumber || undefined,
+        paymentProvider: paymentProvider || undefined,
       }
-
-      if (payment) {
-        await admin
-          .from("payments")
-          .update({
-            status: "paid",
-            paid_at: paidAt,
-            payment_type: stablePaymentType(paymentType) as never,
-            payment_provider: paymentProvider,
-            va_number: vaNumber,
-            gateway_reference: notification.transaction_id || orderId,
-            updated_at: paidAt,
-          })
-          .eq("id", payment.id)
+    } else if (isPendingStatus(rawStatus)) {
+      event = {
+        kind: "pending",
+        transactionId: notification.transaction_id || orderId,
+        paymentType,
+        vaNumber: vaNumber || undefined,
+        paymentProvider: paymentProvider || undefined,
       }
-    } else if (isPendingStatus(rawStatus) && payment) {
-      // Tetap pending — catat detail pembayaran yang terpilih
-      await admin
-        .from("payments")
-        .update({
-          payment_type: stablePaymentType(paymentType) as never,
-          payment_provider: paymentProvider,
-          va_number: vaNumber,
-          gateway_reference: notification.transaction_id || orderId,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", payment.id)
+    } else if (rawStatus === "expire") {
+      event = { kind: "terminal", terminalStatus: "expired" }
+    } else if (rawStatus === "cancel") {
+      event = { kind: "terminal", terminalStatus: "canceled" }
+    } else {
+      event = { kind: "terminal", terminalStatus: "failed" }
     }
 
-    return NextResponse.json({ status: "ok" })
+    const result = await applyPaymentEvent(admin, {
+      bookingId,
+      paymentId,
+      isRemaining,
+      event,
+    })
+
+    return NextResponse.json({ status: "ok", applied: result.applied, booking_status: result.bookingStatus, reason: result.reason })
   } catch (err) {
     console.error("Midtrans notification error:", err)
     return NextResponse.json({ error: "internal_error" }, { status: 500 })

@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, IdCard, PhoneCall, UserRound, ChevronDown, ChevronUp, Ban, X, ChevronRight } from "lucide-react"
 import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
@@ -154,7 +154,6 @@ const TIMELINE_STEPS = [
     rt_rw: "",
   })
   const [savingParticipant, setSavingParticipant] = useState(false)
-  const [verifying, setVerifying] = useState(false)
 
   // Track auth state with onAuthStateChange — handles hydration delay after Midtrans redirect
   useEffect(() => {
@@ -232,11 +231,9 @@ const TIMELINE_STEPS = [
       setBooking(bookingData)
       setLoading(false)
 
-      // Step 4: Verify Midtrans payment status if applicable
-      const shouldVerify = bookingData.status === "pending_payment" ||
-        (bookingData.status === "processing" && bookingData.payment_scheme === "down_payment" && (bookingData.remaining_amount || 0) > 0)
-      if (shouldVerify) {
-        setVerifying(true)
+      // Verify sekali diam-diam saat halaman dibuka (tanpa loading gate):
+      // kalau gateway sudah mencatat sukses, status langsung diperbarui.
+      if (!cancelled && bookingData.status === "pending_payment") {
         try {
           const res = await fetch("/api/booking/verify-payment", {
             method: "POST",
@@ -249,8 +246,6 @@ const TIMELINE_STEPS = [
           }
         } catch (e) {
           console.error("Verify payment error:", e)
-        } finally {
-          if (!cancelled) setVerifying(false)
         }
       }
     }
@@ -867,7 +862,6 @@ const TIMELINE_STEPS = [
         paymentMethod={booking.payment_method}
         createdAt={booking.created_at}
         activePayment={booking.active_payment ?? null}
-        verifying={verifying}
       />
     </div>
   )
@@ -1099,11 +1093,35 @@ function CancelBookingModal({ bookingId, onClose }: { bookingId: string; onClose
 
 // ─── Payment Status Section (4-condition rendering) ──────────────────────────
 
+// Timeline tahap pembayaran — jujur menunjukkan macetnya di mana,
+// agar user/support tidak menebak-nebak status.
+function PaymentTimeline({ snapCreated, methodChosen }: { snapCreated: boolean; methodChosen: boolean }) {
+  const steps = [
+    { label: "Transaksi dibuat", done: snapCreated },
+    { label: "Metode dipilih", done: methodChosen },
+    { label: "Dibayar", done: false },
+    { label: "Verifikasi travel", done: false },
+  ]
+  return (
+    <div className="bg-ivory rounded-xl p-4 space-y-2.5">
+      <p className="text-xs font-semibold text-emerald-deep">Tahap Pembayaran</p>
+      {steps.map((s) => (
+        <div key={s.label} className="flex items-center gap-2.5">
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${s.done ? "bg-emerald-dark text-ivory" : "bg-ivory-border/60 text-muted-foreground"}`}>
+            {s.done ? "✓" : "○"}
+          </span>
+          <span className={`text-xs ${s.done ? "text-emerald-deep font-medium" : "text-muted-foreground"}`}>{s.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function PaymentStatusSection({
   bookingId, status, total, paidAmount, remainingBalance,
   paymentType, dpAmount, dpPercentage, remainingAmount,
   remainingDueDate, paidAt, paymentMethod, createdAt,
-  activePayment, verifying,
+  activePayment,
 }: {
   bookingId: string
   status: string
@@ -1119,7 +1137,6 @@ function PaymentStatusSection({
   paymentMethod: string | null
   createdAt: string
   activePayment: { id: string; status: string; gateway_reference: string | null; va_number: string | null; payment_provider: string | null; payment_type: string | null; amount: number | null } | null
-  verifying: boolean
 }) {
   const { t } = useTranslation()
 
@@ -1134,25 +1151,68 @@ function PaymentStatusSection({
   // VA sudah terbit = user sudah pilih metode, tinggal transfer
   const hasVaNumber = hasActiveVA && !!activePayment?.va_number
 
-  const handleRecheck = () => window.location.reload()
+  // Hasil cek live ke gateway (bukan tebakan dari DB lokal)
+  const [liveMsg, setLiveMsg] = useState<string | null>(null)
+  const [checking, setChecking] = useState(false)
+  const autoCheckedRef = useRef(false)
 
-  // ── KONDISI 0: Sedang verifikasi status ke gateway (tombol disembunyikan) ──
-  if (verifying && status === "pending_payment" && !hasVaNumber) {
-    return (
-      <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center shrink-0">
-            <Loader2 className="w-6 h-6 text-gold-dark animate-spin" />
-          </div>
-          <div>
-            <h3 className="font-bold text-emerald-deep">Memeriksa Pembayaran</h3>
-            <p className="text-sm text-gold-dark mt-0.5">
-              Kami sedang memastikan status pembayaran Anda ke gateway. Tunggu sebentar...
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+  // Tanya langsung ke Midtrans: order ini sudah bayar atau belum?
+  // Kalau ternyata sudah lunas tapi belum tercatat → reconcile + reload.
+  const runGatewayCheck = useCallback(async () => {
+    setChecking(true)
+    setLiveMsg("Mengecek ke gateway...")
+    try {
+      const res = await fetch(`/api/booking/payment-check?bookingId=${bookingId}`)
+      const data = await res.json()
+      if (data?.server && data.server.valid === false) {
+        setLiveMsg("⚠ Konfigurasi gateway bermasalah — pembayaran tidak bisa diverifikasi. Hubungi support.")
+        return
+      }
+      const c = data?.conclusion as string | undefined
+      if (c === "settled_unrecorded") {
+        setLiveMsg("Ditemukan pelunasan di gateway — menyinkronkan...")
+        await fetch("/api/booking/reconcile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bookingId }),
+        })
+        window.location.reload()
+        return
+      }
+      const map: Record<string, string> = {
+        no_gateway_transaction: "Gateway: tidak ada transaksi untuk booking ini.",
+        pending_at_gateway: "Gateway: menunggu transfer Anda.",
+        recorded_waiting_travel: "Sudah tercatat — menunggu verifikasi travel.",
+        no_pending_payment_row: "Tidak ada tagihan aktif.",
+      }
+      setLiveMsg(map[c || ""] || `Gateway: ${data?.live?.transaction_status || "tidak diketahui"}.`)
+    } catch {
+      setLiveMsg("Gagal menghubungi pemeriksa. Coba lagi.")
+    } finally {
+      setChecking(false)
+    }
+  }, [bookingId])
+
+  // Cek otomatis sekali saat kartu pending dibuka — user LIHAT sistem mengecek
+  useEffect(() => {
+    if (status === "pending_payment" && !autoCheckedRef.current) {
+      autoCheckedRef.current = true
+      runGatewayCheck()
+    }
+  }, [status, runGatewayCheck])
+
+  // "Cek Status" = reconcile (menyembuhkan) lalu reload — bukan reload buta
+  const handleRecheck = async () => {
+    try {
+      await fetch("/api/booking/reconcile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId }),
+      })
+    } catch {
+      // tetap reload agar status terbaru tampil
+    }
+    window.location.reload()
   }
 
   // ── KONDISI 1: LUNAS (Fully Paid) ──
@@ -1358,11 +1418,18 @@ function PaymentStatusSection({
           </div>
           <p className="text-sm font-semibold mt-1">{formatRupiah(activePayment.amount || total)}</p>
         </div>
+        <PaymentTimeline snapCreated methodChosen />
+        {liveMsg && (
+          <p className="text-xs text-emerald-deep bg-emerald-dark/5 border border-emerald-dark/20 rounded-xl p-3">
+            {liveMsg}
+          </p>
+        )}
         <button
           onClick={handleRecheck}
-          className="w-full bg-emerald-dark text-white py-3 rounded-xl font-semibold hover:bg-emerald-deep transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer"
+          disabled={checking}
+          className="w-full bg-emerald-dark text-white py-3 rounded-xl font-semibold hover:bg-emerald-deep transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer disabled:opacity-60"
         >
-          <><Loader2 className="w-4 h-4" /> Cek Status Pembayaran</>
+          <><Loader2 className={`w-4 h-4 ${checking ? "animate-spin" : ""}`} /> Cek Status Pembayaran</>
         </button>
       </div>
     )
@@ -1383,6 +1450,28 @@ function PaymentStatusSection({
             </p>
           </div>
         </div>
+        <PaymentTimeline snapCreated={hasActiveVA} methodChosen={false} />
+        {hasActiveVA ? (
+          <p className="text-xs text-gold-dark bg-gold/10 border border-gold/30 rounded-xl p-3">
+            Transaksi sempat dibuat tapi metode belum dipilih (popup tertutup?) — tekan Bayar di bawah untuk mengulang. Tidak perlu buat booking baru.
+          </p>
+        ) : (
+          <p className="text-xs text-gold-dark bg-gold/10 border border-gold/30 rounded-xl p-3">
+            Belum ada transaksi di gateway — tekan Bayar untuk memulai pembayaran.
+          </p>
+        )}
+        {liveMsg && (
+          <p className="text-xs text-emerald-deep bg-emerald-dark/5 border border-emerald-dark/20 rounded-xl p-3">
+            {liveMsg}
+          </p>
+        )}
+        <button
+          onClick={runGatewayCheck}
+          disabled={checking}
+          className="w-full py-3 rounded-xl font-semibold border border-emerald-dark/30 text-emerald-dark hover:bg-emerald-dark/5 transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer disabled:opacity-60"
+        >
+          <><Loader2 className={`w-4 h-4 ${checking ? "animate-spin" : ""}`} /> Sudah bayar? Cek ke Gateway</>
+        </button>
         <PayNowSection bookingId={bookingId} total={total} />
       </div>
     )
@@ -1397,8 +1486,12 @@ function PaymentStatusSection({
 function PayNowSection({ bookingId, total }: { bookingId: string; total: number }) {
   const { t } = useTranslation()
   const [submitting, setSubmitting] = useState(false)
+  // Guard anti double-klik se-tick (state saja bisa ditembus 2 klik cepat)
+  const submittingRef = useRef(false)
 
   const handlePay = async () => {
+    if (submittingRef.current) return
+    submittingRef.current = true
     setSubmitting(true)
     try {
       const res = await fetch("/api/booking/pay", {
@@ -1415,6 +1508,7 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
     } catch {
       toast.error(t("checkout.network_error"))
     }
+    submittingRef.current = false
     setSubmitting(false)
   }
 
