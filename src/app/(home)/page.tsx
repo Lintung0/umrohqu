@@ -173,10 +173,7 @@ export default function Home() {
           </p>
 
           <h1 className="relative whitespace-normal sm:whitespace-nowrap text-[clamp(24px,4.5vw,28px)] sm:text-4xl md:text-5xl lg:text-[3.4rem] font-bold tracking-tight mb-8 sm:mb-10 leading-[1.1]">
-            Cari, Bandingkan &amp; Pesan{" "}
-            <span className="text-gold-light">
-              Langsung
-            </span>
+            Cari, Bandingkan &amp; Pesan Langsung
           </h1>
 
           <HeroSearch />
