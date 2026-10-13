@@ -320,8 +320,12 @@ export function ChartAreaInteractive() {
               cursor={false}
               content={
                 <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("id-ID", {
+                  labelFormatter={(value: any) => {
+                    const v = value as any
+                    if (!v) return ""
+                    const d = v instanceof Date ? v : new Date(v)
+                    if (isNaN(d.getTime())) return ""
+                    return d.toLocaleDateString("id-ID", {
                       month: "long",
                       day: "numeric",
                       year: "numeric",

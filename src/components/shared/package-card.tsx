@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Hotel, Calendar, Scale, Heart, Loader2, Star, Timer, BadgePercent } from "lucide-react"
+import { Clock, MapPin, Plane, Scale, Heart, Loader2, Star, Timer, BadgePercent } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { formatRupiah, formatRupiahCompact, decodeUnicodeEscapes, getPackageAvailable, extractAirline, extractHotelStars, extractHotelName, formatDepartureDate } from "@/lib/utils"
 import { CASHBACK_INFO } from "@/lib/constants"
@@ -35,7 +35,7 @@ interface PackageCardProps {
 
 export default function PackageCard({ pkg, travel, showTravel = true, variant = "vertical" }: PackageCardProps) {
   const { t } = useTranslation()
-  const { addToCompare, isFull, comparePackages } = useCompare()
+  const { addToCompare, removeFromCompare, isSelected, isFull } = useCompare()
   const router = useRouter()
   const supabase = createClient()
   const [imgSrc, setImgSrc] = useState(getSafeImage((pkg.images && pkg.images[0]) || pkg.image_url))
@@ -46,10 +46,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [reviewCount, setReviewCount] = useState(0)
 
   const soldOut = getPackageAvailable(pkg) <= 0
-  const airline = extractAirline(pkg.includes, pkg.airline)
-  const hotelStars = extractHotelStars(pkg.includes, pkg.hotel_makkah_stars)
-  const hotelName = extractHotelName(pkg.includes, pkg.hotel_makkah)
-  const departureLabel = formatDepartureDate(pkg.departure_date)
 
   useEffect(() => {
     let cancelled = false
@@ -119,7 +115,11 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   function handleCompare(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    if (comparePackages.some((p) => p.id === pkg.id)) return
+    if (isSelected(pkg.id)) {
+      removeFromCompare(pkg.id)
+      showPopup("Dihapus dari perbandingan", "success", "Lihat Perbandingan", "/compare")
+      return
+    }
     if (isFull) {
       showPopup("Maksimal 3 paket untuk dibandingkan", "warning", "Lihat Perbandingan", "/compare")
       return
@@ -171,9 +171,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
   }
 
-  function handleTravelClick(e: React.MouseEvent) {
-    e.stopPropagation()
-  }
 
   if (variant === "clean") {
     return (
@@ -213,14 +210,18 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               )}
             </button>
             {!soldOut && (
-              <button
-                onClick={handleCompare}
-className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
-                type="button"
-                aria-label="Bandingkan paket"
-              >
-                <Scale className="w-4 h-4 text-gold-dark" />
-              </button>
+               <button
+                 onClick={handleCompare}
+                 className={`p-2 rounded-full border transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 ${
+                   isSelected(pkg.id)
+                     ? "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory" : "text-secondary"
+                     
+                 }`}
+                 type="button"
+                 aria-label="Bandingkan paket"
+               >
+                 <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-ivory" : "text-secondary"}`} />
+               </button>
             )}
           </div>
         </div>
@@ -292,14 +293,18 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
                 )}
               </button>
               {!soldOut && (
-                <button
-                  onClick={handleCompare}
-                  className="bg-ivory-card/95 p-1.5 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto"
-                  type="button"
-                  aria-label="Bandingkan paket"
-                >
-                  <Scale className="w-4 h-4 text-gold-dark" />
-                </button>
+                 <button
+                   onClick={handleCompare}
+                   className={`p-1.5 rounded-full border transition pointer-events-auto ${
+                     isSelected(pkg.id)
+                       ? "bg-emerald-dark border-emerald-dark text-ivory hover:bg-emerald-deep"
+                       : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory"
+                   }`}
+                   type="button"
+                   aria-label="Bandingkan paket"
+                 >
+                   <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-ivory" : "text-gold-dark"}`} />
+                 </button>
               )}
             </div>
           </div>
@@ -387,14 +392,18 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
             )}
           </button>
           {!soldOut && (
-            <button
-              onClick={handleCompare}
-              className="bg-ivory-card/95 p-1.5 rounded-full border border-ivory-border/70 hover:bg-ivory transition pointer-events-auto"
-              type="button"
-              aria-label="Bandingkan paket"
-            >
-              <Scale className="w-4 h-4 text-gold-dark" />
-            </button>
+             <button
+               onClick={handleCompare}
+               className={`p-1.5 rounded-full border transition pointer-events-auto ${
+                 isSelected(pkg.id)
+                   ? "bg-emerald-dark border-emerald-dark text-ivory hover:bg-emerald-deep"
+                   : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory"
+               }`}
+               type="button"
+               aria-label="Bandingkan paket"
+             >
+               <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-ivory" : "text-gold-dark"}`} />
+             </button>
           )}
         </div>
 

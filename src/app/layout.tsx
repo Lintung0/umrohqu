@@ -6,6 +6,8 @@ import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { SerwistProvider } from "@serwist/turbopack/react";
 import MobileBottomNav from "@/components/shared/mobile-bottom-nav";
+import { Agentation } from "agentation";
+
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -28,17 +30,7 @@ export const metadata: Metadata = {
   description: "Teman Perjalanan Terbaikmu",
   icons: {
     icon: "/logo-icon.svg",
-    apple: [
-      { url: "/icons/apple-touch-icon-180x180.png", sizes: "180x180", type: "image/png" },
-    ],
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "UmrahQu",
-  },
-  formatDetection: {
-    telephone: false,
+
   },
 };
 
@@ -57,6 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
+      suppressHydrationWarning
       className={cn(
         "h-full",
         jakarta.variable,
@@ -64,6 +57,7 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col">
+            {process.env.NODE_ENV === "development" && <Agentation />}
         <Providers>
           <SerwistProvider swUrl="/serwist/sw.js">{children}</SerwistProvider>
         </Providers>

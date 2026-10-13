@@ -6,11 +6,11 @@ import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
-import { Loader2, CreditCard, Users, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User, Phone, Heart, Calendar } from "lucide-react"
+import { Loader2, CreditCard, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { getPackageAvailable } from "@/lib/utils"
-import type { Package, Tenant, PackageDeparture } from "@/lib/types"
+import type { Package, Tenant } from "@/lib/types"
 import { SNAP_SCRIPT_URL, MIDTRANS_CLIENT_KEY, vtWebUrl } from "@/lib/services/midtrans-client"
 
 const DP_OPTIONS = [30, 40, 50]
@@ -45,26 +45,19 @@ function CheckoutContent() {
   const [dpPercentage, setDpPercentage] = useState(30)
   const [notes, setNotes] = useState("")
   const [expandedJemaah, setExpandedJemaah] = useState<Record<number, boolean>>({ 0: true })
-  const [packageDepartures, setPackageDepartures] = useState<PackageDeparture[]>([])
-  const [selectedDepartureId, setSelectedDepartureId] = useState<string | null>(null)
 
   const STEPS = useMemo(() => [
-    { id: "package", label: "Data Singkat" },
-    { id: "departure", label: "Keberangkatan" },
+    { id: "package", label: "Data Jamaah" },
     { id: "payment", label: "Pembayaran" },
     { id: "confirm", label: "Selesai" },
   ], [])
 
-  const hasDepartures = packageDepartures.length > 0
-  const resolveStep = (i: number) => (!hasDepartures && i >= 2 ? i - 1 : i)
   const canGoTo = (i: number) => {
-    const t = resolveStep(i)
-    if (t <= step) return true
+    if (i <= step) return true
     if (!allPilgrimsFilled) return false
-    if (t <= 1) return true
-    return !hasDepartures || !!selectedDepartureId
+    return true
   }
-  const goToStep = (i: number) => { if (canGoTo(i)) setStep(resolveStep(i)) }
+  const goToStep = (i: number) => { if (canGoTo(i)) setStep(i) }
 
   const supabase = useMemo(() => createClient(), [])
 
@@ -82,7 +75,7 @@ function CheckoutContent() {
       try {
         const { data: pkgData, error: pkgError } = await supabase
           .from("packages")
-          .select("*, travel:tenants(*), departures:package_departures(id, departure_city, departure_date, quota, price_adjustment)")
+          .select("*, travel:tenants(*)")
           .eq("slug", packageSlug)
           .single()
 
@@ -98,19 +91,6 @@ function CheckoutContent() {
           setError("Paket ini tidak bisa dipesan karena sedang berlangsung atau kursi sudah penuh.")
           setLoading(false)
           return
-        }
-
-        // Filter active departures with available quota
-        const activeDepartures = (pkgData.departures || [])
-          .filter((d: PackageDeparture) => d.quota > 0)
-          .sort((a: PackageDeparture, b: PackageDeparture) => new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime())
-
-        if (activeDepartures.length > 0) {
-          setPackageDepartures(activeDepartures)
-          // Auto-select first departure if only one
-          if (activeDepartures.length === 1) {
-            setSelectedDepartureId(activeDepartures[0].id)
-          }
         }
 
         const enriched = await enrichPackagesWithDetail(supabase, [pkgData as any])
@@ -193,7 +173,7 @@ function CheckoutContent() {
         headers: { "Content-Type": "application/json" },
 body: JSON.stringify({
             packageId: pkg.id,
-            packageDepartureId: selectedDepartureId,
+            packageDepartureId: null,
             pilgrimCount,
             pilgrims: pilgrims.map((p) => ({
               full_name: p.full_name,
@@ -408,18 +388,7 @@ body: JSON.stringify({
               />
             )}
 
-            {step === 1 && packageDepartures.length > 0 && (
-              <StepDeparture
-                pkg={pkg}
-                travel={travel}
-                packageDepartures={packageDepartures}
-                selectedDepartureId={selectedDepartureId}
-                setSelectedDepartureId={setSelectedDepartureId}
-                setStep={setStep}
-              />
-            )}
-
-            {step === (packageDepartures.length > 0 ? 2 : 1) && (
+            {step === 1 && (
               <StepPayment
                 pkg={pkg}
                 travel={travel}
@@ -435,11 +404,11 @@ body: JSON.stringify({
                 notes={notes}
                 setNotes={setNotes}
                 setStep={setStep}
-                reviewStep={packageDepartures.length > 0 ? 3 : 2}
+                reviewStep={2}
               />
             )}
 
-            {step === (packageDepartures.length > 0 ? 3 : 2) && (
+            {step === 2 && (
               <StepReview
                 pkg={pkg}
                 travel={travel}
@@ -481,14 +450,58 @@ function StepDataSingkat({
   toggleJemaah: (idx: number) => void
   setStep: (n: number) => void
 }) {
+  const [userProfile, setUserProfile] = useState<{ full_name: string; phone: string } | null>(null)
+  const [useMyData, setUseMyData] = useState<Record<number, boolean>>({})
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchProfile() {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || cancelled) return
+        const { data } = await supabase
+          .from("users")
+          .select("full_name, phone")
+          .eq("id", user.id)
+          .maybeSingle()
+        if (cancelled) return
+        const fullName = (data as { full_name?: string; phone?: string } | null)?.full_name
+          || (user.user_metadata as { full_name?: string; name?: string } | null)?.full_name
+          || (user.user_metadata as { full_name?: string; name?: string } | null)?.name
+          || ""
+        const phone = (data as { full_name?: string; phone?: string } | null)?.phone
+          || (user.user_metadata as { phone?: string } | null)?.phone
+          || (user as { phone?: string })?.phone
+          || ""
+        setUserProfile({ full_name: fullName || "", phone: phone || "" })
+      } catch {
+        // silent
+      }
+    }
+    fetchProfile()
+    return () => { cancelled = true }
+  }, [])
+
+  const handleUseMyData = (idx: number, checked: boolean) => {
+    setUseMyData((prev) => ({ ...prev, [idx]: checked }))
+    if (checked && userProfile) {
+      if (userProfile.full_name) updatePilgrim(idx, "full_name", userProfile.full_name)
+      if (userProfile.phone) updatePilgrim(idx, "phone", userProfile.phone)
+    } else if (!checked) {
+      updatePilgrim(idx, "full_name", "")
+      updatePilgrim(idx, "phone", "")
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-5">
         
 
         <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 shadow-sm">
-          <label className="text-sm font-semibold flex items-center gap-2 mb-3">
-            <Users className="w-4 h-4 text-emerald-dark" /> Jumlah Jemaah
+          <label className="text-sm font-semibold mb-3 block">
+            Jml. Jamaah
           </label>
           <div className="flex items-center gap-3">
             <button
@@ -520,9 +533,6 @@ function StepDataSingkat({
                   <p className="text-sm font-semibold text-emerald-deep">
                     {pilgrim.full_name || `Jemaah ${idx + 1}`}
                   </p>
-                  <p className="text-[11px] text-ivory-ink/70">
-                    {idx === 0 ? "Jemaah Utama" : "Pendamping"}
-                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -540,12 +550,25 @@ function StepDataSingkat({
             </button>
 
             {expandedJemaah[idx] && (
-              <div className="px-5 pb-5 space-y-3 border-t border-ivory-border/60">
+              <div className="px-5 pb-5 space-y-5 border-t border-ivory-border/60">
                 <div className="pt-4" />
 
                 <div>
-                  <label className="text-xs font-medium text-ivory-ink/70 mb-1.5 flex items-center gap-1.5">
-                    <User className="w-3 h-3" /> Nama Lengkap *
+                  {idx === 0 && (
+                    <label className="flex items-center gap-2 mb-5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={!!useMyData[idx]}
+                        onChange={(e) => handleUseMyData(idx, e.target.checked)}
+                        className="w-4 h-4 rounded border-ivory-border accent-emerald-700 cursor-pointer"
+                      />
+                      <span className="text-base font-medium text-emerald-deep">
+                        Pesanan Pribadi
+                      </span>
+                    </label>
+                  )}
+                  <label className="text-base font-medium text-ivory-ink/70 mb-1.5 block">
+                    Nama Lengkap *
                   </label>
                   <input
                     type="text"
@@ -557,8 +580,8 @@ function StepDataSingkat({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-ivory-ink/70 mb-1.5 flex items-center gap-1.5">
-                    <Phone className="w-3 h-3" /> No. Telepon / WhatsApp *
+                  <label className="text-base font-medium text-ivory-ink/70 mb-1.5 block">
+                    No. Telepon / WhatsApp *
                   </label>
                   <input
                     type="tel"
@@ -572,7 +595,7 @@ function StepDataSingkat({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-ivory-ink/70 mb-2 block">Jenis Kelamin</label>
+                  <label className="text-base font-medium text-ivory-ink/70 mb-2 block">Jenis Kelamin</label>
                   <div className="flex gap-3">
                     <label className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 cursor-pointer transition-all text-sm font-medium ${
                       pilgrim.gender === "male"
@@ -608,8 +631,8 @@ function StepDataSingkat({
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-ivory-ink/70 mb-1.5 flex items-center gap-1.5">
-                    <Heart className="w-3 h-3" /> Hubungan
+                  <label className="text-base font-medium text-ivory-ink/70 mb-1.5 block">
+                    Hubungan
                   </label>
                   <select
                     value={pilgrim.relation}
@@ -639,7 +662,7 @@ function StepDataSingkat({
       <div className="lg:col-span-1">
         <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-ivory-card border border-ivory-border rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Pemesanan</h3>
+            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Pesanan</h3>
 
             <div className="flex gap-3 pb-4 border-b border-ivory-border/60">
               <div className="relative w-16 h-14 rounded-xl overflow-hidden shrink-0">
@@ -653,11 +676,11 @@ function StepDataSingkat({
 
             <div className="py-4 space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Harga per orang</span>
+                <span className="text-ivory-ink/70">Harga</span>
                 <span className="font-medium text-emerald-deep">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Jumlah jemaah</span>
+                <span className="text-ivory-ink/70">Jml. Jamaah</span>
                 <span className="font-medium text-emerald-deep">x{pilgrimCount}</span>
               </div>
             </div>
@@ -680,121 +703,6 @@ function StepDataSingkat({
             </div>
       </div>
     </div>
-    </div>
-  )
-}
-
-  // ─── Step Departure: Pilih Keberangkatan ──────────────────────────────────────
-  function StepDeparture({
-  pkg, travel, packageDepartures, selectedDepartureId, setSelectedDepartureId, setStep,
-}: {
-  pkg: Package
-  travel: Tenant | null
-  packageDepartures: PackageDeparture[]
-  selectedDepartureId: string | null
-  setSelectedDepartureId: (id: string) => void
-  setStep: (n: number) => void
-}) {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 space-y-5">
-
-        <div className="space-y-3">
-          {packageDepartures.map((dep) => (
-            <button
-              key={dep.id}
-              onClick={() => setSelectedDepartureId(dep.id)}
-              className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                selectedDepartureId === dep.id
-                  ? "border-emerald-dark bg-emerald-dark/10"
-                  : "border-ivory-border hover:border-gold/60 hover:bg-emerald-dark/5"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    selectedDepartureId === dep.id
-                      ? "bg-emerald-dark text-ivory"
-                      : "bg-emerald-dark/10 text-emerald-deep"
-                  }`}>
-                    <Calendar className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-emerald-deep">
-                      {new Date(dep.departure_date).toLocaleDateString("id-ID", { 
-                        weekday: "long", 
-                        day: "numeric", 
-                        month: "long", 
-                        year: "numeric" 
-                      })}
-                    </p>
-                    <p className="text-xs text-emerald-deep">Kota: {dep.departure_city}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-emerald-deep">
-                    Kuota: {dep.quota} kursi
-                  </p>
-                  {dep.price_adjustment && dep.price_adjustment > 0 && (
-                    <p className="text-xs font-semibold text-emerald-deep">+{formatRupiah(dep.price_adjustment)}</p>
-                  )}
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {!selectedDepartureId && (
-          <p className="text-center text-amber-600 text-sm py-2">
-            Silakan pilih salah satu jadwal keberangkatan
-          </p>
-        )}
-
-        <div className="flex justify-end pt-2">
-          <button
-            onClick={() => setStep(2)}
-            disabled={!selectedDepartureId}
-            className="px-6 py-2.5 rounded-xl bg-emerald-dark text-ivory font-semibold hover:bg-emerald-deep transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-1.5"
-          >
-            Lanjutkan <ChevronRight className="w-4 h-4 shrink-0" />
-          </button>
-        </div>
-      </div>
-
-      <div className="lg:col-span-1">
-        <div className="lg:sticky lg:top-24 space-y-4">
-          <div className="bg-ivory-card border border-ivory-border rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Paket</h3>
-            <div className="flex gap-3 pb-4 border-b border-ivory-border/60">
-              <div className="relative w-16 h-14 rounded-xl overflow-hidden shrink-0">
-                <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name} fill className="object-cover" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-ivory-ink/70 truncate">{travel?.name}</p>
-                <p className="text-sm font-semibold text-emerald-deep leading-snug line-clamp-2">{pkg.name}</p>
-              </div>
-            </div>
-
-            <div className="py-4 space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Harga per orang</span>
-                <span className="font-medium text-emerald-deep">{formatRupiah(Number(pkg.price))}</span>
-              </div>
-            </div>
-
-            <div className="bg-emerald-dark/10 rounded-xl p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-emerald-deep font-medium">Total Pembayaran</span>
-                <span className="text-lg font-bold text-emerald-deep">{formatRupiah(Number(pkg.price))}</span>
-              </div>
-            </div>
-
-            <p className="text-[10px] text-ivory-ink/70 flex items-center gap-1">
-              <Shield className="w-3 h-3" /> Harga sudah termasuk fasilitas paket umrah lengkap
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
@@ -912,7 +820,7 @@ function StepPayment({
       <div className="lg:col-span-1">
         <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-ivory-card border border-ivory-border rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Pemesanan</h3>
+            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Pesanan</h3>
 
             <div className="flex gap-3 pb-4 border-b border-ivory-border/60">
               <div className="relative w-16 h-14 rounded-xl overflow-hidden shrink-0">
@@ -926,11 +834,11 @@ function StepPayment({
 
             <div className="py-4 space-y-2 text-sm border-b border-ivory-border/60">
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Harga per orang</span>
+                <span className="text-ivory-ink/70">Harga</span>
                 <span className="font-medium">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Jumlah jemaah</span>
+                <span className="text-ivory-ink/70">Jml. Jamaah</span>
                 <span className="font-medium">x{pilgrimCount}</span>
               </div>
               <div className="flex justify-between">
@@ -1038,7 +946,7 @@ function StepReview({
       <div className="lg:col-span-1">
         <div className="lg:sticky lg:top-24 space-y-4">
           <div className="bg-ivory-card border border-ivory-border rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Pemesanan</h3>
+            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Pesanan</h3>
 
             <div className="flex gap-3 pb-4 border-b border-ivory-border/60">
               <div className="relative w-16 h-14 rounded-xl overflow-hidden shrink-0">
@@ -1052,11 +960,11 @@ function StepReview({
 
             <div className="py-4 space-y-2 text-sm border-b border-ivory-border/60">
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Harga per orang</span>
+                <span className="text-ivory-ink/70">Harga</span>
                 <span className="font-medium">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Jumlah jemaah</span>
+                <span className="text-ivory-ink/70">Jml. Jamaah</span>
                 <span className="font-medium">x{pilgrimCount}</span>
               </div>
               <div className="flex justify-between">

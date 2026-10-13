@@ -17,7 +17,6 @@ import { CASHBACK_INFO } from "@/lib/constants"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { decodeUnicodeEscapes } from "@/lib/utils"
 import ImageGallery from "@/components/shared/image-gallery"
-import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import SeatAvailabilityBar from "@/components/shared/seat-availability-bar"
@@ -390,7 +389,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   )}
                   {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                    <PackageStatusBadge status={displayPkg.status} />
                     {pkg.type && (
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
                         pkg.type === "vip" ? "bg-gold text-emerald-deep" :
@@ -471,110 +469,42 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   <div className="animate-in fade-in duration-200">
                     {itineraryList.length > 0 ? (
                       <div className="relative">
-                        {/* Header summary */}
-                        <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-ivory-card border border-ivory-border">
-                          <div className="w-10 h-10 rounded-xl bg-emerald-dark flex items-center justify-center shrink-0">
-                            <Calendar className="w-5 h-5 text-ivory" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-emerald-deep">Perjalanan {itineraryList.length} Hari</p>
-                            <p className="text-xs text-ivory-ink/70">Ikuti langkah demi langkah perjalanan ibadah Anda</p>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              onClick={() => setOpenDays(itineraryList.map((_, i) => i))}
-                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-emerald-dark hover:bg-emerald-dark/10 transition-colors cursor-pointer"
-                            >
-                              Buka Semua
-                            </button>
-                            <span className="text-ivory-border">|</span>
-                            <button
-                              onClick={() => setOpenDays([])}
-                              disabled={openDays.length === 0}
-                              className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-emerald-dark hover:bg-emerald-dark/10 transition-colors disabled:opacity-40 disabled:cursor-default cursor-pointer"
-                            >
-                              Tutup Semua
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Timeline */}
-                        <div className="relative ml-5 pr-2 sm:pr-3 border-l-2 border-ivory-border space-y-0">
+                        {/* Timeline Itinerary — vertical, collapsible */}
+                        <div className="relative ml-5 border-l-2 border-ivory-border">
                           {itineraryList.map((item, idx) => {
                             const isOpen = openDays.includes(idx)
-                            const isLast = idx === itineraryList.length - 1
-                            const hasTitle = item.title.length > 0
-                            // Potong awalan deskripsi yang mengulang judul (abaikan kapital
-                            // & tanda baca) supaya judul vs deskripsi tidak tampil ganda
-                            const stripLeadingTitle = (desc: string, title: string) => {
-                              const t = desc.trim()
-                              const p = title.trim()
-                              if (p.length >= 5 && t.toLowerCase().startsWith(p.toLowerCase())) {
-                                const rest = t.slice(p.length).replace(/^[:.\-–—\s]+/, "").trim()
-                                if (rest) return rest
-                              }
-                              return t
-                            }
-                            const bodyText = stripLeadingTitle(item.description, item.title)
+                            // Title dari database sengaja diabaikan — hanya pakai description
+                            const bodyText = item.description.trim()
                             const hasDesc = bodyText.length > 0
-                            const isEmpty = !hasTitle && !hasDesc
-                            // Expand selalu memunculkan deskripsi: tanpa judul pakai
-                            // 60 karakter pertama sebagai judul, tanpa deskripsi = judul penuh
-                            const preview = hasTitle
-                              ? item.title
-                              : (bodyText.length > 60 ? `${bodyText.slice(0, 60)}…` : bodyText)
-                            const fullDesc = hasDesc ? bodyText : item.title
-                            const canExpand = fullDesc.length > 0
+                            const isEmpty = !hasDesc
+                            const fullDesc = bodyText
                             return (
-                              <div
-                                key={idx}
-                                className="relative group"
-                              >
-                                {/* Timeline dot */}
-                                <div className={`absolute -left-[1.35rem] top-4 w-3 h-3 rounded-full border-2 transition-all duration-300 ${
-                                  isOpen
-                                    ? "bg-emerald-dark border-emerald-dark scale-125 shadow-md"
-                                    : "bg-ivory-card border-ivory-border group-hover:border-emerald-dark group-hover:bg-ivory-soft"
-                                }`} />
-
-                                {/* Day card */}
-                                <button
-                                  onClick={() => { if (canExpand) setOpenDays((prev) => isOpen ? prev.filter((d) => d !== idx) : [...prev, idx]) }}
-                                  className={`w-full text-left ml-6 p-4 rounded-xl transition-all duration-300 ${
-                                    isOpen && canExpand
-                                      ? "bg-ivory-soft border border-ivory-border shadow-sm"
-                                      : "hover:bg-ivory-soft border border-transparent hover:border-ivory-border"
-                                  } ${!canExpand ? "cursor-default" : ""}`}
-                                >
-                                  <div className="flex items-start justify-between gap-3">
-                                    <span className={`inline-flex text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md mt-1.5 ${
-                                      isOpen && canExpand
-                                        ? "bg-emerald-dark text-ivory"
-                                        : "bg-emerald-dark/10 text-emerald-dark"
-                                    }`}>
+                              <div key={idx} className="relative pl-6 pb-4 last:pb-0">
+                                <div className={`absolute -left-[7px] top-5 w-3 h-3 rounded-full border-2 transition-colors ${isOpen ? "bg-emerald-dark border-emerald-dark" : "bg-ivory-card border-ivory-border"}`} />
+                                <div className={`rounded-xl border shadow-sm overflow-hidden transition-colors ${isOpen ? "bg-ivory-card border-ivory-border" : "bg-ivory-card border-ivory-border/60 hover:border-ivory-border hover:bg-ivory-soft"}`}>
+                                  <button
+                                    onClick={() => { if (!isEmpty) setOpenDays((prev) => (isOpen ? prev.filter((d) => d !== idx) : [...prev, idx])) }}
+                                    className={`w-full text-left px-4 py-3.5 flex items-center justify-between gap-3 ${isEmpty ? "cursor-default" : "cursor-pointer"}`}
+                                  >
+                                    <span className={`inline-flex text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${isOpen ? "bg-emerald-dark text-ivory" : "bg-emerald-dark/10 text-emerald-dark"}`}>
                                       Hari {item.day}
                                     </span>
-                                    {canExpand && !isEmpty && (
-                                      <span className="w-11 h-11 shrink-0 rounded-xl border border-ivory-border bg-ivory flex items-center justify-center">
-                                        <ChevronDown className={`w-5 h-5 text-emerald-dark transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
-                                      </span>
+                                    {!isEmpty && (
+                                      <ChevronDown className={`w-4 h-4 shrink-0 text-emerald-dark transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                                     )}
-                                  </div>
+                                  </button>
                                   {isEmpty ? (
-                                    <p className="text-sm text-ivory-ink/40 mt-2">Detail itinerary menyusul.</p>
-                                  ) : !canExpand ? (
-                                    <h3 className="text-sm font-semibold text-emerald-deep mt-2 leading-relaxed">{preview}</h3>
+                                    <p className="text-sm text-ivory-ink/40 px-4 pb-4">Detail itinerary menyusul.</p>
                                   ) : (
-                                    <>
-                                      <h3 className="text-sm font-semibold text-emerald-deep mt-2 leading-snug line-clamp-2">{preview}</h3>
-                                      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 mt-2" : "max-h-0"}`}>
-                                        <p className="text-sm text-ivory-ink/70 leading-relaxed whitespace-pre-line break-words border-t border-ivory-border pt-2">
+                                    isOpen && (
+                                      <div className="px-4 pb-4">
+                                        <p className="text-sm text-ivory-ink/70 leading-relaxed whitespace-pre-line break-words border-t border-ivory-border pt-3">
                                           {fullDesc}
                                         </p>
                                       </div>
-                                    </>
+                                    )
                                   )}
-                                </button>
+                                </div>
                               </div>
                             )
                           })}
@@ -822,7 +752,6 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
             {/* Booking Card — title + price + seats + CTA (satu kartu) */}
             <div className="bg-ivory-card rounded-2xl border border-ivory-border p-5 shadow-sm">
               <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                <PackageStatusBadge status={displayPkg.status} />
                 {pkg.type && pkg.type !== "haji" && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-dark/10 text-emerald-dark uppercase tracking-wide">
                     {pkg.type}
@@ -909,14 +838,15 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   </div>
                 ) : (
                   <>
-                    <button onClick={handleCheckout} className="w-full block">
-                      <Button className="w-full h-12 font-bold text-sm bg-gold text-emerald-deep hover:bg-emerald-deep hover:text-ivory shadow-lg transition-all active:scale-[0.98]">
-                        Pesan
-                      </Button>
-                    </button>
+                    <Button
+                      onClick={handleCheckout}
+                      className="w-full h-12 font-bold text-sm bg-gold text-emerald-deep hover:bg-emerald-deep hover:text-ivory shadow-lg transition-all active:scale-[0.98]"
+                    >
+                      Pesan
+                    </Button>
                     <Button
                       variant="outline"
-                      className="w-full h-11 text-xs gap-2 font-semibold border-ivory-border hover:bg-ivory-soft transition-all"
+                      className="w-full h-11 text-xs font-semibold border-ivory-border hover:bg-ivory-soft transition-all"
                       onClick={() => {
                         if (comparePackages.some((p) => p.id === pkg.id)) return
                         if (isFull) {
@@ -927,7 +857,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         toast.success("Paket berhasil ditambahkan ke perbandingan", { action: { label: "Lihat Perbandingan", onClick: () => router.push("/compare") } })
                       }}
                     >
-                      <Scale className="w-4 h-4" /> Bandingkan
+                      Bandingkan
                     </Button>
                   </>
                 )}
@@ -998,9 +928,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               <p className="text-lg font-bold text-emerald-deep truncate">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-ivory-ink/70">per orang</p>
             </div>
-            <button onClick={handleCheckout}>
-              <Button className="h-10 px-5 font-semibold text-sm bg-gold text-emerald-deep shadow-lg">Pesan</Button>
-            </button>
+            <Button onClick={handleCheckout} className="h-10 px-5 font-semibold text-sm bg-gold text-emerald-deep shadow-lg">Pesan</Button>
           </div>
         </div>
       )}
