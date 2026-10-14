@@ -28,7 +28,6 @@ function LoginForm() {
   const [errors, setErrors] = useState<LoginErrors>({})
   const [loading, setLoading] = useState(false)
 
-  const supabase = createClient()
   const searchParams = useSearchParams()
 
   // Derived during render: mirror the auth-callback error query param into
@@ -57,6 +56,8 @@ function LoginForm() {
     setLoading(true)
 
     try {
+      const supabase = createClient()
+
       const checkRes = await fetch("/api/auth/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,15 +77,16 @@ function LoginForm() {
 
       if (error) {
         if (error.message === "Invalid login credentials") {
-          setAuthError(t.auth.password_required)
+          setAuthError(t.auth.invalid_credentials)
         } else {
           setAuthError(error.message)
         }
         return
       }
-      router.push("/")
-    } catch {
-      setAuthError(t.auth.password_required)
+      const redirectTo = searchParams.get("redirect_to")
+      router.push(redirectTo && redirectTo.startsWith("/") ? redirectTo : "/")
+    } catch (err) {
+      setAuthError(err instanceof Error && err.message ? err.message : t.auth.login_failed)
     } finally {
       setLoading(false)
     }
