@@ -57,6 +57,8 @@
     "email_required": "Email is required.",
     "email_invalid": "Invalid email format.",
     "password_required": "Password is required.",
+    "invalid_credentials": "Incorrect email or password. Please try again.",
+    "login_failed": "Failed to sign in. Please try again.",
     "password_min": "Password must be at least {{min}} characters.",
     "name_required": "Full name is required.",
     "name_min": "Name must be at least {{min}} characters.",
