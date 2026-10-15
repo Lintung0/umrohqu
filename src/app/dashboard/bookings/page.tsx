@@ -174,7 +174,7 @@ export default function BookingsPage() {
         <div className="bg-ivory-card border border-ivory-border rounded-2xl p-12 text-center">
           <BookOpen className="w-12 h-12 text-emerald-dark/25 mx-auto mb-3" />
           <p className="font-medium text-muted-foreground">{t("booking.no_bookings")}</p>
-          <Link href="/search" className="text-sm text-emerald-dark hover:text-emerald-deep mt-2 inline-flex items-center gap-1">
+          <Link href="/packages" className="text-sm text-emerald-dark hover:text-emerald-deep mt-2 inline-flex items-center gap-1">
             {t("package.search_title")} <ChevronRight className="w-3 h-3" />
           </Link>
         </div>

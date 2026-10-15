@@ -323,7 +323,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               <h2 className="text-lg font-bold tracking-tight text-emerald-deep">Paket Tersedia</h2>
               <span className="text-ivory-ink/70 font-normal text-sm">({salePackages.length + otherPackages.length})</span>
             </div>
-            <Link href="/search" className="text-xs font-semibold text-emerald-dark hover:text-emerald-deep inline-flex items-center gap-1">
+            <Link href="/packages" className="text-xs font-semibold text-emerald-dark hover:text-emerald-deep inline-flex items-center gap-1">
               Semua <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>

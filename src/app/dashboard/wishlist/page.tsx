@@ -95,7 +95,7 @@ export default function WishlistPage() {
         <div className="bg-ivory-card border border-ivory-border rounded-2xl p-12 text-center">
           <Heart className="w-12 h-12 text-emerald-dark/25 mx-auto mb-3" />
           <p className="font-medium text-muted-foreground">Belum ada paket di wishlist</p>
-          <Link href="/search" className="text-sm text-emerald-dark hover:text-emerald-deep mt-2 inline-flex items-center gap-1">
+          <Link href="/packages" className="text-sm text-emerald-dark hover:text-emerald-deep mt-2 inline-flex items-center gap-1">
             Cari paket umrah <ChevronRight className="w-3 h-3" />
           </Link>
         </div>

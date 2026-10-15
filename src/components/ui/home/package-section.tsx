@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
+import { useCompare } from "@/lib/compare-context";
 import Link from "next/link";
 import { Loader2, Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -41,7 +42,7 @@ export default function PackageSection() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [compared, setCompared] = useState<string[]>([]);
+  const { comparePackages, compareCount, clearCompare } = useCompare();
   const [tenants, setTenants] = useState<Map<string, Tenant>>(new Map());
   const packagesRef = useRef<Package[]>([]);
   const initialLoadDone = useRef(false);
@@ -155,12 +156,6 @@ export default function PackageSection() {
     fetchPackages(next);
   }
 
-  const _toggleCompare = (id: string) => {
-    setCompared((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : prev.length < 3 ? [...prev, id] : prev
-    );
-  };
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -213,7 +208,7 @@ export default function PackageSection() {
             <div className="mt-3 h-1 w-14 rounded-full bg-gold" />
           </div>
           <Link
-            href="/search"
+            href="/packages"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-dark hover:text-emerald-deep transition-colors group"
           >
             Semua
@@ -221,13 +216,13 @@ export default function PackageSection() {
           </Link>
         </div>
 
-        {compared.length > 0 && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-1.25rem)] px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl z-40 flex items-center gap-2.5 sm:gap-4 bg-emerald-dark text-ivory shadow-xl shadow-emerald-deep/25">
-            <span className="text-sm font-medium">{compared.length} paket dipilih untuk dibandingkan</span>
-            <Link href={`/compare?ids=${compared.join(",")}`} className="px-4 py-2 rounded-xl text-sm font-bold bg-gold text-emerald-deep hover:bg-gold-dark transition-colors">
+        {compareCount > 0 && (
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-1.25rem)] px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl z-40 flex items-center gap-2.5 sm:gap-4 bg-emerald-dark text-ivory shadow-xl shadow-emerald-deep/25 animate-in fade-in slide-in-from-bottom-4 duration-200">
+            <span className="text-sm font-medium">{compareCount} paket dipilih untuk dibandingkan</span>
+            <Link href={`/compare?ids=${comparePackages.map((p) => p.id).join(",")}`} className="px-4 py-2 rounded-xl text-sm font-bold bg-gold text-emerald-deep hover:bg-gold-dark transition-colors">
               Bandingkan
             </Link>
-            <button onClick={() => setCompared([])} className="text-xs opacity-60 hover:opacity-100">
+            <button onClick={clearCompare} className="text-xs opacity-60 hover:opacity-100 cursor-pointer">
               {t.common.delete}
             </button>
           </div>

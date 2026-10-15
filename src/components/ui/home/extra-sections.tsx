@@ -299,7 +299,7 @@ export function CTASection() {
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
-            href="/search"
+            href="/packages"
             className="inline-flex items-center justify-center gap-2 px-7 py-3 border border-ivory/20 text-ivory font-medium rounded-xl hover:bg-ivory/10 transition-colors"
           >
             {t.hero.search}

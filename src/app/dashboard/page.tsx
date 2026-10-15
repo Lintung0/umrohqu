@@ -146,7 +146,7 @@ export default function DashboardOverview() {
             <div className="text-center py-10">
               <Clock className="w-10 h-10 text-emerald-dark/25 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground font-medium">Belum ada pesanan</p>
-              <Link href="/search" className="text-sm text-emerald-dark hover:underline mt-2 inline-flex items-center gap-1">
+              <Link href="/packages" className="text-sm text-emerald-dark hover:underline mt-2 inline-flex items-center gap-1">
                 Mulai Cari Paket <ChevronRight className="w-3 h-3" />
               </Link>
             </div>

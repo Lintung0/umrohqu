@@ -17,13 +17,13 @@ const VARIANTS: Record<EmptyVariant, VariantConfig> = {
     icon: Search,
     title: "Paket tidak ditemukan",
     desc: "Coba ubah filter atau kata kunci pencarian Anda.",
-    cta: { label: "Reset Pencarian", href: "/search" },
+    cta: { label: "Reset Pencarian", href: "/packages" },
   },
   compare: {
     icon: Scale,
     title: "Belum ada paket dipilih",
     desc: "Pilih paket dari halaman pencarian untuk mulai membandingkan.",
-    cta: { label: "Cari Paket", href: "/search" },
+    cta: { label: "Cari Paket", href: "/packages" },
   },
   packages: {
     icon: Package,

@@ -78,7 +78,7 @@ function HeroSearch() {
     if (query) params.set("search", query)
     if (departureCity) params.set("departure", departureCity)
     if (selectedMonth) params.set("month", selectedMonth)
-    router.push(`/search?${params.toString()}`)
+    router.push(`/packages?${params.toString()}`)
   }
 
   const inputClass =

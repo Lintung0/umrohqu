@@ -212,15 +212,17 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             {!soldOut && (
                <button
                  onClick={handleCompare}
-                 className={`p-2 rounded-full border transition pointer-events-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 ${
+                 className={`p-2 rounded-full border transition pointer-events-auto ${
                    isSelected(pkg.id)
-                     ? "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory" : "text-secondary"
-                     
-                 }`}
+                     ? "bg-emerald-dark border-emerald-dark text-gold shadow-md opacity-100"
+                     : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                 } focus-visible:opacity-100`}
                  type="button"
-                 aria-label="Bandingkan paket"
+                 aria-label={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
+                 title={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
+                 aria-pressed={isSelected(pkg.id)}
                >
-                 <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-ivory" : "text-secondary"}`} />
+                 <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} />
                </button>
             )}
           </div>
@@ -297,13 +299,15 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                    onClick={handleCompare}
                    className={`p-1.5 rounded-full border transition pointer-events-auto ${
                      isSelected(pkg.id)
-                       ? "bg-emerald-dark border-emerald-dark text-ivory hover:bg-emerald-deep"
+                       ? "bg-emerald-dark border-emerald-dark text-gold shadow-md"
                        : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory"
                    }`}
                    type="button"
-                   aria-label="Bandingkan paket"
+                   aria-label={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
+                   title={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
+                   aria-pressed={isSelected(pkg.id)}
                  >
-                   <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-ivory" : "text-gold-dark"}`} />
+                   <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} />
                  </button>
               )}
             </div>
@@ -396,13 +400,15 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
                onClick={handleCompare}
                className={`p-1.5 rounded-full border transition pointer-events-auto ${
                  isSelected(pkg.id)
-                   ? "bg-emerald-dark border-emerald-dark text-ivory hover:bg-emerald-deep"
-                   : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory"
-               }`}
+                   ? "bg-emerald-dark border-emerald-dark text-gold shadow-md opacity-100"
+                   : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+               } focus-visible:opacity-100`}
                type="button"
-               aria-label="Bandingkan paket"
+               aria-label={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
+               title={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
+               aria-pressed={isSelected(pkg.id)}
              >
-               <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-ivory" : "text-gold-dark"}`} />
+               <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} />
              </button>
           )}
         </div>

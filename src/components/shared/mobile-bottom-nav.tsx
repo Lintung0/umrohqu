@@ -9,7 +9,7 @@ import { useCompare } from "@/lib/compare-context"
 const NAV_ITEMS = [
   { href: "/", label: "Beranda", icon: Home },
   { href: "/compare", label: "Bandingkan", icon: Scale },
-  { href: "/search", label: "Cari", icon: Search },
+  { href: "/packages", label: "Cari", icon: Search },
   { href: "/dashboard/bookings", label: "Pesanan", icon: ClipboardList },
   { href: "/dashboard", label: "Akun", icon: User },
 ]

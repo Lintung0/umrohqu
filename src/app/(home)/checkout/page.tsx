@@ -299,7 +299,7 @@ body: JSON.stringify({
           <h2 className="text-lg font-bold text-emerald-deep">Terjadi Kesalahan</h2>
           <p className="text-sm text-ivory-ink/70">{error || "Paket tidak ditemukan. Silakan kembali ke katalog."}</p>
           <div className="flex items-center justify-center gap-3">
-            <Link href="/search">
+            <Link href="/packages">
               <Button variant="outline" className="gap-2">
                 ← Kembali ke Cari Paket
               </Button>
@@ -317,7 +317,7 @@ body: JSON.stringify({
         <div className="max-w-6xl mx-auto flex items-center gap-2 text-sm text-ivory-ink/70">
           <Link href="/" className="hover:text-emerald-dark">Beranda</Link>
           <span>/</span>
-          <Link href="/search" className="hover:text-emerald-dark">Cari Paket</Link>
+          <Link href="/packages" className="hover:text-emerald-dark">Cari Paket</Link>
           <span>/</span>
           <Link href={`/package/${pkg.slug}`} className="hover:text-emerald-dark truncate hidden sm:inline">{pkg.name}</Link>
           <span className="hidden sm:inline">/</span>

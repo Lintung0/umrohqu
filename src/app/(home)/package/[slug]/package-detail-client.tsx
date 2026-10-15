@@ -355,7 +355,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
           <Link href="/" className="hover:text-emerald-dark transition-colors">Beranda</Link>
           <ChevronRight className="w-3 h-3" />
-          <Link href="/search" className="hover:text-emerald-dark transition-colors">Cari Paket</Link>
+          <Link href="/packages" className="hover:text-emerald-dark transition-colors">Cari Paket</Link>
           <ChevronRight className="w-3 h-3" />
           <span className="text-foreground truncate">{pkg.name}</span>
         </div>

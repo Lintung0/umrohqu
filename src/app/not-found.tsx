@@ -26,7 +26,7 @@ export default function NotFound() {
             <Home className="w-4 h-4" /> Beranda
           </Link>
           <Link
-            href="/search"
+            href="/packages"
             className="flex items-center gap-2 border border-white/20 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-white/10 transition-all"
           >
             <Search className="w-4 h-4" /> Cari Paket
