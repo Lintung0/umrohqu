@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DataTable } from "@/components/travel/OperationalDataTable"
-import { Building2, MapPin, Phone, Building, CheckCircle, XCircle } from "lucide-react"
-import { formatRupiah, cn } from "@/lib/utils"
+import { CheckCircle, XCircle } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
 

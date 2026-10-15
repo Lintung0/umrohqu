@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { RotateCcw, MapPin, Clock, Banknote, ChevronDown, SlidersHorizontal, ArrowUpDown } from "lucide-react"
+import { RotateCcw, MapPin, Clock, Banknote, SlidersHorizontal, ArrowUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
 import { SelectDropdown, type SelectOption } from "@/components/ui/select-dropdown"

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DataTable } from "@/components/travel/OperationalDataTable"
-import { Hotel, MapPin, Building, Star, CheckCircle, XCircle } from "lucide-react"
+import { Hotel } from "lucide-react"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
 

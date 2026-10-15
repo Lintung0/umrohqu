@@ -46,6 +46,8 @@ function CheckoutContent() {
   const [notes, setNotes] = useState("")
   const [expandedJemaah, setExpandedJemaah] = useState<Record<number, boolean>>({ 0: true })
 
+  const allPilgrimsFilled = pilgrims.every((p) => p.full_name.trim().length > 0 && p.phone.trim().length > 0)
+
   const STEPS = useMemo(() => [
     { id: "package", label: "Data Jamaah" },
     { id: "payment", label: "Pembayaran" },
@@ -132,8 +134,6 @@ function CheckoutContent() {
       return next
     })
   }, [])
-
-  const allPilgrimsFilled = useMemo(() => pilgrims.every((p) => p.full_name.trim().length > 0 && p.phone.trim().length > 0), [pilgrims])
 
   const toggleJemaah = useCallback((idx: number) => {
     setExpandedJemaah((prev) => ({ ...prev, [idx]: !prev[idx] }))

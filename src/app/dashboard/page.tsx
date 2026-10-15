@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import { BookOpen, Heart, Package, Clock, ChevronRight, Calendar } from "lucide-react"
 import StatCard from "@/components/shared/stat-card"
-import { getStatusLabel, formatRupiah } from "@/lib/constants"
+import { getStatusLabel } from "@/lib/constants"
 import { enrichEmbeddedPackageCovers } from "@/lib/package-covers"
 
 function getBookingStatusColor(status: string): string {
