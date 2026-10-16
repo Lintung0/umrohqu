@@ -212,17 +212,17 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
             {!soldOut && (
                <button
                  onClick={handleCompare}
-                 className={`p-2 rounded-full border transition pointer-events-auto ${
+                 className={`p-2 rounded-full border transition pointer-events-auto bg-ivory-card/95 hover:bg-ivory focus-visible:opacity-100 ${
                    isSelected(pkg.id)
-                     ? "bg-emerald-dark border-emerald-dark text-gold shadow-md opacity-100"
-                     : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-                 } focus-visible:opacity-100`}
+                     ? "border-gold/50 text-gold shadow-sm"
+                     : "border-ivory-border/70 text-ivory-ink/70 hover:text-emerald-dark"
+                 }`}
                  type="button"
                  aria-label={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
                  title={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
                  aria-pressed={isSelected(pkg.id)}
                >
-                 <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} />
+                 <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} strokeWidth={isSelected(pkg.id) ? 2.5 : 2} />
                </button>
             )}
           </div>
@@ -297,17 +297,17 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
               {!soldOut && (
                  <button
                    onClick={handleCompare}
-                   className={`p-1.5 rounded-full border transition pointer-events-auto ${
+                   className={`p-1.5 rounded-full border transition pointer-events-auto bg-ivory-card/95 hover:bg-ivory ${
                      isSelected(pkg.id)
-                       ? "bg-emerald-dark border-emerald-dark text-gold shadow-md"
-                       : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory"
+                       ? "border-gold/50 text-gold shadow-sm"
+                       : "border-ivory-border/70 text-ivory-ink/70 hover:text-emerald-dark"
                    }`}
                    type="button"
                    aria-label={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
                    title={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
                    aria-pressed={isSelected(pkg.id)}
                  >
-                   <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} />
+                   <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} strokeWidth={isSelected(pkg.id) ? 2.5 : 2} />
                  </button>
               )}
             </div>
@@ -398,17 +398,17 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
           {!soldOut && (
              <button
                onClick={handleCompare}
-               className={`p-1.5 rounded-full border transition pointer-events-auto ${
+               className={`p-1.5 rounded-full border transition pointer-events-auto bg-ivory-card/95 hover:bg-ivory focus-visible:opacity-100 ${
                  isSelected(pkg.id)
-                   ? "bg-emerald-dark border-emerald-dark text-gold shadow-md opacity-100"
-                   : "bg-ivory-card/95 border-ivory-border/70 text-ivory-ink/70 hover:bg-ivory opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-               } focus-visible:opacity-100`}
+                   ? "border-gold/50 text-gold shadow-sm"
+                   : "border-ivory-border/70 text-ivory-ink/70 hover:text-emerald-dark"
+               }`}
                type="button"
                aria-label={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
                title={isSelected(pkg.id) ? "Hapus dari perbandingan" : "Bandingkan paket"}
                aria-pressed={isSelected(pkg.id)}
              >
-               <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} />
+               <Scale className={`w-4 h-4 ${isSelected(pkg.id) ? "text-gold" : "text-ivory-ink/70"}`} strokeWidth={isSelected(pkg.id) ? 2.5 : 2} />
              </button>
           )}
         </div>

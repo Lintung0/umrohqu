@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
-import { useCompare } from "@/lib/compare-context";
+
 import Link from "next/link";
 import { Loader2, Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -42,7 +42,6 @@ export default function PackageSection() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const { comparePackages, compareCount, clearCompare } = useCompare();
   const [tenants, setTenants] = useState<Map<string, Tenant>>(new Map());
   const packagesRef = useRef<Package[]>([]);
   const initialLoadDone = useRef(false);
@@ -215,18 +214,6 @@ export default function PackageSection() {
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
-
-        {compareCount > 0 && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-1.25rem)] px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl z-40 flex items-center gap-2.5 sm:gap-4 bg-emerald-dark text-ivory shadow-xl shadow-emerald-deep/25 animate-in fade-in slide-in-from-bottom-4 duration-200">
-            <span className="text-sm font-medium">{compareCount} paket dipilih untuk dibandingkan</span>
-            <Link href={`/compare?ids=${comparePackages.map((p) => p.id).join(",")}`} className="px-4 py-2 rounded-xl text-sm font-bold bg-gold text-emerald-deep hover:bg-gold-dark transition-colors">
-              Bandingkan
-            </Link>
-            <button onClick={clearCompare} className="text-xs opacity-60 hover:opacity-100 cursor-pointer">
-              {t.common.delete}
-            </button>
-          </div>
-        )}
 
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-4">
           {packages.map((pkg, index) => (
