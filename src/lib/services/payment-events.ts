@@ -144,6 +144,52 @@ export async function applyPaymentEvent(
       })
       .eq("id", payment.id)
 
+    // Sinkronisasi status invoices dan payment_schedules
+    try {
+      let targetInvoiceId: string | null = (payment as any).invoice_id || null
+
+      if (!targetInvoiceId) {
+        if (isRemaining) {
+          const { data: nextInv } = await admin
+            .from("invoices")
+            .select("id")
+            .eq("booking_id", bookingId)
+            .eq("status", "unpaid")
+            .gt("installment_number", 0)
+            .order("installment_number", { ascending: true })
+            .limit(1)
+            .maybeSingle()
+          targetInvoiceId = nextInv?.id || null
+        } else {
+          const { data: dpInv } = await admin
+            .from("invoices")
+            .select("id")
+            .eq("booking_id", bookingId)
+            .eq("installment_number", 0)
+            .maybeSingle()
+          targetInvoiceId = dpInv?.id || null
+        }
+      }
+
+      if (targetInvoiceId) {
+        await admin
+          .from("invoices")
+          .update({ status: "paid", paid_at: paidAt })
+          .eq("id", targetInvoiceId)
+
+        await admin
+          .from("payment_schedules")
+          .update({
+            status: "paid",
+            paid_amount: (payment as any).amount || 0,
+            paid_at: paidAt,
+          })
+          .eq("invoice_id", targetInvoiceId)
+      }
+    } catch (invSyncErr) {
+      console.error("[payment-events] invoice/schedule sync error:", invSyncErr)
+    }
+
     await audit(admin, {
       tenantId: (booking as any).tenant_id ?? null,
       action: isRemaining ? "payment.remaining_paid" : "payment.paid",

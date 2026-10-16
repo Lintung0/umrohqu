@@ -45,29 +45,53 @@ export async function POST(_request: NextRequest) {
       orderId.startsWith("pay-remaining-") ||
       (!orderId.startsWith("booking-") && !orderId.startsWith("pay-") && orderId.endsWith("-R"))
 
-    const uuidPart = orderId.match(
-      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
-    )?.[0] || null
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    const uuidMatch = orderId.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
+    const uuidPart = uuidMatch?.[0] || null
 
     let bookingId: string | null = null
     let bookingCode: string | null = null
     let paymentId: string | null = null
-    if (orderId.startsWith("pay-")) {
-      // Format baru: order_id = pay-{paymentId}. Ambil bookingId dari payments.
+
+    // 1. Jika orderId adalah UUID langsung (misal booking.id asli dari database)
+    if (uuidRegex.test(orderId)) {
+      const { data: bCheck } = await admin.from("bookings").select("id").eq("id", orderId).maybeSingle()
+      if (bCheck?.id) {
+        bookingId = bCheck.id
+      } else {
+        // Cek apakah invoice_id
+        const { data: invCheck } = await admin.from("invoices").select("id, booking_id").eq("id", orderId).maybeSingle()
+        if (invCheck?.id) {
+          bookingId = invCheck.booking_id
+        } else {
+          // Cek apakah payment_id
+          const { data: payCheck } = await admin.from("payments").select("id, booking_id").eq("id", orderId).maybeSingle()
+          if (payCheck?.id) {
+            paymentId = payCheck.id
+            bookingId = payCheck.booking_id
+          }
+        }
+      }
+    } else if (orderId.startsWith("INV-")) {
+      // 2. Jika orderId adalah nomor invoice (misal cicilan)
+      const { data: invByNo } = await admin.from("invoices").select("id, booking_id").eq("invoice_number", orderId).maybeSingle()
+      if (invByNo?.booking_id) {
+        bookingId = invByNo.booking_id
+      }
+    } else if (orderId.startsWith("pay-")) {
+      // 3. Format legacy: order_id = pay-{paymentId} / pay-remaining-{paymentId}
       const { data: payByRef } = await admin
         .from("payments")
         .select("id, booking_id")
-        .eq("gateway_reference", orderId)
+        .or(`gateway_reference.eq.${orderId}${uuidPart ? `,id.eq.${uuidPart}` : ""}`)
         .maybeSingle()
       if (payByRef?.booking_id) {
         paymentId = payByRef.id
         bookingId = payByRef.booking_id
-      } else {
-        return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
+      } else if (uuidPart) {
+        bookingId = uuidPart
       }
-    } else if (orderId.startsWith("booking-remaining-")) {
-      bookingId = uuidPart
-    } else if (orderId.startsWith("booking-")) {
+    } else if (orderId.startsWith("booking-remaining-") || orderId.startsWith("booking-")) {
       bookingId = uuidPart
     } else {
       bookingCode = isRemaining ? orderId.slice(0, -2) : orderId
@@ -79,19 +103,19 @@ export async function POST(_request: NextRequest) {
         .from("bookings")
         .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, payment_scheme, total, remaining_amount")
         .eq("id", bookingId)
-        .single()
+        .maybeSingle()
       booking = b
-    } else {
-      const bookingQuery = admin
+    } else if (bookingCode) {
+      const { data: b } = await admin
         .from("bookings")
         .select("id, status, tenant_id, price, pilgrim_count, booking_source, package_id, payment_scheme, total, remaining_amount")
-      const { data: b } = bookingCode
-        ? await bookingQuery.eq("booking_code", bookingCode).single()
-        : await bookingQuery.eq("id", bookingId).single()
+        .eq("booking_code", bookingCode)
+        .maybeSingle()
       booking = b
     }
 
     if (!booking) {
+      console.error("[Midtrans Notification] Booking not found for orderId:", orderId)
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 

@@ -175,7 +175,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   if (variant === "clean") {
     return (
       <Link
-        href={`/package/${pkg.slug}`}
+        href={`/packages/${pkg.slug}`}
         className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:shadow-md hover:shadow-emerald-deep/5 hover:border-gold/50 transition-all group cursor-pointer"
       >
         <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -268,7 +268,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   if (variant === "horizontal") {
     return (
       <Link
-        href={`/package/${pkg.slug}`}
+        href={`/packages/${pkg.slug}`}
         className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:border-gold/50 transition-colors group cursor-pointer"
       >
         <div className="flex flex-col sm:flex-row h-full">
@@ -361,7 +361,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
 
   return (
     <Link
-      href={`/package/${pkg.slug}`}
+      href={`/packages/${pkg.slug}`}
       className="flex flex-col h-full bg-ivory-card rounded-xl overflow-hidden border border-ivory-border hover:border-gold/50 transition-colors group cursor-pointer"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden">

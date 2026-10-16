@@ -20,8 +20,10 @@ const schema = z.object({
   packageDepartureId: z.string().uuid().nullable().optional(),
   pilgrimCount: z.number().min(1).max(99),
   pilgrims: z.array(pilgrimSchema).optional(),
-  paymentType: z.enum(["full", "dp"]),
+  paymentType: z.enum(["full", "dp", "installment"]).default("installment"),
   dpPercentage: z.number().min(10).max(90).optional(),
+  tenorMonths: z.number().min(1).max(60).optional(),
+  installmentOptionId: z.string().uuid().nullable().optional(),
   feeChannel: z.enum(["portal", "subdomain", "custom_domain"]).default("portal"),
   referralCode: z.string().optional(),
   notes: z.string().optional(),
@@ -47,7 +49,20 @@ export async function POST(_request: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Data tidak valid" }, { status: 400 })
     }
 
-    const { packageId, packageDepartureId, pilgrimCount, pilgrims, paymentType, dpPercentage, feeChannel, referralCode, notes } = parsed.data
+    const {
+      packageId,
+      packageDepartureId,
+      pilgrimCount,
+      pilgrims,
+      paymentType,
+      dpPercentage,
+      tenorMonths,
+      installmentOptionId,
+      feeChannel,
+      referralCode,
+      notes,
+    } = parsed.data
+    const isInstallment = paymentType === "installment" || paymentType === "dp"
     const admin = createAdminClient()
 
     // 1. Get package (harga SELALU dari database, bukan dari client)
@@ -78,7 +93,7 @@ export async function POST(_request: NextRequest) {
       return NextResponse.json({
         success: true,
         booking_id: existingBooking.id,
-        payment_type: existingBooking.payment_scheme === "down_payment" ? "dp" : "full",
+        payment_type: existingBooking.payment_scheme === "full_payment" ? "full" : "installment",
         dp_amount: existingBooking.down_payment_amount || 0,
         remaining: existingBooking.remaining_amount || 0,
         total: existingBooking.total || 0,
@@ -96,11 +111,9 @@ export async function POST(_request: NextRequest) {
     let remainingAmount: number
     let remainingDueDate: string | null = null
 
-    if (paymentType === "dp") {
-      if (!dpPercentage) {
-        return NextResponse.json({ error: "Persentase DP wajib diisi" }, { status: 400 })
-      }
-      dpAmount = Math.round(totalPrice * dpPercentage / 100)
+    if (isInstallment) {
+      const safeDpPct = dpPercentage || 20
+      dpAmount = Math.round((totalPrice * safeDpPct) / 100)
       remainingAmount = totalPrice - dpAmount
       remainingDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     } else {
@@ -111,7 +124,6 @@ export async function POST(_request: NextRequest) {
     const payNow = dpAmount
 
     // 2. Insert booking
-    // Resolve agent_id from referral_code if provided
     let agentId: string | null = null
     if (referralCode) {
       const { data: agent } = await admin
@@ -123,33 +135,69 @@ export async function POST(_request: NextRequest) {
       agentId = agent?.id || null
     }
 
-    const { data: booking, error: insertErr } = await admin
+    const bookingPayload = {
+      package_id: packageId,
+      package_departure_id: packageDepartureId,
+      tenant_id: pkg.tenant_id,
+      customer_id: user.id,
+      agent_id: agentId,
+      referral_code: referralCode || null,
+      status: "pending_payment" as const,
+      booking_channel: toBookingChannel(feeChannel),
+      pilgrim_count: pilgrimCount,
+      price: pkg.price,
+      total: totalPrice,
+      payment_scheme: isInstallment ? "installment" : "full_payment",
+      installment_option_id: installmentOptionId || null,
+      down_payment_amount: isInstallment ? dpAmount : 0,
+      remaining_amount: isInstallment ? remainingAmount : 0,
+      remaining_due_date: remainingDueDate,
+      cashback_amount: Number(pkg.cashback_amount || 0),
+      notes: notes || null,
+    }
+
+    let { data: booking, error: insertErr } = await admin
       .from("bookings")
-      .insert({
-        package_id: packageId,
-        package_departure_id: packageDepartureId,
-        tenant_id: pkg.tenant_id,
-        customer_id: user.id,
-        agent_id: agentId,
-        referral_code: referralCode || null,
-        status: "pending_payment",
-        booking_channel: toBookingChannel(feeChannel),
-        pilgrim_count: pilgrimCount,
-        price: pkg.price,
-        total: payNow,
-        payment_scheme: paymentType === "dp" ? "down_payment" : "full_payment",
-        down_payment_amount: paymentType === "dp" ? dpAmount : 0,
-        remaining_amount: paymentType === "dp" ? remainingAmount : 0,
-        remaining_due_date: remainingDueDate,
-        cashback_amount: Number(pkg.cashback_amount || 0),
-        notes: notes || null,
-      })
+      .insert(bookingPayload)
       .select("id, booking_code")
       .single()
 
-    if (insertErr) {
+    // Self-healing jika sequence booking_code bentrok dengan data lama
+    if (insertErr && insertErr.code === "23505" && insertErr.message?.includes("bookings_booking_code_key")) {
+      console.warn("[booking/create] Bentrok booking_code terdeteksi, melakukan sinkronisasi sequence...")
+      const { data: maxBookings } = await admin
+        .from("bookings")
+        .select("booking_code")
+        .like("booking_code", "UQ-%")
+        .order("booking_code", { ascending: false })
+        .limit(1)
+
+      const highestCode = maxBookings?.[0]?.booking_code
+      if (highestCode) {
+        const lastDigits = parseInt(highestCode.slice(-4), 10)
+        if (!isNaN(lastDigits)) {
+          const now = new Date()
+          const ym = now.toISOString().slice(2, 4) + (now.getMonth() + 1).toString().padStart(2, "0")
+          await admin
+            .from("monthly_sequences")
+            .upsert({ prefix: "UQ", year_month: ym, last_val: lastDigits }, { onConflict: "prefix,year_month" })
+
+          // Coba insert kembali setelah sequence dimajukan
+          const retry = await admin
+            .from("bookings")
+            .insert(bookingPayload)
+            .select("id, booking_code")
+            .single()
+
+          booking = retry.data
+          insertErr = retry.error
+        }
+      }
+    }
+
+    if (insertErr || !booking) {
       // Race: dua request lolos cek di atas — kembalikan booking yang sudah ada
-      if (insertErr.code === "23505") {
+      if (insertErr?.code === "23505") {
         const { data: raced } = await admin
           .from("bookings")
           .select("id, status, total, down_payment_amount, remaining_amount, payment_scheme")
@@ -162,7 +210,7 @@ export async function POST(_request: NextRequest) {
           return NextResponse.json({
             success: true,
             booking_id: raced.id,
-            payment_type: raced.payment_scheme === "down_payment" ? "dp" : "full",
+            payment_type: raced.payment_scheme === "full_payment" ? "full" : "installment",
             dp_amount: raced.down_payment_amount || 0,
             remaining: raced.remaining_amount || 0,
             total: raced.total || 0,
@@ -185,8 +233,72 @@ export async function POST(_request: NextRequest) {
         gender: p.gender || null,
         phone: p.phone || null,
         relation: p.relation || "self",
+        payment_scheme: isInstallment ? "installment" : "full_payment",
+        installment_option_id: installmentOptionId || null,
+        package_price: Number(pkg.price),
+        down_payment_amount: isInstallment ? Math.round(dpAmount / pilgrimCount) : Number(pkg.price),
+        tenor_months: isInstallment ? tenorMonths || 24 : 0,
       }))
       await admin.from("participants").insert(participantRecords)
+    }
+
+    // 4. Generate invoices & payment schedules
+    if (isInstallment) {
+      const { buildInstallmentInvoicesAndSchedules } = await import("@/lib/business-logic/installment")
+      const { invoicesToInsert } = buildInstallmentInvoicesAndSchedules({
+        bookingId: booking.id,
+        bookingCode: booking.booking_code || booking.id.slice(0, 8).toUpperCase(),
+        tenantId: pkg.tenant_id,
+        customerId: user.id,
+        totalPrice,
+        downPaymentAmount: dpAmount,
+        remainingAmount,
+        tenorMonths: tenorMonths || 24,
+      })
+
+      const { data: insertedInvoices, error: invErr } = await admin
+        .from("invoices")
+        .insert(invoicesToInsert)
+        .select("id, invoice_number, installment_number, due_date, amount")
+
+      if (invErr) {
+        console.error("Invoice insert error:", invErr)
+      } else if (insertedInvoices && insertedInvoices.length > 0) {
+        // Insert payment_schedules untuk cicilan 1..N
+        const schedulesToInsert = insertedInvoices
+          .filter((inv) => inv.installment_number > 0)
+          .map((inv) => ({
+            invoice_id: inv.id,
+            booking_id: booking.id,
+            tenant_id: pkg.tenant_id,
+            installment_number: inv.installment_number,
+            schedule_name: `Cicilan Bulan ke-${inv.installment_number}`,
+            due_date: inv.due_date,
+            amount: inv.amount,
+            paid_amount: 0,
+            status: "pending",
+          }))
+
+        if (schedulesToInsert.length > 0) {
+          const { error: schedErr } = await admin.from("payment_schedules").insert(schedulesToInsert)
+          if (schedErr) {
+            console.error("Payment schedules insert error:", schedErr)
+          }
+        }
+      }
+    } else {
+      // Full payment: 1 invoice
+      await admin.from("invoices").insert({
+        invoice_number: `INV-${booking.booking_code || booking.id.slice(0, 8).toUpperCase()}`,
+        booking_id: booking.id,
+        tenant_id: pkg.tenant_id,
+        customer_id: user.id,
+        amount: totalPrice,
+        status: "unpaid",
+        due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        installment_number: 0,
+        invoice_type: "full",
+      })
     }
 
     // 4. Update package quota (reserved on booking creation)
@@ -255,7 +367,7 @@ export async function POST(_request: NextRequest) {
     let snap: { token: string; redirect_url: string } | null = null
     try {
       const { createSnapTransaction } = await import("@/lib/services/midtrans")
-      const orderId = paymentId ? `pay-${paymentId}` : `pay-${booking.id.slice(0, 8)}-${Date.now()}`
+      const orderId = booking.id
       const finishBase = appUrl(`checkout/finish?booking_id=${booking.id}`)
       snap = await createSnapTransaction({
         orderId,
@@ -265,7 +377,7 @@ export async function POST(_request: NextRequest) {
         items: [
           {
             id: pkg.id,
-            name: `${pkg.name}${paymentType === "dp" ? ` (DP ${dpPercentage}%)` : ""}`,
+            name: `${pkg.name}${isInstallment ? ` (Uang Muka ${dpPercentage || 20}%)` : ""}`,
             price: payNow,
             quantity: 1,
           },
@@ -288,7 +400,7 @@ export async function POST(_request: NextRequest) {
     return NextResponse.json({
       success: true,
       booking_id: booking.id,
-      payment_type: paymentType,
+      payment_type: isInstallment ? "installment" : "full",
       dp_amount: dpAmount,
       remaining: remainingAmount,
       total: payNow,

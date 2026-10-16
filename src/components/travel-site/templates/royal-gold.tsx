@@ -122,7 +122,7 @@ export default function RoyalGoldTemplate({ tenant, packages, themeConfig }: Tem
 
 function PackageCard({ pkg, primary, gold }: { pkg: Package; primary: string; gold: string }) {
   return (
-    <Link href={`/package/${pkg.slug}`} className="group block rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1" style={{ background: `${primary}cc`, border: `1px solid ${gold}22` }}>
+    <Link href={`/packages/${pkg.slug}`} className="group block rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1" style={{ background: `${primary}cc`, border: `1px solid ${gold}22` }}>
       <div className="relative h-48 overflow-hidden">
         <Image
           src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}

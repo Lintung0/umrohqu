@@ -499,7 +499,7 @@ function PackagesContent() {
   if (cost && cost !== "Semua Biaya") activeFilterChips.push({ label: cost, onRemove: () => setCost("") })
   if (type !== "semua") activeFilterChips.push({ label: type, onRemove: () => setType("semua") })
   if (duration) activeFilterChips.push({ label: duration, onRemove: () => setDuration("") })
-  if (searchQuery) activeFilterChips.push({ label: `"${searchQuery}"`, onRemove: () => handleSearchInput("") })
+  if (searchQuery) activeFilterChips.push({ label: searchQuery, onRemove: () => handleSearchInput("") })
   if (selectedSubCategory) {
     chipsPush(selectedSubCategory.name, () =>
       setCategory(selectedParentCategory ? getCategorySlug(selectedParentCategory) : null, null)
@@ -515,8 +515,8 @@ function PackagesContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-ivory-50">
-        <div className="sticky top-16 z-40 bg-ivory-50/80">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="bg-ivory-50 border-b border-ivory-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
             <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
               <div className="w-11 shrink-0" />
               <div className="h-11 flex-1 bg-ivory-card border border-ivory-border rounded-full animate-pulse" />
@@ -564,9 +564,9 @@ function PackagesContent() {
   return (
     <main className="min-h-screen bg-ivory-50">
 
-      {/* ── Sticky search toolbar ── */}
-      <div className="sticky top-16 z-40 bg-ivory-50/80 backdrop-blur-md border-b border-ivory-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      {/* ── Search toolbar ── */}
+      <div className="bg-ivory-50 border-b border-ivory-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
             <button
               onClick={() => setShowMobileFilter(true)}
@@ -641,18 +641,18 @@ function PackagesContent() {
 
           {/* ── Category Navigation Menu (Under Search Bar, Plain Text, Hover for Subcategories) ── */}
           {parentCategories.length > 0 && (
-            <div className="mt-3 flex items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="mt-1.5 flex items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <NavigationMenu className="max-w-full">
-                <NavigationMenuList className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+                <NavigationMenuList className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                   <NavigationMenuItem>
                     <button
                       type="button"
                       onClick={() => setCategory(null, null)}
                       className={cn(
-                        "px-3.5 py-1.5 text-sm transition-all cursor-pointer rounded-lg font-medium",
+                        "px-2.5 py-1 text-xs transition-colors cursor-pointer rounded-md font-medium bg-transparent hover:bg-transparent",
                         !selectedParentCategory && !selectedSubCategory
-                          ? "bg-emerald-dark/10 text-emerald-deep font-bold"
-                          : "text-ivory-ink/70 hover:text-emerald-deep hover:bg-ivory-soft/80"
+                          ? "text-emerald-deep font-bold"
+                          : "text-ivory-ink/70 hover:text-emerald-deep"
                       )}
                     >
                       Semua
@@ -671,10 +671,10 @@ function PackagesContent() {
                             type="button"
                             onClick={() => setCategory(parentSlug, null)}
                             className={cn(
-                              "px-3.5 py-1.5 text-sm transition-all cursor-pointer rounded-lg font-medium",
+                              "px-2.5 py-1 text-xs transition-colors cursor-pointer rounded-md font-medium bg-transparent hover:bg-transparent",
                               isParentActive
-                                ? "bg-emerald-dark/10 text-emerald-deep font-bold"
-                                : "text-ivory-ink/70 hover:text-emerald-deep hover:bg-ivory-soft/80"
+                                ? "text-emerald-deep font-bold"
+                                : "text-ivory-ink/70 hover:text-emerald-deep"
                             )}
                           >
                             {displayName}
@@ -688,10 +688,10 @@ function PackagesContent() {
                         <NavigationMenuTrigger
                           onClick={() => setCategory(parentSlug, null)}
                           className={cn(
-                            "h-auto px-3.5 py-1.5 text-sm font-medium transition-all cursor-pointer rounded-lg shadow-none border-none",
+                            "h-auto px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer rounded-md shadow-none border-none bg-transparent hover:bg-transparent focus:bg-transparent data-open:bg-transparent data-popup-open:bg-transparent data-open:hover:bg-transparent",
                             isParentActive
-                              ? "bg-emerald-dark/10 text-emerald-deep font-bold hover:bg-emerald-dark/15 hover:text-emerald-deep data-open:bg-emerald-dark/10 data-popup-open:bg-emerald-dark/10 focus:bg-emerald-dark/10"
-                              : "bg-transparent text-ivory-ink/70 hover:bg-ivory-soft/80 hover:text-emerald-deep data-open:bg-ivory-soft/80 data-popup-open:bg-ivory-soft/80 focus:bg-transparent"
+                              ? "text-emerald-deep font-bold hover:text-emerald-deep data-open:text-emerald-deep data-popup-open:text-emerald-deep focus:text-emerald-deep"
+                              : "text-ivory-ink/70 hover:text-emerald-deep data-open:text-emerald-deep data-popup-open:text-emerald-deep focus:text-ivory-ink/70"
                           )}
                         >
                           {displayName}
@@ -703,7 +703,7 @@ function PackagesContent() {
                                 type="button"
                                 onClick={() => setCategory(parentSlug, null)}
                                 className={cn(
-                                  "w-full text-left px-3 py-2 text-xs rounded-lg transition-colors hover:bg-ivory-soft hover:text-emerald-deep cursor-pointer",
+                                  "w-full text-left px-3 py-1.5 text-xs rounded-lg transition-colors hover:bg-ivory-soft hover:text-emerald-deep cursor-pointer",
                                   isParentActive && !selectedSubCategory
                                     ? "bg-emerald-dark/10 text-emerald-deep font-semibold"
                                     : "text-ivory-ink"
@@ -720,7 +720,7 @@ function PackagesContent() {
                                     type="button"
                                     onClick={() => setCategory(parentSlug, toCategorySlug(sub.name))}
                                     className={cn(
-                                      "w-full text-left px-3 py-2 text-xs rounded-lg transition-colors hover:bg-ivory-soft hover:text-emerald-deep cursor-pointer",
+                                      "w-full text-left px-3 py-1.5 text-xs rounded-lg transition-colors hover:bg-ivory-soft hover:text-emerald-deep cursor-pointer",
                                       isSubActive
                                         ? "bg-emerald-dark/10 text-emerald-deep font-semibold"
                                         : "text-ivory-ink"

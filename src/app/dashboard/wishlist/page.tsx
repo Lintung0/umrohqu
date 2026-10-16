@@ -108,7 +108,7 @@ export default function WishlistPage() {
                 key={item.id}
                 className="bg-ivory-card border border-ivory-border rounded-2xl overflow-hidden group"
               >
-                <Link href={`/package/${pkg?.slug || ""}`} className="block">
+                <Link href={`/packages/${pkg?.slug || ""}`} className="block">
                   <div className="relative">
                     {pkg?.image_url ? (
                       <Image
@@ -127,7 +127,7 @@ export default function WishlistPage() {
                   </div>
                 </Link>
                 <div className="p-4">
-                  <Link href={`/package/${pkg?.slug || ""}`}>
+                  <Link href={`/packages/${pkg?.slug || ""}`}>
                     <h3 className="font-semibold text-sm text-emerald-deep hover:text-emerald-dark transition-colors line-clamp-1">{pkg?.name}</h3>
                   </Link>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">

@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
       console.error("Payment insert error:", payErr)
     }
 
-    // order_id unik per klik, ≤ 50 char (batas Midtrans)
-    const orderId = paymentId ? `pay-${paymentId}` : `pay-${booking.id.slice(0, 8)}-${Date.now()}`
+    // order_id menggunakan langsung ID dari database
+    const orderId = booking.id
 
     let snap: { token: string; redirect_url: string } | null = null
     try {

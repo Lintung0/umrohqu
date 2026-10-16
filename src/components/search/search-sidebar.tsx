@@ -87,7 +87,7 @@ export default function SearchSidebar({
   }
 
   return (
-    <div className="sticky top-36 max-h-[calc(100vh-9.5rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar">
+    <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar">
       <div className="bg-ivory-card rounded-2xl border border-ivory-border shadow-sm overflow-hidden">
 
         {/* Header */}

@@ -117,7 +117,7 @@ export default function ModernIslamicTemplate({ tenant, packages, themeConfig }:
 
 function PackageCard({ pkg, primary, secondary: _secondary }: { pkg: Package; primary: string; secondary: string }) {
   return (
-    <Link href={`/package/${pkg.slug}`} className="group block bg-white border border-border/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1">
+    <Link href={`/packages/${pkg.slug}`} className="group block bg-white border border-border/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1">
       <div className="relative h-48 overflow-hidden">
         <Image
           src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}

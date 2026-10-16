@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     const actions: Array<{ payment_id: string; action: string; detail?: string }> = []
 
     for (const p of pendings ?? []) {
-      const candidates = [p.gateway_reference, `booking-${bookingId}`].filter(Boolean) as string[]
+      const candidates = [p.gateway_reference, bookingId, `booking-${bookingId}`].filter(Boolean) as string[]
       let txn: Awaited<ReturnType<typeof getTransactionStatus>> | null = null
       let matched: string | null = null
       for (const orderId of candidates) {

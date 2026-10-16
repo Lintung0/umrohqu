@@ -63,6 +63,15 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/package/:slug*",
+        destination: "/packages/:slug*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withSerwist(nextConfig);
