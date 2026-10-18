@@ -242,20 +242,20 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
             <p className="text-base font-bold text-emerald-dark">{formatRupiah(pkg.price)}</p>
             <p className="text-[10px] text-ivory-ink/70">{t("card.per_person")}</p>
           </div>
-          <p className="text-[11px] text-ivory-ink/70 truncate mt-0.5">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"} · {pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</p>
-              {Number(pkg.cashback_amount) > 0 && (
-                <TooltipProvider delay={100}>
-                  <Tooltip>
-                    <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap overflow-hidden mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2 py-1">
-                      <BadgePercent className="w-3.5 h-3.5 shrink-0" /> <span className="truncate min-w-0">Cashback <span className="sm:hidden">{formatRupiahCompact(Number(pkg.cashback_amount))}</span><span className="hidden sm:inline">{formatRupiah(Number(pkg.cashback_amount))}</span></span>
-                    </span>} />
-                    <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              <div className="mt-2">
-                <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
-              </div>
+           <p className="text-[11px] text-ivory-ink/70 truncate mt-0.5">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"} · {pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</p>
+           <div className="mt-2">
+             <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
+           </div>
+           {Number(pkg.cashback_amount) > 0 && (
+             <TooltipProvider delay={100}>
+               <Tooltip>
+                 <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap overflow-hidden mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2 py-1">
+                   <BadgePercent className="w-3.5 h-3.5 shrink-0" /> <span className="truncate min-w-0">Cashback <span className="sm:hidden">{formatRupiahCompact(Number(pkg.cashback_amount))}</span><span className="hidden sm:inline">{formatRupiah(Number(pkg.cashback_amount))}</span></span>
+                 </span>} />
+                 <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
+               </Tooltip>
+             </TooltipProvider>
+           )}
         </div>
 
       </Link>
