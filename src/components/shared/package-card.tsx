@@ -316,33 +316,40 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
                   <Clock className="w-3 h-3 text-emerald-dark shrink-0" />
                   {pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}
                 </div>
-                <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
-                  <Plane className="w-3 h-3 text-emerald-dark shrink-0" />
-                  <span className="truncate">{pkg.airline ? decodeUnicodeEscapes(pkg.airline) : "-"}</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
-                  <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
-                </div>
-              </div>
-            </div>
-            <div className="flex items-end justify-between pt-2 border-t border-ivory-border">
-              <div>
-                <p className="text-lg font-extrabold text-emerald-dark">
-                  {formatRupiah(pkg.price)}
-                  <span className="text-[10px] text-ivory-ink/70 font-normal">{t("card.per_person")}</span>
-                </p>
-                {Number(pkg.cashback_amount) > 0 && (
-                  <TooltipProvider delay={100}>
-                    <Tooltip>
-                      <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap overflow-hidden mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2 py-1">
-                          <BadgePercent className="w-3.5 h-3.5 shrink-0" /> <span className="truncate min-w-0">Cashback <span className="sm:hidden">{formatRupiahCompact(Number(pkg.cashback_amount))}</span><span className="hidden sm:inline">{formatRupiah(Number(pkg.cashback_amount))}</span></span>
-                        </span>} />
-                      <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-            </div>
+                 <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
+                   <Plane className="w-3 h-3 text-emerald-dark shrink-0" />
+                   <span className="truncate">{pkg.airline ? decodeUnicodeEscapes(pkg.airline) : "-"}</span>
+                 </div>
+                 <div className="flex items-center gap-1 text-xs text-ivory-ink/70">
+                   <Hotel className="w-3 h-3 text-emerald-dark shrink-0" />
+                   <span className="truncate">{hotelName ? hotelName : hotelStars ? `${hotelStars} Star` : "-"}</span>
+                 </div>
+               </div>
+               <div className="mt-2">
+                 <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
+               </div>
+             </div>
+             <div className="flex items-end justify-between pt-2 border-t border-ivory-border">
+               <div>
+                 <p className="text-lg font-extrabold text-emerald-dark">
+                   {formatRupiah(pkg.price)}
+                   <span className="text-[10px] text-ivory-ink/70 font-normal">{t("card.per_person")}</span>
+                 </p>
+                 <div className="mt-1.5">
+                   <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
+                 </div>
+                 {Number(pkg.cashback_amount) > 0 && (
+                   <TooltipProvider delay={100}>
+                     <Tooltip>
+                       <TooltipTrigger render={<span className="inline-flex items-center gap-1 w-fit max-w-full whitespace-nowrap overflow-hidden mt-1.5 text-[11px] font-semibold text-emerald-deep bg-gold border border-gold rounded-full px-2 py-1">
+                           <BadgePercent className="w-3.5 h-3.5 shrink-0" /> <span className="truncate min-w-0">Cashback <span className="sm:hidden">{formatRupiahCompact(Number(pkg.cashback_amount))}</span><span className="hidden sm:inline">{formatRupiah(Number(pkg.cashback_amount))}</span></span>
+                         </span>} />
+                       <TooltipContent className="max-w-xs">{CASHBACK_INFO}</TooltipContent>
+                     </Tooltip>
+                   </TooltipProvider>
+                 )}
+               </div>
+             </div>
           </div>
         </div>
 
