@@ -154,7 +154,7 @@ function CompareFloatingActions({ pkg, size = "md" }: { pkg: Package; size?: "sm
   }
 
   function handleShare() {
-    const url = `${window.location.origin}/package/${pkg.slug}`
+    const url = `${window.location.origin}/packages/${pkg.slug}`
     if (navigator.share) {
       navigator.share({ title: pkg.name || "Paket Umrah", url })
     } else {
@@ -207,7 +207,7 @@ function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCo
             return (
               <div key={pkg.id} className={`relative flex-1 min-w-0 rounded-xl border-2 overflow-hidden ${isBest(i) ? pal.border : "border-border/70"}`}>
                 <div className="relative h-12">
-                  <Link href={`/package/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
+                  <Link href={`/packages/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
                     <Image
                       src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}
                       alt={pkg.name || "Paket"} fill className="object-cover"
@@ -280,7 +280,7 @@ function MobileCompareList({ pkgs, scores, maxScore, rowHighlights, removeFromCo
                 <p className="text-xs font-semibold truncate">{pkg.name}</p>
                 <p className="text-[11px] text-muted-foreground">{formatRupiah(Number(pkg.price) || 0)} · {pkg.duration_nights || "-"} Hari</p>
               </div>
-              <Link href={`/package/${pkg.slug}`}>
+              <Link href={`/packages/${pkg.slug}`}>
                 <Button className="h-9 text-xs px-4 bg-emerald-dark text-ivory hover:bg-emerald-deep shadow-md shadow-emerald-dark/25">
                   Pilih Ini
                 </Button>
@@ -646,7 +646,7 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
                       {isBest && (
                         <div className="absolute inset-x-0 top-0 h-1.5 bg-emerald-dark z-10" />
                       )}
-                      <Link href={`/package/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
+                      <Link href={`/packages/${pkg.slug}`} aria-label={`Lihat detail ${pkg.name || "paket"}`} className="absolute inset-0 block">
                         <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name || "Paket"} fill className="object-cover transition-transform duration-300 hover:scale-105" />
                       </Link>
                       <button onClick={() => removeFromCompare(pkg.id)} className="absolute top-2 right-2 w-6 h-6 bg-ivory-card/90 rounded-full flex items-center justify-center text-ivory-ink/70 hover:bg-ivory-soft hover:text-red-500 transition-colors">
@@ -708,7 +708,7 @@ function CompareView({ onOpenPicker }: { onOpenPicker: () => void }) {
           <div className="grid grid-cols-[minmax(160px,20%)_repeat(3,minmax(0,1fr))] gap-4 mt-4 pt-4 border-t border-border">
             <div />
             {comparePackages.map((pkg) => (
-              <Link key={pkg.id} href={`/package/${pkg.slug}`}>
+              <Link key={pkg.id} href={`/packages/${pkg.slug}`}>
                 <Button className="w-full text-xs h-9 bg-emerald-dark text-ivory hover:bg-emerald-deep shadow-md shadow-emerald-dark/25">Pilih Paket Ini</Button>
               </Link>
             ))}

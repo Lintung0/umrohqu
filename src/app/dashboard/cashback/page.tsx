@@ -137,7 +137,7 @@ export default function CashbackPage() {
               <div key={row.id} className="flex flex-col gap-2.5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <Link
-                    href={`/package/${row.package_slug}`}
+                    href={`/packages/${row.package_slug}`}
                     className="font-medium text-sm text-emerald-deep hover:text-emerald-dark hover:underline"
                   >
                     {row.package_name}

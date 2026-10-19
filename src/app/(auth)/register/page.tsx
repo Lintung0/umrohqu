@@ -47,8 +47,6 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [authError, setAuthError] = useState("")
 
-  const supabase = createClient()
-
   const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: v }))
 
   const validate = () => {
@@ -73,27 +71,28 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
-        options: {
-          data: { full_name: form.name.trim() },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim().toLowerCase(),
+          password: form.password,
+        }),
       })
 
-      if (error) {
-        if (error.message.toLowerCase().includes("already")) {
-          setAuthError(t.auth.email_invalid)
-        } else {
-          setAuthError(error.message)
-        }
+      const data = await res.json()
+
+      if (!res.ok) {
+        setAuthError(data.error || "Gagal melakukan pendaftaran.")
         return
       }
 
       router.push(`/verify-email?email=${encodeURIComponent(form.email.trim().toLowerCase())}`)
     } catch {
-      setAuthError(t.auth.email_invalid)
+      setAuthError("Terjadi kesalahan jaringan. Silakan coba beberapa saat lagi.")
     } finally {
       setLoading(false)
     }

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DataTable } from "@/components/travel/OperationalDataTable"
-import { UsersRound, MapPin, Award, Calendar, BadgeCheck, BadgeX } from "lucide-react"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
 

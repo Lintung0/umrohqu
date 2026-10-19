@@ -25,7 +25,7 @@ const Footer = () => {
     {
       title: t.footer.products,
       items: [
-        { href: "/search", label: t.footer.packages },
+        { href: "/packages", label: t.footer.packages },
         { href: "/promotions", label: t.nav.promo },
         { href: "/travel", label: t.footer.travel_agencies },
         { href: "/compare", label: t.footer.compare },

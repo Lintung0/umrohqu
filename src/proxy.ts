@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 const PUBLIC_ROUTES = [
   "/",
-  "/search",
+  "/packages",
   "/package",
   "/travel",
   "/compare",

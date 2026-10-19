@@ -27,23 +27,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 
-    const { data: refund } = await admin
-      .from("refunds")
-      .select("id, amount, status, reason, method, reference, note, completed_at")
-      .eq("booking_id", bookingId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const [{ data: refund }, { data: latestPayment }, { data: invoices }, { data: schedules }] = await Promise.all([
+      admin
+        .from("refunds")
+        .select("id, amount, status, reason, method, reference, note, completed_at")
+        .eq("booking_id", bookingId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      admin
+        .from("payments")
+        .select("id, status, gateway_reference, va_number, payment_provider, payment_type, amount")
+        .eq("booking_id", bookingId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      admin
+        .from("invoices")
+        .select("id, invoice_number, installment_number, invoice_type, amount, status, due_date, paid_at")
+        .eq("booking_id", bookingId)
+        .order("installment_number", { ascending: true }),
+      admin
+        .from("payment_schedules")
+        .select("id, installment_number, schedule_name, due_date, amount, paid_amount, status, invoice_id")
+        .eq("booking_id", bookingId)
+        .order("installment_number", { ascending: true }),
+    ])
 
-    const { data: latestPayment } = await admin
-      .from("payments")
-      .select("id, status, gateway_reference, va_number, payment_provider, payment_type, amount")
-      .eq("booking_id", bookingId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-
-    return NextResponse.json({ data: { ...booking, refund: refund || null, active_payment: latestPayment || null } })
+    return NextResponse.json({
+      data: {
+        ...booking,
+        refund: refund || null,
+        active_payment: latestPayment || null,
+        invoices: invoices || [],
+        payment_schedules: schedules || [],
+      },
+    })
   } catch (err) {
     console.error("Booking detail API error:", err)
     return NextResponse.json({ error: "Gagal memuat detail booking" }, { status: 500 })

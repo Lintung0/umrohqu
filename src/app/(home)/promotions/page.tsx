@@ -24,7 +24,7 @@ export default function PromotionsPage() {
             Saat ini belum ada paket promo yang tersedia. Silakan jelajahi katalog paket umrah untuk menemukan
             penawaran terbaik.
           </p>
-          <Link href="/search">
+          <Link href="/packages">
             <Button className="mt-2">Jelajahi Paket Umrah</Button>
           </Link>
         </div>

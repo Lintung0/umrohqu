@@ -37,7 +37,7 @@ const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
 
 const NAV_LINKS_KEYS = ["search_packages", "travel", "faq"] as const
 const NAV_HREFS: Record<string, string> = {
-  search_packages: "/search",
+  search_packages: "/packages",
   promo: "/promotions",
   faq: "/faq",
   travel: "/travel",
@@ -50,6 +50,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [notifUnread, setNotifUnread] = useState(0)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const { t } = useTranslation()
   const { compareCount } = useCompare()
@@ -122,6 +123,10 @@ const Navbar = () => {
     }
   }, [user])
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -172,11 +177,11 @@ const Navbar = () => {
               aria-label="Bandingkan"
             >
               <Scale className="w-5 h-5" />
-              {compareCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-emerald-deep text-gold-light text-[10px] font-bold leading-none">
-                  {compareCount > 99 ? "99+" : compareCount}
-                </span>
-              )}
+               {mounted && compareCount > 0 && (
+                 <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-emerald-deep text-gold-light text-[10px] font-bold leading-none">
+                   {compareCount > 99 ? "99+" : compareCount}
+                 </span>
+               )}
             </Link>
 
             {/* Notifications */}
@@ -280,11 +285,11 @@ const Navbar = () => {
             >
               <Scale className="w-4 h-4 text-emerald-dark" />
               {t.nav.compare || "Bandingkan"}
-              {compareCount > 0 && (
-                <span className="ml-auto w-5 h-5 flex items-center justify-center rounded-full bg-emerald-deep text-gold-light text-[10px] font-bold leading-none">
-                  {compareCount}
-                </span>
-              )}
+               {mounted && compareCount > 0 && (
+                 <span className="ml-auto w-5 h-5 flex items-center justify-center rounded-full bg-emerald-deep text-gold-light text-[10px] font-bold leading-none">
+                   {compareCount}
+                 </span>
+               )}
             </Link>
 
             <div className="pt-2 border-t border-ivory-border mt-2">

@@ -127,7 +127,7 @@ export default function CleanMinimalTemplate({ tenant, packages, themeConfig }: 
 
 function PackageCard({ pkg, primary: _primary }: { pkg: Package; primary: string }) {
   return (
-    <Link href={`/package/${pkg.slug}`} className="group block bg-white border border-border/60 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+    <Link href={`/packages/${pkg.slug}`} className="group block bg-white border border-border/60 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
       <div className="relative h-44 overflow-hidden">
         <Image
           src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"}

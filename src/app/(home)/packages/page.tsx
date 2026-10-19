@@ -1,28 +1,89 @@
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
-import { useState, useEffect, useRef, useCallback, Suspense } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react"
 import { Search, SearchX, X, SlidersHorizontal, MapPin } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
-import { getPackageAvailable } from "@/lib/utils"
+import { getPackageAvailable, cn } from "@/lib/utils"
 import type { Package, Tenant } from "@/lib/types"
 import SharedPackageCard from "@/components/shared/package-card"
 import SearchSidebar from "@/components/search/search-sidebar"
 import { Pagination } from "@/components/ui/pagination"
 import { rankTravels, RankingFactors, DEFAULT_RANKING_CONFIG } from "@/lib/business-logic/bidding"
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+} from "@/components/ui/navigation-menu"
 
 const PAGE_SIZE = 8
 
-const QUICK_CATEGORIES = [
-  { label: "Semua", preset: {} },
-  { label: "Bulan Ramadhan", preset: { month: "Ramadhan" } },
-  { label: "Promo Terbaik", preset: { cost: "< Rp 25 Juta" } },
-  { label: "umrah Reguler", preset: { type: "reguler" } },
-  { label: "umrah VIP", preset: { type: "vip" } },
-  { label: "Haji Furoda", preset: { type: "furoda" } },
-]
+interface Category {
+  id: string
+  name: string
+  parent_id: string | null
+  is_active: boolean
+}
+
+function toCategorySlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
+function getCategoryDisplayName(name: string): string {
+  const lower = name.toLowerCase()
+  if (lower.includes("tour") || lower.includes("wisata")) {
+    return "Wisata Agama (Tour)"
+  }
+  return name
+}
+
+function getCategorySlug(category: Category): string {
+  const lower = category.name.toLowerCase()
+  if (lower.includes("tour") || lower.includes("wisata")) {
+    return "wisata-agama"
+  }
+  return toCategorySlug(category.name)
+}
+
+function getCategoryPriority(name: string): number {
+  const lower = name.toLowerCase()
+  if (lower.includes("umrah")) return 1
+  if (lower.includes("haji")) return 2
+  if (lower.includes("tour") || lower.includes("wisata")) return 3
+  return 99
+}
+
+function isCategoryMatch(category: Category, param: string): boolean {
+  if (!param) return false
+  const p = param.toLowerCase().trim()
+  const name = category.name.toLowerCase()
+  const slug = toCategorySlug(category.name)
+
+  if (category.id.toLowerCase() === p) return true
+  if (slug === p || name === p) return true
+
+  if (p === "wisata-agama" || p === "wisata" || p === "tour" || p === "tour-halal") {
+    if (name.includes("tour") || name.includes("wisata")) return true
+  }
+  return false
+}
+
+function isSubCategoryMatch(sub: Category, param: string): boolean {
+  if (!param) return false
+  const p = param.toLowerCase().trim()
+  const name = sub.name.toLowerCase()
+  const slug = toCategorySlug(sub.name)
+  if (sub.id.toLowerCase() === p) return true
+  if (slug === p || name === p) return true
+  return false
+}
 
 interface GeoapifySuggestion {
   name: string
@@ -31,7 +92,7 @@ interface GeoapifySuggestion {
   formatted: string
 }
 
-function SearchContent() {
+function PackagesContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -51,14 +112,52 @@ function SearchContent() {
   const type = searchParams.get("type") ?? "semua"
   const duration = searchParams.get("duration") ?? ""
   const sortBy = searchParams.get("sort") ?? "relevance"
+  const categoryParam = searchParams.get("category") ?? ""
+  const subCategoryParam = searchParams.get("subCategory") ?? ""
 
-  const SORT_LABELS: Record<string, string> = {
-    relevance: "Relevansi",
-    "price-asc": "Harga Terendah",
-    "price-desc": "Harga Tertinggi",
-    duration: "Durasi Terpendek",
-    "duration-desc": "Durasi Terpanjang",
-  }
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    const supabase = createClient()
+    const loadCategories = async () => {
+      const { data } = await supabase
+        .from("categories")
+        .select("id, name, parent_id, is_active")
+        .eq("is_active", true)
+        .order("name")
+      if (data) setCategories(data)
+    }
+    loadCategories()
+  }, [])
+
+  const parentCategories = useMemo(() => {
+    return categories
+      .filter((c) => !c.parent_id)
+      .sort((a, b) => getCategoryPriority(a.name) - getCategoryPriority(b.name))
+  }, [categories])
+
+  const selectedParentCategory = useMemo(() => {
+    if (!categoryParam) return null
+    return parentCategories.find((c) => isCategoryMatch(c, categoryParam)) || null
+  }, [categoryParam, parentCategories])
+
+  const selectedSubCategory = useMemo(() => {
+    if (!subCategoryParam) return null
+    return categories.find((c) => c.parent_id && isSubCategoryMatch(c, subCategoryParam)) || null
+  }, [subCategoryParam, categories])
+
+  const subCategoriesMap = useMemo(() => {
+    const map = new Map<string, Category[]>()
+    categories.forEach((c) => {
+      if (c.parent_id) {
+        const arr = map.get(c.parent_id) || []
+        arr.push(c)
+        map.set(c.parent_id, arr)
+      }
+    })
+    return map
+  }, [categories])
+
   const searchQuery = searchParams.get("search") ?? ""
   const parsedMin = parseInt(searchParams.get("priceMin") ?? "", 10)
   const parsedMax = parseInt(searchParams.get("priceMax") ?? "", 10)
@@ -153,7 +252,7 @@ function SearchContent() {
         else next.set(key, value)
       }
       const qs = next.toString()
-      router.replace(qs ? `/search?${qs}` : "/search", { scroll: false })
+      router.replace(qs ? `/packages?${qs}` : "/packages", { scroll: false })
     },
     [searchParams, router]
   )
@@ -173,6 +272,15 @@ function SearchContent() {
     [setUrl]
   )
   const setSortBy = useCallback((v: string) => setUrl({ sort: v === "relevance" ? null : v }), [setUrl])
+  const setCategory = useCallback(
+    (catSlugOrId: string | null, subCatSlugOrId?: string | null) => {
+      setUrl({
+        category: catSlugOrId,
+        subCategory: subCatSlugOrId !== undefined ? subCatSlugOrId : null,
+      })
+    },
+    [setUrl]
+  )
 
   const handleSearchInput = (v: string) => {
     setSearchInput(v)
@@ -216,16 +324,17 @@ function SearchContent() {
           .from("packages")
           .select("*")
           .in("status", ["active", "ongoing"])
-          .neq("type", "haji")
           .is("deleted_at", null)
 
         if (searchQueryParam) {
-          query = query.or(
-            `name.ilike.*${searchQueryParam}*,` +
-            `description.ilike.*${searchQueryParam}*,` +
-            `departure_date.cast(text).ilike.*${searchQueryParam}*,` +
-            `slug.ilike.*${searchQueryParam}*`
-          )
+          const sanitized = searchQueryParam.replace(/[,()]/g, " ").trim()
+          if (sanitized) {
+            query = query.or(
+              `name.ilike.*${sanitized}*,` +
+              `description.ilike.*${sanitized}*,` +
+              `slug.ilike.*${sanitized}*`
+            )
+          }
         }
 
         const { data: pkgs, error: pkgError } = await query
@@ -292,13 +401,12 @@ function SearchContent() {
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel("search-packages-live")
+      .channel("packages-live-feed")
       .on("postgres_changes", { event: "*", schema: "public", table: "packages" }, () => {
         const query = supabase
           .from("packages")
           .select("*")
           .in("status", ["active", "ongoing"])
-          .neq("type", "haji")
           .is("deleted_at", null)
         query.then(async ({ data }) => {
           const enriched = await enrichPackagesWithDetail(supabase, (data as Package[]) || [])
@@ -342,6 +450,15 @@ function SearchContent() {
         if (duration === "10-14 Hari" && (days < 10 || days > 14)) return false
         if (duration === "14-21 Hari" && (days < 14 || days > 21)) return false
       }
+      if (selectedSubCategory) {
+        if (pkg.sub_category_id !== selectedSubCategory.id) return false
+      } else if (selectedParentCategory) {
+        const subIds = (subCategoriesMap.get(selectedParentCategory.id) || []).map((s) => s.id)
+        const match =
+          pkg.category_id === selectedParentCategory.id ||
+          (pkg.sub_category_id && subIds.includes(pkg.sub_category_id))
+        if (!match) return false
+      }
       return true
     })
     .sort((a, b) => {
@@ -367,10 +484,14 @@ function SearchContent() {
     setSearchInput("")
     setShowCitySuggestions(false)
     setCitySuggestions([])
-    router.replace("/search", { scroll: false })
+    router.replace("/packages", { scroll: false })
   }
 
-  const hasActiveFilters = Boolean(departure || month || cost || duration || searchQuery) || type !== "semua" || priceRange[0] !== 10000000 || priceRange[1] !== 500000000
+  const hasActiveFilters =
+    Boolean(departure || month || cost || duration || searchQuery || categoryParam || subCategoryParam) ||
+    type !== "semua" ||
+    priceRange[0] !== 10000000 ||
+    priceRange[1] !== 500000000
 
   const activeFilterChips: { label: string; onRemove: () => void }[] = []
   if (departure) activeFilterChips.push({ label: departure, onRemove: () => setDeparture("") })
@@ -378,13 +499,24 @@ function SearchContent() {
   if (cost && cost !== "Semua Biaya") activeFilterChips.push({ label: cost, onRemove: () => setCost("") })
   if (type !== "semua") activeFilterChips.push({ label: type, onRemove: () => setType("semua") })
   if (duration) activeFilterChips.push({ label: duration, onRemove: () => setDuration("") })
-  if (searchQuery) activeFilterChips.push({ label: `"${searchQuery}"`, onRemove: () => handleSearchInput("") })
+  if (searchQuery) activeFilterChips.push({ label: searchQuery, onRemove: () => handleSearchInput("") })
+  if (selectedSubCategory) {
+    chipsPush(selectedSubCategory.name, () =>
+      setCategory(selectedParentCategory ? getCategorySlug(selectedParentCategory) : null, null)
+    )
+  } else if (selectedParentCategory) {
+    chipsPush(getCategoryDisplayName(selectedParentCategory.name), () => setCategory(null, null))
+  }
+
+  function chipsPush(label: string, onRemove: () => void) {
+    activeFilterChips.push({ label, onRemove })
+  }
 
   if (loading) {
     return (
       <main className="min-h-screen bg-ivory-50">
-        <div className="sticky top-16 z-40 bg-ivory-50/80">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="bg-ivory-50 border-b border-ivory-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
             <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
               <div className="w-11 shrink-0" />
               <div className="h-11 flex-1 bg-ivory-card border border-ivory-border rounded-full animate-pulse" />
@@ -432,9 +564,9 @@ function SearchContent() {
   return (
     <main className="min-h-screen bg-ivory-50">
 
-      {/* ── Sticky search toolbar ── */}
-      <div className="sticky top-16 z-40 bg-ivory-50/80 backdrop-blur-md border-b border-ivory-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      {/* ── Search toolbar ── */}
+      <div className="bg-ivory-50 border-b border-ivory-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <div className="flex items-center justify-center gap-2.5 max-w-2xl mx-auto">
             <button
               onClick={() => setShowMobileFilter(true)}
@@ -448,7 +580,7 @@ function SearchContent() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Cari nama paket, travel, atau kota..."
+                  placeholder="Cari..."
                   value={searchInput}
                   onChange={(e) => handleSearchInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit() }}
@@ -506,67 +638,113 @@ function SearchContent() {
               <Search className="w-5 h-5" />
             </button>
           </div>
+
+          {/* ── Category Navigation Menu (Under Search Bar, Plain Text, Hover for Subcategories) ── */}
+          {parentCategories.length > 0 && (
+            <div className="mt-1.5 flex items-center justify-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <NavigationMenu className="max-w-full">
+                <NavigationMenuList className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+                  <NavigationMenuItem>
+                    <button
+                      type="button"
+                      onClick={() => setCategory(null, null)}
+                      className={cn(
+                        "px-2.5 py-1 text-xs transition-colors cursor-pointer rounded-md font-medium bg-transparent hover:bg-transparent",
+                        !selectedParentCategory && !selectedSubCategory
+                          ? "text-emerald-deep font-bold"
+                          : "text-ivory-ink/70 hover:text-emerald-deep"
+                      )}
+                    >
+                      Semua
+                    </button>
+                  </NavigationMenuItem>
+                  {parentCategories.map((parent) => {
+                    const subs = subCategoriesMap.get(parent.id) || []
+                    const isParentActive = selectedParentCategory?.id === parent.id
+                    const displayName = getCategoryDisplayName(parent.name)
+                    const parentSlug = getCategorySlug(parent)
+
+                    if (subs.length === 0) {
+                      return (
+                        <NavigationMenuItem key={parent.id}>
+                          <button
+                            type="button"
+                            onClick={() => setCategory(parentSlug, null)}
+                            className={cn(
+                              "px-2.5 py-1 text-xs transition-colors cursor-pointer rounded-md font-medium bg-transparent hover:bg-transparent",
+                              isParentActive
+                                ? "text-emerald-deep font-bold"
+                                : "text-ivory-ink/70 hover:text-emerald-deep"
+                            )}
+                          >
+                            {displayName}
+                          </button>
+                        </NavigationMenuItem>
+                      )
+                    }
+
+                    return (
+                      <NavigationMenuItem key={parent.id}>
+                        <NavigationMenuTrigger
+                          onClick={() => setCategory(parentSlug, null)}
+                          className={cn(
+                            "h-auto px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer rounded-md shadow-none border-none bg-transparent hover:bg-transparent focus:bg-transparent data-open:bg-transparent data-popup-open:bg-transparent data-open:hover:bg-transparent",
+                            isParentActive
+                              ? "text-emerald-deep font-bold hover:text-emerald-deep data-open:text-emerald-deep data-popup-open:text-emerald-deep focus:text-emerald-deep"
+                              : "text-ivory-ink/70 hover:text-emerald-deep data-open:text-emerald-deep data-popup-open:text-emerald-deep focus:text-ivory-ink/70"
+                          )}
+                        >
+                          {displayName}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent className="p-1.5 min-w-[200px] bg-ivory-card border border-ivory-border shadow-lg rounded-xl">
+                          <ul className="flex flex-col gap-0.5">
+                            <li>
+                              <button
+                                type="button"
+                                onClick={() => setCategory(parentSlug, null)}
+                                className={cn(
+                                  "w-full text-left px-3 py-1.5 text-xs rounded-lg transition-colors hover:bg-ivory-soft hover:text-emerald-deep cursor-pointer",
+                                  isParentActive && !selectedSubCategory
+                                    ? "bg-emerald-dark/10 text-emerald-deep font-semibold"
+                                    : "text-ivory-ink"
+                                )}
+                              >
+                                Semua {displayName}
+                              </button>
+                            </li>
+                            {subs.map((sub) => {
+                              const isSubActive = selectedSubCategory?.id === sub.id
+                              return (
+                                <li key={sub.id}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setCategory(parentSlug, toCategorySlug(sub.name))}
+                                    className={cn(
+                                      "w-full text-left px-3 py-1.5 text-xs rounded-lg transition-colors hover:bg-ivory-soft hover:text-emerald-deep cursor-pointer",
+                                      isSubActive
+                                        ? "bg-emerald-dark/10 text-emerald-deep font-semibold"
+                                        : "text-ivory-ink"
+                                    )}
+                                  >
+                                    {sub.name}
+                                  </button>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
+                    )
+                  })}
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
+          )}
         </div>
       </div>
 
       {/* ── Content ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 sm:pb-10">
-
-        {/* Quick Category Pills + Sort */}
-        <div className="space-y-3 mb-5 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
-          <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-1 sm:min-w-0">
-            {QUICK_CATEGORIES.map((q) => {
-              const isActive = Object.entries(q.preset).every(([k, v]) => {
-                if (k === "month") return month?.toLowerCase().includes((v as string).toLowerCase())
-                if (k === "cost") return cost === v
-                if (k === "type") return type === v
-                return true
-              }) && (Object.keys(q.preset).length > 0 ? true : type === "semua" && !month && !cost)
-
-              return (
-                <button
-                  key={q.label}
-                  onClick={() => {
-                    if (Object.keys(q.preset).length === 0) {
-                      clearFilters()
-                      return
-                    }
-                    Object.entries(q.preset).forEach(([k, v]) => {
-                      if (k === "month") setMonth(isActive ? "" : (v as string))
-                      if (k === "cost") setCost(isActive ? "" : (v as string))
-                      if (k === "type") setType(isActive ? "semua" : (v as string))
-                    })
-                  }}
-                  aria-pressed={isActive}
-                  className={`shrink-0 px-4 py-2 rounded-full text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-dark/30 ${
-                    isActive
-                      ? "bg-emerald-dark text-ivory shadow-md shadow-emerald-dark/25"
-                      : "bg-ivory border border-ivory-border text-ivory-ink/70 hover:bg-ivory-soft hover:text-emerald-deep"
-                  }`}
-                >
-                  {q.label}
-                </button>
-              )
-            })}
-          </div>
-          <div className="shrink-0 flex justify-end w-full sm:w-auto">
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "relevance")}>
-              <SelectTrigger
-                aria-label="Urutkan hasil pencarian"
-                className="h-10 w-36 sm:w-40 text-sm bg-ivory-card border-ivory-border text-ivory-ink/70 shadow-sm rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-dark/30"
-              >
-                <SelectValue>{SORT_LABELS[sortBy] ?? sortBy}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="relevance">Relevansi</SelectItem>
-                <SelectItem value="price-asc">Harga Terendah</SelectItem>
-                <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
-                <SelectItem value="duration">Durasi Terpendek</SelectItem>
-                <SelectItem value="duration-desc">Durasi Terpanjang</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
 
         {/* Active Filter Chips */}
         {activeFilterChips.length > 0 && (
@@ -596,6 +774,8 @@ function SearchContent() {
               setPriceRange={setPriceRange}
               duration={duration}
               setDuration={setDuration}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
               hasActiveFilters={!!hasActiveFilters}
               clearFilters={clearFilters}
             />
@@ -621,6 +801,8 @@ function SearchContent() {
                   setPriceRange={setPriceRange}
                   duration={duration}
                   setDuration={setDuration}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
                   hasActiveFilters={!!hasActiveFilters}
                   clearFilters={clearFilters}
                 />
@@ -668,10 +850,10 @@ function SearchContent() {
   )
 }
 
-export default function SearchPage() {
+export default function PackagesPage() {
   return (
     <Suspense>
-      <SearchContent />
+      <PackagesContent />
     </Suspense>
   )
 }

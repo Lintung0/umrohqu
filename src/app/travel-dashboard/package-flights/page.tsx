@@ -3,9 +3,6 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DataTable } from "@/components/travel/OperationalDataTable"
-import { Plane, MapPin, Calendar, ChevronRight } from "lucide-react"
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
 
 interface PackageFlight {
   id: string

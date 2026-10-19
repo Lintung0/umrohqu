@@ -57,7 +57,20 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "img.youtube.com",
       },
+      {
+        protocol: "https",
+        hostname: "db.umrahqu.com",
+      }
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/package/:slug*",
+        destination: "/packages/:slug*",
+        permanent: true,
+      },
+    ];
   },
 };
 

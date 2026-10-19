@@ -75,6 +75,9 @@ export interface Package {
   completed_at: string | null
   rating_avg: number | null
   rating_count: number
+  category_id?: string | null
+  sub_category_id?: string | null
+  branch_id?: string | null
   created_at: string
   updated_at: string
   deleted_at: string | null

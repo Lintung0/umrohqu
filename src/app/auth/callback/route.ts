@@ -5,9 +5,11 @@ import { createAdminClient } from "@/lib/supabase/server"
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
+  const token_hash = searchParams.get("token_hash")
+  const type = searchParams.get("type") as import("@supabase/supabase-js").EmailOtpType | null
   const next = searchParams.get("next") ?? "/"
 
-  if (code) {
+  if (code || (token_hash && type)) {
     try {
       const pendingCookies: { name: string; value: string; options?: Record<string, unknown> }[] = []
 
@@ -29,11 +31,22 @@ export async function GET(request: NextRequest) {
         },
       )
 
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      let user = null
+      let authError = null
 
-      if (!error && data.user) {
+      if (token_hash && type) {
+        const { data, error } = await supabase.auth.verifyOtp({ token_hash, type })
+        user = data?.user ?? null
+        authError = error
+      } else if (code) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+        user = data?.user ?? null
+        authError = error
+      }
+
+      if (!authError && user) {
         const adminClient = createAdminClient()
-        const { id, email, user_metadata } = data.user
+        const { id, email, user_metadata } = user
 
         const { error: upsertError } = await adminClient.from("users").upsert({
           id,
@@ -54,8 +67,8 @@ export async function GET(request: NextRequest) {
         return redirectResponse
       }
 
-      if (error) {
-        console.error("Auth callback error:", error.message)
+      if (authError) {
+        console.error("Auth callback error:", authError.message)
       }
     } catch (err) {
       console.error("Auth callback exception:", err)

@@ -95,7 +95,7 @@ export default function WishlistPage() {
         <div className="bg-ivory-card border border-ivory-border rounded-2xl p-12 text-center">
           <Heart className="w-12 h-12 text-emerald-dark/25 mx-auto mb-3" />
           <p className="font-medium text-muted-foreground">Belum ada paket di wishlist</p>
-          <Link href="/search" className="text-sm text-emerald-dark hover:text-emerald-deep mt-2 inline-flex items-center gap-1">
+          <Link href="/packages" className="text-sm text-emerald-dark hover:text-emerald-deep mt-2 inline-flex items-center gap-1">
             Cari paket umrah <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
@@ -108,7 +108,7 @@ export default function WishlistPage() {
                 key={item.id}
                 className="bg-ivory-card border border-ivory-border rounded-2xl overflow-hidden group"
               >
-                <Link href={`/package/${pkg?.slug || ""}`} className="block">
+                <Link href={`/packages/${pkg?.slug || ""}`} className="block">
                   <div className="relative">
                     {pkg?.image_url ? (
                       <Image
@@ -127,7 +127,7 @@ export default function WishlistPage() {
                   </div>
                 </Link>
                 <div className="p-4">
-                  <Link href={`/package/${pkg?.slug || ""}`}>
+                  <Link href={`/packages/${pkg?.slug || ""}`}>
                     <h3 className="font-semibold text-sm text-emerald-deep hover:text-emerald-dark transition-colors line-clamp-1">{pkg?.name}</h3>
                   </Link>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">

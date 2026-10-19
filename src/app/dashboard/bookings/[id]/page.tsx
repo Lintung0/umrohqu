@@ -3,12 +3,12 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, IdCard, PhoneCall, UserRound, ChevronDown, ChevronUp, Ban, X, ChevronRight } from "lucide-react"
-import { formatRupiah, getStatusColor, getStatusLabel } from "@/lib/constants"
+import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, PhoneCall, UserRound, Ban, X, ChevronRight, Share2 } from "lucide-react"
+import { formatRupiah, getStatusLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import Link from "next/link"
 import { useTranslation } from "@/lib/i18n"
-import { vtWebUrl } from "@/lib/services/midtrans-client"
+import { vtWebUrl, SNAP_SCRIPT_URL, MIDTRANS_CLIENT_KEY } from "@/lib/services/midtrans-client"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -89,6 +89,26 @@ interface BookingDetail {
     package_hotels: { night_count: number | null; sort_order: number | null; hotel: { name: string | null; rating: number | null; city: string | null } | null }[] | null
   } | null
   participants: ParticipantData[]
+  invoices?: Array<{
+    id: string
+    invoice_number: string
+    installment_number: number
+    invoice_type: string
+    amount: number
+    status: string
+    due_date: string
+    paid_at: string | null
+  }>
+  payment_schedules?: Array<{
+    id: string
+    installment_number: number
+    schedule_name: string
+    due_date: string
+    amount: number
+    paid_amount: number
+    status: string
+    invoice_id?: string
+  }>
 }
 
 export default function BookingDetailPage() {
@@ -729,17 +749,24 @@ const TIMELINE_STEPS = [
               <span className="text-muted-foreground">{t("booking.package")} ({booking.pilgrim_count})</span>
               <span>{formatRupiah(booking.price)}</span>
             </div>
-            {booking.payment_scheme === "down_payment" && (
+            {(booking.payment_scheme === "down_payment" || booking.payment_scheme === "installment") && (
               <>
                 <div className="border-t border-ivory-border pt-2 flex justify-between text-emerald-dark">
                   <span className="font-medium flex items-center gap-1">
                     <CreditCard className="w-3.5 h-3.5" />
-                    DP {Number(booking.price || 0) * (booking.pilgrim_count || 1) > 0 ? Math.round(Number(booking.down_payment_amount || 0) / (Number(booking.price || 0) * (booking.pilgrim_count || 1)) * 100) : 0}%
+                    {booking.payment_scheme === "installment" ? "Uang Muka" : "DP"}{" "}
+                    {Number(booking.price || 0) * (booking.pilgrim_count || 1) > 0
+                      ? `${Math.round(
+                          (Number(booking.down_payment_amount || 0) /
+                            (Number(booking.price || 0) * (booking.pilgrim_count || 1))) *
+                            100
+                        )}%`
+                      : ""}
                   </span>
                   <span className="font-bold">{formatRupiah(booking.down_payment_amount || 0)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>{t("booking.dp_remaining", { percent: "" })}</span>
+                  <span>{booking.payment_scheme === "installment" ? "Sisa Dicicil" : t("booking.dp_remaining", { percent: "" })}</span>
                   <span className="font-medium">{formatRupiah(booking.remaining_amount || 0)}</span>
                 </div>
                 {booking.remaining_due_date && (
@@ -846,6 +873,19 @@ const TIMELINE_STEPS = [
         refund={booking.refund}
       />
 
+      {booking.payment_scheme === "installment" && (
+        <InstallmentScheduleSection
+          bookingId={booking.id}
+          bookingStatus={booking.status}
+          total={booking.total}
+          downPaymentAmount={booking.down_payment_amount || 0}
+          remainingAmount={booking.remaining_amount || 0}
+          invoices={booking.invoices || []}
+          schedules={booking.payment_schedules || []}
+          onPaid={() => window.location.reload()}
+        />
+      )}
+
       {/* ── Payment Status Sections (3 conditions) ── */}
       <PaymentStatusSection
         bookingId={booking.id}
@@ -853,7 +893,7 @@ const TIMELINE_STEPS = [
         total={booking.total}
         paidAmount={booking.paid_amount}
         remainingBalance={booking.remaining_balance}
-        paymentType={booking.payment_scheme === "down_payment" ? "dp" : "full"}
+        paymentType={booking.payment_scheme === "down_payment" || booking.payment_scheme === "installment" ? "dp" : "full"}
         dpAmount={booking.down_payment_amount}
         dpPercentage={Number(booking.price || 0) * (booking.pilgrim_count || 1) > 0 ? Math.round(Number(booking.down_payment_amount || 0) / (Number(booking.price || 0) * (booking.pilgrim_count || 1)) * 100) : 0}
         remainingAmount={booking.remaining_amount}
@@ -1598,3 +1638,258 @@ function PayRemainingSection({ bookingId, remainingAmount }: { bookingId: string
     </div>
   )
 }
+
+// ─── Installment Schedule Section (Multi-termin) ─────────────────────────────
+
+function InstallmentScheduleSection({
+  bookingId,
+  bookingStatus,
+  total,
+  downPaymentAmount,
+  remainingAmount,
+  invoices,
+  schedules,
+  onPaid,
+}: {
+  bookingId: string
+  bookingStatus: string
+  total: number
+  downPaymentAmount: number
+  remainingAmount: number
+  invoices: Array<{
+    id: string
+    invoice_number: string
+    installment_number: number
+    invoice_type: string
+    amount: number
+    status: string
+    due_date: string
+    paid_at: string | null
+  }>
+  schedules: Array<{
+    id: string
+    installment_number: number
+    schedule_name: string
+    due_date: string
+    amount: number
+    paid_amount: number
+    status: string
+    invoice_id?: string
+  }>
+  onPaid: () => void
+}) {
+  const [payingId, setPayingId] = useState<string | null>(null)
+  const [sharingId, setSharingId] = useState<string | null>(null)
+
+  const paidCount = invoices.filter((i) => i.status === "paid").length
+  const totalInvoices = invoices.length
+  const progressPercent = totalInvoices > 0 ? Math.round((paidCount / totalInvoices) * 100) : 0
+
+  const handlePayInvoice = async (invoiceId: string) => {
+    setPayingId(invoiceId)
+    try {
+      const res = await fetch("/api/booking/pay-installment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceId }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.snap) {
+        toast.error(data.error || "Gagal menyiapkan pembayaran")
+        setPayingId(null)
+        return
+      }
+
+      // Load Snap
+      const loadSnapScript = (): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          if (typeof window !== "undefined" && (window as any).snap) {
+            resolve()
+            return
+          }
+          const script = document.createElement("script")
+          script.src = SNAP_SCRIPT_URL
+          script.setAttribute("data-client-key", MIDTRANS_CLIENT_KEY)
+          script.onload = () => resolve()
+          script.onerror = () => reject(new Error("Gagal memuat Midtrans Snap JS"))
+          document.body.appendChild(script)
+        })
+      }
+
+      await loadSnapScript()
+
+      // @ts-expect-error Snap types
+      window.snap.pay(data.snap.token, {
+        onSuccess: async function () {
+          toast.success("Pembayaran cicilan berhasil!")
+          setPayingId(null)
+          onPaid()
+        },
+        onPending: async function () {
+          toast.info("Silakan transfer sesuai instruksi VA.")
+          setPayingId(null)
+          onPaid()
+        },
+        onError: function () {
+          toast.error("Pembayaran gagal. Silakan coba lagi.")
+          setPayingId(null)
+        },
+        onClose: function () {
+          setPayingId(null)
+        },
+      })
+    } catch (e: any) {
+      toast.error(e?.message || "Terjadi kesalahan")
+      setPayingId(null)
+    }
+  }
+
+  const handleShareLink = async (invoiceId: string) => {
+    setSharingId(invoiceId)
+    try {
+      const res = await fetch("/api/booking/payment-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceId }),
+      })
+      const data = await res.json()
+      if (res.ok && data.paymentUrl) {
+        await navigator.clipboard.writeText(data.paymentUrl)
+        toast.success("Link pembayaran disalin! Anda dapat mengirimkannya ke keluarga atau sponsor.")
+      } else {
+        toast.error(data.error || "Gagal membuat link pembayaran")
+      }
+    } catch {
+      toast.error("Gagal menyalin link pembayaran")
+    } finally {
+      setSharingId(null)
+    }
+  }
+
+  return (
+    <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-ivory-border/70">
+        <div>
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-emerald-dark" />
+            <h2 className="text-lg font-bold text-emerald-deep">Jadwal & Riwayat Cicilan</h2>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Pelunasan bertahap setiap bulan via Virtual Account Bank atau Kartu Kredit
+          </p>
+        </div>
+        <div className="text-right">
+          <span className="text-xs text-muted-foreground block">Progres Pelunasan</span>
+          <span className="font-bold text-sm text-emerald-deep">
+            {paidCount} dari {totalInvoices} termin ({progressPercent}%)
+          </span>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="w-full bg-ivory-border/50 h-2.5 rounded-full overflow-hidden">
+        <div
+          className="bg-emerald-dark h-full rounded-full transition-all duration-500"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
+      {/* Invoices List */}
+      <div className="space-y-3">
+        {invoices.map((inv) => {
+          const isPaid = inv.status === "paid"
+          const isOverdue = !isPaid && inv.due_date && new Date(inv.due_date).getTime() < Date.now()
+          const label = inv.installment_number === 0
+            ? "Uang Muka"
+            : `Cicilan Bulan ke-${inv.installment_number}`
+
+          const dueDateFormatted = inv.due_date
+            ? new Date(inv.due_date).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
+            : "-"
+
+          return (
+            <div
+              key={inv.id}
+              className={`p-4 rounded-xl border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                isPaid
+                  ? "bg-emerald-dark/5 border-emerald-dark/20"
+                  : isOverdue
+                  ? "bg-red-50/60 border-red-200"
+                  : "bg-ivory border-ivory-border hover:border-emerald-dark/30"
+              }`}
+            >
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm text-emerald-deep">{label}</span>
+                  <span className="text-[11px] font-mono text-muted-foreground">({inv.invoice_number})</span>
+                  {isPaid ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-dark bg-emerald-dark/10 px-2 py-0.5 rounded-full">
+                      <Check className="w-3 h-3" /> Lunas
+                    </span>
+                  ) : isOverdue ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">
+                      <Clock className="w-3 h-3" /> Jatuh Tempo
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                      <Clock className="w-3 h-3" /> Belum Bayar
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground flex items-center gap-3">
+                  <span>Jatuh tempo: <strong className="text-emerald-deep font-medium">{dueDateFormatted}</strong></span>
+                  {inv.paid_at && (
+                    <span>Dibayar: {new Date(inv.paid_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-ivory-border/60">
+                <span className="font-bold text-base text-emerald-deep">
+                  {formatRupiah(inv.amount)}
+                </span>
+
+                {!isPaid && bookingStatus !== "cancelled" && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleShareLink(inv.id)}
+                      disabled={sharingId === inv.id}
+                      title="Salin Link Pembayaran untuk Keluarga / Sponsor"
+                      className="p-2 rounded-xl border border-ivory-border bg-ivory hover:bg-emerald-dark/5 text-muted-foreground hover:text-emerald-dark transition-colors cursor-pointer"
+                    >
+                      {sharingId === inv.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Share2 className="w-4 h-4" />
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => handlePayInvoice(inv.id)}
+                      disabled={payingId === inv.id}
+                      className="px-3.5 py-1.5 rounded-xl bg-emerald-dark hover:bg-emerald-deep text-white text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      {payingId === inv.id ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Memproses...
+                        </>
+                      ) : (
+                        <>Bayar Cicilan</>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+

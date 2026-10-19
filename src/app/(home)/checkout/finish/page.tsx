@@ -200,7 +200,7 @@ function FinishContent() {
                 Lihat Pesanan <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link href="/search">
+            <Link href="/packages">
               <Button variant="outline" className="h-12 px-6 border-emerald-dark/30 text-emerald-dark hover:bg-emerald-dark/5">
                 ← Cari Paket
               </Button>

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { LayoutDashboard, Package, BookOpen, Users, BarChart3, Globe, Settings, LogOut, Home, Menu, X, Shield, Building2, UserCheck, MapPin, Plane, Hotel, Building, Bus, Bed, Calendar, Box, UsersRound, ClipboardList, PackageCheck, ChevronDown, ChevronRight } from "lucide-react"
+import { LayoutDashboard, Package, BookOpen, Users, BarChart3, Globe, Settings, LogOut, Home, Menu, X, Shield, Building2, UserCheck, MapPin, Plane, Hotel, Bus, Bed, Calendar, Box, UsersRound, ClipboardList, PackageCheck } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
 import Image from "next/image"

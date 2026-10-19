@@ -58,8 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Cari transaksi di Midtrans lewat beberapa kandidat order_id:
     // referensi internal terbaru dulu, lalu format legacy booking-{uuid}.
-    // Jujur ke UI kalau tidak ada yang dikenal gateway.
-    const candidates = [payment.gateway_reference, `booking-${bookingId}`]
+    const candidates = [payment.gateway_reference, bookingId, `booking-${bookingId}`].filter(Boolean) as string[]
     let txn: Awaited<ReturnType<typeof getTransactionStatus>> | null = null
     let matchedOrderId: string | null = null
     for (const orderId of candidates) {

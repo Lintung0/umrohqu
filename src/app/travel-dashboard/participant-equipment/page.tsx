@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DataTable } from "@/components/travel/OperationalDataTable"
-import { Package, Box, CheckCircle, XCircle, Clock, ChevronRight } from "lucide-react"
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
+import { CheckCircle, Clock } from "lucide-react"
 
 interface ParticipantEquipment {
   id: string

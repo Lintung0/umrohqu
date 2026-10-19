@@ -51,9 +51,17 @@ export async function createSnapTransaction(params: {
       quantity: it.quantity,
     }))
   }
-  if (params.enabledPayments && params.enabledPayments.length > 0) {
-    payload.enabled_payments = params.enabledPayments
-  }
+  const allowedPayments = params.enabledPayments || [
+    "credit_card",
+    "bca_va",
+    "bni_va",
+    "bri_va",
+    "permata_va",
+    "cimb_va",
+    "other_va",
+    "echannel",
+  ]
+  payload.enabled_payments = allowedPayments
   if (params.finishUrl || params.unfinishUrl || params.errorUrl) {
     payload.callbacks = {
       finish: params.finishUrl,

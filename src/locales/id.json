@@ -1,6 +1,6 @@
 {
   "nav": {
-    "search_packages": "Cari Paket",
+    "search_packages": "Paket",
     "blog": "Blog",
     "promo": "Promo",
     "faq": "FAQ",
@@ -57,6 +57,8 @@
     "email_required": "Email wajib diisi.",
     "email_invalid": "Format email tidak valid.",
     "password_required": "Kata sandi wajib diisi.",
+    "invalid_credentials": "Email atau kata sandi salah. Silakan coba lagi.",
+    "login_failed": "Gagal masuk. Silakan coba lagi.",
     "password_min": "Kata sandi minimal {{min}} karakter.",
     "name_required": "Nama lengkap wajib diisi.",
     "name_min": "Nama minimal {{min}} karakter.",

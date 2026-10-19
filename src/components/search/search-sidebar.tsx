@@ -1,9 +1,17 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { RotateCcw, MapPin, Clock, Banknote, ChevronDown, SlidersHorizontal } from "lucide-react"
+import { RotateCcw, MapPin, Clock, Banknote, SlidersHorizontal, ArrowUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
+import { SelectDropdown, type SelectOption } from "@/components/ui/select-dropdown"
+
+export const SORT_OPTIONS: SelectOption[] = [
+  { value: "relevance", label: "Relevansi" },
+  { value: "price-asc", label: "Harga Terendah" },
+  { value: "price-desc", label: "Harga Tertinggi" },
+  { value: "duration", label: "Durasi Terpendek" },
+  { value: "duration-desc", label: "Durasi Terpanjang" },
+]
 
 interface SearchSidebarProps {
   departure: string
@@ -12,6 +20,8 @@ interface SearchSidebarProps {
   setPriceRange: (v: [number, number]) => void
   duration: string
   setDuration: (v: string) => void
+  sortBy?: string
+  setSortBy?: (v: string) => void
   hasActiveFilters: boolean
   clearFilters: () => void
 }
@@ -63,6 +73,7 @@ export default function SearchSidebar({
   departure, setDeparture,
   priceRange, setPriceRange,
   duration, setDuration,
+  sortBy, setSortBy,
   hasActiveFilters, clearFilters,
 }: SearchSidebarProps) {
   const toggleDuration = (d: string) => setDuration(duration === d ? "" : d)
@@ -76,7 +87,7 @@ export default function SearchSidebar({
   }
 
   return (
-    <div className="sticky top-36 max-h-[calc(100vh-9.5rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar">
+    <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 pb-10 custom-scrollbar">
       <div className="bg-ivory-card rounded-2xl border border-ivory-border shadow-sm overflow-hidden">
 
         {/* Header */}
@@ -92,6 +103,20 @@ export default function SearchSidebar({
         </div>
 
         <div className="divide-y divide-ivory-border px-4">
+
+          {/* Sort By Dropdown */}
+          {sortBy !== undefined && setSortBy && (
+            <div className="py-4 space-y-2.5">
+              <SectionLabel icon={<ArrowUpDown className="w-3.5 h-3.5" />}>Urutkan</SectionLabel>
+              <SelectDropdown
+                value={sortBy}
+                onValueChange={setSortBy}
+                options={SORT_OPTIONS}
+                aria-label="Urutkan hasil pencarian"
+                triggerClassName="w-full h-11 px-3.5 rounded-xl border border-ivory-border bg-ivory text-sm text-ivory-ink shadow-sm hover:border-emerald-dark/40 focus:ring-2 focus:ring-emerald-dark/20 focus:border-emerald-dark transition-all"
+              />
+            </div>
+          )}
 
           {/* Kota Keberangkatan — Geoapify Autocomplete (Indonesia) */}
           <div className="py-4 space-y-3">

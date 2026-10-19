@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Edit2, Trash2, Filter, ChevronLeft, ChevronRight, Loader2, Download, Eye, ChevronUp, ChevronDown } from "lucide-react"
+import { Plus, Trash2, Filter, ChevronLeft, ChevronRight, Loader2, Download, Eye, ChevronUp, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {

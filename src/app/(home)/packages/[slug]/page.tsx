@@ -5,7 +5,7 @@ import PackageDetailClient, { type PackageDetail, type ReviewRow } from "./packa
 import type { Metadata } from "next"
 import type { Package } from "@/lib/types"
 
-export const revalidate = 3600
+export const dynamic = "force-dynamic"
 
 interface PackageMetaRow {
   id: string
@@ -31,6 +31,7 @@ type FetchedPackage = Omit<PackageDetail, "travel"> & {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
+  const decodedSlug = decodeURIComponent(slug)
   const supabase = createAdminClient()
 
   let pkg: PackageMetaRow | null = null
@@ -38,14 +39,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const { data: pkgData, error } = await supabase
       .from("packages")
       .select("name, description, price, id, travel:tenants(name)")
-      .eq("slug", slug)
+      .eq("slug", decodedSlug)
       .in("status", ["active", "ongoing"])
-      .single()
+      .is("deleted_at", null)
+      .maybeSingle()
     if (!error && pkgData) {
       pkg = pkgData as unknown as PackageMetaRow
     }
-  } catch {
-    // error caught, pkg stays null
+  } catch (err) {
+    console.error("[generateMetadata] catch error:", err)
   }
 
   if (!pkg) {
@@ -79,6 +81,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function PackageDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const decodedSlug = decodeURIComponent(slug)
   const supabase = createAdminClient()
 
   let pkg: FetchedPackage | null = null
@@ -86,14 +89,15 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     const { data: pkgData, error } = await supabase
       .from("packages")
       .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, brand_color, description)")
-      .eq("slug", slug)
+      .eq("slug", decodedSlug)
       .in("status", ["active", "ongoing"])
-      .single()
+      .is("deleted_at", null)
+      .maybeSingle()
     if (!error && pkgData) {
       pkg = pkgData as unknown as FetchedPackage
     }
-  } catch {
-    // error caught, pkg stays null
+  } catch (err) {
+    console.error("[PackageDetailPage] catch error:", err)
   }
 
   if (!pkg) {

@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
+import { sendVerificationEmail } from "@/lib/email/resend"
 import { z } from "zod"
 
 const registerSchema = z.object({
@@ -8,7 +9,18 @@ const registerSchema = z.object({
   password: z.string().min(8, "Kata sandi minimal 8 karakter"),
 })
 
-export async function POST(request: Request) {
+function normalizeVerificationLink(rawLink: string): string {
+  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://db.umrahqu.com").replace(/\/$/, "")
+  if (rawLink.startsWith("https:///") || rawLink.startsWith("http:///")) {
+    return rawLink.replace(/^https?:\/\/\//, `${supabaseUrl}/`)
+  }
+  if (rawLink.startsWith("/")) {
+    return `${supabaseUrl}${rawLink}`
+  }
+  return rawLink
+}
+
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const parsed = registerSchema.safeParse(body)
@@ -18,42 +30,131 @@ export async function POST(request: Request) {
     }
 
     const { name, email, password } = parsed.data
-    const lowerEmail = email.toLowerCase()
+    const lowerEmail = email.toLowerCase().trim()
     const adminClient = createAdminClient()
 
-    const { data, error } = await adminClient.auth.admin.createUser({
+    // Determine base redirect URL
+    const origin =
+      request.headers.get("origin") ||
+      request.nextUrl.origin ||
+      process.env.NEXT_PUBLIC_MARKETPLACE_URL ||
+      "https://umrahqu.com"
+
+    const redirectUrl = `${origin}/auth/callback`
+
+    // Generate signup link (creates user in auth.users without GoTrue SMTP dependency)
+    const { data, error } = await adminClient.auth.admin.generateLink({
+      type: "signup",
       email: lowerEmail,
       password,
-      email_confirm: true,
-      user_metadata: { full_name: name },
+      options: {
+        data: { full_name: name.trim() },
+        redirectTo: redirectUrl,
+      },
     })
 
     if (error) {
-      const msg = error.message.toLowerCase()
-      if (msg.includes("already") || msg.includes("duplicate")) {
-        return NextResponse.json({ error: "Email sudah terdaftar." }, { status: 409 })
+      const errorMsg = error.message.toLowerCase()
+
+      // If user is already registered in auth.users
+      if (errorMsg.includes("already") || errorMsg.includes("duplicate") || errorMsg.includes("exists")) {
+        // Attempt to send a fresh verification link so unverified existing users can still complete signup
+        try {
+          const magicRes = await adminClient.auth.admin.generateLink({
+            type: "magiclink",
+            email: lowerEmail,
+            options: {
+              redirectTo: redirectUrl,
+            },
+          })
+
+          if (magicRes.data?.properties?.hashed_token || magicRes.data?.properties?.action_link) {
+            const verificationUrl = magicRes.data.properties?.hashed_token
+              ? `${origin}/auth/callback?token_hash=${magicRes.data.properties.hashed_token}&type=${magicRes.data.properties.verification_type || "magiclink"}`
+              : normalizeVerificationLink(magicRes.data.properties.action_link)
+
+            await sendVerificationEmail({
+              to: lowerEmail,
+              name,
+              verificationUrl,
+            })
+
+            return NextResponse.json({
+              success: true,
+              email: lowerEmail,
+              message: "Akun dengan email ini sudah terdaftar. Kami telah mengirimkan tautan konfirmasi baru ke email Anda.",
+            })
+          }
+        } catch (resendErr) {
+          console.error("Failed to generate fallback link for existing user:", resendErr)
+        }
+
+        return NextResponse.json(
+          { error: "Email sudah terdaftar. Silakan masuk atau gunakan fitur lupa kata sandi." },
+          { status: 409 },
+        )
       }
-      return NextResponse.json({ error: error.message || "Terjadi kesalahan saat pendaftaran." }, { status: 500 })
+
+      console.error("[Register] Error generating link:", error)
+      return NextResponse.json(
+        { error: error.message || "Terjadi kesalahan saat pendaftaran." },
+        { status: 500 },
+      )
     }
 
     if (!data?.user?.id) {
-      return NextResponse.json({ error: "Terjadi kesalahan saat pendaftaran." }, { status: 500 })
+      return NextResponse.json(
+        { error: "Gagal membuat akun pendaftaran." },
+        { status: 500 },
+      )
     }
 
-    const { error: insertError } = await adminClient.from("users").upsert({
-      id: data.user.id,
+    // Upsert into public.users
+    const { error: upsertError } = await adminClient.from("users").upsert(
+      {
+        id: data.user.id,
+        email: lowerEmail,
+        full_name: name.trim(),
+        role: "customer",
+      },
+      { onConflict: "id", ignoreDuplicates: true },
+    )
+
+    if (upsertError) {
+      console.warn("[Register] Public users upsert warning:", upsertError.message)
+    }
+
+    // Build direct application verification URL (pointing directly to localhost / umrahqu.com instead of db.umrahqu.com)
+    const verificationUrl = data.properties?.hashed_token
+      ? `${origin}/auth/callback?token_hash=${data.properties.hashed_token}&type=${data.properties.verification_type || "signup"}`
+      : normalizeVerificationLink(data.properties.action_link)
+
+    // Send confirmation email via Resend
+    const emailResult = await sendVerificationEmail({
+      to: lowerEmail,
+      name: name.trim(),
+      verificationUrl,
+    })
+
+    if (!emailResult.success) {
+      console.error("[Register] Failed to send email via Resend:", emailResult.error)
+      return NextResponse.json(
+        {
+          error: "Pendaftaran berhasil, namun gagal mengirim email verifikasi: " + (emailResult.error || "Gagal mengirim email"),
+          email: lowerEmail,
+        },
+        { status: 502 },
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
       email: lowerEmail,
-      full_name: name,
-      role: "customer",
-    }, { onConflict: "id", ignoreDuplicates: true })
-
-    if (insertError) {
-      console.error("Users upsert error:", insertError)
-    }
-
-    return NextResponse.json({ success: true, userId: data.user.id, email: lowerEmail })
+      userId: data.user.id,
+    })
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Terjadi kesalahan server."
+    console.error("[Register] Exception:", err)
+    const message = err instanceof Error ? err.message : "Terjadi kesalahan internal server."
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
