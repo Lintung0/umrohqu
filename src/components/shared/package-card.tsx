@@ -325,9 +325,6 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
                    <span className="truncate">{hotelName ? hotelName : hotelStars ? `${hotelStars} Star` : "-"}</span>
                  </div>
                </div>
-               <div className="mt-2">
-                 <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
-               </div>
              </div>
              <div className="flex items-end justify-between pt-2 border-t border-ivory-border">
                <div>
@@ -425,6 +422,9 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
           <p className="text-[10px] text-ivory-ink/70">{t("card.per_person")}</p>
         </div>
         <p className="text-[11px] text-ivory-ink/70 truncate mt-0.5">{(pkg.departure_cities || []).filter(Boolean).slice(0, 2).join(", ") || "-"} · {pkg.duration_nights ? `${pkg.duration_nights} ${t("card.days")}` : "-"}</p>
+        <div className="mt-2">
+          <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
+        </div>
         {Number(pkg.cashback_amount) > 0 && (
           <TooltipProvider delay={100}>
             <Tooltip>
@@ -435,9 +435,6 @@ className="bg-ivory-card/95 p-2 rounded-full border border-ivory-border/70 hover
             </Tooltip>
           </TooltipProvider>
         )}
-        <div className="mt-2">
-          <SeatAvailabilityBar available={pkg.available} quota={pkg.quota} variant="compact" soldOut={soldOut} quotaTaken={pkg.quota_taken} />
-        </div>
       </div>
 
     </Link>
