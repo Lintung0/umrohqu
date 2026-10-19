@@ -35,16 +35,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan" }, { status: 404 })
     }
 
-    if (booking.payment_scheme !== "down_payment") {
-      return NextResponse.json({ error: "Bukan booking DP" }, { status: 400 })
-    }
-
-    if (booking.status === "cancelled" || booking.status === "cancellation_pending") {
+    // Status terminal dulu — jangan terima pembayaran baru (guard di atas
+    // validasi skema agar pesannya jelas, bukan "Bukan booking DP")
+    if (booking.status === "cancelled" || booking.status === "cancellation_pending" || booking.status === "refunded") {
       return NextResponse.json({ error: "Booking dibatalkan / menunggu persetujuan pembatalan" }, { status: 400 })
     }
 
+    // Pelunasan sah untuk SEMUA skema yang masih punya sisa tagihan
+    // (down_payment, installment, dsb). Sumber kebenaran = remaining_amount,
+    // bukan label payment_scheme — agar API selaras dengan tombol di UI.
     const remaining = Number(booking.remaining_amount)
-    if (remaining <= 0) {
+    if (!Number.isFinite(remaining) || remaining <= 0) {
       return NextResponse.json({ error: "Sisa pembayaran sudah 0" }, { status: 400 })
     }
 

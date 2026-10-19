@@ -1405,7 +1405,8 @@ function PaymentStatusSection({
   // ── KONDISI 3: Belum Lunas, Perlu Pelunasan DP ──
   // effectiveRemaining > 0 AND status !== 'pending_payment'
   // (covers: cancelled with DP paid, refunded, etc.)
-  if (effectiveRemaining > 0 && status !== "pending_payment") {
+  const isTerminalBooking = status === "cancelled" || status === "cancellation_pending" || status === "refunded"
+  if (effectiveRemaining > 0 && status !== "pending_payment" && !isTerminalBooking) {
     return (
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
         <div className="flex items-center gap-4">

@@ -4,9 +4,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, MapPin, Plane, Scale, Heart, Loader2, Star, Timer, BadgePercent } from "lucide-react"
+import { Clock, MapPin, Plane, Hotel, Scale, Heart, Loader2, Star, Timer, BadgePercent } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
-import { formatRupiah, formatRupiahCompact, decodeUnicodeEscapes, getPackageAvailable } from "@/lib/utils"
+import { formatRupiah, formatRupiahCompact, decodeUnicodeEscapes, getPackageAvailable, extractHotelStars, extractHotelName } from "@/lib/utils"
 import { CASHBACK_INFO } from "@/lib/constants"
 import { useTranslation } from "@/lib/i18n"
 import { useCompare } from "@/lib/compare-context"
@@ -46,6 +46,8 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const [reviewCount, setReviewCount] = useState(0)
 
   const soldOut = getPackageAvailable(pkg) <= 0
+  const hotelStars = extractHotelStars(pkg.includes, pkg.hotel_makkah_stars)
+  const hotelName = extractHotelName(pkg.includes, pkg.hotel_makkah)
 
   useEffect(() => {
     let cancelled = false
