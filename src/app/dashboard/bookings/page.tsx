@@ -17,6 +17,7 @@ interface BookingRow {
   price: number
   total: number
   booking_channel: string
+  booking_code: string | null
   created_at: string
   package: { id: string; name: string; slug: string; image_url?: string | null } | null
 }
@@ -45,7 +46,7 @@ export default function BookingsPage() {
       if (user) {
         const { data } = await supabase
           .from("bookings")
-          .select("id, status, pilgrim_count, price, total, booking_channel, created_at, package:packages(id, name, slug)")
+          .select("id, status, pilgrim_count, price, total, booking_channel, booking_code, created_at, package:packages(id, name, slug)")
           .eq("customer_id", user.id)
           .is("deleted_at", null)
           .order("created_at", { ascending: false })
@@ -212,6 +213,9 @@ export default function BookingsPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate text-sm text-emerald-deep">{booking.package?.name || t("booking.package")}</p>
+                          {booking.booking_code && (
+                            <p className="text-xs text-muted-foreground font-mono mt-0.5">{booking.booking_code}</p>
+                          )}
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(booking.status, "booking")}`}>
                               {getStatusLabel(booking.status, "booking")}

@@ -3,20 +3,21 @@
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { CheckCircle, ArrowRight, Loader2, RefreshCw, Clock } from "lucide-react"
+import { CheckCircle, ArrowRight, Loader2, RefreshCw, Clock, Compass } from "lucide-react"
 import Link from "next/link"
 
 export default function BookingSuccessPage() {
   const params = useParams()
   const router = useRouter()
   const [status, setStatus] = useState<"loading" | "success" | "processing" | "timeout">("loading")
+  const [bookingCode, setBookingCode] = useState<string | null>(null)
 
   const checkStatus = useCallback(async () => {
     // Try client-side first
     const supabase = createClient()
     let { data } = await supabase
       .from("bookings")
-      .select("id, status")
+      .select("id, status, booking_code")
       .eq("id", params.id)
       .single()
 
@@ -43,6 +44,8 @@ export default function BookingSuccessPage() {
         body: JSON.stringify({ bookingId: params.id }),
       })
     } catch {}
+
+    if (data?.booking_code) setBookingCode(data.booking_code)
 
     if (data?.status === "confirmed" || data?.status === "completed") {
       setStatus("success")
@@ -116,10 +119,21 @@ export default function BookingSuccessPage() {
             <h1 className="text-lg font-bold text-emerald-deep">Pembayaran Sedang Diverifikasi</h1>
             <p className="text-sm text-emerald-500 mt-1">Tim kami sedang memproses pembayaran Anda.</p>
           </div>
+          {bookingCode && (
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-500">Kode Pesanan</p>
+              <p className="font-mono font-bold text-emerald-deep">{bookingCode}</p>
+            </div>
+          )}
           <div className="flex flex-col gap-2">
             <button onClick={handleRetry} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
               <RefreshCw className="w-4 h-4" /> Cek Status
             </button>
+            {bookingCode && (
+              <Link href={`/tracking?code=${encodeURIComponent(bookingCode)}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-emerald-dark/30 text-emerald-dark text-sm font-semibold rounded-xl hover:bg-emerald-dark/5 transition-colors">
+                <Compass className="w-4 h-4" /> Lacak Pesanan
+              </Link>
+            )}
             <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 text-emerald-500 hover:text-emerald-700 transition-colors">
               Lihat Pesanan <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -141,6 +155,17 @@ export default function BookingSuccessPage() {
             <h1 className="text-lg font-bold text-emerald-deep">Pembayaran Diterima</h1>
             <p className="text-sm text-emerald-500 mt-1">Pembayaran telah kami terima. Travel partner sedang memverifikasi dana — booking akan dikonfirmasi setelah diverifikasi.</p>
           </div>
+          {bookingCode && (
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-500">Kode Pesanan</p>
+              <p className="font-mono font-bold text-emerald-deep">{bookingCode}</p>
+            </div>
+          )}
+          {bookingCode && (
+            <Link href={`/tracking?code=${encodeURIComponent(bookingCode)}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-emerald-dark/30 text-emerald-dark text-sm font-semibold rounded-xl hover:bg-emerald-dark/5 transition-colors">
+              <Compass className="w-4 h-4" /> Lacak Pesanan
+            </Link>
+          )}
           <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
             Lihat Pesanan <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -162,10 +187,21 @@ export default function BookingSuccessPage() {
             Pembayaran terverifikasi. Travel partner sedang menyiapkan dokumen umrah Anda.
           </p>
         </div>
+        {bookingCode && (
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-500">Kode Pesanan</p>
+            <p className="font-mono font-bold text-emerald-deep">{bookingCode}</p>
+          </div>
+        )}
         <div className="flex flex-col gap-2">
           <Link href={`/dashboard/bookings/${params.id}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
             Lihat Detail <ArrowRight className="w-3.5 h-3.5" />
           </Link>
+          {bookingCode && (
+            <Link href={`/tracking?code=${encodeURIComponent(bookingCode)}`} className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border border-emerald-dark/30 text-emerald-dark text-sm font-semibold rounded-xl hover:bg-emerald-dark/5 transition-colors">
+              <Compass className="w-4 h-4" /> Lacak Pesanan
+            </Link>
+          )}
           <p className="text-xs text-emerald-500">Redirect otomatis dalam 3 detik</p>
         </div>
       </div>

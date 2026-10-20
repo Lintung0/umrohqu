@@ -86,6 +86,7 @@
     "processing_message": "Your payment has been received. It is currently being confirmed by the travel partner. We will notify you when the status changes.",
     "no_bookings": "No bookings yet",
     "booking_id": "Booking ID",
+    "booking_code": "Booking Code",
     "package": "Package",
     "total": "Total",
     "status": "Status",

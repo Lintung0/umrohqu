@@ -86,6 +86,7 @@
     "processing_message": "Pembayaran Anda telah kami terima. Saat ini sedang dalam proses konfirmasi oleh travel partner. Kami akan memberi tahu Anda begitu status berubah.",
     "no_bookings": "Belum ada pemesanan",
     "booking_id": "ID Pemesanan",
+    "booking_code": "Kode Pesanan",
     "package": "Paket",
     "total": "Total",
     "status": "Status",

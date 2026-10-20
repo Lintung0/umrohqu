@@ -57,6 +57,7 @@ interface ParticipantData {
 interface BookingDetail {
   id: string
   status: string
+  booking_code: string | null
   pilgrim_count: number
   price: number
   total: number
@@ -628,9 +629,12 @@ const TIMELINE_STEPS = [
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{t("booking.booking_id")}</p>
-            <h1 className="text-xl font-bold font-mono mt-1">{booking.id.slice(0, 8).toUpperCase()}</h1>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{t("booking.booking_code")}</p>
+            <h1 className="text-xl font-bold font-mono mt-1">{booking.booking_code || booking.id.slice(0, 8).toUpperCase()}</h1>
             <p className="text-muted-foreground mt-1">{pkg?.name || t("booking.package")}</p>
+            {booking.booking_code && (
+              <p className="text-xs text-muted-foreground font-mono mt-0.5">ID: {booking.id.slice(0, 8).toUpperCase()}</p>
+            )}
           </div>
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <span className={`w-2 h-2 rounded-full ${STATUS_ACCENT[booking.status] ?? "bg-ivory-border"}`} />
@@ -889,6 +893,7 @@ const TIMELINE_STEPS = [
       {/* ── Payment Status Sections (3 conditions) ── */}
       <PaymentStatusSection
         bookingId={booking.id}
+        bookingCode={booking.booking_code ?? null}
         status={booking.status}
         total={booking.total}
         paidAmount={booking.paid_amount}
@@ -1158,12 +1163,13 @@ function PaymentTimeline({ snapCreated, methodChosen }: { snapCreated: boolean; 
 }
 
 function PaymentStatusSection({
-  bookingId, status, total, paidAmount, remainingBalance,
+  bookingId, bookingCode, status, total, paidAmount, remainingBalance,
   paymentType, dpAmount, dpPercentage, remainingAmount,
   remainingDueDate, paidAt, paymentMethod, createdAt,
   activePayment,
 }: {
   bookingId: string
+  bookingCode: string | null
   status: string
   total: number
   paidAmount: number
@@ -1513,7 +1519,7 @@ function PaymentStatusSection({
         >
           <><Loader2 className={`w-4 h-4 ${checking ? "animate-spin" : ""}`} /> Sudah bayar? Cek ke Gateway</>
         </button>
-        <PayNowSection bookingId={bookingId} total={total} />
+        <PayNowSection bookingId={bookingId} bookingCode={bookingCode} total={total} />
       </div>
     )
   }
@@ -1524,7 +1530,7 @@ function PaymentStatusSection({
 
 // ─── Pay Now Section (Full Payment) ──────────────────────────────────────────
 
-function PayNowSection({ bookingId, total }: { bookingId: string; total: number }) {
+function PayNowSection({ bookingId, bookingCode, total }: { bookingId: string; bookingCode: string | null; total: number }) {
   const { t } = useTranslation()
   const [submitting, setSubmitting] = useState(false)
   // Guard anti double-klik se-tick (state saja bisa ditembus 2 klik cepat)
@@ -1556,13 +1562,13 @@ function PayNowSection({ bookingId, total }: { bookingId: string; total: number 
   return (
     <div className="space-y-4">
       <div className="bg-ivory rounded-xl p-4">
-        <p className="text-xs text-muted-foreground mb-1">{t("booking.booking_id")}</p>
+        <p className="text-xs text-muted-foreground mb-1">{t("booking.booking_code")}</p>
         <div className="flex items-center gap-2">
-          <p className="font-mono font-bold text-lg">{bookingId.slice(0, 8).toUpperCase()}</p>
+          <p className="font-mono font-bold text-lg">{bookingCode || bookingId.slice(0, 8).toUpperCase()}</p>
           <button
             onClick={() => {
-              navigator.clipboard.writeText(bookingId.slice(0, 8).toUpperCase())
-              toast.success(t("booking.booking_id") + " ✓")
+              navigator.clipboard.writeText(bookingCode || bookingId.slice(0, 8).toUpperCase())
+              toast.success(t("booking.booking_code") + " ✓")
             }}
             className="p-1 hover:bg-ivory rounded transition-colors cursor-pointer"
           >

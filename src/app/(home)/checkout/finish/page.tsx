@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useState, useCallback, Suspense } from "react"
 import Link from "next/link"
-import { Loader2, CheckCircle, Clock, AlertCircle, XCircle, ChevronRight } from "lucide-react"
+import { Loader2, CheckCircle, Clock, AlertCircle, XCircle, ChevronRight, Compass } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 type ViewState = {
@@ -20,8 +20,27 @@ function FinishContent() {
   const router = useRouter()
 
   const [view, setView] = useState<ViewState>({ kind: "loading", title: "", description: "", bookingId: null })
+  const [bookingCode, setBookingCode] = useState<string | null>(null)
   const [pollLeft, setPollLeft] = useState(0)
   const [retryKey, setRetryKey] = useState(0)
+
+  // Ambil kode pesanan (UQ-...) untuk ditampilkan + tombol Lacak
+  useEffect(() => {
+    const bookingId = searchParams.get("booking_id")
+    if (!bookingId) return
+    let cancelled = false
+    fetch("/api/booking/detail", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!cancelled && json?.data?.booking_code) setBookingCode(json.data.booking_code)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [searchParams])
 
   const handleManualCheck = useCallback(async () => {
     const bookingId = searchParams.get("booking_id")
@@ -172,6 +191,13 @@ function FinishContent() {
         <h2 className="text-xl font-bold text-emerald-deep">{view.title}</h2>
         <p className="text-sm text-ivory-ink/70 leading-relaxed">{view.description}</p>
 
+        {bookingCode && (
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Kode Pesanan</p>
+            <p className="font-mono font-bold text-emerald-deep">{bookingCode}</p>
+          </div>
+        )}
+
         {view.bookingId && (view.kind === "pending" || view.kind === "nogateway") && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             {view.kind === "pending" ? (
@@ -200,6 +226,13 @@ function FinishContent() {
                 Lihat Pesanan <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
+            {bookingCode && (
+              <Link href={`/tracking?code=${encodeURIComponent(bookingCode)}`}>
+                <Button variant="outline" className="h-12 px-6 border-emerald-dark/30 text-emerald-dark hover:bg-emerald-dark/5 gap-2">
+                  <Compass className="w-4 h-4" /> Lacak Pesanan
+                </Button>
+              </Link>
+            )}
             <Link href="/packages">
               <Button variant="outline" className="h-12 px-6 border-emerald-dark/30 text-emerald-dark hover:bg-emerald-dark/5">
                 ← Cari Paket
