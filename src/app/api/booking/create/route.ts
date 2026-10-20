@@ -223,6 +223,23 @@ export async function POST(_request: NextRequest) {
       return NextResponse.json({ error: "Gagal membuat booking" }, { status: 500 })
     }
 
+    // 2b. Seed langkah progres tracking (gagal sekalipun tidak menggagalkan booking)
+    try {
+      const { TRACKING_STEP_DEFS } = await import("@/lib/tracking-steps")
+      await admin.from("booking_progress_steps").upsert(
+        TRACKING_STEP_DEFS.map((s) => ({
+          booking_id: booking.id,
+          step_key: s.key,
+          label: s.label,
+          sort_order: s.sort_order,
+          status: s.key === "payment" ? "in_progress" : "pending",
+        })),
+        { onConflict: "booking_id,step_key" },
+      )
+    } catch (seedErr) {
+      console.warn("[booking/create] Gagal seed booking_progress_steps:", seedErr)
+    }
+
     // 3. Insert participants
     if (pilgrims && pilgrims.length > 0) {
       const participantRecords = pilgrims.map((p) => ({

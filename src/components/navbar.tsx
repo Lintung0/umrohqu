@@ -35,9 +35,10 @@ const ROLE_DASHBOARD_LABEL_KEYS: Record<string, string> = {
   customer: "dashboard_saya",
 }
 
-const NAV_LINKS_KEYS = ["search_packages", "travel", "faq"] as const
+const NAV_LINKS_KEYS = ["search_packages", "tracking", "travel", "faq"] as const
 const NAV_HREFS: Record<string, string> = {
   search_packages: "/packages",
+  tracking: "/tracking",
   promo: "/promotions",
   faq: "/faq",
   travel: "/travel",
