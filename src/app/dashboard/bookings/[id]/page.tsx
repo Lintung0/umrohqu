@@ -630,11 +630,21 @@ const TIMELINE_STEPS = [
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{t("booking.booking_code")}</p>
-            <h1 className="text-xl font-bold font-mono mt-1">{booking.booking_code || booking.id.slice(0, 8).toUpperCase()}</h1>
+            <div className="flex items-center gap-2 mt-1">
+              <h1 className="text-xl font-bold font-mono">{booking.booking_code || booking.id.slice(0, 8).toUpperCase()}</h1>
+              <button
+                onClick={() => {
+                  const code = booking.booking_code || booking.id.slice(0, 8).toUpperCase()
+                  navigator.clipboard.writeText(code)
+                  toast.success(t("booking.booking_code") + " ✓")
+                }}
+                title="Salin kode pesanan"
+                className="p-1.5 rounded-lg hover:bg-ivory transition-colors cursor-pointer"
+              >
+                <Copy className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
             <p className="text-muted-foreground mt-1">{pkg?.name || t("booking.package")}</p>
-            {booking.booking_code && (
-              <p className="text-xs text-muted-foreground font-mono mt-0.5">ID: {booking.id.slice(0, 8).toUpperCase()}</p>
-            )}
           </div>
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <span className={`w-2 h-2 rounded-full ${STATUS_ACCENT[booking.status] ?? "bg-ivory-border"}`} />
@@ -893,12 +903,14 @@ const TIMELINE_STEPS = [
       {/* ── Payment Status Sections (3 conditions) ── */}
       <PaymentStatusSection
         bookingId={booking.id}
-        bookingCode={booking.booking_code ?? null}
         status={booking.status}
         total={booking.total}
         paidAmount={booking.paid_amount}
         remainingBalance={booking.remaining_balance}
         paymentType={booking.payment_scheme === "down_payment" || booking.payment_scheme === "installment" ? "dp" : "full"}
+        isInstallment={booking.payment_scheme === "installment"}
+        installmentPaidCount={(booking.invoices || []).filter((i) => i.status === "paid").length}
+        installmentTotalCount={(booking.invoices || []).length}
         dpAmount={booking.down_payment_amount}
         dpPercentage={Number(booking.price || 0) * (booking.pilgrim_count || 1) > 0 ? Math.round(Number(booking.down_payment_amount || 0) / (Number(booking.price || 0) * (booking.pilgrim_count || 1)) * 100) : 0}
         remainingAmount={booking.remaining_amount}
@@ -1163,18 +1175,21 @@ function PaymentTimeline({ snapCreated, methodChosen }: { snapCreated: boolean; 
 }
 
 function PaymentStatusSection({
-  bookingId, bookingCode, status, total, paidAmount, remainingBalance,
-  paymentType, dpAmount, dpPercentage, remainingAmount,
+  bookingId, status, total, paidAmount, remainingBalance,
+  paymentType, isInstallment, installmentPaidCount, installmentTotalCount,
+  dpAmount, dpPercentage, remainingAmount,
   remainingDueDate, paidAt, paymentMethod, createdAt,
   activePayment,
 }: {
   bookingId: string
-  bookingCode: string | null
   status: string
   total: number
   paidAmount: number
   remainingBalance: number
   paymentType: string | null
+  isInstallment: boolean
+  installmentPaidCount: number
+  installmentTotalCount: number
   dpAmount: number | null
   dpPercentage: number | null
   remainingAmount: number | null
@@ -1259,6 +1274,49 @@ function PaymentStatusSection({
       // tetap reload agar status terbaru tampil
     }
     window.location.reload()
+  }
+
+  // ── KONDISI 0: CICILAN BERJALAN (skema cicilan, sudah ada yang dibayar) ──
+  // Berbasis data invoice nyata, bukan status booking yang bisa tertinggal.
+  if (isInstallment && !isFullyPaid && installmentPaidCount > 0 && !["cancelled", "cancellation_pending", "refunded"].includes(status)) {
+    const progressPercent = installmentTotalCount > 0
+      ? Math.round((installmentPaidCount / installmentTotalCount) * 100)
+      : 0
+    const remainingTermin = Math.max(installmentTotalCount - installmentPaidCount, 0)
+    return (
+      <div className="bg-ivory-card rounded-2xl border border-emerald-dark/20 p-6 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-emerald-dark/10 rounded-xl flex items-center justify-center shrink-0">
+            <CreditCard className="w-6 h-6 text-emerald-dark" />
+          </div>
+          <div>
+            <h3 className="font-bold text-emerald-deep">Cicilan Berjalan</h3>
+            <p className="text-sm text-emerald-dark">
+              {installmentPaidCount} dari {installmentTotalCount} termin terbayar. Lanjutkan cicilan sesuai jadwal.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-baseline justify-between text-sm">
+            <span className="text-muted-foreground">Terbayar</span>
+            <span className="font-bold text-emerald-deep tabular-nums">
+              {formatRupiah(effectivePaid)} <span className="text-muted-foreground font-normal">/ {formatRupiah(total)}</span>
+            </span>
+          </div>
+          <div className="w-full bg-ivory-border/50 h-2.5 rounded-full overflow-hidden">
+            <div
+              className="bg-emerald-dark h-full rounded-full transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{progressPercent}% terbayar</span>
+            <span>Sisa {formatRupiah(effectiveRemaining)} · {remainingTermin} termin lagi</span>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // ── KONDISI 1: LUNAS (Fully Paid) ──
@@ -1482,7 +1540,7 @@ function PaymentStatusSection({
     )
   }
 
-  // ── KONDISI 4: Belum Bayar (belum ada transaksi gateway) ──
+  // ── KONDISI 4: Belum Bayar ──
   if (status === "pending_payment") {
     return (
       <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
@@ -1493,33 +1551,23 @@ function PaymentStatusSection({
           <div>
             <h3 className="font-bold text-emerald-deep">Menunggu Pembayaran</h3>
             <p className="text-sm text-gold-dark mt-0.5">
-              Silakan selesaikan pembayaran untuk mengkonfirmasi booking Anda.
+              Selesaikan pembayaran untuk mengkonfirmasi pesanan Anda.
             </p>
           </div>
         </div>
-        <PaymentTimeline snapCreated={hasActiveVA} methodChosen={false} />
-        {hasActiveVA ? (
-          <p className="text-xs text-gold-dark bg-gold/10 border border-gold/30 rounded-xl p-3">
-            Transaksi sempat dibuat tapi metode belum dipilih (popup tertutup?) — tekan Bayar di bawah untuk mengulang. Tidak perlu buat booking baru.
-          </p>
-        ) : (
-          <p className="text-xs text-gold-dark bg-gold/10 border border-gold/30 rounded-xl p-3">
-            Belum ada transaksi di gateway — tekan Bayar untuk memulai pembayaran.
-          </p>
-        )}
         {liveMsg && (
           <p className="text-xs text-emerald-deep bg-emerald-dark/5 border border-emerald-dark/20 rounded-xl p-3">
             {liveMsg}
           </p>
         )}
+        <PayNowSection bookingId={bookingId} total={total} />
         <button
           onClick={runGatewayCheck}
           disabled={checking}
           className="w-full py-3 rounded-xl font-semibold border border-emerald-dark/30 text-emerald-dark hover:bg-emerald-dark/5 transition-colors flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer disabled:opacity-60"
         >
-          <><Loader2 className={`w-4 h-4 ${checking ? "animate-spin" : ""}`} /> Sudah bayar? Cek ke Gateway</>
+          <><Loader2 className={`w-4 h-4 ${checking ? "animate-spin" : ""}`} /> Sudah bayar? Cek Status</>
         </button>
-        <PayNowSection bookingId={bookingId} bookingCode={bookingCode} total={total} />
       </div>
     )
   }
@@ -1530,7 +1578,7 @@ function PaymentStatusSection({
 
 // ─── Pay Now Section (Full Payment) ──────────────────────────────────────────
 
-function PayNowSection({ bookingId, bookingCode, total }: { bookingId: string; bookingCode: string | null; total: number }) {
+function PayNowSection({ bookingId, total }: { bookingId: string; total: number }) {
   const { t } = useTranslation()
   const [submitting, setSubmitting] = useState(false)
   // Guard anti double-klik se-tick (state saja bisa ditembus 2 klik cepat)
@@ -1561,21 +1609,6 @@ function PayNowSection({ bookingId, bookingCode, total }: { bookingId: string; b
 
   return (
     <div className="space-y-4">
-      <div className="bg-ivory rounded-xl p-4">
-        <p className="text-xs text-muted-foreground mb-1">{t("booking.booking_code")}</p>
-        <div className="flex items-center gap-2">
-          <p className="font-mono font-bold text-lg">{bookingCode || bookingId.slice(0, 8).toUpperCase()}</p>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(bookingCode || bookingId.slice(0, 8).toUpperCase())
-              toast.success(t("booking.booking_code") + " ✓")
-            }}
-            className="p-1 hover:bg-ivory rounded transition-colors cursor-pointer"
-          >
-            <Copy className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
-      </div>
       <button
         onClick={handlePay}
         disabled={submitting}
