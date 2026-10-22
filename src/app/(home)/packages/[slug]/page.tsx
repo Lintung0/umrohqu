@@ -88,7 +88,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
   try {
     const { data: pkgData, error } = await supabase
       .from("packages")
-      .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, brand_color, description, city)")
+      .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, brand_color, description, config)")
       .eq("slug", decodedSlug)
       .in("status", ["active", "ongoing"])
       .is("deleted_at", null)
@@ -135,7 +135,10 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     .filter((g): g is PackageGalleryRow & { image_url: string } => typeof g.image_url === "string")
     .map((i) => ({ url: i.image_url, type: (i.media_type === "video" ? "video" : "image") as "image" | "video" }))
 
-  const travel = Array.isArray(pkg.travel) ? (pkg.travel[0] ?? null) : pkg.travel
+  const travelRef = Array.isArray(pkg.travel) ? (pkg.travel[0] ?? null) : pkg.travel
+  const travel = travelRef
+    ? { ...travelRef, city: ((travelRef as any)?.config?.city as string | undefined) ?? null }
+    : null
 
   return (
     <PackageDetailClient

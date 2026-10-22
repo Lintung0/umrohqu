@@ -64,7 +64,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
   try {
     const tenantQuery = await supabase
       .from("tenants")
-      .select("id, slug, name, logo_url, description, founded_year, is_verified, is_featured, brand_color, city")
+      .select("id, slug, name, logo_url, description, founded_year, is_verified, is_featured, brand_color, config")
       .eq("slug", slug)
       .is("deleted_at", null)
       .single()
@@ -72,7 +72,11 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
     if (tenantQuery.error || !tenantQuery.data) notFound()
     const tenantBase = tenantQuery.data as Tenant
     const tenantEnriched = (await enrichTenantsWithDetail(supabase, [tenantBase])) as unknown as TenantRow[]
-    tenant = tenantEnriched?.[0] ?? (tenantBase as unknown as TenantRow)
+    const resolvedTenant = tenantEnriched?.[0] ?? (tenantBase as unknown as TenantRow)
+    tenant = {
+      ...resolvedTenant,
+      city: ((tenantBase as any)?.config?.city as string | undefined) ?? resolvedTenant.city ?? null,
+    }
 
     const packagesResult = await supabase
       .from("packages")

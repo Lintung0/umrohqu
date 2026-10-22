@@ -5,7 +5,6 @@ import { z } from "zod"
 const schema = z.object({
   tenantId: z.string().uuid(),
   name: z.string().min(1).max(200).optional(),
-  city: z.string().max(120).nullable().optional(),
   contact_email: z.string().email().nullable().optional(),
   contact_phone: z.string().max(30).nullable().optional(),
   custom_domain: z.string().max(255).nullable().optional(),

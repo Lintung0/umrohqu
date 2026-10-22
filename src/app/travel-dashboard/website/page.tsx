@@ -82,7 +82,7 @@ export default function TravelWebsitePage() {
     setSaving(true)
     const { error } = await supabase.from("tenants").update({
       custom_domain: customDomain || null,
-      config: { brand_color: brandColor, description },
+      config: { ...((tenantData?.config as Record<string, unknown>) || {}), brand_color: brandColor, description },
     }).eq("id", tenantId)
     if (error) {
       toast.error(t("toast.error") + ": " + error.message)

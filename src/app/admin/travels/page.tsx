@@ -14,10 +14,14 @@ interface TenantRow {
   contact_email: string | null
   contact_phone: string | null
   status: string
-  city: string | null
   config: Record<string, unknown> | null
   package_count?: number
   booking_count?: number
+}
+
+function tenantCity(tenant: TenantRow): string {
+  const value = tenant.config?.city
+  return typeof value === "string" ? value : ""
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -39,7 +43,7 @@ export default function AdminTravelsPage() {
     async function load() {
       const { data } = await supabase
         .from("tenants")
-        .select("id, name, slug, custom_domain, contact_email, contact_phone, status, config, city")
+        .select("id, name, slug, custom_domain, contact_email, contact_phone, status, config")
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
 
@@ -73,13 +77,14 @@ export default function AdminTravelsPage() {
     setUpdatingId(null)
   }
 
-  async function updateCity(tenantId: string, city: string) {
-    const value = city.trim() || null
-    const { error } = await supabase.from("tenants").update({ city: value }).eq("id", tenantId)
+  async function updateCity(tenantId: string, city: string, currentConfig: Record<string, unknown> | null) {
+    const value = city.trim()
+    const nextConfig = { ...(currentConfig || {}), city: value }
+    const { error } = await supabase.from("tenants").update({ config: nextConfig }).eq("id", tenantId)
     if (error) {
       toast.error("Gagal menyimpan kota")
     } else {
-      setTenants((prev) => prev.map((t) => t.id === tenantId ? { ...t, city: value } : t))
+      setTenants((prev) => prev.map((t) => t.id === tenantId ? { ...t, config: nextConfig } : t))
       toast.success("Lokasi pusat disimpan")
     }
   }
@@ -192,9 +197,9 @@ export default function AdminTravelsPage() {
             <div>
               <label className="text-[11px] text-muted-foreground">Lokasi pusat</label>
               <input
-                defaultValue={tenant.city || ""}
+                defaultValue={tenantCity(tenant)}
                 onBlur={(e) => {
-                  if (e.target.value !== (tenant.city || "")) updateCity(tenant.id, e.target.value)
+                  if (e.target.value !== tenantCity(tenant)) updateCity(tenant.id, e.target.value, tenant.config)
                 }}
                 placeholder="Contoh: Surabaya"
                 className="mt-1 w-full px-2.5 py-1.5 text-xs border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"

@@ -15,6 +15,7 @@ export default function TravelSettingsPage() {
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [tenantName, setTenantName] = useState("")
   const [tenantCity, setTenantCity] = useState("")
+  const [tenantConfig, setTenantConfig] = useState<Record<string, unknown>>({})
   const [tenantEmail, setTenantEmail] = useState("")
   const [tenantPhone, setTenantPhone] = useState("")
   const [activeTab, setActiveTab] = useState<"profile" | "password">("profile")
@@ -29,10 +30,12 @@ export default function TravelSettingsPage() {
         const { data: profile } = await supabase.from("users").select("tenant_id").eq("id", user.id).single()
         if (profile?.tenant_id) {
           setTenantId(profile.tenant_id)
-          const { data: tenant } = await supabase.from("tenants").select("name, description, city").eq("id", profile.tenant_id).single()
+          const { data: tenant } = await supabase.from("tenants").select("name, description, config").eq("id", profile.tenant_id).single()
           if (tenant) {
+            const cfg = (tenant.config || {}) as Record<string, unknown>
+            setTenantConfig(cfg)
             setTenantName(tenant.name || "")
-            setTenantCity(tenant.city || "")
+            setTenantCity(typeof cfg.city === "string" ? cfg.city : "")
             setTenantEmail("")
             setTenantPhone("")
           }
@@ -53,7 +56,7 @@ export default function TravelSettingsPage() {
         body: JSON.stringify({
           tenantId,
           name: tenantName,
-          city: tenantCity.trim() || null,
+          config: { ...tenantConfig, city: tenantCity.trim() },
           contact_email: tenantEmail || null,
           contact_phone: tenantPhone || null,
         }),
