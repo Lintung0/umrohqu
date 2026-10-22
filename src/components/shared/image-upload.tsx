@@ -16,12 +16,12 @@ export function ImageUpload({ value, onChange, bucket = "packages", folder = "im
   const [uploading, setUploading] = useState(false)
   const [previewError, setPreviewError] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
+    const supabase = createClient()
     setUploading(true)
     try {
       const ext = file.name.split(".").pop()

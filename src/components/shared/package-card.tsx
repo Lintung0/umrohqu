@@ -37,7 +37,6 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
   const { t } = useTranslation()
   const { addToCompare, removeFromCompare, isSelected, isFull } = useCompare()
   const router = useRouter()
-  const supabase = createClient()
   const [imgSrc, setImgSrc] = useState(getSafeImage((pkg.images && pkg.images[0]) || pkg.image_url))
   const [imgError, setImgError] = useState(false)
   const [isWishlisted, setIsWishlisted] = useState(false)
@@ -53,6 +52,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     let cancelled = false
     async function checkWishlist() {
       try {
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user || cancelled) return
         const { data } = await supabase
@@ -68,12 +68,13 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
     checkWishlist()
     return () => { cancelled = true }
-  }, [pkg.id, supabase])
+  }, [pkg.id])
 
   useEffect(() => {
     let cancelled = false
     async function fetchRating() {
       try {
+        const supabase = createClient()
         const { data: bookings } = await supabase
           .from("bookings")
           .select("id")
@@ -97,7 +98,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     }
     fetchRating()
     return () => { cancelled = true }
-  }, [pkg.id, supabase])
+  }, [pkg.id])
 
   function handleError() {
     if (!imgError) {
@@ -135,6 +136,7 @@ export default function PackageCard({ pkg, travel, showTravel = true, variant = 
     e.stopPropagation()
     if (togglingWishlist) return
 
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       router.push("/login")

@@ -21,7 +21,6 @@ interface AppNotification {
 }
 
 export default function NotificationBell() {
-  const supabase = createClient()
   const pathname = usePathname()
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -33,6 +32,7 @@ export default function NotificationBell() {
   const ActiveIcon = items.length > 0 && unread > 0 ? BellRing : Bell
 
   async function load() {
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       setItems([])
@@ -75,6 +75,7 @@ export default function NotificationBell() {
   }, [pathname])
 
   async function markAllRead() {
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     await supabase
@@ -89,6 +90,7 @@ export default function NotificationBell() {
 
   async function openItem(item: AppNotification) {
     if (!item.is_read) {
+      const supabase = createClient()
       await supabase
         .from("notifications")
         .update({ is_read: true, read_at: new Date().toISOString() })
