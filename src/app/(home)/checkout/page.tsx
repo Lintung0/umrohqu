@@ -53,7 +53,7 @@ function CheckoutContent() {
   const allPilgrimsFilled = pilgrims.every((p) => p.full_name.trim().length > 0 && p.phone.trim().length > 0)
 
   const STEPS = useMemo(() => [
-    { id: "package", label: "Data Jamaah" },
+    { id: "package", label: "Data Jemaah" },
     { id: "payment", label: "Pembayaran" },
     { id: "confirm", label: "Selesai" },
   ], [])
@@ -536,7 +536,7 @@ function StepDataSingkat({
 
         <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 shadow-sm">
           <label className="text-sm font-semibold mb-3 block">
-            Jml. Jamaah
+            Jml. Jemaah
           </label>
           <div className="flex items-center gap-3">
             <button
@@ -715,7 +715,7 @@ function StepDataSingkat({
                 <span className="font-medium text-emerald-deep">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Jml. Jamaah</span>
+                <span className="text-ivory-ink/70">Jml. Jemaah</span>
                 <span className="font-medium text-emerald-deep">x{pilgrimCount}</span>
               </div>
             </div>
@@ -943,7 +943,7 @@ function StepPayment({
                 <span className="font-medium">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Jml. Jamaah</span>
+                <span className="text-ivory-ink/70">Jml. Jemaah</span>
                 <span className="font-medium">x{pilgrimCount}</span>
               </div>
               <div className="flex justify-between">
@@ -1094,7 +1094,7 @@ function StepReview({
                 <span className="font-medium">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Jml. Jamaah</span>
+                <span className="text-ivory-ink/70">Jml. Jemaah</span>
                 <span className="font-medium">x{pilgrimCount}</span>
               </div>
               <div className="flex justify-between">

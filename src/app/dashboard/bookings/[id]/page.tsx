@@ -355,10 +355,10 @@ const TIMELINE_STEPS = [
         })
         .eq("id", editingParticipant.id)
       if (error) throw error
-      toast.success("Data jamaah berhasil disimpan")
+      toast.success("Data jemaah berhasil disimpan")
       handleCloseParticipantModal()
     } catch (err: any) {
-      toast.error(err.message || "Gagal menyimpan data jamaah")
+      toast.error(err.message || "Gagal menyimpan data jemaah")
       // Rollback on error
       router.refresh()
     } finally {
@@ -415,8 +415,8 @@ const TIMELINE_STEPS = [
                   <UserRound className="w-5 h-5 text-gold-dark" />
                 </div>
                 <div>
-                  <h2 className="font-semibold text-emerald-deep">Data Diri Jamaah</h2>
-                  <p className="text-xs text-muted-foreground">{editingParticipant.full_name} • {editingParticipant.relation === "self" ? "Jamaah Utama" : "Pendamping"}</p>
+                  <h2 className="font-semibold text-emerald-deep">Data Diri Jemaah</h2>
+                  <p className="text-xs text-muted-foreground">{editingParticipant.full_name} • {editingParticipant.relation === "self" ? "Jemaah Utama" : "Pendamping"}</p>
                 </div>
               </div>
               <button onClick={handleCloseParticipantModal} className="p-2 rounded-xl text-muted-foreground hover:text-emerald-dark hover:bg-ivory transition-colors" aria-label="Tutup">
@@ -1271,8 +1271,8 @@ function PaymentStatusSection({
             <CheckCircle className="w-6 h-6 text-emerald-dark" />
           </div>
           <div>
-            <h3 className="font-bold text-emerald-deep">Lunas & Dikonfirmasi</h3>
-            <p className="text-sm text-emerald-dark">Pembayaran penuh diterima. Dalam persiapan dokumen travel</p>
+            <h3 className="font-bold text-emerald-deep">Menunggu Konfirmasi Travel</h3>
+            <p className="text-sm text-emerald-dark">Pembayaran penuh diterima. Menunggu konfirmasi dari travel</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm">
