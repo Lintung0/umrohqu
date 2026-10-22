@@ -6,7 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
-import { Loader2, CreditCard, CheckCircle, AlertCircle, Shield, Sparkles, ChevronRight, ChevronDown, ChevronUp, User } from "lucide-react"
+import { Loader2, CheckCircle, AlertCircle, ChevronRight, ChevronDown, ChevronUp, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { getPackageAvailable } from "@/lib/utils"
@@ -590,17 +590,29 @@ function StepDataSingkat({
 
                 <div>
                   {idx === 0 && (
-                    <label className="flex items-center gap-2 mb-5 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={!!useMyData[idx]}
-                        onChange={(e) => handleUseMyData(idx, e.target.checked)}
-                        className="w-4 h-4 rounded border-ivory-border accent-emerald-700 cursor-pointer"
-                      />
-                      <span className="text-base font-medium text-emerald-deep">
-                        Pesanan Pribadi
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={!!useMyData[idx]}
+                      onClick={() => handleUseMyData(idx, !useMyData[idx])}
+                      className={`w-full flex items-center gap-3 mb-5 p-3.5 rounded-xl border text-left transition-colors cursor-pointer ${
+                        useMyData[idx]
+                          ? "border-emerald-dark/40 bg-emerald-dark/5"
+                          : "border-ivory-border bg-ivory hover:border-gold/50"
+                      }`}
+                    >
+                      <span className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                        useMyData[idx] ? "bg-emerald-dark" : "bg-ivory-border"
+                      }`}>
+                        <span className={`inline-block h-5 w-5 transform rounded-full bg-ivory-card shadow transition-transform ${
+                          useMyData[idx] ? "translate-x-[22px]" : "translate-x-0.5"
+                        }`} />
                       </span>
-                    </label>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-emerald-deep">Pesanan Pribadi</span>
+                        <span className="block text-xs text-ivory-ink/60">Isi otomatis dengan nama & nomor Anda</span>
+                      </span>
+                    </button>
                   )}
                   <label className="text-base font-medium text-ivory-ink/70 mb-1.5 block">
                     Nama Lengkap *
@@ -779,205 +791,209 @@ function StepPayment({
     : [12, 24, 36]
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 space-y-5">
-        <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 space-y-4 shadow-sm">
-          <label className="text-sm font-semibold">Tipe Pembayaran</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setPaymentType("installment")}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${isInstallment ? "border-emerald-dark bg-emerald-dark/10 shadow-sm" : "border-ivory-border hover:border-gold/60"}`}
-            >
-              <div className="flex items-center justify-between mb-1.5">
-                <Sparkles className={`w-5 h-5 ${isInstallment ? "text-emerald-dark" : "text-ivory-ink/70"}`} />
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold/20 text-gold-dark border border-gold/30">Rekomendasi</span>
-              </div>
-              <p className="text-sm font-semibold text-emerald-deep">Cicilan Berkala</p>
-              <p className="text-xs text-ivory-ink/70 mt-0.5">Uang muka dulu, sisanya dicicil</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaymentType("full")}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${!isInstallment ? "border-emerald-dark bg-emerald-dark/10 shadow-sm" : "border-ivory-border hover:border-gold/60"}`}
-            >
-              <CheckCircle className={`w-5 h-5 mb-1.5 ${!isInstallment ? "text-emerald-dark" : "text-ivory-ink/70"}`} />
-              <p className="text-sm font-semibold text-emerald-deep">Bayar Penuh</p>
-              <p className="text-xs text-ivory-ink/70 mt-0.5">Bayar lunas sekarang</p>
-            </button>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="lg:col-span-2 space-y-6">
+        {/* Tipe pembayaran: segmented control, satu track */}
+        <section className="border-b border-ivory-border pb-6">
+          <h3 className="text-sm font-semibold text-emerald-deep mb-3">Tipe Pembayaran</h3>
+          <div className="inline-flex w-full sm:w-auto p-1 bg-ivory rounded-lg border border-ivory-border">
+            {[
+              { key: "installment" as const, label: "Cicilan" },
+              { key: "full" as const, label: "Bayar Penuh" },
+            ].map((opt) => {
+              const active = paymentType === opt.key
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setPaymentType(opt.key)}
+                  aria-pressed={active}
+                  className={`flex-1 sm:flex-none px-5 py-2.5 rounded-md text-sm font-semibold transition-colors cursor-pointer min-h-[44px] ${
+                    active
+                      ? "bg-emerald-dark text-ivory"
+                      : "text-ivory-ink/70 hover:text-emerald-dark"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              )
+            })}
           </div>
+          <p className="text-xs text-ivory-ink/60 mt-2">
+            {isInstallment
+              ? "Bayar uang muka dulu, sisanya dicicil tiap bulan."
+              : "Satu kali bayar lunas untuk seluruh biaya paket."}
+          </p>
+        </section>
 
-          {isInstallment && (
-            <div className="space-y-4 pt-3 border-t border-ivory-border/70">
-              {/* Pilihan Tenor */}
-              <div>
-                <p className="text-xs font-semibold text-ivory-ink/80 mb-2">Pilih Tenor Cicilan</p>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {availableTenors.map((t) => {
-                    const matchedOption = installmentOptions.find((o) => o.tenor_months === t)
-                    const simMonthly = Math.round(remainingAmount / t)
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => {
-                          setTenorMonths(t)
-                          setSelectedOptionId(matchedOption?.id || null)
-                        }}
-                        className={`py-3 px-2 rounded-xl text-center border-2 transition-all cursor-pointer ${
-                          tenorMonths === t
-                            ? "border-emerald-dark bg-emerald-dark/10 text-emerald-deep font-bold ring-2 ring-emerald-dark/20"
-                            : "border-ivory-border hover:border-gold/60 text-ivory-ink/80"
-                        }`}
-                      >
-                        <span className="text-sm block font-bold">{t} Bulan</span>
-                        <span className="text-[10px] text-ivory-ink/70 block mt-0.5 font-normal">
-                          {formatRupiah(simMonthly)}/bln
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Pilihan Uang Muka */}
-              <div>
-                <p className="text-xs font-semibold text-ivory-ink/80 mb-2">Besaran Uang Muka (Pembayaran Pertama)</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {DP_OPTIONS.map((pct) => {
-                    const dpNominal = Math.round((totalPrice * pct) / 100)
-                    return (
-                      <button
-                        key={pct}
-                        type="button"
-                        onClick={() => setDpPercentage(pct)}
-                        className={`py-2 px-1.5 rounded-xl text-center border-2 transition-all cursor-pointer ${
-                          dpPercentage === pct
-                            ? "border-emerald-dark bg-emerald-dark/10 text-emerald-deep font-bold ring-2 ring-emerald-dark/20"
-                            : "border-ivory-border hover:border-gold/60 text-ivory-ink/80"
-                        }`}
-                      >
-                        <span className="text-sm block font-bold">{pct}%</span>
-                        <span className="text-[10px] text-ivory-ink/70 block mt-0.5 truncate">{formatRupiah(dpNominal)}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Simulasi Cicilan */}
-              <div className="bg-emerald-dark/5 border border-emerald-dark/15 rounded-xl p-3.5 space-y-2 text-xs">
-                <div className="flex justify-between items-center text-ivory-ink/80">
-                  <span>Pembayaran Pertama (Uang Muka)</span>
-                  <span className="font-semibold text-emerald-deep">{formatRupiah(dpAmount)}</span>
-                </div>
-                <div className="flex justify-between items-center text-ivory-ink/80">
-                  <span>Cicilan Bulanan ({tenorMonths} bulan)</span>
-                  <span className="font-semibold text-emerald-deep">{formatRupiah(monthlyAmount)} / bulan</span>
-                </div>
-                <div className="flex justify-between items-center pt-2 border-t border-emerald-dark/15 font-semibold text-emerald-deep">
-                  <span>Total Biaya Paket</span>
-                  <span>{formatRupiah(totalPrice)}</span>
-                </div>
+        {isInstallment && (
+          <section className="space-y-6">
+            {/* Tenor: strip angka, bukan grid kotak */}
+            <div>
+              <h3 className="text-sm font-semibold text-emerald-deep mb-1">Tenor Cicilan</h3>
+              <p className="text-xs text-ivory-ink/60 mb-3">Pilih rentang waktu cicilan.</p>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {availableTenors.map((t) => {
+                  const matchedOption = installmentOptions.find((o) => o.tenor_months === t)
+                  const simMonthly = Math.round(remainingAmount / t)
+                  const active = tenorMonths === t
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        setTenorMonths(t)
+                        setSelectedOptionId(matchedOption?.id || null)
+                      }}
+                      aria-pressed={active}
+                      className={`pb-1.5 border-b-2 transition-colors cursor-pointer min-h-[44px] text-left ${
+                        active ? "border-gold" : "border-transparent hover:border-ivory-border"
+                      }`}
+                    >
+                      <span className={`block text-base font-bold ${active ? "text-emerald-dark" : "text-ivory-ink/60"}`}>
+                        {t} bulan
+                      </span>
+                      <span className="block text-xs text-ivory-ink/50">{formatRupiah(simMonthly)}/bln</span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
-          )}
-        </div>
 
-        <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 space-y-3 shadow-sm">
-          <label className="text-sm font-semibold">Metode Pembayaran</label>
-          <div className="w-full p-4 rounded-xl border-2 border-emerald-dark/25 bg-emerald-dark/5 text-left">
-            <div className="flex items-start gap-3">
-              <CreditCard className="w-5 h-5 mt-0.5 shrink-0 text-emerald-dark" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-emerald-deep">Metode Pembayaran Resmi</p>
-                <p className="text-xs text-ivory-ink/70 mb-2">Virtual Account (Bank Transfer: BCA, Mandiri, BNI, BRI, Permata), Kartu Kredit, atau Tunai di Kantor Travel</p>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {["BCA VA", "Mandiri Bill", "BNI VA", "BRI VA", "Permata VA", "Kartu Kredit", "Tunai di Travel"].map((m) => (
-                    <span key={m} className="px-2 py-1 bg-ivory-card border border-ivory-border rounded-md text-[10px] font-semibold text-ivory-ink/70">
-                      {m}
-                    </span>
-                  ))}
-                </div>
+            {/* Uang muka: segmented kecil */}
+            <div>
+              <h3 className="text-sm font-semibold text-emerald-deep mb-1">Uang Muka</h3>
+              <p className="text-xs text-ivory-ink/60 mb-3">Pembayaran pertama saat booking.</p>
+              <div className="inline-flex w-full sm:w-auto p-1 bg-ivory rounded-lg border border-ivory-border">
+                {DP_OPTIONS.map((pct) => {
+                  const active = dpPercentage === pct
+                  return (
+                    <button
+                      key={pct}
+                      type="button"
+                      onClick={() => setDpPercentage(pct)}
+                      aria-pressed={active}
+                      className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-semibold transition-colors cursor-pointer min-h-[44px] ${
+                        active ? "bg-emerald-dark text-ivory" : "text-ivory-ink/70 hover:text-emerald-dark"
+                      }`}
+                    >
+                      {pct}%
+                    </button>
+                  )
+                })}
               </div>
-              <CheckCircle className="w-4 h-4 mt-0.5 shrink-0 text-emerald-dark" />
+              <p className="text-xs text-ivory-ink/60 mt-2">
+                Uang muka: <span className="font-semibold text-emerald-deep">{formatRupiah(dpAmount)}</span> · sisa {formatRupiah(remainingAmount)} dicicil {tenorMonths} bulan.
+              </p>
             </div>
-          </div>
-        </div>
 
-        <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 space-y-3 shadow-sm">
-          <label className="text-sm font-semibold">Catatan (Opsional)</label>
+            {/* Simulasi: gaya struk, garis pemisah tipis */}
+            <div className="border-t border-ivory-border pt-4 space-y-2.5 text-sm">
+              <div className="flex items-baseline justify-between">
+                <span className="text-ivory-ink/60">Pembayaran pertama</span>
+                <span className="font-semibold text-emerald-deep tabular-nums">{formatRupiah(dpAmount)}</span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-ivory-ink/60">Cicilan per bulan</span>
+                <span className="font-semibold text-emerald-deep tabular-nums">{formatRupiah(monthlyAmount)}</span>
+              </div>
+              <div className="flex items-baseline justify-between pt-2.5 border-t border-ivory-border">
+                <span className="font-medium text-emerald-deep">Total biaya paket</span>
+                <span className="font-bold text-emerald-deep tabular-nums">{formatRupiah(totalPrice)}</span>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Metode: blok datar, garis kiri gold sebagai penanda finalitas */}
+        <section className="border-l-2 border-gold pl-4 py-1">
+          <h3 className="text-sm font-semibold text-emerald-deep mb-1">Metode Pembayaran</h3>
+          <p className="text-xs text-ivory-ink/60 mb-2">
+            Diproses aman melalui Midtrans. Pilih metodenya di langkah berikutnya.
+          </p>
+          <ul className="text-sm text-ivory-ink/70 space-y-0.5">
+            {["Virtual Account (BCA, Mandiri, BNI, BRI, Permata)", "Kartu kredit / debit", "E-wallet", "Tunai di kantor travel"].map((m) => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section>
+          <label htmlFor="checkout-notes" className="text-sm font-semibold text-emerald-deep block mb-2">
+            Catatan untuk travel <span className="font-normal text-ivory-ink/50">(opsional)</span>
+          </label>
           <textarea
+            id="checkout-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Catatan untuk travel..."
+            placeholder="Misalnya: permintaan kamar, kebutuhan khusus jemaah."
             rows={2}
-            className="w-full border border-ivory-border rounded-xl px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-colors"
+            className="w-full bg-ivory-card border border-ivory-border rounded-lg px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-colors"
           />
-        </div>
+        </section>
 
-        <div className="lg:hidden flex justify-between">
-          <Button variant="outline" onClick={() => setStep(0)}>← Kembali</Button>
-          <Button onClick={() => setStep(reviewStep)} className="gap-2 px-6 h-12">Tinjau <ChevronRight className="w-4 h-4" /></Button>
+        <div className="lg:hidden flex justify-between pt-1">
+          <Button variant="outline" onClick={() => setStep(0)}>Kembali</Button>
+          <Button onClick={() => setStep(reviewStep)} className="px-6 h-12">Lanjutkan</Button>
         </div>
       </div>
 
       <div className="lg:col-span-1">
-        <div className="lg:sticky lg:top-24 space-y-4">
-          <div className="bg-ivory-card border border-ivory-border rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Pesanan</h3>
+        <div className="lg:sticky lg:top-24">
+          <div className="bg-ivory-card border border-ivory-border rounded-xl p-6">
+            <h3 className="text-sm font-semibold text-emerald-deep mb-4">Ringkasan Pesanan</h3>
 
-            <div className="flex gap-3 pb-4 border-b border-ivory-border/60">
-              <div className="relative w-16 h-14 rounded-xl overflow-hidden shrink-0">
+            <div className="flex gap-3 pb-4 border-b border-ivory-border">
+              <div className="relative w-16 h-14 rounded-md overflow-hidden shrink-0">
                 <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name} fill className="object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-ivory-ink/70 truncate">{travel?.name}</p>
+                <p className="text-[11px] text-ivory-ink/60 truncate">{travel?.name}</p>
                 <p className="text-sm font-semibold text-emerald-deep leading-snug line-clamp-2">{pkg.name}</p>
               </div>
             </div>
 
-            <div className="py-4 space-y-2 text-sm border-b border-ivory-border/60">
+            <div className="py-4 space-y-2 text-sm border-b border-ivory-border">
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Harga Paket</span>
-                <span className="font-medium">{formatRupiah(Number(pkg.price))}</span>
+                <span className="text-ivory-ink/60">Harga paket</span>
+                <span className="tabular-nums">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Jml. Jemaah</span>
-                <span className="font-medium">x{pilgrimCount}</span>
+                <span className="text-ivory-ink/60">Jumlah jemaah</span>
+                <span className="tabular-nums">x{pilgrimCount}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Total Biaya</span>
-                <span className="font-medium">{formatRupiah(totalPrice)}</span>
+                <span className="text-ivory-ink/60">Total biaya</span>
+                <span className="tabular-nums">{formatRupiah(totalPrice)}</span>
               </div>
               {isInstallment && (
                 <>
-                  <div className="flex justify-between text-emerald-deep">
-                    <span className="font-medium">Uang Muka ({dpPercentage}%)</span>
-                    <span className="font-semibold">{formatRupiah(dpAmount)}</span>
+                  <div className="flex justify-between pt-1">
+                    <span className="text-ivory-ink/60">Uang muka ({dpPercentage}%)</span>
+                    <span className="tabular-nums">{formatRupiah(dpAmount)}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-amber-600">
-                    <span>Sisa dicicil ({tenorMonths}x)</span>
-                    <span className="font-medium">{formatRupiah(remainingAmount)} ({formatRupiah(monthlyAmount)}/bln)</span>
+                  <div className="flex justify-between text-ivory-ink/50 text-xs">
+                    <span>Sisa dicicil ({tenorMonths} bulan)</span>
+                    <span className="tabular-nums">{formatRupiah(remainingAmount)}</span>
                   </div>
                 </>
               )}
             </div>
 
-            <div className="bg-emerald-dark/10 rounded-xl p-4 mt-4 mb-4">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-emerald-deep font-medium">
-                  {isInstallment ? "Bayar Uang Muka" : "Bayar Sekarang"}
+            <div className="pt-4 border-t-2 border-gold">
+              <div className="flex items-baseline justify-between">
+                <span className="text-xs font-medium text-ivory-ink/70">
+                  {isInstallment ? "Bayar uang muka" : "Bayar sekarang"}
                 </span>
-                <span className="text-lg font-bold text-emerald-deep">{formatRupiah(amountToPayNow)}</span>
+                <span className="text-xl font-bold text-emerald-deep tabular-nums">{formatRupiah(amountToPayNow)}</span>
               </div>
             </div>
 
             <Button
               onClick={() => setStep(reviewStep)}
-              className="w-full h-12 gap-2 bg-emerald-dark hover:bg-emerald-deep text-ivory py-3 rounded-xl font-semibold shadow-md shadow-emerald-deep/20 active:scale-[0.98] transition-all"
+              className="w-full h-12 mt-4 bg-emerald-dark hover:bg-emerald-deep text-ivory rounded-lg font-semibold active:scale-[0.98] transition-all"
             >
-              Lanjutkan ke Tinjauan <ChevronRight className="w-4 h-4" />
+              Lanjutkan
             </Button>
           </div>
         </div>
@@ -1067,60 +1083,60 @@ function StepReview({
         )}
 
         <div className="lg:hidden flex justify-end">
-          <Button onClick={handleSubmit} disabled={submitting} className="gap-2 px-6 h-12 w-full sm:w-auto">
-            {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : isInstallment ? "Bayar Uang Muka" : "Bayar Penuh"}
+          <Button onClick={handleSubmit} disabled={submitting} className="h-12 w-full sm:w-auto px-6">
+            {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Bayar"}
           </Button>
         </div>
       </div>
 
       <div className="lg:col-span-1">
-        <div className="lg:sticky lg:top-24 space-y-4">
-          <div className="bg-ivory-card border border-ivory-border rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-sm text-emerald-deep mb-4">Ringkasan Pesanan</h3>
+        <div className="lg:sticky lg:top-24">
+          <div className="bg-ivory-card border border-ivory-border rounded-xl p-6">
+            <h3 className="text-sm font-semibold text-emerald-deep mb-4">Ringkasan Pesanan</h3>
 
-            <div className="flex gap-3 pb-4 border-b border-ivory-border/60">
-              <div className="relative w-16 h-14 rounded-xl overflow-hidden shrink-0">
+            <div className="flex gap-3 pb-4 border-b border-ivory-border">
+              <div className="relative w-16 h-14 rounded-md overflow-hidden shrink-0">
                 <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name} fill className="object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-ivory-ink/70 truncate">{travel?.name}</p>
+                <p className="text-[11px] text-ivory-ink/60 truncate">{travel?.name}</p>
                 <p className="text-sm font-semibold text-emerald-deep leading-snug line-clamp-2">{pkg.name}</p>
               </div>
             </div>
 
-            <div className="py-4 space-y-2 text-sm border-b border-ivory-border/60">
+            <div className="py-4 space-y-2 text-sm border-b border-ivory-border">
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Harga Paket</span>
-                <span className="font-medium">{formatRupiah(Number(pkg.price))}</span>
+                <span className="text-ivory-ink/60">Harga paket</span>
+                <span className="tabular-nums">{formatRupiah(Number(pkg.price))}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Jml. Jemaah</span>
-                <span className="font-medium">x{pilgrimCount}</span>
+                <span className="text-ivory-ink/60">Jumlah jemaah</span>
+                <span className="tabular-nums">x{pilgrimCount}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/70">Total Biaya</span>
-                <span className="font-medium">{formatRupiah(totalPrice)}</span>
+                <span className="text-ivory-ink/60">Total biaya</span>
+                <span className="tabular-nums">{formatRupiah(totalPrice)}</span>
               </div>
               {isInstallment && (
                 <>
-                  <div className="flex justify-between text-emerald-deep">
-                    <span className="font-medium">Uang Muka ({dpPercentage}%)</span>
-                    <span className="font-semibold">{formatRupiah(dpAmount)}</span>
+                  <div className="flex justify-between pt-1">
+                    <span className="text-ivory-ink/60">Uang muka ({dpPercentage}%)</span>
+                    <span className="tabular-nums">{formatRupiah(dpAmount)}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-amber-600">
-                    <span>Sisa dicicil ({tenorMonths}x)</span>
-                    <span className="font-medium">{formatRupiah(remainingAmount)}</span>
+                  <div className="flex justify-between text-ivory-ink/50 text-xs">
+                    <span>Sisa dicicil ({tenorMonths} bulan)</span>
+                    <span className="tabular-nums">{formatRupiah(remainingAmount)}</span>
                   </div>
                 </>
               )}
             </div>
 
-            <div className="bg-emerald-dark/10 rounded-xl p-4 mt-4 mb-4">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-emerald-deep font-medium">
-                  {isInstallment ? "Bayar Uang Muka" : "Bayar Sekarang"}
+            <div className="pt-4 border-t-2 border-gold">
+              <div className="flex items-baseline justify-between">
+                <span className="text-xs font-medium text-ivory-ink/70">
+                  {isInstallment ? "Bayar uang muka" : "Bayar sekarang"}
                 </span>
-                <span className="text-lg font-bold text-emerald-deep">{formatRupiah(amountToPayNow)}</span>
+                <span className="text-xl font-bold text-emerald-deep tabular-nums">{formatRupiah(amountToPayNow)}</span>
               </div>
             </div>
 
@@ -1128,12 +1144,12 @@ function StepReview({
               <Button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full h-12 gap-2 bg-emerald-dark hover:bg-emerald-deep text-ivory py-3 rounded-xl font-semibold shadow-md shadow-emerald-deep/20 active:scale-[0.98] transition-all"
+                className="w-full h-12 mt-4 bg-emerald-dark hover:bg-emerald-deep text-ivory rounded-lg font-semibold active:scale-[0.98] transition-all"
               >
                 {submitting ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
                 ) : (
-                  <>{isInstallment ? "Bayar Uang Muka" : "Bayar Penuh"} <ChevronRight className="w-4 h-4" /></>
+                  "Bayar"
                 )}
               </Button>
             </div>
