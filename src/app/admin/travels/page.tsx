@@ -14,6 +14,7 @@ interface TenantRow {
   contact_email: string | null
   contact_phone: string | null
   status: string
+  city: string | null
   config: Record<string, unknown> | null
   package_count?: number
   booking_count?: number
@@ -38,7 +39,7 @@ export default function AdminTravelsPage() {
     async function load() {
       const { data } = await supabase
         .from("tenants")
-        .select("id, name, slug, custom_domain, contact_email, contact_phone, status, config")
+        .select("id, name, slug, custom_domain, contact_email, contact_phone, status, config, city")
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
 
@@ -70,6 +71,17 @@ export default function AdminTravelsPage() {
       toast.success("Status travel diperbarui")
     }
     setUpdatingId(null)
+  }
+
+  async function updateCity(tenantId: string, city: string) {
+    const value = city.trim() || null
+    const { error } = await supabase.from("tenants").update({ city: value }).eq("id", tenantId)
+    if (error) {
+      toast.error("Gagal menyimpan kota")
+    } else {
+      setTenants((prev) => prev.map((t) => t.id === tenantId ? { ...t, city: value } : t))
+      toast.success("Lokasi pusat disimpan")
+    }
   }
 
   const filtered = tenants.filter((t) => {
@@ -175,6 +187,18 @@ export default function AdminTravelsPage() {
               {tenant.contact_email && <p className="flex items-center gap-1"><Mail className="w-3 h-3" />{tenant.contact_email}</p>}
               {tenant.contact_phone && <p className="flex items-center gap-1"><Phone className="w-3 h-3" />{tenant.contact_phone}</p>}
               <p className="flex items-center gap-1">🌐 {tenant.slug}.umrohq.com</p>
+            </div>
+
+            <div>
+              <label className="text-[11px] text-muted-foreground">Lokasi pusat</label>
+              <input
+                defaultValue={tenant.city || ""}
+                onBlur={(e) => {
+                  if (e.target.value !== (tenant.city || "")) updateCity(tenant.id, e.target.value)
+                }}
+                placeholder="Contoh: Surabaya"
+                className="mt-1 w-full px-2.5 py-1.5 text-xs border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              />
             </div>
 
             <div className="flex gap-2 pt-2 border-t border-border">

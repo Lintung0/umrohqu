@@ -155,6 +155,33 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
   const [canReview, setCanReview] = useState<boolean | null>(null)
   const [eligibleBookingId, setEligibleBookingId] = useState<string | null>(null)
   const [submittingReview, setSubmittingReview] = useState(false)
+  const [travelRating, setTravelRating] = useState<{ avg: number; count: number } | null>(null)
+
+  // Rating travel (bukan paket) — dari seluruh ulasan travel
+  useEffect(() => {
+    const travelId = pkg.travel?.id
+    if (!travelId) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from("reviews")
+          .select("rating")
+          .eq("tenant_id", travelId)
+          .eq("status", "published")
+        if (cancelled || !data || data.length === 0) return
+        const sum = data.reduce((s: number, r: { rating: number }) => s + r.rating, 0)
+        setTravelRating({
+          avg: Math.round((sum / data.length) * 10) / 10,
+          count: data.length,
+        })
+      } catch {
+        // rating bersifat pelengkap — gagal fetching tidak boleh mengganggu halaman
+      }
+    })()
+    return () => { cancelled = true }
+  }, [pkg.travel?.id])
 
   const avgRating = initialReviews.length > 0
     ? initialReviews.reduce((s, r) => s + r.rating, 0) / initialReviews.length
@@ -883,7 +910,18 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                       <span className="text-sm font-bold group-hover:text-emerald-dark transition-colors truncate">{pkg.travel.name}</span>
                       {pkg.travel.is_verified && <BadgeCheck className="w-4 h-4 text-emerald-dark shrink-0" />}
                     </div>
-                    {pkg.travel.city && <p className="text-[11px] text-ivory-ink/70 flex items-center gap-0.5"><MapPin className="w-3 h-3" />{pkg.travel.city}</p>}
+                    {pkg.travel.city && (
+                      <p className="text-[11px] text-ivory-ink/70 flex items-center gap-0.5 mt-0.5">
+                        <MapPin className="w-3 h-3" />{pkg.travel.city}
+                      </p>
+                    )}
+                    {travelRating && (
+                      <p className="text-[11px] text-ivory-ink/70 flex items-center gap-0.5 mt-0.5">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        <span className="font-semibold text-emerald-deep">{travelRating.avg.toFixed(1).replace(".", ",")}</span>
+                        <span>({travelRating.count} ulasan)</span>
+                      </p>
+                    )}
                   </div>
                   <ChevronRight className="w-4 h-4 text-ivory-ink/70 shrink-0 group-hover:text-emerald-dark transition-colors" />
                 </Link>

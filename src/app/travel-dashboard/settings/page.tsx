@@ -14,6 +14,7 @@ export default function TravelSettingsPage() {
   const [_user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [tenantName, setTenantName] = useState("")
+  const [tenantCity, setTenantCity] = useState("")
   const [tenantEmail, setTenantEmail] = useState("")
   const [tenantPhone, setTenantPhone] = useState("")
   const [activeTab, setActiveTab] = useState<"profile" | "password">("profile")
@@ -28,9 +29,10 @@ export default function TravelSettingsPage() {
         const { data: profile } = await supabase.from("users").select("tenant_id").eq("id", user.id).single()
         if (profile?.tenant_id) {
           setTenantId(profile.tenant_id)
-          const { data: tenant } = await supabase.from("tenants").select("name, description").eq("id", profile.tenant_id).single()
+          const { data: tenant } = await supabase.from("tenants").select("name, description, city").eq("id", profile.tenant_id).single()
           if (tenant) {
             setTenantName(tenant.name || "")
+            setTenantCity(tenant.city || "")
             setTenantEmail("")
             setTenantPhone("")
           }
@@ -51,6 +53,7 @@ export default function TravelSettingsPage() {
         body: JSON.stringify({
           tenantId,
           name: tenantName,
+          city: tenantCity.trim() || null,
           contact_email: tenantEmail || null,
           contact_phone: tenantPhone || null,
         }),
@@ -123,6 +126,16 @@ export default function TravelSettingsPage() {
                 onChange={(e) => setTenantName(e.target.value)}
                 className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Kota / Lokasi Pusat</label>
+              <input
+                value={tenantCity}
+                onChange={(e) => setTenantCity(e.target.value)}
+                placeholder="Contoh: Surabaya"
+                className="w-full px-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">Ditampilkan di card travel pada halaman paket.</p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5">Email</label>

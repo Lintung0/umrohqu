@@ -88,7 +88,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
   try {
     const { data: pkgData, error } = await supabase
       .from("packages")
-      .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, brand_color, description)")
+      .select("*, travel:tenants(id, name, slug, status, is_verified, logo_url, brand_color, description, city)")
       .eq("slug", decodedSlug)
       .in("status", ["active", "ongoing"])
       .is("deleted_at", null)
