@@ -840,7 +840,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                   <>
                     <Button
                       onClick={handleCheckout}
-                      className="w-full h-12 font-bold text-sm bg-gold text-emerald-deep hover:bg-emerald-deep hover:text-ivory shadow-lg transition-all active:scale-[0.98]"
+                      className="w-full h-12 font-bold text-sm bg-emerald-dark text-ivory hover:bg-emerald-deep shadow-lg shadow-emerald-dark/20 transition-all active:scale-[0.98]"
                     >
                       Pesan
                     </Button>
@@ -928,7 +928,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
               <p className="text-lg font-bold text-emerald-deep truncate">{formatRupiah(pkg.price)}</p>
               <p className="text-[10px] text-ivory-ink/70">per orang</p>
             </div>
-            <Button onClick={handleCheckout} className="h-10 px-5 font-semibold text-sm bg-gold text-emerald-deep shadow-lg">Pesan</Button>
+            <Button onClick={handleCheckout} className="h-10 px-5 font-semibold text-sm bg-emerald-dark text-ivory hover:bg-emerald-deep shadow-lg shadow-emerald-dark/20 transition-colors">Pesan</Button>
           </div>
         </div>
       )}
