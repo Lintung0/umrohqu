@@ -126,7 +126,7 @@ export default function CashbackRequestsPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Review Cashback</h1>
-          <p className="text-muted-foreground">Setujui, tolak, atau tandai dicairkan pengajuan cashback jamaah.</p>
+          <p className="text-muted-foreground">Setujui, tolak, atau tandai dicairkan pengajuan cashback jemaah.</p>
         </div>
         <button
           onClick={load}
@@ -169,7 +169,7 @@ export default function CashbackRequestsPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="px-4 py-3">Jamaah / Paket</th>
+                <th className="px-4 py-3">Jemaah / Paket</th>
                 <th className="px-4 py-3">Nominal</th>
                 <th className="px-4 py-3">Rekening</th>
                 <th className="px-4 py-3">Status</th>
@@ -183,7 +183,7 @@ export default function CashbackRequestsPage() {
                 return (
                   <tr key={r.id}>
                     <td className="px-4 py-3">
-                      <p className="font-medium">{r.jamaah?.full_name || "Jamaah"}</p>
+                      <p className="font-medium">{r.jamaah?.full_name || "Jemaah"}</p>
                       <p className="text-xs text-muted-foreground">{r.jamaah?.email}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{r.booking?.package?.name || "Paket"}</p>
                     </td>
@@ -259,7 +259,7 @@ export default function CashbackRequestsPage() {
               <div>
                 <h3 className="text-lg font-bold">Tolak Pengajuan</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {rejectFor.jamaah?.full_name || "Jamaah"} · {formatRupiah(Number(rejectFor.amount))}
+                  {rejectFor.jamaah?.full_name || "Jemaah"} · {formatRupiah(Number(rejectFor.amount))}
                 </p>
               </div>
               <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted" onClick={() => setRejectFor(null)} aria-label="Tutup">
@@ -273,7 +273,7 @@ export default function CashbackRequestsPage() {
                   value={rejectNote}
                   onChange={(e) => setRejectNote(e.target.value)}
                   rows={3}
-                  placeholder="Alasan akan dikirim sebagai notifikasi ke jamaah"
+                  placeholder="Alasan akan dikirim sebagai notifikasi ke jemaah"
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-500"
                 />
               </div>

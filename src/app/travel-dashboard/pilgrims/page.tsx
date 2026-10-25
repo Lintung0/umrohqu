@@ -108,13 +108,13 @@ export default function TravelPilgrimsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Data Jamaah</h1>
-        <p className="text-muted-foreground mt-1">Total {pilgrims.length} jamaah terdaftar · {confirmedCount} terkonfirmasi</p>
+        <h1 className="text-2xl font-bold">Data Jemaah</h1>
+        <p className="text-muted-foreground mt-1">Total {pilgrims.length} jemaah terdaftar · {confirmedCount} terkonfirmasi</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Total Jamaah", value: pilgrims.length, color: "bg-emerald-50 text-emerald-700" },
+          { label: "Total Jemaah", value: pilgrims.length, color: "bg-emerald-50 text-emerald-700" },
           { label: "Terkonfirmasi", value: confirmedCount, color: "bg-blue-50 text-blue-700" },
           { label: "Menunggu", value: pendingCount, color: "bg-yellow-50 text-yellow-700" },
         ].map((s) => (
@@ -152,7 +152,7 @@ export default function TravelPilgrimsPage() {
             <tbody className="divide-y divide-border">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">Tidak ada data jamaah</td>
+                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">Tidak ada data jemaah</td>
                 </tr>
               ) : filtered.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">

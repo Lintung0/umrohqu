@@ -851,7 +851,7 @@ export default function PackageDetailClient({ pkg, reviews: initialReviews, revi
                         <div className="flex items-center text-[11px] text-ivory/80 mb-1.5">
                           <span className="inline-flex items-center gap-1.5">
                             <Users className="w-3.5 h-3.5 text-gold" />
-                            {departedCount} dari {displayPkg.quota} jamaah berangkat
+                            {departedCount} dari {displayPkg.quota} jemaah berangkat
                           </span>
                         </div>
                         <div className="h-1.5 bg-white/15 rounded-full overflow-hidden">

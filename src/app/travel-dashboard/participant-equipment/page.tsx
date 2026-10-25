@@ -84,17 +84,17 @@ export default function ParticipantEquipmentPage() {
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Perlengkapan Jamaah</h1>
-          <p className="text-sm text-slate-500 mt-1">Kelola penyerahan perlengkapan ke jamaah individual</p>
+          <h1 className="text-2xl font-bold text-slate-900">Perlengkapan Jemaah</h1>
+          <p className="text-sm text-slate-500 mt-1">Kelola penyerahan perlengkapan ke jemaah individual</p>
         </div>
       </div>
 
       <DataTable
-        title="Daftar Perlengkapan Jamaah"
+        title="Daftar Perlengkapan Jemaah"
         columns={[
           {
             key: "participant.full_name",
-            header: "Jamaah",
+            header: "Jemaah",
             sortable: false,
             width: "200px",
             render: (row: any) => row.participant?.full_name || "-"

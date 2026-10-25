@@ -15,7 +15,7 @@ const STATIC_FAQS: FAQItem[] = [
     id: "1",
     category: "Umum",
     question: "Apa itu UmrahQu?",
-    answer: "UmrahQu adalah platform pencarian dan perbandingan paket umrah terpercaya di Indonesia. Kami membantu jamaah menemukan paket umrah terbaik dari travel-travel terverifikasi, serta membantu travel mengelola bisnis mereka secara digital."
+    answer: "UmrahQu adalah platform pencarian dan perbandingan paket umrah terpercaya di Indonesia. Kami membantu jemaah menemukan paket umrah terbaik dari travel-travel terverifikasi, serta membantu travel mengelola bisnis mereka secara digital."
   },
   {
     id: "2",
@@ -39,29 +39,29 @@ const STATIC_FAQS: FAQItem[] = [
     id: "5",
     category: "Travel",
     question: "Bagaimana cara travel mendapat pesanan?",
-    answer: "Setelah paket umrah dipublikasikan, paket akan tampil di halaman pencarian UmrahQu. Jamaah dapat mencari, membandingkan, dan memesan langsung paket travel Anda. Travel akan menerima notifikasi setiap ada pesanan baru melalui dashboard."
+    answer: "Setelah paket umrah dipublikasikan, paket akan tampil di halaman pencarian UmrahQu. Jemaah dapat mencari, membandingkan, dan memesan langsung paket travel Anda. Travel akan menerima notifikasi setiap ada pesanan baru melalui dashboard."
   },
   {
     id: "6",
-    category: "Jamaah",
+    category: "Jemaah",
     question: "Bagaimana cara memesan paket umrah?",
-    answer: 'Cukup cari paket umrah di halaman <a href="/packages" class="text-emerald-dark hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih metode pembayaran, dan selesaikan pembayaran via Midtrans.'
+    answer: 'Cukup cari paket umrah di halaman <a href="/packages" class="text-emerald-dark hover:underline font-medium">Pencarian</a>, pilih paket yang diinginkan, lalu klik "Pesan". Isi data diri dan peserta, pilih tipe pembayaran, lalu selesaikan pembayaran via transfer bank atau tunai.'
   },
   {
     id: "7",
-    category: "Jamaah",
+    category: "Jemaah",
     question: "Metode pembayaran apa saja yang tersedia?",
-    answer: "Pembayaran dapat dilakukan melalui Virtual Account (BCA, Mandiri, BRI, BNI), QRIS (GoPay, OVO, DANA, ShopeePay), dan Kartu Kredit. Semua pembayaran diproses melalui Midtrans yang terpercaya."
+    answer: "Pembayaran dapat dilakukan melalui transfer bank ke rekening travel (unggah bukti transfer di halaman pesanan) atau tunai langsung di kantor travel. Travel akan memverifikasi pembayaran Anda."
   },
   {
     id: "8",
-    category: "Jamaah",
+    category: "Jemaah",
     question: "Apakah bisa booking dengan sistem DP?",
     answer: "Ya, tersedia opsi pembayaran DP (Down Payment) untuk paket tertentu. Anda dapat membayar DP terlebih dahulu, kemudian melunasi sisa pembayaran sebelum tanggal keberangkatan."
   },
   {
     id: "9",
-    category: "Jamaah",
+    category: "Jemaah",
     question: "Bagaimana jika booking dibatalkan?",
     answer: "Kebijakan pembatalan tergantung pada masing-masing travel partner. Silakan cek syarat dan ketentuan pada halaman detail paket sebelum melakukan pemesanan. Hubungi travel terkait untuk informasi lebih lanjut."
   },
@@ -69,17 +69,17 @@ const STATIC_FAQS: FAQItem[] = [
     id: "10",
     category: "Akun",
     question: "Bagaimana cara mendaftar akun?",
-    answer: 'Anda dapat mendaftar sebagai jamaah di halaman <a href="/register" class="text-emerald-dark hover:underline font-medium">Daftar</a>. Cukup isi nama, email, dan password. Jika Anda adalah travel dan ingin mendaftar sebagai mitra, gunakan halaman <a href="/register/travel" class="text-emerald-dark hover:underline font-medium">Daftar Travel</a>.'
+    answer: 'Anda dapat mendaftar sebagai jemaah di halaman <a href="/register" class="text-emerald-dark hover:underline font-medium">Daftar</a>. Cukup isi nama, email, dan password. Jika Anda adalah travel dan ingin mendaftar sebagai mitra, gunakan halaman <a href="/register/travel" class="text-emerald-dark hover:underline font-medium">Daftar Travel</a>.'
   },
   {
     id: "11",
     category: "Akun",
-    question: "Saya sudah daftar sebagai jamaah, bisa upgrade jadi travel?",
+    question: "Saya sudah daftar sebagai jemaah, bisa upgrade jadi travel?",
     answer: 'Bisa! Silakan hubungi tim kami melalui WhatsApp atau daftar ulang di halaman <a href="/register/travel" class="text-emerald-dark hover:underline font-medium">Daftar Travel</a> dengan email yang berbeda. Atau hubungi admin untuk mengubah role akun Anda.'
   },
 ]
 
-const CATEGORIES = ["Semua", "Umum", "Travel", "Jamaah", "Akun"]
+const CATEGORIES = ["Semua", "Umum", "Travel", "Jemaah", "Akun"]
 
 export default function FAQPage() {
   const [search, setSearch] = useState("")

@@ -302,7 +302,7 @@ export default function TravelBookingDetailPage() {
             </div>
           </div>
 
-          {/* Data Diri Lengkap Jamaah (hanya setelah dikonfirmasi) */}
+          {/* Data Diri Lengkap Jemaah (hanya setelah dikonfirmasi) */}
           {["confirmed", "completed"].includes(booking.status) && (
             <CustomerDataDiriCard bookingId={booking.id} />
           )}

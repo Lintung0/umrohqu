@@ -36,7 +36,7 @@ export async function AuthLayout({
             <span className="text-gold-light">Sempurna</span>
           </h1>
           <p className="text-white/60 text-base leading-relaxed">
-            Bergabung dengan jamaah yang telah mempercayakan perjalanan ibadah mereka bersama UmrahQu.
+            Bergabung dengan jemaah yang telah mempercayakan perjalanan ibadah mereka bersama UmrahQu.
           </p>
           <div className="flex items-center gap-8 pt-4">
             {stats.map((stat, i) => (

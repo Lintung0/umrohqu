@@ -173,7 +173,7 @@ export default function TravelDashboardOverview() {
           { icon: Package, label: "Paket Aktif", value: stats.packageCount, color: "bg-emerald-100 text-emerald-600" },
           { icon: BookOpen, label: "Total Pesanan", value: stats.bookingCount, color: "bg-blue-100 text-blue-600" },
           { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(stats.totalRevenue), color: "bg-purple-100 text-purple-600" },
-          { icon: Users, label: "Total Jamaah", value: stats.totalPilgrims, color: "bg-amber-100 text-amber-600" },
+          { icon: Users, label: "Total Jemaah", value: stats.totalPilgrims, color: "bg-amber-100 text-amber-600" },
         ].map((s) => (
           <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} color={s.color} />
         ))}
@@ -192,7 +192,7 @@ export default function TravelDashboardOverview() {
               <div key={booking.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{booking.customer?.full_name || "Pelanggan"}</p>
-                  <p className="text-xs text-muted-foreground">{booking.package?.name || "Paket"} · {booking.pilgrim_count} jamaah</p>
+                  <p className="text-xs text-muted-foreground">{booking.package?.name || "Paket"} · {booking.pilgrim_count} jemaah</p>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status, "booking")}`}>
                   {getStatusLabel(booking.status, "booking")}

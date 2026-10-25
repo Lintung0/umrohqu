@@ -287,7 +287,7 @@ export default function AdminOverviewPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{b.customer?.full_name || "Pelanggan"}</p>
-                  <p className="text-xs text-muted-foreground truncate">{b.package?.name || "Paket"} · {b.pilgrim_count} jamaah</p>
+                  <p className="text-xs text-muted-foreground truncate">{b.package?.name || "Paket"} · {b.pilgrim_count} jemaah</p>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${getStatusColor(b.status, "booking")}`}>
                   {getStatusLabel(b.status, "booking")}

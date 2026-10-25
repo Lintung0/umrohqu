@@ -85,7 +85,7 @@ export default function DashboardOverview() {
     )
   }
 
-  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Jamaah"
+  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Jemaah"
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">

@@ -15,7 +15,7 @@ export default function AdminHelpPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Bantuan Pengguna</h1>
-        <p className="text-muted-foreground mt-1">Pusat bantuan untuk admin, travel, dan jamaah</p>
+        <p className="text-muted-foreground mt-1">Pusat bantuan untuk admin, travel, dan jemaah</p>
       </div>
 
       {/* Search */}

@@ -89,7 +89,7 @@ export default function TravelReportsPage() {
           { icon: DollarSign, label: "Total Pendapatan", value: formatRupiah(totalRevenue), color: "bg-emerald-100 text-emerald-700" },
           { icon: BarChart3, label: "Saldo Deposit (Komisi)", value: formatRupiah(depositBalance), color: "bg-blue-100 text-blue-700" },
           { icon: Package, label: "Total Booking", value: totalBookings, color: "bg-purple-100 text-purple-700" },
-          { icon: Users, label: "Total Jamaah", value: totalPilgrims, color: "bg-amber-100 text-amber-700" },
+          { icon: Users, label: "Total Jemaah", value: totalPilgrims, color: "bg-amber-100 text-amber-700" },
           { icon: TrendingUp, label: "Rata-rata/Booking", value: formatRupiah(avgBooking), color: "bg-pink-100 text-pink-700" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl border border-border p-4">
@@ -139,7 +139,7 @@ export default function TravelReportsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{booking.package?.name || "Paket"}</p>
-                  <p className="text-xs text-muted-foreground">{booking.pilgrim_count} jamaah</p>
+                  <p className="text-xs text-muted-foreground">{booking.pilgrim_count} jemaah</p>
                 </div>
                 <p className="text-sm font-bold shrink-0">{formatRupiah(booking.total)}</p>
               </div>

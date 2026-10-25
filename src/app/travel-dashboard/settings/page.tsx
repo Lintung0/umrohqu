@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { User } from "@supabase/supabase-js"
-import { User as UserIcon, Lock, Save, Loader2 } from "lucide-react"
+import { User as UserIcon, Lock, Save, Loader2, Landmark } from "lucide-react"
 
 import { toast } from "sonner"
 import { useTranslation } from "@/lib/i18n"
+import { BanksTab } from "./banks-tab"
 
 export default function TravelSettingsPage() {
   const supabase = useMemo(() => createClient(), [])
@@ -18,7 +19,7 @@ export default function TravelSettingsPage() {
   const [tenantConfig, setTenantConfig] = useState<Record<string, unknown>>({})
   const [tenantEmail, setTenantEmail] = useState("")
   const [tenantPhone, setTenantPhone] = useState("")
-  const [activeTab, setActiveTab] = useState<"profile" | "password">("profile")
+  const [activeTab, setActiveTab] = useState<"profile" | "password" | "banks">("profile")
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -93,6 +94,7 @@ export default function TravelSettingsPage() {
 
   const tabs = [
     { key: "profile" as const, label: "Profil", icon: UserIcon },
+    { key: "banks" as const, label: "Rekening Bank", icon: Landmark },
     { key: "password" as const, label: "Password", icon: Lock },
   ]
 
@@ -169,6 +171,8 @@ export default function TravelSettingsPage() {
           </div>
         </div>
       )}
+
+      {activeTab === "banks" && <BanksTab tenantId={tenantId} />}
 
       {activeTab === "password" && (
         <PasswordTab onChangePassword={handleChangePassword} />

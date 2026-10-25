@@ -86,7 +86,7 @@ export default function SeatAssignmentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Penempatan Kursi Bus</h1>
-          <p className="text-sm text-slate-500 mt-1">Kelola penempatan jamaah di kursi bus</p>
+          <p className="text-sm text-slate-500 mt-1">Kelola penempatan jemaah di kursi bus</p>
         </div>
       </div>
 
@@ -95,7 +95,7 @@ export default function SeatAssignmentsPage() {
         columns={[
           {
             key: "participant.full_name",
-            header: "Jamaah",
+            header: "Jemaah",
             sortable: false,
             width: "200px",
             render: (row: any) => row.participant?.full_name || "-"

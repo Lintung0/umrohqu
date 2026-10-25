@@ -23,7 +23,7 @@ export function PackageDocumentationSection({ packages, title }: { packages: Doc
             <FolderOpen className="w-4 h-4 text-blue-600" />
           </div>
           <div>
-            <h2 className="font-semibold text-sm">{title || "Dokumentasi Jamaah"}</h2>
+            <h2 className="font-semibold text-sm">{title || "Dokumentasi Jemaah"}</h2>
             <p className="text-xs text-muted-foreground">Foto & video dokumentasi perjalanan umrah</p>
           </div>
         </div>

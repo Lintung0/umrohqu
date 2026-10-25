@@ -76,7 +76,7 @@ export default function DashboardSidebar() {
             className="rounded-full ring-1 ring-gold/50"
           />
           <div className="min-w-0">
-            <p className="text-sm font-semibold truncate text-emerald-deep">{user?.user_metadata?.full_name || "Jamaah"}</p>
+            <p className="text-sm font-semibold truncate text-emerald-deep">{user?.user_metadata?.full_name || "Jemaah"}</p>
             <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
           </div>
         </div>

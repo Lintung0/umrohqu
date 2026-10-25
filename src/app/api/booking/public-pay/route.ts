@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         orderId,
         grossAmount: payAmount,
         customerEmail: payerEmail || "pembayar@umrahqu.com",
-        customerName: payerName || "Keluarga Jamaah",
+        customerName: payerName || "Keluarga Jemaah",
         items: [
           {
             id: invoice.id,

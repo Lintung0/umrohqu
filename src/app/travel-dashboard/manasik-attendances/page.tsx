@@ -89,7 +89,7 @@ export default function ManasikAttendancesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Presensi Manasik</h1>
-          <p className="text-sm text-slate-500 mt-1">Kelola kehadiran jamaah di sesi manasik</p>
+          <p className="text-sm text-slate-500 mt-1">Kelola kehadiran jemaah di sesi manasik</p>
         </div>
       </div>
 
@@ -126,7 +126,7 @@ export default function ManasikAttendancesPage() {
           },
           {
             key: "participant.full_name",
-            header: "Jamaah",
+            header: "Jemaah",
             sortable: false,
             width: "200px",
             render: (row: any) => row.participant?.full_name || "-"

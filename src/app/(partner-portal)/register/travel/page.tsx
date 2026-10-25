@@ -285,7 +285,7 @@ export default function RegisterTravelPage() {
           </span>
         </h1>
         <p className="text-sm sm:text-base text-gray-400 max-w-lg mx-auto leading-relaxed">
-          Bergabung dengan 100+ Travel Partner & jangkau puluhan ribu calon jamaah umrah di seluruh Indonesia.
+          Bergabung dengan 100+ Travel Partner & jangkau puluhan ribu calon jemaah umrah di seluruh Indonesia.
         </p>
       </div>
 
@@ -713,7 +713,7 @@ export default function RegisterTravelPage() {
         <p className="text-xs text-gray-600">
           <Link href="/register" className="text-gray-500 hover:text-emerald-400 transition-colors no-underline">
             <ArrowLeft size={11} className="inline mr-1" />
-            Daftar sebagai jamaah
+            Daftar sebagai jemaah
           </Link>
         </p>
       </div>

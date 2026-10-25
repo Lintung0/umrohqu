@@ -204,7 +204,7 @@ export default function PublicInstallmentPayPage() {
             <ShieldCheck className="w-3.5 h-3.5" /> Portal Pembayaran Resmi
           </div>
           <h1 className="text-2xl font-bold text-emerald-deep mt-2">Tagihan Cicilan Umrah</h1>
-          <p className="text-xs text-ivory-ink/70">Link pembayaran aman untuk jamaah & keluarga sponsor</p>
+          <p className="text-xs text-ivory-ink/70">Link pembayaran aman untuk jemaah & keluarga sponsor</p>
         </div>
 
         {/* Invoice Card */}

@@ -177,7 +177,7 @@ export default async function TravelDetailPage({ params }: { params: Promise<{ s
               {tenantData.city && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" />{tenantData.city}</span>}
               {tenantData.founded_year && <span className="flex items-center gap-1.5"><Building2 className="w-4 h-4" />Sejak {tenantData.founded_year}</span>}
               <span className="flex items-center gap-1.5"><Package className="w-4 h-4" />{salePackages.length + otherPackages.length} Paket</span>
-              {totalJamaah > 0 && <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{totalJamaah.toLocaleString("id-ID")}+ Jamaah</span>}
+              {totalJamaah > 0 && <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{totalJamaah.toLocaleString("id-ID")}+ Jemaah</span>}
             </div>
 
             <div className="flex flex-wrap gap-3">

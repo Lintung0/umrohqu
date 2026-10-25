@@ -159,7 +159,7 @@ export function DataTable({ data: _initialData }: DataTableProps) {
       mappedRows.push({
         id: item.id,
         category: "refund",
-        vendor_name: item.customer_name || "Nama Jamaah",
+        vendor_name: item.customer_name || "Nama Jemaah",
         request_type: "Pengembalian",
         request_status: "Menunggu",
         detail: `Paket: ${item.package_name}`,
@@ -558,7 +558,7 @@ export function DataTable({ data: _initialData }: DataTableProps) {
                         <>
                           <div className="grid grid-cols-3 text-xs">
                             <span className="text-muted-foreground">
-                              Nama Jamaah:
+                              Nama Jemaah:
                             </span>
                             <span className="col-span-2 font-semibold text-foreground">
                               {item.customer_name}

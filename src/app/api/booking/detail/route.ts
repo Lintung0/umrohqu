@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         .maybeSingle(),
       admin
         .from("payments")
-        .select("id, status, gateway_reference, va_number, payment_provider, payment_type, amount")
+        .select("*, bank:banks(id, bank_code, bank_name, account_number, account_holder_name)")
         .eq("booking_id", bookingId)
         .order("created_at", { ascending: false })
         .limit(1)

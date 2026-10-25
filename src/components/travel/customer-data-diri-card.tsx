@@ -60,7 +60,7 @@ export default function CustomerDataDiriCard({ bookingId }: { bookingId: string 
     const json = await res.json()
     if (res.ok) {
       setReminderSent(true)
-      toast.success("Pengingat berhasil dikirim ke jamaah")
+      toast.success("Pengingat berhasil dikirim ke jemaah")
     } else {
       toast.error(json.error || "Gagal mengirim pengingat")
     }
@@ -79,7 +79,7 @@ export default function CustomerDataDiriCard({ bookingId }: { bookingId: string 
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          Data Diri Jamaah
+          Data Diri Jemaah
         </h2>
         {!loading && data && (
           <span
@@ -105,7 +105,7 @@ export default function CustomerDataDiriCard({ bookingId }: { bookingId: string 
           <div>
             <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700 flex items-center gap-2 mb-4">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
-              Jamaah telah melengkapi data diri. Data tercantum di bawah.
+              Jemaah telah melengkapi data diri. Data tercantum di bawah.
             </div>
             <dl className="grid grid-cols-1 gap-x-4 gap-y-2.5 text-sm">
               <Field label="Nama" value={data.data.full_name} />
@@ -124,7 +124,7 @@ export default function CustomerDataDiriCard({ bookingId }: { bookingId: string 
             <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-700 flex items-start gap-2 mb-4">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>
-                Jamaah <b>belum melengkapi data diri</b>. Kirim pengingat agar mereka segera mengisinya.
+                Jemaah <b>belum melengkapi data diri</b>. Kirim pengingat agar mereka segera mengisinya.
                 {data.missingFields.length > 0 && (
                   <span className="block mt-1 text-amber-700/80">{data.missingFields.join(", ")}</span>
                 )}
@@ -133,7 +133,7 @@ export default function CustomerDataDiriCard({ bookingId }: { bookingId: string 
             {reminderSent ? (
               <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
-                Pengingat terkirim ke jamaah. Dapat mengirim lagi maksimal 1x per 24 jam.
+                Pengingat terkirim ke jemaah. Dapat mengirim lagi maksimal 1x per 24 jam.
               </div>
             ) : (
               <button
@@ -142,7 +142,7 @@ export default function CustomerDataDiriCard({ bookingId }: { bookingId: string 
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-700 hover:to-emerald-600 transition-colors disabled:opacity-60 shadow-md shadow-emerald-600/25"
               >
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
-                {sending ? "Mengirim..." : "Kirim Pengingat ke Jamaah"}
+                {sending ? "Mengirim..." : "Kirim Pengingat ke Jemaah"}
               </button>
             )}
           </div>

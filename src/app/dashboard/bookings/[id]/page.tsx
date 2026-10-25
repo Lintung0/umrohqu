@@ -3,7 +3,7 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, PhoneCall, UserRound, Ban, X, ChevronRight, Share2 } from "lucide-react"
+import { Calendar, MapPin, Plane, Hotel, Users, CreditCard, FileText, CheckCircle, Clock, XCircle, Loader2, Copy, AlertTriangle, Check, Edit2, ShieldCheck, PhoneCall, UserRound, Ban, X, ChevronRight, Share2, Landmark, Upload, Banknote } from "lucide-react"
 import { formatRupiah, getStatusLabel } from "@/lib/constants"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -80,7 +80,24 @@ interface BookingDetail {
   payment_status?: string
   cancel_reason?: string | null
   refund: { id: string; amount: number; reason?: string | null; status: string; method: string | null; completed_at: string | null } | null
-  active_payment?: { id: string; status: string; gateway_reference: string | null; va_number: string | null; payment_provider: string | null; payment_type: string | null; amount: number | null } | null
+  active_payment?: {
+    id: string
+    status: string
+    amount: number | null
+    payment_channel: string | null
+    proof_url: string | null
+    sender_bank: string | null
+    sender_account_name: string | null
+    sender_account_number: string | null
+    transferred_at: string | null
+    description: string | null
+    destination_bank_id: string | null
+    gateway_reference?: string | null
+    va_number?: string | null
+    payment_provider?: string | null
+    payment_type?: string | null
+    bank: { id: string; bank_code: string; bank_name: string; account_number: string; account_holder_name: string } | null
+  } | null
   package: {
     name: string
     slug: string
@@ -1197,7 +1214,7 @@ function PaymentStatusSection({
   paidAt: string | null
   paymentMethod: string | null
   createdAt: string
-  activePayment: { id: string; status: string; gateway_reference: string | null; va_number: string | null; payment_provider: string | null; payment_type: string | null; amount: number | null } | null
+  activePayment: BookingDetail["active_payment"]
 }) {
   const { t } = useTranslation()
 
@@ -1211,6 +1228,9 @@ function PaymentStatusSection({
   const hasActiveVA = !!activePayment && activePayment.status === "pending" && !!activePayment.gateway_reference
   // VA sudah terbit = user sudah pilih metode, tinggal transfer
   const hasVaNumber = hasActiveVA && !!activePayment?.va_number
+
+  // Pembayaran manual (transfer bank / tunai) dari checkout marketplace
+  const isManualPayment = !!activePayment && (activePayment.payment_channel === "bank_transfer" || activePayment.payment_channel === "cash")
 
   // Hasil cek live ke gateway (bukan tebakan dari DB lokal)
   const [liveMsg, setLiveMsg] = useState<string | null>(null)
@@ -1274,6 +1294,21 @@ function PaymentStatusSection({
       // tetap reload agar status terbaru tampil
     }
     window.location.reload()
+  }
+
+  // ── KONDISI MANUAL: transfer bank / tunai dari checkout ──
+  // Ditolak sebelum logika gateway karena keduanya memakai kolom berbeda
+  // (proof_url vs VA) dan booking manual tidak punya transaksi Snap.
+  if (isManualPayment && activePayment && ["pending_payment", "processing"].includes(status)) {
+    return (
+      <ManualPaymentSection
+        bookingId={bookingId}
+        payment={activePayment}
+        isCash={activePayment.payment_channel === "cash"}
+        amount={Number(activePayment.amount || total)}
+        awaitingVerification={!!activePayment.proof_url || activePayment.status === "processing"}
+      />
+    )
   }
 
   // ── KONDISI 0: CICILAN BERJALAN (skema cicilan, sudah ada yang dibayar) ──
@@ -1574,6 +1609,302 @@ function PaymentStatusSection({
 
   // ── Default: cancelled / refunded (no payment action) ──
   return null
+}
+
+// ─── Manual Payment (Transfer Bank / Tunai) ──────────────────────────────────
+
+function ManualPaymentSection({
+  bookingId, payment, isCash, amount, awaitingVerification,
+}: {
+  bookingId: string
+  payment: NonNullable<BookingDetail["active_payment"]>
+  isCash: boolean
+  amount: number
+  awaitingVerification: boolean
+}) {
+  const [file, setFile] = useState<File | null>(null)
+  const [senderBank, setSenderBank] = useState(payment.sender_bank || payment.bank?.bank_name || "")
+  const [senderAccountName, setSenderAccountName] = useState(payment.sender_account_name || "")
+  const [senderAccountNumber, setSenderAccountNumber] = useState(payment.sender_account_number || "")
+  const [transferredAt, setTransferredAt] = useState(
+    payment.transferred_at ? payment.transferred_at.slice(0, 10) : new Date().toISOString().slice(0, 10)
+  )
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const bank = payment.bank
+
+  const copy = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      toast.success(`${label} disalin`)
+    } catch {
+      toast.error("Gagal menyalin. Salin manual ya.")
+    }
+  }
+
+  const submitProof = async () => {
+    if (!file) { setError("Unggah bukti transfer terlebih dahulu."); return }
+    if (file.size > 5 * 1024 * 1024) { setError("Ukuran file maksimal 5MB."); return }
+    setSubmitting(true)
+    setError(null)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      fd.append("bookingId", bookingId)
+      fd.append("senderBank", senderBank)
+      fd.append("senderAccountName", senderAccountName)
+      fd.append("senderAccountNumber", senderAccountNumber)
+      fd.append("transferredAt", transferredAt)
+      const res = await fetch("/api/booking/payment-proof", { method: "POST", body: fd })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Gagal mengirim bukti pembayaran.")
+        setSubmitting(false)
+        return
+      }
+      window.location.reload()
+    } catch {
+      setError("Terjadi kesalahan jaringan. Silakan coba lagi.")
+      setSubmitting(false)
+    }
+  }
+
+  if (awaitingVerification) {
+    return (
+      <div className="bg-ivory-card rounded-2xl border border-gold/30 p-6 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center shrink-0">
+            <Clock className="w-6 h-6 text-gold-dark" />
+          </div>
+          <div>
+            <h3 className="font-bold text-emerald-deep">
+              {isCash ? "Menunggu Konfirmasi Pembayaran" : "Menunggu Verifikasi Pembayaran"}
+            </h3>
+            <p className="text-sm text-gold-dark mt-0.5">
+              {isCash
+                ? "Pembayaran tunai sedang dikonfirmasi oleh travel."
+                : "Bukti transfer sudah diterima. Travel akan memverifikasi dana masuk."}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="bg-ivory rounded-xl p-3">
+            <p className="text-xs text-muted-foreground mb-1">Nominal</p>
+            <p className="font-bold text-emerald-deep tabular-nums">{formatRupiah(amount)}</p>
+          </div>
+          <div className="bg-ivory rounded-xl p-3">
+            <p className="text-xs text-muted-foreground mb-1">Metode</p>
+            <p className="font-medium text-emerald-deep">{isCash ? "Tunai" : "Transfer bank"}</p>
+          </div>
+          {!isCash && bank && (
+            <div className="bg-ivory rounded-xl p-3 col-span-2">
+              <p className="text-xs text-muted-foreground mb-1">Tujuan transfer</p>
+              <p className="font-medium text-emerald-deep">
+                {bank.bank_name} · {bank.account_number}
+              </p>
+              <p className="text-xs text-muted-foreground">a.n. {bank.account_holder_name}</p>
+            </div>
+          )}
+          {!isCash && payment.transferred_at && (
+            <div className="bg-ivory rounded-xl p-3 col-span-2">
+              <p className="text-xs text-muted-foreground mb-1">Tanggal transfer</p>
+              <p className="font-medium text-emerald-deep">
+                {new Date(payment.transferred_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {payment.proof_url && (
+          <a
+            href={payment.proof_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-emerald-dark/30 text-emerald-dark font-semibold hover:bg-emerald-dark/5 transition-colors"
+          >
+            <FileText className="w-4 h-4" /> Lihat Bukti Transfer
+          </a>
+        )}
+
+        <button
+          onClick={() => window.location.reload()}
+          className="w-full py-3 rounded-xl border border-ivory-border text-sm font-semibold text-emerald-deep hover:border-gold/60 transition-colors cursor-pointer"
+        >
+          Muat Ulang Status
+        </button>
+      </div>
+    )
+  }
+
+  if (isCash) {
+    return (
+      <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-emerald-dark/10 rounded-xl flex items-center justify-center shrink-0">
+            <Banknote className="w-6 h-6 text-emerald-dark" />
+          </div>
+          <div>
+            <h3 className="font-bold text-emerald-deep">Bayar Tunai di Kantor Travel</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Datang dan bayar langsung ke kantor travel sebesar:
+            </p>
+          </div>
+        </div>
+        <div className="bg-emerald-dark rounded-xl p-4">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gold-light mb-1">Nominal</p>
+          <p className="text-2xl font-bold text-ivory tabular-nums">{formatRupiah(amount)}</p>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Tunjukkan halaman pesanan ini ke petugas. Travel akan mengonfirmasi pembayaranmu.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="w-full py-3 rounded-xl border border-ivory-border text-sm font-semibold text-emerald-deep hover:border-gold/60 transition-colors cursor-pointer"
+        >
+          Muat Ulang Status
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-ivory-card rounded-2xl border border-ivory-border p-6 space-y-4">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 bg-emerald-dark/10 rounded-xl flex items-center justify-center shrink-0">
+          <Landmark className="w-6 h-6 text-emerald-dark" />
+        </div>
+        <div>
+          <h3 className="font-bold text-emerald-deep">Selesaikan Pembayaran</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Transfer sesuai nominal, lalu unggah bukti transfer.
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-emerald-dark rounded-xl p-4 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gold-light mb-1">Nominal transfer</p>
+          <p className="text-2xl font-bold text-ivory tabular-nums">{formatRupiah(amount)}</p>
+        </div>
+        <button
+          onClick={() => copy(String(amount), "Nominal")}
+          className="p-2 rounded-lg text-ivory/70 hover:text-ivory hover:bg-ivory/10 transition-colors cursor-pointer"
+          aria-label="Salin nominal"
+        >
+          <Copy className="w-4 h-4" />
+        </button>
+      </div>
+
+      {bank ? (
+        <div className="bg-ivory rounded-xl border border-ivory-border p-4">
+          <p className="text-xs text-muted-foreground mb-1">Rekening tujuan</p>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-bold text-emerald-deep">{bank.bank_name}</p>
+              <p className="font-mono font-semibold text-emerald-deep tabular-nums">{bank.account_number}</p>
+              <p className="text-xs text-muted-foreground">a.n. {bank.account_holder_name}</p>
+            </div>
+            <button
+              onClick={() => copy(bank.account_number, "Nomor rekening")}
+              className="p-2 rounded-lg text-muted-foreground hover:text-emerald-dark hover:bg-ivory transition-colors cursor-pointer"
+              aria-label="Salin nomor rekening"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground bg-gold/10 border border-gold/30 rounded-xl p-3">
+          Rekening tujuan tidak tersedia. Hubungi travel untuk instruksi transfer.
+        </p>
+      )}
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
+        className="hidden"
+        onChange={(e) => {
+          setError(null)
+          setFile(e.target.files?.[0] || null)
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        className="w-full rounded-xl border border-dashed border-emerald-dark/30 bg-emerald-dark/5 px-4 py-5 text-center hover:border-emerald-dark/60 transition-colors cursor-pointer"
+      >
+        <Upload className="w-5 h-5 text-emerald-dark mx-auto mb-1.5" />
+        <span className="block text-sm font-semibold text-emerald-deep">
+          {file ? file.name : "Pilih file bukti transfer"}
+        </span>
+        <span className="block text-xs text-muted-foreground mt-0.5">
+          {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB — klik untuk ganti` : "JPG, PNG, WEBP, atau PDF · maks 5MB"}
+        </span>
+      </button>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">Bank pengirim</label>
+          <Input
+            value={senderBank}
+            onChange={(e) => setSenderBank(e.target.value)}
+            placeholder="Contoh: BCA"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">Nama pemilik rekening</label>
+          <Input
+            value={senderAccountName}
+            onChange={(e) => setSenderAccountName(e.target.value)}
+            placeholder="Sesuai rekening"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">Nomor rekening pengirim</label>
+          <Input
+            value={senderAccountNumber}
+            onChange={(e) => setSenderAccountNumber(e.target.value)}
+            inputMode="numeric"
+            placeholder="Opsional"
+            className="mt-1 tabular-nums"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">Tanggal transfer</label>
+          <Input
+            type="date"
+            value={transferredAt}
+            onChange={(e) => setTransferredAt(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <p className="flex items-center gap-1.5 text-xs text-red-600">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> {error}
+        </p>
+      )}
+
+      <button
+        onClick={submitProof}
+        disabled={submitting}
+        className="w-full bg-emerald-dark text-white py-3 rounded-xl font-semibold hover:bg-emerald-deep transition-colors flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] cursor-pointer"
+      >
+        {submitting ? (
+          <><Loader2 className="w-4 h-4 animate-spin" /> Mengirim...</>
+        ) : (
+          <><Upload className="w-4 h-4" /> Kirim Bukti Pembayaran</>
+        )}
+      </button>
+    </div>
+  )
 }
 
 // ─── Pay Now Section (Full Payment) ──────────────────────────────────────────

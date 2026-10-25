@@ -14,7 +14,7 @@ export default function ParticipantsDisabledPage() {
         </div>
         <h3 className="text-lg font-bold mb-1 text-emerald-deep">Modul tidak tersedia</h3>
         <p className="text-sm text-muted-foreground mb-6">
-          Data peserta tidak tersedia pada skema baru. Data jamaah kini dikelola langsung melalui proses pemesanan.
+          Data peserta tidak tersedia pada skema baru. Data jemaah kini dikelola langsung melalui proses pemesanan.
         </p>
         <Button onClick={() => router.push("/dashboard")} className="w-full">Kembali ke Dashboard</Button>
       </div>

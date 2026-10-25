@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { calculateTotalFee } from "@/lib/business-logic/fees"
 import { getFeeConfig } from "@/lib/business-logic/fee-config"
-import { appUrl } from "@/lib/utils"
 import { isDataDiriComplete, type DataDiriAddress, type DataDiriProfile } from "@/lib/data-diri"
 import { z } from "zod"
 
@@ -21,6 +20,9 @@ const schema = z.object({
   pilgrimCount: z.number().min(1).max(99),
   pilgrims: z.array(pilgrimSchema).optional(),
   paymentType: z.enum(["full", "dp", "installment"]).default("installment"),
+  paymentMethod: z.enum(["transfer", "cash"]).default("transfer"),
+  bankId: z.string().uuid().nullable().optional(),
+  dpAmount: z.number().min(1).optional(),
   dpPercentage: z.number().min(10).max(90).optional(),
   tenorMonths: z.number().min(1).max(60).optional(),
   installmentOptionId: z.string().uuid().nullable().optional(),
@@ -28,6 +30,14 @@ const schema = z.object({
   referralCode: z.string().optional(),
   notes: z.string().optional(),
 })
+
+type BankSnapshot = {
+  id: string
+  bank_code: string
+  bank_name: string
+  account_number: string
+  account_holder_name: string
+}
 
 function toBookingChannel(feeChannel: string): string {
   if (feeChannel === "subdomain") return "agency_subdomain"
@@ -55,6 +65,9 @@ export async function POST(_request: NextRequest) {
       pilgrimCount,
       pilgrims,
       paymentType,
+      paymentMethod,
+      bankId,
+      dpAmount: requestedDpAmount,
       dpPercentage,
       tenorMonths,
       installmentOptionId,
@@ -79,17 +92,27 @@ export async function POST(_request: NextRequest) {
     }
 
     // Idempotency: cek apakah booking pending_payment sudah ada untuk user+package+departure
-    const { data: existingBooking } = await admin
+    let existingQuery = admin
       .from("bookings")
       .select("id, status, total, down_payment_amount, remaining_amount, payment_scheme")
       .eq("customer_id", user.id)
       .eq("package_id", packageId)
-      .eq("package_departure_id", packageDepartureId || null)
       .eq("status", "pending_payment")
-      .maybeSingle()
+    existingQuery = packageDepartureId
+      ? existingQuery.eq("package_departure_id", packageDepartureId)
+      : existingQuery.is("package_departure_id", null)
+    const { data: existingBooking } = await existingQuery.maybeSingle()
 
     if (existingBooking?.id) {
       // Booking sudah ada — kembalikan data booking lama (hindari duplikat pesanan)
+      const { data: existingPayment } = await admin
+        .from("payments")
+        .select("id, amount, payment_channel, proof_url, destination_bank_id, bank:banks(id, bank_code, bank_name, account_number, account_holder_name)")
+        .eq("booking_id", existingBooking.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
       return NextResponse.json({
         success: true,
         booking_id: existingBooking.id,
@@ -97,6 +120,7 @@ export async function POST(_request: NextRequest) {
         dp_amount: existingBooking.down_payment_amount || 0,
         remaining: existingBooking.remaining_amount || 0,
         total: existingBooking.total || 0,
+        payment: existingPayment || null,
         snap: null,
         is_duplicate: true,
       })
@@ -110,10 +134,34 @@ export async function POST(_request: NextRequest) {
     let dpAmount: number
     let remainingAmount: number
     let remainingDueDate: string | null = null
+    let minDpAmount = 0
 
     if (isInstallment) {
-      const safeDpPct = dpPercentage || 20
-      dpAmount = Math.round((totalPrice * safeDpPct) / 100)
+      // Batas minimum uang muka mengikuti opsi cicilan paket (fallback 10%)
+      let minPct = Math.max(10, Math.min(90, dpPercentage || 10))
+      if (installmentOptionId) {
+        const { data: option } = await admin
+          .from("package_installment_options")
+          .select("min_down_payment_percent")
+          .eq("id", installmentOptionId)
+          .maybeSingle()
+        const optMin = Number(option?.min_down_payment_percent || 0)
+        if (optMin > 0) minPct = Math.max(10, Math.min(90, optMin))
+      }
+      minDpAmount = Math.ceil((totalPrice * minPct) / 100)
+
+      const requested = requestedDpAmount ?? Math.round((totalPrice * minPct) / 100)
+      if (requested < minDpAmount) {
+        return NextResponse.json(
+          { error: `Uang muka minimal ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(minDpAmount)}` },
+          { status: 400 },
+        )
+      }
+      if (requested >= totalPrice) {
+        return NextResponse.json({ error: "Uang muka harus lebih kecil dari total biaya. Gunakan Bayar Penuh." }, { status: 400 })
+      }
+
+      dpAmount = Math.round(requested)
       remainingAmount = totalPrice - dpAmount
       remainingDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     } else {
@@ -122,6 +170,24 @@ export async function POST(_request: NextRequest) {
     }
 
     const payNow = dpAmount
+
+    let destinationBank: BankSnapshot | null = null
+    if (paymentMethod === "transfer") {
+      if (!bankId) {
+        return NextResponse.json({ error: "Pilih rekening bank tujuan transfer" }, { status: 400 })
+      }
+      const { data: bank } = await admin
+        .from("banks")
+        .select("id, bank_code, bank_name, account_number, account_holder_name")
+        .eq("id", bankId)
+        .eq("tenant_id", pkg.tenant_id)
+        .eq("is_active", true)
+        .maybeSingle()
+      if (!bank) {
+        return NextResponse.json({ error: "Rekening tujuan tidak tersedia untuk travel ini" }, { status: 400 })
+      }
+      destinationBank = bank as BankSnapshot
+    }
 
     // 2. Insert booking
     let agentId: string | null = null
@@ -198,15 +264,25 @@ export async function POST(_request: NextRequest) {
     if (insertErr || !booking) {
       // Race: dua request lolos cek di atas — kembalikan booking yang sudah ada
       if (insertErr?.code === "23505") {
-        const { data: raced } = await admin
+        let racedQuery = admin
           .from("bookings")
           .select("id, status, total, down_payment_amount, remaining_amount, payment_scheme")
           .eq("customer_id", user.id)
           .eq("package_id", packageId)
-          .eq("package_departure_id", packageDepartureId || null)
           .eq("status", "pending_payment")
-          .maybeSingle()
+        racedQuery = packageDepartureId
+          ? racedQuery.eq("package_departure_id", packageDepartureId)
+          : racedQuery.is("package_departure_id", null)
+        const { data: raced } = await racedQuery.maybeSingle()
         if (raced?.id) {
+          const { data: racedPayment } = await admin
+            .from("payments")
+            .select("id, amount, payment_channel, proof_url, destination_bank_id, bank:banks(id, bank_code, bank_name, account_number, account_holder_name)")
+            .eq("booking_id", raced.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
           return NextResponse.json({
             success: true,
             booking_id: raced.id,
@@ -214,6 +290,7 @@ export async function POST(_request: NextRequest) {
             dp_amount: raced.down_payment_amount || 0,
             remaining: raced.remaining_amount || 0,
             total: raced.total || 0,
+            payment: racedPayment || null,
             snap: null,
             is_duplicate: true,
           })
@@ -334,7 +411,7 @@ export async function POST(_request: NextRequest) {
         userId: user.id,
         tenantId: pkg.tenant_id,
         title: "Pemesanan berhasil dibuat",
-        body: `Booking #${bookingCode} — ${pkg.name} (${pilgrimCount} jamaah). Mohon selesaikan pembayaran sesuai nominal DP.`,
+        body: `Booking #${bookingCode} — ${pkg.name} (${pilgrimCount} jemaah). Mohon selesaikan pembayaran sesuai nominal DP.`,
         templateKey: "booking_created",
         linkUrl: `/dashboard/bookings/${booking.id}`,
         payload: { booking_id: booking.id, package_name: pkg.name },
@@ -356,7 +433,7 @@ export async function POST(_request: NextRequest) {
           userId: user.id,
           tenantId: pkg.tenant_id,
           title: "Lengkapi data diri Anda",
-          body: "Selesaikan informasi data jamaah (paspor, tempat lahir, kontak darurat, alamat) agar pengajuan visa dan pemberangkatan lebih lancar.",
+          body: "Selesaikan informasi data jemaah (paspor, tempat lahir, kontak darurat, alamat) agar pengajuan visa dan pemberangkatan lebih lancar.",
           templateKey: "data_diri_incomplete",
           linkUrl: "/dashboard/data-diri",
           payload: { booking_id: booking.id },
@@ -366,52 +443,26 @@ export async function POST(_request: NextRequest) {
       console.error("[notify booking create]", notifErr)
     }
 
-    // 6. Catat transaksi payments via RPC create_payment (trigger menuntut app.booking_id)
-    const { data: paymentId, error: payErr } = await admin.rpc("create_payment", {
-      p_booking_id: booking.id,
-      p_tenant_id: pkg.tenant_id,
-      p_status: "pending",
-      p_gateway: "midtrans",
-      p_amount: payNow,
-      p_currency: "IDR",
+    // 6. Catat tagihan pembayaran manual (transfer bank / tunai)
+    const paymentDescription = paymentMethod === "cash"
+      ? "Pembayaran tunai di kantor travel — menunggu konfirmasi travel"
+      : `Transfer ke ${destinationBank?.bank_name} ${destinationBank?.account_number} — menunggu bukti transfer`
+
+    const { error: payErr } = await admin.from("payments").insert({
+      booking_id: booking.id,
+      tenant_id: pkg.tenant_id,
+      status: "pending",
+      amount: payNow,
+      currency: "IDR",
+      payment_channel: paymentMethod === "cash" ? "cash" : "bank_transfer",
+      description: paymentDescription,
+      destination_bank_id: destinationBank?.id ?? null,
+      installment_sequence: 0,
     })
 
     if (payErr) {
       console.error("Payment insert error:", payErr)
-    }
-
-    // 6. Create Midtrans Snap token
-    let snap: { token: string; redirect_url: string } | null = null
-    try {
-      const { createSnapTransaction } = await import("@/lib/services/midtrans")
-      const orderId = booking.id
-      const finishBase = appUrl(`checkout/finish?booking_id=${booking.id}`)
-      snap = await createSnapTransaction({
-        orderId,
-        grossAmount: payNow,
-        customerName: user.user_metadata?.full_name || user.email,
-        customerEmail: user.email,
-        items: [
-          {
-            id: pkg.id,
-            name: `${pkg.name}${isInstallment ? ` (Uang Muka ${dpPercentage || 20}%)` : ""}`,
-            price: payNow,
-            quantity: 1,
-          },
-        ],
-        finishUrl: finishBase,
-        unfinishUrl: appUrl(`checkout/finish?booking_id=${booking.id}&status=unfinish`),
-        errorUrl: appUrl(`checkout/finish?booking_id=${booking.id}&status=error`),
-      })
-
-      if (paymentId) {
-        await admin
-          .from("payments")
-          .update({ gateway_reference: orderId })
-          .eq("id", paymentId)
-      }
-    } catch (serr: unknown) {
-      console.error("Midtrans Snap error:", serr instanceof Error ? serr.message : serr)
+      return NextResponse.json({ error: "Gagal membuat tagihan pembayaran" }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -421,7 +472,13 @@ export async function POST(_request: NextRequest) {
       dp_amount: dpAmount,
       remaining: remainingAmount,
       total: payNow,
-      snap: snap,
+      payment: {
+        amount: payNow,
+        method: paymentMethod,
+        channel: paymentMethod === "cash" ? "cash" : "bank_transfer",
+        bank: destinationBank,
+      },
+      snap: null,
     })
   } catch (err) {
     console.error("Create booking error:", err)

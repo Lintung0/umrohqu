@@ -8,7 +8,7 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <h1 className="text-3xl font-bold">Tentang UmrahQu</h1>
           <p className="text-emerald-100 max-w-2xl mx-auto">
-            Platform marketplace Haji &amp; umrah yang menghubungkan travel terpercaya dengan jamaah di seluruh Indonesia
+            Platform marketplace Haji &amp; umrah yang menghubungkan travel terpercaya dengan jemaah di seluruh Indonesia
           </p>
         </div>
       </div>
@@ -21,7 +21,7 @@ export default function AboutPage() {
             <h2 className="text-xl font-bold">Visi</h2>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            Menjadi platform marketplace Haji &amp; umrah terdepan di Indonesia yang menghubungkan travel, jamaah, dan mitra dalam satu ekosistem digital terintegrasi, sekaligus menjadi sumber pendapatan melalui model bisnis berbasis setup fee, service fee, dan bidding promosi.
+            Menjadi platform marketplace Haji &amp; umrah terdepan di Indonesia yang menghubungkan travel, jemaah, dan mitra dalam satu ekosistem digital terintegrasi, sekaligus menjadi sumber pendapatan melalui model bisnis berbasis setup fee, service fee, dan bidding promosi.
           </p>
         </div>
 
@@ -34,7 +34,7 @@ export default function AboutPage() {
           <ul className="space-y-3 text-muted-foreground">
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
-              Membangun ekosistem digital yang memudahkan jamaah menemukan paket umrah terbaik
+              Membangun ekosistem digital yang memudahkan jemaah menemukan paket umrah terbaik
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />

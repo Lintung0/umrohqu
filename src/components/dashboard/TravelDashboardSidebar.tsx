@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { href: "/travel-dashboard", label: "Ringkasan", icon: LayoutDashboard },
   { href: "/travel-dashboard/packages", label: "Paket Saya", icon: Package },
   { href: "/travel-dashboard/bookings", label: "Pesanan", icon: BookOpen },
-  { href: "/travel-dashboard/pilgrims", label: "Jamaah", icon: Users },
+  { href: "/travel-dashboard/pilgrims", label: "Jemaah", icon: Users },
   { href: "/travel-dashboard/staff", label: "Tim Saya", icon: Shield },
   { href: "/travel-dashboard/reports", label: "Laporan", icon: BarChart3 },
   { href: "/travel-dashboard/website", label: "Website", icon: Globe },
@@ -59,7 +59,7 @@ const OPERATIONAL_NAV_GROUPS = [
       { href: "/travel-dashboard/manasik-sessions", label: "Sesi Manasik", icon: Calendar },
       { href: "/travel-dashboard/manasik-attendances", label: "Presensi Manasik", icon: ClipboardList },
       { href: "/travel-dashboard/equipment-templates", label: "Template Perlengkapan", icon: Box },
-      { href: "/travel-dashboard/participant-equipment", label: "Perlengkapan Jamaah", icon: PackageCheck },
+      { href: "/travel-dashboard/participant-equipment", label: "Perlengkapan Jemaah", icon: PackageCheck },
     ],
   },
 ]

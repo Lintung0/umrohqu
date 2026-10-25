@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Booking tidak ditemukan atau bukan milik Anda" }, { status: 404 })
     }
 
-    if (booking.status === "cancelled" || booking.status === "cancellation_pending") {
+    if (["cancelled", "cancellation_pending", "refunded"].includes(booking.status)) {
       return NextResponse.json({ error: "Booking dibatalkan / dalam proses pembatalan" }, { status: 400 })
     }
 

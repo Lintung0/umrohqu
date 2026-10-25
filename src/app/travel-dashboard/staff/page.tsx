@@ -16,7 +16,7 @@ interface StaffMember {
 }
 
 const ROLE_OPTIONS = [
-  { value: "travel_operational", label: "Operasional", desc: "Akses terbatas (pesanan, jamaah)" },
+  { value: "travel_operational", label: "Operasional", desc: "Akses terbatas (pesanan, jemaah)" },
   { value: "travel_finance", label: "Keuangan", desc: "Keuangan travel" },
   { value: "travel_admin", label: "Admin", desc: "Akses penuh (paket, keuangan, pengaturan)" },
 ]

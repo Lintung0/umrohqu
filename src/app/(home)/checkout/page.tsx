@@ -6,14 +6,33 @@ import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
-import { Loader2, CheckCircle, AlertCircle, ChevronRight, ChevronDown, ChevronUp, User, CalendarRange, Wallet, CreditCard } from "lucide-react"
+import { Loader2, CheckCircle, AlertCircle, ChevronRight, ChevronDown, ChevronUp, User, CalendarRange, Wallet, Landmark, Banknote, Upload, Copy, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
 import { getPackageAvailable } from "@/lib/utils"
 import type { Package, Tenant } from "@/lib/types"
-import { SNAP_SCRIPT_URL, MIDTRANS_CLIENT_KEY, vtWebUrl } from "@/lib/services/midtrans-client"
 
 const DP_OPTIONS = [20, 30, 40, 50]
+
+type Bank = {
+  id: string
+  bank_code: string
+  bank_name: string
+  account_number: string
+  account_holder_name: string
+  is_primary: boolean
+}
+
+type CreatedOrder = {
+  bookingId: string
+  paymentType: "installment" | "full"
+  method: "transfer" | "cash"
+  amount: number
+  dpAmount: number
+  remaining: number
+  tenor: number
+  bank: Bank | null
+}
 
 // Single source of truth untuk peringatan pelunasan DP H-30
 function DpReminder({ amount, className }: { amount: number; className?: string }) {
@@ -27,7 +46,6 @@ function DpReminder({ amount, className }: { amount: number; className?: string 
 
 function CheckoutContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const packageSlug = searchParams.get("slug")
 
   const [pkg, setPkg] = useState<Package | null>(null)
@@ -44,10 +62,16 @@ function CheckoutContent() {
   // Default metode pembayaran adalah cicilan
   const [paymentType, setPaymentType] = useState<"installment" | "full">("installment")
   const [tenorMonths, setTenorMonths] = useState<number>(24)
-  const [dpPercentage, setDpPercentage] = useState<number>(20)
+  const [dpAmount, setDpAmount] = useState<number>(0)
   const [installmentOptions, setInstallmentOptions] = useState<any[]>([])
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
   const [notes, setNotes] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState<"transfer" | "cash">("transfer")
+  const [banks, setBanks] = useState<Bank[]>([])
+  const [banksLoading, setBanksLoading] = useState(true)
+  const [bankId, setBankId] = useState<string | null>(null)
+  const [expandedTransfer, setExpandedTransfer] = useState(false)
+  const [createdOrder, setCreatedOrder] = useState<CreatedOrder | null>(null)
   const [expandedJemaah, setExpandedJemaah] = useState<Record<number, boolean>>({ 0: true })
 
   const allPilgrimsFilled = pilgrims.every((p) => p.full_name.trim().length > 0 && p.phone.trim().length > 0)
@@ -55,13 +79,14 @@ function CheckoutContent() {
   const STEPS = useMemo(() => [
     { id: "package", label: "Data Jemaah" },
     { id: "payment", label: "Pembayaran" },
-    { id: "confirm", label: "Selesai" },
+    { id: "confirm", label: "Instruksi" },
   ], [])
 
   const canGoTo = (i: number) => {
     if (i <= step) return true
-    if (!allPilgrimsFilled) return false
-    return true
+    if (i === 1) return allPilgrimsFilled
+    if (i === 2) return !!createdOrder
+    return false
   }
   const goToStep = (i: number) => { if (canGoTo(i)) setStep(i) }
 
@@ -115,9 +140,6 @@ function CheckoutContent() {
           setInstallmentOptions(optData)
           setTenorMonths(optData[0].tenor_months)
           setSelectedOptionId(optData[0].id)
-          if (optData[0].min_down_payment_percent) {
-            setDpPercentage(Math.max(20, optData[0].min_down_payment_percent))
-          }
         }
 
         setLoading(false)
@@ -146,13 +168,46 @@ function CheckoutContent() {
 
   const totalPrice = useMemo(() => pkg ? Number(pkg.price) * pilgrimCount : 0, [pkg, pilgrimCount])
   const isInstallment = paymentType === "installment"
-  const dpAmount = useMemo(() => isInstallment ? Math.round(totalPrice * dpPercentage / 100) : totalPrice, [isInstallment, totalPrice, dpPercentage])
-  const remainingAmount = useMemo(() => isInstallment ? totalPrice - dpAmount : 0, [isInstallment, totalPrice, dpAmount])
+  const selectedOption = installmentOptions.find((o) => o.id === selectedOptionId)
+  const minDpPercent = Math.max(10, Number(selectedOption?.min_down_payment_percent || 0) || 10)
+  const minDpAmount = Math.ceil((totalPrice * minDpPercent) / 100)
+  const remainingAmount = useMemo(() => isInstallment ? Math.max(0, totalPrice - dpAmount) : 0, [isInstallment, totalPrice, dpAmount])
   const monthlyAmount = useMemo(() => {
     if (!isInstallment || tenorMonths <= 0) return 0
     return Math.round(remainingAmount / tenorMonths)
   }, [isInstallment, remainingAmount, tenorMonths])
-  const amountToPayNow = useMemo(() => isInstallment ? dpAmount : totalPrice, [isInstallment, dpAmount, totalPrice])
+  const amountToPayNow = isInstallment ? dpAmount : totalPrice
+  const dpPercentDisplay = totalPrice > 0 ? Math.round((dpAmount / totalPrice) * 1000) / 10 : 0
+  const methodLabel = paymentMethod === "cash" ? "Tunai di travel" : "Transfer bank"
+
+  useEffect(() => {
+    if (!pkg?.tenant_id) return
+    let cancelled = false
+    setBanksLoading(true)
+    ;(async () => {
+      const { data } = await supabase
+        .from("banks")
+        .select("id, bank_code, bank_name, account_number, account_holder_name, is_primary")
+        .eq("tenant_id", pkg.tenant_id)
+        .eq("is_active", true)
+        .order("is_primary", { ascending: false })
+        .order("bank_name", { ascending: true })
+      if (cancelled) return
+      const rows = (data || []) as Bank[]
+      setBanks(rows)
+      setBankId((prev) => prev && rows.some((b) => b.id === prev) ? prev : (rows.find((b) => b.is_primary)?.id || rows[0]?.id || null))
+      setBanksLoading(false)
+    })()
+    return () => { cancelled = true }
+  }, [pkg?.tenant_id, supabase])
+
+  useEffect(() => {
+    if (!isInstallment) return
+    setDpAmount((prev) => {
+      if (!prev || prev < minDpAmount || prev >= totalPrice) return minDpAmount
+      return prev
+    })
+  }, [isInstallment, minDpAmount, totalPrice])
 
   const updatePilgrim = useCallback((index: number, field: string, value: string) => {
     setPilgrims((prev) => {
@@ -171,140 +226,71 @@ function CheckoutContent() {
     // Guard anti double-klik: state saja tidak cukup (2 klik dalam 1 tick
     // lolos sebelum re-render). Ref sinkron, tidak bisa ditembus.
     if (submittingRef.current) return
+    if (paymentMethod === "transfer" && !bankId) {
+      setResult({ success: false, error: "Pilih rekening bank tujuan transfer." })
+      return
+    }
+    if (isInstallment && dpAmount < minDpAmount) {
+      setResult({ success: false, error: `Uang muka minimal ${formatRupiah(minDpAmount)}.` })
+      return
+    }
     submittingRef.current = true
     setSubmitting(true)
     setResult(null)
-    // Verifikasi diam-diam ke gateway, lalu langsung ke detail pesanan.
-    // TIDAK lewat halaman finish/loading — popup Snap cukup overlay.
-    const verifyNow = async (bookingId: string) => {
-      try {
-        await fetch("/api/booking/verify-payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bookingId }),
-        })
-      } catch (e) {
-        console.error("Verify payment error:", e)
-      }
-    }
     const done = () => {
       submittingRef.current = false
       setSubmitting(false)
     }
-    // True jika popup Snap sempat dibuka — selama popup terbuka / proses
-    // verify berjalan, tombol Bayar tetap terkunci (anti double order).
-    let snapOpened = false
     try {
       const res = await fetch("/api/booking/create", {
         method: "POST",
-          body: JSON.stringify({
-            packageId: pkg.id,
-            packageDepartureId: null,
-            pilgrimCount,
-            pilgrims: pilgrims.map((p) => ({
-              full_name: p.full_name,
-              phone: p.phone || null,
-              gender: p.gender || null,
-              relation: p.relation || "self",
-            })),
-            paymentType,
-            dpPercentage: isInstallment ? dpPercentage : undefined,
-            tenorMonths: isInstallment ? tenorMonths : undefined,
-            installmentOptionId: isInstallment ? (selectedOptionId || undefined) : undefined,
-            notes,
-            feeChannel: "portal",
-            referralCode: undefined,
-          }),
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packageId: pkg.id,
+          packageDepartureId: null,
+          pilgrimCount,
+          pilgrims: pilgrims.map((p) => ({
+            full_name: p.full_name,
+            phone: p.phone || null,
+            gender: p.gender || null,
+            relation: p.relation || "self",
+          })),
+          paymentType,
+          paymentMethod,
+          bankId: paymentMethod === "transfer" ? bankId : undefined,
+          dpAmount: isInstallment ? dpAmount : undefined,
+          tenorMonths: isInstallment ? tenorMonths : undefined,
+          installmentOptionId: isInstallment ? (selectedOptionId || undefined) : undefined,
+          notes,
+          feeChannel: "portal",
+          referralCode: undefined,
+        }),
+      })
       const data = await res.json()
-      if (res.ok && data.snap && data.booking_id) {
-        // Gunakan Midtrans Snap JS SDK dengan callback onPending untuk capture VA number
-        const snapToken = data.snap.token
-        const bookingId = data.booking_id
-
-        // Load Midtrans Snap JS SDK dynamically
-        const loadSnapScript = (): Promise<void> => {
-          return new Promise((resolve, reject) => {
-            if (typeof window !== "undefined" && (window as any).snap) {
-              resolve()
-              return
-            }
-            const script = document.createElement("script")
-            script.src = SNAP_SCRIPT_URL
-            script.setAttribute("data-client-key", MIDTRANS_CLIENT_KEY)
-            script.onload = () => resolve()
-            script.onerror = () => reject(new Error("Gagal memuat Midtrans Snap JS"))
-            document.body.appendChild(script)
-          })
-        }
-
-        try {
-          await loadSnapScript()
-
-          // @ts-expect-error - Midtrans Snap types tidak ada di TS
-          window.snap.pay(snapToken, {
-            // Sukses (kartu/QRIS/e-wallet instan): verify diam-diam,
-            // lalu LANGSUNG ke detail pesanan — tanpa halaman finish/loading.
-            onSuccess: async function (result: any) {
-              console.log("Payment success:", result)
-              await verifyNow(bookingId)
-              router.push(`/dashboard/bookings/${bookingId}`)
-            },
-            onPending: async function (result: any) {
-              console.log("Payment pending:", result)
-              // Capture VA number dari callback onPending
-              const vaNumber = result.va_numbers?.[0]?.va_number
-              const bank = result.va_numbers?.[0]?.bank
-              if (vaNumber) {
-                try {
-                  await fetch("/api/payments/update-va", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ bookingId, vaNumber, bank }),
-                  })
-                  console.log("VA number updated:", vaNumber, bank)
-                } catch (e) {
-                  console.error("Failed to update VA:", e)
-                }
-              }
-              // VA/e-wallet pending: verify diam-diam, lalu LANGSUNG ke
-              // detail pesanan (kartu VA menanti di sana). Tanpa finish.
-              await verifyNow(bookingId)
-              router.push(`/dashboard/bookings/${bookingId}`)
-            },
-            onError: async function (result: any) {
-              console.log("Payment error:", result)
-              // Gagal: TETAP di checkout, tampilkan pesan — user bisa coba lagi.
-              done()
-              setResult({ success: false, error: "Pembayaran gagal. Silakan coba lagi atau pilih metode lain." })
-            },
-            onClose: function () {
-              console.log("Payment popup closed")
-              // Popup ditutup tanpa bayar: TETAP di checkout, tombol aktif lagi.
-              done()
-            },
-          })
-          snapOpened = true
-        } catch (snapError) {
-          console.error("Snap JS error:", snapError)
-          // Fallback ke redirect biasa jika Snap JS gagal
-          window.location.href = data.snap.redirect_url || vtWebUrl(snapToken)
-        }
-      } else if (res.ok) {
-        setResult({ success: true, bookingId: data.booking_id })
-        setTimeout(() => router.push(`/dashboard/bookings/${data.booking_id}`), 2000)
-      } else {
-        setResult({ success: false, error: data.error })
+      if (!res.ok || !data.booking_id) {
+        setResult({ success: false, error: data.error || "Gagal membuat pesanan." })
+        done()
+        return
       }
+
+      const selectedBank = banks.find((b) => b.id === bankId) || null
+      setCreatedOrder({
+        bookingId: data.booking_id,
+        paymentType: data.payment_type === "full" ? "full" : "installment",
+        method: paymentMethod,
+        amount: Number(data.payment?.amount ?? data.dp_amount ?? amountToPayNow),
+        dpAmount: Number(data.dp_amount ?? dpAmount),
+        remaining: Number(data.remaining ?? remainingAmount),
+        tenor: tenorMonths,
+        bank: (data.payment?.bank as Bank | undefined) || selectedBank,
+      })
+      setStep(2)
+      done()
     } catch {
       setResult({ success: false, error: "Terjadi kesalahan jaringan. Silakan coba lagi." })
-    }
-    // Popup Snap terbuka = alur dilanjutkan oleh callback (sukses/pending/
-    // error/close). Jangan buka kunci tombol di sini — anti double order.
-    if (!snapOpened) {
       done()
     }
-  }, [pkg, pilgrimCount, pilgrims, paymentType, dpPercentage, notes, router])
+  }, [pkg, pilgrimCount, pilgrims, paymentType, paymentMethod, bankId, isInstallment, dpAmount, minDpAmount, tenorMonths, selectedOptionId, notes, amountToPayNow, remainingAmount, banks])
 
   if (loading) {
     return (
@@ -423,43 +409,39 @@ function CheckoutContent() {
                 pilgrimCount={pilgrimCount}
                 totalPrice={totalPrice}
                 dpAmount={dpAmount}
+                setDpAmount={setDpAmount}
+                minDpAmount={minDpAmount}
+                minDpPercent={minDpPercent}
+                dpPercentDisplay={dpPercentDisplay}
                 remainingAmount={remainingAmount}
                 monthlyAmount={monthlyAmount}
                 tenorMonths={tenorMonths}
                 setTenorMonths={setTenorMonths}
                 installmentOptions={installmentOptions}
                 setSelectedOptionId={setSelectedOptionId}
-                dpPercentage={dpPercentage}
-                setDpPercentage={setDpPercentage}
                 paymentType={paymentType}
                 setPaymentType={setPaymentType}
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                banks={banks}
+                banksLoading={banksLoading}
+                bankId={bankId}
+                setBankId={setBankId}
+                expandedTransfer={expandedTransfer}
+                setExpandedTransfer={setExpandedTransfer}
                 amountToPayNow={amountToPayNow}
+                methodLabel={methodLabel}
                 notes={notes}
                 setNotes={setNotes}
                 setStep={setStep}
-                reviewStep={2}
-              />
-            )}
-
-            {step === 2 && (
-              <StepReview
-                pkg={pkg}
-                travel={travel}
-                pilgrimCount={pilgrimCount}
-                pilgrims={pilgrims}
-                totalPrice={totalPrice}
-                dpAmount={dpAmount}
-                remainingAmount={remainingAmount}
-                monthlyAmount={monthlyAmount}
-                tenorMonths={tenorMonths}
-                dpPercentage={dpPercentage}
-                paymentType={paymentType}
-                amountToPayNow={amountToPayNow}
                 submitting={submitting}
                 result={result}
                 handleSubmit={handleSubmit}
-                setStep={setStep}
               />
+            )}
+
+            {step === 2 && createdOrder && (
+              <StepInstructions order={createdOrder} travel={travel} />
             )}
           </div>
         )}
@@ -759,31 +741,46 @@ function StepDataSingkat({
 // ─── Step 2: Payment ─────────────────────────────────────────────────────────
 
 function StepPayment({
-  pkg, travel, pilgrimCount, totalPrice, dpAmount, remainingAmount,
-  monthlyAmount, tenorMonths, setTenorMonths, installmentOptions, setSelectedOptionId,
-  dpPercentage, setDpPercentage, paymentType, setPaymentType,
-  amountToPayNow, notes, setNotes, setStep, reviewStep,
+  pkg, travel, pilgrimCount, totalPrice, dpAmount, setDpAmount,
+  minDpAmount, minDpPercent, dpPercentDisplay, remainingAmount, monthlyAmount,
+  tenorMonths, setTenorMonths, installmentOptions, setSelectedOptionId,
+  paymentType, setPaymentType, paymentMethod, setPaymentMethod,
+  banks, banksLoading, bankId, setBankId, expandedTransfer, setExpandedTransfer,
+  amountToPayNow, methodLabel, notes, setNotes, setStep, submitting, result, handleSubmit,
 }: {
   pkg: Package
   travel: Tenant | null
   pilgrimCount: number
   totalPrice: number
   dpAmount: number
+  setDpAmount: (n: number) => void
+  minDpAmount: number
+  minDpPercent: number
+  dpPercentDisplay: number
   remainingAmount: number
   monthlyAmount: number
   tenorMonths: number
   setTenorMonths: (n: number) => void
-  installmentOptions: any[]
+  installmentOptions: Array<{ id: string; tenor_months: number }>
   setSelectedOptionId: (id: string | null) => void
-  dpPercentage: number
-  setDpPercentage: (n: number) => void
   paymentType: "installment" | "full"
   setPaymentType: (v: "installment" | "full") => void
+  paymentMethod: "transfer" | "cash"
+  setPaymentMethod: (v: "transfer" | "cash") => void
+  banks: Bank[]
+  banksLoading: boolean
+  bankId: string | null
+  setBankId: (id: string) => void
+  expandedTransfer: boolean
+  setExpandedTransfer: (v: boolean) => void
   amountToPayNow: number
+  methodLabel: string
   notes: string
   setNotes: (v: string) => void
   setStep: (n: number) => void
-  reviewStep: number
+  submitting: boolean
+  result: { success: boolean; bookingId?: string; error?: string } | null
+  handleSubmit: () => void
 }) {
   const isInstallment = paymentType === "installment"
   const availableTenors = installmentOptions.length > 0
@@ -793,13 +790,13 @@ function StepPayment({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
       <div className="lg:col-span-2 space-y-8">
-        {/* Tipe pembayaran: dua kartu berbobot, kartu aktif emerald penuh */}
+        {/* Tipe pembayaran: bobot lewat kontras warna, tanpa nominal */}
         <section>
           <h3 className="text-sm font-semibold text-emerald-deep mb-3">Tipe Pembayaran</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {([
-              { key: "installment" as const, label: "Cicilan", hint: "Uang muka dulu, sisanya dicicil tiap bulan", Icon: CalendarRange, amount: dpAmount },
-              { key: "full" as const, label: "Bayar Penuh", hint: "Satu kali bayar lunas, tanpa cicilan", Icon: Wallet, amount: totalPrice },
+              { key: "installment" as const, label: "Cicilan", hint: "Uang muka dulu, sisanya dicicil tiap bulan", Icon: CalendarRange },
+              { key: "full" as const, label: "Bayar Penuh", hint: "Satu kali bayar lunas, tanpa cicilan", Icon: Wallet },
             ]).map((opt) => {
               const active = paymentType === opt.key
               const Icon = opt.Icon
@@ -809,25 +806,18 @@ function StepPayment({
                   type="button"
                   onClick={() => setPaymentType(opt.key)}
                   aria-pressed={active}
-                  className={`relative text-left rounded-2xl p-5 border transition-all cursor-pointer min-h-[112px] ${
+                  className={`relative text-left rounded-2xl p-5 border transition-all cursor-pointer min-h-[104px] ${
                     active
                       ? "border-emerald-dark bg-emerald-dark text-ivory"
                       : "border-ivory-border bg-ivory-card hover:border-gold/60"
                   }`}
                 >
-                  {active && (
-                    <span className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-gold-light">
-                      <CheckCircle className="w-4 h-4" /> Dipilih
-                    </span>
-                  )}
-                  <div className="flex items-center gap-2 mb-3">
+                  {active && <CheckCircle className="absolute top-3 right-3 w-5 h-5 text-gold-light" />}
+                  <div className="flex items-center gap-2 mb-2">
                     <Icon className={`w-5 h-5 ${active ? "text-gold-light" : "text-emerald-dark"}`} />
                     <span className={`text-base font-bold ${active ? "text-ivory" : "text-emerald-deep"}`}>{opt.label}</span>
                   </div>
-                  <span className={`block text-xl font-bold tabular-nums ${active ? "text-ivory" : "text-emerald-deep"}`}>
-                    {formatRupiah(opt.amount)}
-                  </span>
-                  <span className={`block text-xs mt-1 ${active ? "text-ivory/70" : "text-ivory-ink/55"}`}>{opt.hint}</span>
+                  <span className={`block text-xs leading-relaxed ${active ? "text-ivory/70" : "text-ivory-ink/55"}`}>{opt.hint}</span>
                 </button>
               )
             })}
@@ -836,6 +826,67 @@ function StepPayment({
 
         {isInstallment && (
           <>
+            {/* Uang muka: input bebas dengan batas minimum */}
+            <section>
+              <div className="flex items-baseline justify-between mb-3">
+                <h3 className="text-sm font-semibold text-emerald-deep">Uang Muka</h3>
+                <span className="text-[11px] text-ivory-ink/55">
+                  Minimal {minDpPercent}% · {formatRupiah(minDpAmount)}
+                </span>
+              </div>
+              <div className="rounded-xl border border-ivory-border bg-ivory-card p-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-ivory-ink/60">Rp</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={minDpAmount}
+                    step={100000}
+                    value={dpAmount || ""}
+                    onChange={(e) => setDpAmount(Math.max(0, Number(e.target.value)))}
+                    onBlur={() => { if (dpAmount < minDpAmount) setDpAmount(minDpAmount) }}
+                    className="flex-1 min-w-0 bg-transparent text-2xl font-bold text-emerald-deep tabular-nums focus:outline-none"
+                    aria-label="Nominal uang muka"
+                  />
+                  <span className="shrink-0 rounded-full bg-emerald-dark/10 px-2.5 py-1 text-xs font-bold text-emerald-deep tabular-nums">
+                    {dpPercentDisplay}%
+                  </span>
+                </div>
+
+                <div className="h-2 w-full rounded-full bg-ivory overflow-hidden mt-3">
+                  <div
+                    className="h-full rounded-full bg-emerald-dark transition-all"
+                    style={{ width: `${Math.min(100, dpPercentDisplay)}%` }}
+                  />
+                </div>
+
+                <div className="flex gap-2 mt-3">
+                  {DP_OPTIONS.filter((pct) => pct >= minDpPercent).map((pct) => {
+                    const active = dpPercentDisplay === pct
+                    return (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => setDpAmount(Math.ceil((totalPrice * pct) / 100))}
+                        aria-pressed={active}
+                        className={`flex-1 px-2 py-2 rounded-lg text-sm font-semibold border transition-colors cursor-pointer min-h-[44px] ${
+                          active
+                            ? "border-emerald-dark bg-emerald-dark text-ivory"
+                            : "border-ivory-border text-ivory-ink/70 hover:border-gold/60"
+                        }`}
+                      >
+                        {pct}%
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <p className="text-xs text-ivory-ink/55 mt-3">
+                  Sisa <span className="font-semibold text-emerald-deep tabular-nums">{formatRupiah(remainingAmount)}</span> dicicil {tenorMonths} bulan.
+                </p>
+              </div>
+            </section>
+
             {/* Tenor: deret kartu yang mudah dipindai */}
             <section>
               <h3 className="text-sm font-semibold text-emerald-deep mb-3">Tenor Cicilan</h3>
@@ -869,83 +920,125 @@ function StepPayment({
                 })}
               </div>
             </section>
-
-            {/* Uang muka: bar porsi DP */}
-            <section>
-              <h3 className="text-sm font-semibold text-emerald-deep mb-3">Uang Muka</h3>
-              <div className="rounded-xl border border-ivory-border bg-ivory-card p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-ivory-ink/60">Uang muka</span>
-                  <span className="text-lg font-bold text-emerald-deep tabular-nums">{formatRupiah(dpAmount)}</span>
-                </div>
-
-                <div className="h-2.5 w-full rounded-full bg-ivory overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-emerald-dark transition-all"
-                    style={{ width: `${dpPercentage}%` }}
-                  />
-                </div>
-
-                <div className="flex gap-2 mt-3">
-                  {DP_OPTIONS.map((pct) => {
-                    const active = dpPercentage === pct
-                    return (
-                      <button
-                        key={pct}
-                        type="button"
-                        onClick={() => setDpPercentage(pct)}
-                        aria-pressed={active}
-                        className={`flex-1 px-2 py-2 rounded-lg text-sm font-semibold border transition-colors cursor-pointer min-h-[44px] ${
-                          active
-                            ? "border-emerald-dark bg-emerald-dark text-ivory"
-                            : "border-ivory-border text-ivory-ink/70 hover:border-gold/60"
-                        }`}
-                      >
-                        {pct}%
-                      </button>
-                    )
-                  })}
-                </div>
-
-                <p className="text-xs text-ivory-ink/55 mt-3">
-                  Sisa <span className="font-semibold text-emerald-deep tabular-nums">{formatRupiah(remainingAmount)}</span> dicicil {tenorMonths} bulan.
-                </p>
-              </div>
-            </section>
-
-            {/* Simulasi: panel emerald lembut sebagai jeda visual */}
-            <section className="rounded-xl bg-emerald-dark/5 border border-emerald-dark/10 p-5 space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-deep/70">Simulasi Pembayaran</p>
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm text-ivory-ink/65">Pembayaran pertama</span>
-                <span className="text-base font-semibold text-emerald-deep tabular-nums">{formatRupiah(dpAmount)}</span>
-              </div>
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm text-ivory-ink/65">Cicilan per bulan</span>
-                <span className="text-base font-semibold text-emerald-deep tabular-nums">{formatRupiah(monthlyAmount)}</span>
-              </div>
-              <div className="flex items-baseline justify-between pt-3 border-t border-emerald-dark/15">
-                <span className="text-sm font-medium text-emerald-deep">Total biaya paket</span>
-                <span className="text-lg font-bold text-emerald-deep tabular-nums">{formatRupiah(totalPrice)}</span>
-              </div>
-            </section>
           </>
         )}
 
-        {/* Metode: chip dengan ikon relevan */}
+        {/* Metode: Tunai atau Transfer manual */}
         <section>
           <h3 className="text-sm font-semibold text-emerald-deep mb-1">Metode Pembayaran</h3>
-          <p className="text-xs text-ivory-ink/60 mb-3">Diproses aman melalui Midtrans. Metodenya dipilih di langkah berikutnya.</p>
-          <div className="flex flex-wrap gap-2">
-            {["BCA VA", "Mandiri", "BNI VA", "BRI VA", "Permata", "Kartu Kredit", "E-wallet", "Tunai di Travel"].map((m) => (
-              <span
-                key={m}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-ivory-border bg-ivory-card px-3 py-2 text-xs font-medium text-ivory-ink/75"
-              >
-                <CreditCard className="w-3.5 h-3.5 text-emerald-dark/70" />
-                {m}
+          <p className="text-xs text-ivory-ink/60 mb-3">Pilih cara kamu membayar. Instruksi lengkap muncul setelah pesanan dibuat.</p>
+
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => setPaymentMethod("cash")}
+              aria-pressed={paymentMethod === "cash"}
+              className={`w-full flex items-center gap-3 rounded-xl border p-4 text-left transition-all cursor-pointer ${
+                paymentMethod === "cash"
+                  ? "border-emerald-dark bg-emerald-dark/5 ring-1 ring-emerald-dark/25"
+                  : "border-ivory-border bg-ivory-card hover:border-gold/60"
+              }`}
+            >
+              <span className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${
+                paymentMethod === "cash" ? "bg-emerald-dark border-emerald-dark" : "border-ivory-ink/25"
+              }`}>
+                {paymentMethod === "cash" && <CheckCircle className="w-4 h-4 text-ivory" />}
               </span>
-            ))}
+              <Banknote className="w-5 h-5 text-emerald-dark shrink-0" />
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-emerald-deep">Tunai</span>
+                <span className="block text-xs text-ivory-ink/55">Bayar langsung di kantor travel</span>
+              </span>
+            </button>
+
+            <div className={`rounded-xl border transition-all ${
+              paymentMethod === "transfer"
+                ? "border-emerald-dark bg-ivory-card ring-1 ring-emerald-dark/25"
+                : "border-ivory-border bg-ivory-card hover:border-gold/60"
+            }`}>
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentMethod("transfer")
+                  setExpandedTransfer(true)
+                }}
+                aria-pressed={paymentMethod === "transfer"}
+                aria-expanded={expandedTransfer && paymentMethod === "transfer"}
+                className="w-full flex items-center gap-3 p-4 text-left cursor-pointer"
+              >
+                <span className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${
+                  paymentMethod === "transfer" ? "bg-emerald-dark border-emerald-dark" : "border-ivory-ink/25"
+                }`}>
+                  {paymentMethod === "transfer" && <CheckCircle className="w-4 h-4 text-ivory" />}
+                </span>
+                <Landmark className="w-5 h-5 text-emerald-dark shrink-0" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-emerald-deep">Transfer Bank</span>
+                  <span className="block text-xs text-ivory-ink/55">Transfer ke rekening travel, lalu unggah bukti</span>
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 shrink-0 text-ivory-ink/50 transition-transform ${
+                    expandedTransfer && paymentMethod === "transfer" ? "rotate-180" : ""
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (paymentMethod !== "transfer") {
+                      setPaymentMethod("transfer")
+                      setExpandedTransfer(true)
+                    } else {
+                      setExpandedTransfer(!expandedTransfer)
+                    }
+                  }}
+                />
+              </button>
+
+              {paymentMethod === "transfer" && expandedTransfer && (
+                <div className="px-4 pb-4 space-y-2">
+                  {banksLoading ? (
+                    <p className="flex items-center gap-2 text-xs text-ivory-ink/55 py-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Memuat rekening travel...
+                    </p>
+                  ) : banks.length === 0 ? (
+                    <p className="rounded-lg bg-ivory border border-ivory-border p-3 text-xs text-ivory-ink/60">
+                      Travel belum menambahkan rekening bank. Pilih tunai atau hubungi travel.
+                    </p>
+                  ) : (
+                    banks.map((b) => {
+                      const active = bankId === b.id
+                      return (
+                        <button
+                          key={b.id}
+                          type="button"
+                          onClick={() => setBankId(b.id)}
+                          aria-pressed={active}
+                          className={`w-full flex items-center gap-3 rounded-lg border p-3 text-left transition-colors cursor-pointer ${
+                            active
+                              ? "border-emerald-dark bg-emerald-dark/5"
+                              : "border-ivory-border bg-ivory hover:border-gold/60"
+                          }`}
+                        >
+                          <div className="w-9 h-9 rounded-lg bg-emerald-dark/10 flex items-center justify-center shrink-0">
+                            <Landmark className="w-4 h-4 text-emerald-dark" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-emerald-deep truncate">
+                              {b.bank_name}
+                              {b.is_primary && <span className="ml-1.5 text-[10px] font-bold uppercase text-gold-dark">Utama</span>}
+                            </p>
+                            <p className="text-xs text-ivory-ink/60 tabular-nums truncate">
+                              {b.account_number} · {b.account_holder_name}
+                            </p>
+                          </div>
+                          <span className={`w-4 h-4 rounded-full border shrink-0 ${
+                            active ? "border-4 border-emerald-dark" : "border-ivory-ink/25"
+                          }`} />
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
@@ -963,9 +1056,22 @@ function StepPayment({
           />
         </section>
 
+        {result && !result.success && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center gap-2 text-sm text-red-700">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {result.error}
+          </div>
+        )}
+
         <div className="lg:hidden flex justify-between pt-1">
           <Button variant="outline" onClick={() => setStep(0)}>Kembali</Button>
-          <Button onClick={() => setStep(reviewStep)} className="px-6 h-12">Lanjutkan</Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="px-6 h-12 bg-emerald-dark hover:bg-emerald-deep text-ivory"
+          >
+            {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Lanjutkan"}
+          </Button>
         </div>
       </div>
 
@@ -1000,15 +1106,23 @@ function StepPayment({
               {isInstallment && (
                 <>
                   <div className="flex justify-between pt-1">
-                    <span className="text-ivory-ink/60">Uang muka ({dpPercentage}%)</span>
+                    <span className="text-ivory-ink/60">Uang muka ({dpPercentDisplay}%)</span>
                     <span className="tabular-nums">{formatRupiah(dpAmount)}</span>
                   </div>
                   <div className="flex justify-between text-ivory-ink/50 text-xs">
                     <span>Sisa dicicil ({tenorMonths} bulan)</span>
                     <span className="tabular-nums">{formatRupiah(remainingAmount)}</span>
                   </div>
+                  <div className="flex justify-between text-ivory-ink/50 text-xs">
+                    <span>Cicilan / bulan</span>
+                    <span className="tabular-nums">{formatRupiah(monthlyAmount)}</span>
+                  </div>
                 </>
               )}
+              <div className="flex justify-between">
+                <span className="text-ivory-ink/60">Metode</span>
+                <span className="font-medium">{methodLabel}</span>
+              </div>
             </div>
 
             {/* Kartu total: focal point */}
@@ -1020,11 +1134,19 @@ function StepPayment({
             </div>
 
             <Button
-              onClick={() => setStep(reviewStep)}
+              onClick={handleSubmit}
+              disabled={submitting}
               className="w-full h-12 mt-4 bg-emerald-dark hover:bg-emerald-deep text-ivory rounded-xl font-semibold active:scale-[0.98] transition-all"
             >
-              Lanjutkan
+              {submitting ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
+              ) : (
+                "Lanjutkan"
+              )}
             </Button>
+            <p className="text-[11px] text-ivory-ink/50 text-center mt-3">
+              Pesanan dibuat setelah kamu menekan Lanjutkan.
+            </p>
           </div>
         </div>
       </div>
@@ -1032,156 +1154,307 @@ function StepPayment({
   )
 }
 
-// ─── Step 3: Review ──────────────────────────────────────────────────────────
+// ─── Step 3: Instruksi Pembayaran ────────────────────────────────────────────
 
-function StepReview({
-  pkg, travel, pilgrimCount, pilgrims, totalPrice, dpAmount, remainingAmount,
-  monthlyAmount, tenorMonths, dpPercentage, paymentType, amountToPayNow,
-  submitting, result, handleSubmit, setStep,
-}: {
-  pkg: Package
-  travel: Tenant | null
-  pilgrimCount: number
-  pilgrims: Array<{ full_name: string; phone: string; relation: string; gender: string }>
-  totalPrice: number
-  dpAmount: number
-  remainingAmount: number
-  monthlyAmount: number
-  tenorMonths: number
-  dpPercentage: number
-  paymentType: "installment" | "full"
-  amountToPayNow: number
-  submitting: boolean
-  result: { success: boolean; bookingId?: string; error?: string } | null
-  handleSubmit: () => void
-  setStep: (n: number) => void
-}) {
-  const isInstallment = paymentType === "installment"
+function StepInstructions({ order, travel }: { order: CreatedOrder; travel: Tenant | null }) {
+  const router = useRouter()
+  const isTransfer = order.method === "transfer"
+  const bank = order.bank
+  const [file, setFile] = useState<File | null>(null)
+  const [senderBank, setSenderBank] = useState(bank?.bank_name || "")
+  const [senderAccountName, setSenderAccountName] = useState("")
+  const [senderAccountNumber, setSenderAccountNumber] = useState("")
+  const [transferredAt, setTransferredAt] = useState(new Date().toISOString().slice(0, 10))
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const legal = (travel?.config as { legal_company?: { office_address?: string; city?: string; office_phone?: string } } | undefined)?.legal_company
+  const officeAddress = [legal?.office_address, legal?.city].filter(Boolean).join(", ")
+
+  const copy = async (value: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(key)
+      setTimeout(() => setCopied(null), 1800)
+    } catch {
+      setError("Gagal menyalin. Salin manual ya.")
+    }
+  }
+
+  const submitProof = async () => {
+    if (!file) { setError("Unggah bukti transfer terlebih dahulu."); return }
+    setSubmitting(true)
+    setError(null)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      fd.append("bookingId", order.bookingId)
+      fd.append("senderBank", senderBank)
+      fd.append("senderAccountName", senderAccountName)
+      fd.append("senderAccountNumber", senderAccountNumber)
+      fd.append("transferredAt", transferredAt)
+      const res = await fetch("/api/booking/payment-proof", { method: "POST", body: fd })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Gagal mengirim bukti pembayaran.")
+        setSubmitting(false)
+        return
+      }
+      router.push(`/dashboard/bookings/${order.bookingId}`)
+    } catch {
+      setError("Terjadi kesalahan jaringan. Silakan coba lagi.")
+      setSubmitting(false)
+    }
+  }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
       <div className="lg:col-span-2 space-y-5">
-        <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 shadow-sm">
-          <h3 className="font-semibold text-sm mb-3">Data Jemaah</h3>
-          <div className="space-y-2">
-            {pilgrims.map((p, i) => (
-              <div key={i} className="flex items-center gap-3 text-sm">
-                <div className="w-7 h-7 rounded-full bg-emerald-dark/10 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-emerald-deep">{i + 1}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{p.full_name}</p>
-                  <p className="text-xs text-ivory-ink/70">{p.phone} · {p.gender === "male" ? "Laki-laki" : p.gender === "female" ? "Perempuan" : "-"} · {p.relation === "self" ? "Diri sendiri" : p.relation}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-[10px] text-ivory-ink/70 mt-3 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> Data lengkap (NIK, alamat, paspor) dapat dilengkapi di dashboard setelah booking dibuat
-          </p>
-        </div>
-
-        {isInstallment && (
-          <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 shadow-sm space-y-3">
-            <h3 className="font-semibold text-sm">Rincian Skema Cicilan</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="bg-ivory p-3 rounded-xl border border-ivory-border">
-                <span className="text-ivory-ink/60 block">Tenor</span>
-                <span className="font-bold text-sm text-emerald-deep mt-0.5 block">{tenorMonths} Bulan</span>
-              </div>
-              <div className="bg-ivory p-3 rounded-xl border border-ivory-border">
-                <span className="text-ivory-ink/60 block">Uang Muka ({dpPercentage}%)</span>
-                <span className="font-bold text-sm text-emerald-deep mt-0.5 block">{formatRupiah(dpAmount)}</span>
-              </div>
-              <div className="bg-ivory p-3 rounded-xl border border-ivory-border">
-                <span className="text-ivory-ink/60 block">Cicilan / Bulan</span>
-                <span className="font-bold text-sm text-emerald-deep mt-0.5 block">{formatRupiah(monthlyAmount)}</span>
-              </div>
-              <div className="bg-ivory p-3 rounded-xl border border-ivory-border">
-                <span className="text-ivory-ink/60 block">Sisa Pembayaran</span>
-                <span className="font-bold text-sm text-emerald-deep mt-0.5 block">{formatRupiah(remainingAmount)}</span>
-              </div>
+        <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 sm:p-6 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-emerald-dark/10 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5 text-emerald-dark" />
+            </div>
+            <div>
+              <h3 className="font-bold text-emerald-deep">Pesanan tersimpan</h3>
+              <p className="text-xs text-ivory-ink/65 mt-0.5">
+                Kode pesanan <span className="font-semibold text-emerald-deep">{order.bookingId.slice(0, 8).toUpperCase()}</span> — selesaikan pembayaran agar travel bisa memproses.
+              </p>
             </div>
           </div>
-        )}
+        </div>
 
-        {result && !result.success && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3 text-sm text-red-700">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            {result.error}
+        {isTransfer ? (
+          <>
+            <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 sm:p-6 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gold-dark mb-3">Rekening Tujuan</p>
+              {bank ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-emerald-dark flex items-center justify-center">
+                      <Landmark className="w-5 h-5 text-gold-light" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-emerald-deep">{bank.bank_name}</p>
+                      <p className="text-xs text-ivory-ink/60">a.n. {bank.account_holder_name}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-ivory border border-ivory-border p-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wide text-ivory-ink/50">Nomor rekening</p>
+                      <p className="text-xl font-bold text-emerald-deep tabular-nums tracking-wide">{bank.account_number}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => copy(bank.account_number, "rek")}
+                      className="gap-1.5 h-10 shrink-0"
+                    >
+                      {copied === "rek" ? <CheckCircle className="w-4 h-4 text-emerald-dark" /> : <Copy className="w-4 h-4" />}
+                      {copied === "rek" ? "Tersalin" : "Salin"}
+                    </Button>
+                  </div>
+                  <div className="rounded-xl bg-emerald-dark p-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wide text-gold-light">Nominal transfer</p>
+                      <p className="text-2xl font-bold text-ivory tabular-nums">{formatRupiah(order.amount)}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => copy(String(order.amount), "nominal")}
+                      className="gap-1.5 h-10 shrink-0 bg-transparent text-ivory border-ivory/30 hover:bg-ivory/10 hover:text-ivory"
+                    >
+                      {copied === "nominal" ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {copied === "nominal" ? "Tersalin" : "Salin"}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-ivory-ink/60">
+                    Transfer sesuai nominal agar verifikasi cepat. Setelah itu unggah bukti transfer di bawah.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-ivory-ink/70">
+                  Travel belum menambahkan rekening tujuan. Hubungi travel untuk instruksi pembayaran.
+                </p>
+              )}
+            </div>
+
+            <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 sm:p-6 shadow-sm">
+              <div className="flex items-start gap-3 mb-4">
+                <Upload className="w-5 h-5 text-emerald-dark shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-emerald-deep">Kirim Bukti Transfer</h3>
+                  <p className="text-xs text-ivory-ink/60 mt-0.5">JPG, PNG, WEBP, atau PDF. Maksimal 5MB.</p>
+                </div>
+              </div>
+
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                className="hidden"
+                onChange={(e) => {
+                  setError(null)
+                  setFile(e.target.files?.[0] || null)
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="w-full rounded-xl border border-dashed border-emerald-dark/30 bg-emerald-dark/5 px-4 py-6 text-center hover:border-emerald-dark/60 transition-colors cursor-pointer"
+              >
+                <Upload className="w-6 h-6 text-emerald-dark mx-auto mb-2" />
+                <span className="block text-sm font-semibold text-emerald-deep">
+                  {file ? file.name : "Pilih file bukti transfer"}
+                </span>
+                <span className="block text-xs text-ivory-ink/55 mt-0.5">
+                  {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB — klik untuk ganti` : "Klik untuk memilih dari perangkat"}
+                </span>
+              </button>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                <label className="text-xs font-medium text-ivory-ink/70">
+                  Bank pengirim
+                  <input
+                    value={senderBank}
+                    onChange={(e) => setSenderBank(e.target.value)}
+                    placeholder="Contoh: BCA"
+                    className="mt-1 w-full bg-ivory border border-ivory-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                  />
+                </label>
+                <label className="text-xs font-medium text-ivory-ink/70">
+                  Nama pemilik rekening
+                  <input
+                    value={senderAccountName}
+                    onChange={(e) => setSenderAccountName(e.target.value)}
+                    placeholder="Nama sesuai rekening"
+                    className="mt-1 w-full bg-ivory border border-ivory-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                  />
+                </label>
+                <label className="text-xs font-medium text-ivory-ink/70">
+                  Nomor rekening pengirim
+                  <input
+                    value={senderAccountNumber}
+                    onChange={(e) => setSenderAccountNumber(e.target.value)}
+                    inputMode="numeric"
+                    placeholder="Opsional"
+                    className="mt-1 w-full bg-ivory border border-ivory-border rounded-lg px-3 py-2.5 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                  />
+                </label>
+                <label className="text-xs font-medium text-ivory-ink/70">
+                  Tanggal transfer
+                  <input
+                    type="date"
+                    value={transferredAt}
+                    onChange={(e) => setTransferredAt(e.target.value)}
+                    className="mt-1 w-full bg-ivory border border-ivory-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                  />
+                </label>
+              </div>
+
+              {error && (
+                <p className="mt-3 flex items-center gap-1.5 text-xs text-red-600">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {error}
+                </p>
+              )}
+
+              <Button
+                onClick={submitProof}
+                disabled={submitting}
+                className="w-full h-12 mt-4 bg-emerald-dark hover:bg-emerald-deep text-ivory rounded-xl font-semibold active:scale-[0.98] transition-all"
+              >
+                {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Mengirim...</> : "Kirim Bukti Pembayaran"}
+              </Button>
+              <p className="text-[11px] text-ivory-ink/50 text-center mt-3">
+                Bukti akan diverifikasi oleh travel. Kamu bisa memantau status di halaman pesanan.
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="bg-ivory-card border border-ivory-border rounded-2xl p-5 sm:p-6 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-11 h-11 rounded-xl bg-emerald-dark/10 flex items-center justify-center shrink-0">
+                <Banknote className="w-5 h-5 text-emerald-dark" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-emerald-deep">Bayar Tunai di Kantor Travel</h3>
+                <p className="text-sm text-ivory-ink/65 mt-1">
+                  Datang ke kantor {travel?.name || "travel"} dan bayar langsung sebesar:
+                </p>
+                <p className="text-2xl font-bold text-emerald-deep tabular-nums mt-2">{formatRupiah(order.amount)}</p>
+                {officeAddress && (
+                  <p className="text-sm text-ivory-ink/70 mt-3">{officeAddress}</p>
+                )}
+                {legal?.office_phone && (
+                  <p className="text-xs text-ivory-ink/60 mt-1">Telepon: {legal.office_phone}</p>
+                )}
+                <p className="text-xs text-ivory-ink/55 mt-4">
+                  Tunjukkan kode pesanan <span className="font-semibold">{order.bookingId.slice(0, 8).toUpperCase()}</span> ke petugas. Travel akan mengonfirmasi pembayaran.
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => router.push(`/dashboard/bookings/${order.bookingId}`)}
+              className="w-full h-12 mt-5 bg-emerald-dark hover:bg-emerald-deep text-ivory rounded-xl font-semibold"
+            >
+              Selesai, Lihat Pesanan
+            </Button>
           </div>
         )}
 
-        <div className="lg:hidden flex justify-end">
-          <Button onClick={handleSubmit} disabled={submitting} className="h-12 w-full sm:w-auto px-6">
-            {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : "Bayar"}
-          </Button>
-        </div>
+        {isTransfer && (
+          <button
+            type="button"
+            onClick={() => router.push(`/dashboard/bookings/${order.bookingId}`)}
+            className="w-full text-center text-xs font-medium text-ivory-ink/55 hover:text-emerald-deep py-1 cursor-pointer"
+          >
+            Nanti saja, buka halaman pesanan
+          </button>
+        )}
       </div>
 
       <div className="lg:col-span-1">
         <div className="lg:sticky lg:top-24">
-          <div className="bg-ivory-card border border-ivory-border rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-emerald-deep mb-4">Ringkasan Pesanan</h3>
-
-            <div className="flex gap-3 pb-4 border-b border-ivory-border">
-              <div className="relative w-16 h-14 rounded-md overflow-hidden shrink-0">
-                <Image src={pkg.image_url || "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80&fm=webp&auto=format"} alt={pkg.name} fill className="object-cover" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-ivory-ink/60 truncate">{travel?.name}</p>
-                <p className="text-sm font-semibold text-emerald-deep leading-snug line-clamp-2">{pkg.name}</p>
-              </div>
-            </div>
-
-            <div className="py-4 space-y-2 text-sm border-b border-ivory-border">
+          <div className="bg-ivory-card border border-ivory-border rounded-2xl p-6">
+            <h3 className="text-sm font-semibold text-emerald-deep mb-4">Ringkasan Pembayaran</h3>
+            <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-ivory-ink/60">Harga paket</span>
-                <span className="tabular-nums">{formatRupiah(Number(pkg.price))}</span>
+                <span className="text-ivory-ink/60">Metode</span>
+                <span className="font-medium">{order.method === "cash" ? "Tunai" : "Transfer bank"}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ivory-ink/60">Jumlah jemaah</span>
-                <span className="tabular-nums">x{pilgrimCount}</span>
+                <span className="text-ivory-ink/60">Tipe</span>
+                <span className="font-medium">{order.paymentType === "full" ? "Bayar Penuh" : "Cicilan"}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-ivory-ink/60">Total biaya</span>
-                <span className="tabular-nums">{formatRupiah(totalPrice)}</span>
-              </div>
-              {isInstallment && (
+              {order.paymentType === "installment" && (
                 <>
-                  <div className="flex justify-between pt-1">
-                    <span className="text-ivory-ink/60">Uang muka ({dpPercentage}%)</span>
-                    <span className="tabular-nums">{formatRupiah(dpAmount)}</span>
+                  <div className="flex justify-between">
+                    <span className="text-ivory-ink/60">Uang muka</span>
+                    <span className="tabular-nums">{formatRupiah(order.dpAmount)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-ivory-ink/60">Tenor</span>
+                    <span>{order.tenor} bulan</span>
                   </div>
                   <div className="flex justify-between text-ivory-ink/50 text-xs">
-                    <span>Sisa dicicil ({tenorMonths} bulan)</span>
-                    <span className="tabular-nums">{formatRupiah(remainingAmount)}</span>
+                    <span>Sisa dicicil</span>
+                    <span className="tabular-nums">{formatRupiah(order.remaining)}</span>
                   </div>
                 </>
               )}
             </div>
-
-            <div className="pt-4 border-t-2 border-gold">
-              <div className="flex items-baseline justify-between">
-                <span className="text-xs font-medium text-ivory-ink/70">
-                  {isInstallment ? "Bayar uang muka" : "Bayar sekarang"}
-                </span>
-                <span className="text-xl font-bold text-emerald-deep tabular-nums">{formatRupiah(amountToPayNow)}</span>
-              </div>
+            <div className="mt-4 rounded-xl bg-emerald-dark p-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gold-light mb-1">
+                {order.method === "cash" ? "Bayar Tunai" : "Transfer Sekarang"}
+              </p>
+              <p className="text-2xl font-bold text-ivory tabular-nums leading-tight">{formatRupiah(order.amount)}</p>
             </div>
-
-            <div className="hidden lg:block">
-              <Button
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="w-full h-12 mt-4 bg-emerald-dark hover:bg-emerald-deep text-ivory rounded-lg font-semibold active:scale-[0.98] transition-all"
-              >
-                {submitting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
-                ) : (
-                  "Bayar"
-                )}
-              </Button>
+            <div className="mt-4 flex items-start gap-2 text-[11px] text-ivory-ink/55">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>Pesanan berstatus menunggu pembayaran sampai travel memverifikasi.</span>
             </div>
           </div>
         </div>
