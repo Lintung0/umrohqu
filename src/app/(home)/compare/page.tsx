@@ -11,6 +11,7 @@ import { formatRupiah } from "@/lib/utils"
 import AiChatPanel from "@/components/shared/ai-chat-panel"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
+import { fetchPublicPackages } from "@/lib/public-packages"
 import { useCompare, MAX_COMPARE } from "@/lib/compare-context"
 import { PackageStatusBadge } from "@/components/shared/package-status-badge"
 import type { Package } from "@/lib/types"
@@ -396,18 +397,15 @@ function PackagePickerModal({ onClose }: {
     const supabase = createClient()
     let active = true
     const fetchPackages = async () => {
-      const { data, error } = await supabase
-        .from("packages")
-        .select("*")
-        .in("status", ["active", "ongoing"])
-        .neq("type", "haji")
-        .is("deleted_at", null)
-        .limit(60)
-      if (active && !error && data) {
-        const enriched = await enrichPackagesWithDetail(supabase, data as Package[])
-        if (active) setPackages(enriched || [])
+      try {
+        const data = (await fetchPublicPackages()).filter((pkg) => pkg.type !== "haji").slice(0, 60)
+        if (active) {
+          const enriched = await enrichPackagesWithDetail(supabase, data)
+          setPackages(enriched || [])
+        }
+      } finally {
+        if (active) setLoading(false)
       }
-      if (active) setLoading(false)
     }
     fetchPackages()
     return () => { active = false }
@@ -732,16 +730,16 @@ function CompareContent() {
     if (packagesParam.length === 0) return
     const supabase = createClient()
     const fetchUrlPackages = async () => {
-      const { data } = await supabase
-        .from("packages")
-        .select("*")
-        .in("slug", packagesParam)
-        .is("deleted_at", null)
-      if (data && data.length > 0) {
-        const enriched = await enrichPackagesWithDetail(supabase, data as Package[])
-        ;(enriched || []).forEach((pkg) => {
-          addToCompare(pkg)
-        })
+      try {
+        const data = (await fetchPublicPackages()).filter((pkg) => packagesParam.includes(pkg.slug))
+        if (data.length > 0) {
+          const enriched = await enrichPackagesWithDetail(supabase, data)
+          ;(enriched || []).forEach((pkg) => {
+            addToCompare(pkg)
+          })
+        }
+      } catch {
+        // keep compare empty on error
       }
     }
     fetchUrlPackages()

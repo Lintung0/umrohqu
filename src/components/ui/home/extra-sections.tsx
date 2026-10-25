@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Star, Shield, Headphones, Award, CheckCircle, ArrowRight, TrendingUp, Lock, Wallet } from "lucide-react"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase/client"
+import { fetchPublicPackages } from "@/lib/public-packages"
 import type { Tenant } from "@/lib/types"
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import LogoMarquee from "@/components/shared/logo-marquee"
@@ -161,9 +162,9 @@ export function TestimonialSection() {
             ;(bookings || []).forEach((b: any) => { if (b.package_id) bookingToPkg.set(b.id, b.package_id) })
             const pkgIds = [...new Set((bookings || []).map((b: any) => b.package_id).filter(Boolean))]
             if (pkgIds.length > 0) {
-              const { data: pkgs } = await supabase.from("packages").select("id, name").in("id", pkgIds)
+              const pkgs = await fetchPublicPackages()
               const rawPkgMap = new Map<string, string>()
-              ;(pkgs || []).forEach((p: any) => rawPkgMap.set(p.id, p.name))
+              pkgs.filter((p) => pkgIds.includes(p.id)).forEach((p) => rawPkgMap.set(p.id, p.name))
               bookingToPkg.forEach((pkgId, bid) => { pkgMap[bid] = rawPkgMap.get(pkgId) || "umrah" })
             }
           }
@@ -333,7 +334,7 @@ export function StatsSection() {
     async function load() {
       const [tenantsRes, packagesRes, bookingsRes, reviewsRes] = await Promise.all([
         supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "active"),
-        supabase.from("packages").select("id", { count: "exact", head: true }).in("status", ["active", "ongoing"]),
+        fetchPublicPackages(),
         supabase.from("bookings").select("id", { count: "exact", head: true }).in("status", ["confirmed", "completed"]),
         supabase.from("reviews").select("rating").limit(100),
       ])
@@ -341,7 +342,7 @@ export function StatsSection() {
       const avg = allRatings.length > 0 ? allRatings.reduce((s: number, r: any) => s + (r.rating || 0), 0) / allRatings.length : 0
       setStats({
         travelCount: tenantsRes.count || 0,
-        packageCount: packagesRes.count || 0,
+        packageCount: packagesRes.length,
         bookingCount: bookingsRes.count || 0,
         avgRating: allRatings.length > 0 ? Math.round(avg * 10) / 10 : 0,
       })

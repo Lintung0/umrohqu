@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "rea
 import { Search, SearchX, X, SlidersHorizontal, MapPin } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
+import { fetchPublicPackages } from "@/lib/public-packages"
 import { getPackageAvailable, cn } from "@/lib/utils"
 import type { Package, Tenant } from "@/lib/types"
 import SharedPackageCard from "@/components/shared/package-card"
@@ -165,7 +166,6 @@ function PackagesContent() {
     Number.isFinite(parsedMin) ? parsedMin : 0,
     Number.isFinite(parsedMax) ? parsedMax : 500000000,
   ]
-  const searchQueryParam = searchQuery
 
   const [searchInput, setSearchInput] = useState(searchQuery)
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -320,31 +320,9 @@ function PackagesContent() {
 
     const fetchData = async () => {
       try {
-        let query = supabase
-          .from("packages")
-          .select("*")
-          .in("status", ["active", "ongoing"])
-          .is("deleted_at", null)
-
-        if (searchQueryParam) {
-          const sanitized = searchQueryParam.replace(/[,()]/g, " ").trim()
-          if (sanitized) {
-            query = query.or(
-              `name.ilike.*${sanitized}*,` +
-              `description.ilike.*${sanitized}*,` +
-              `slug.ilike.*${sanitized}*`
-            )
-          }
-        }
-
-        const { data: pkgs, error: pkgError } = await query
-        if (pkgError) {
-          console.error("Error fetching packages:", pkgError)
-          setPackages([])
-        } else {
-          const enriched = await enrichPackagesWithDetail(supabase, (pkgs as Package[]) || [])
-          setPackages(enriched || [])
-        }
+        const pkgs = await fetchPublicPackages()
+        const enriched = await enrichPackagesWithDetail(supabase, pkgs)
+        setPackages(enriched || [])
 
         const { data: tnts, error: tenantError } = await supabase
           .from("tenants")
@@ -396,31 +374,15 @@ function PackagesContent() {
     }
 
     fetchData()
-  }, [searchQueryParam])
-
-  useEffect(() => {
-    const supabase = createClient()
-    const channel = supabase
-      .channel("packages-live-feed")
-      .on("postgres_changes", { event: "*", schema: "public", table: "packages" }, () => {
-        const query = supabase
-          .from("packages")
-          .select("*")
-          .in("status", ["active", "ongoing"])
-          .is("deleted_at", null)
-        query.then(async ({ data }) => {
-          const enriched = await enrichPackagesWithDetail(supabase, (data as Package[]) || [])
-          setPackages(enriched || [])
-        })
-      })
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
   }, [])
 
   const filtered = packages
     .filter((pkg) => {
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase().trim()
+        const haystack = [pkg.name, pkg.description, pkg.slug].filter(Boolean).join(" ").toLowerCase()
+        if (q && !haystack.includes(q)) return false
+      }
       if (departure) {
         const dep = departure.toLowerCase()
         const cities = (pkg.departure_cities || []).map((c) => c?.toLowerCase() || "")

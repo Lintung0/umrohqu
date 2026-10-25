@@ -5,6 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { MapPin, Package, BadgeCheck, Search, X, ArrowRight, Building2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { fetchPublicPackages } from "@/lib/public-packages"
 
 interface TravelRow {
   id: string
@@ -52,14 +53,11 @@ export default function TravelListPage() {
 
       const rows = ((tenantRows as TravelRow[]) || []).map((t) => ({ ...t, packages_count: 0 }))
 
-      const { data: pkgRows } = await supabase
-        .from("packages")
-        .select("tenant_id")
-        .in("status", ["active", "ongoing"])
+      const pkgRows = await fetchPublicPackages()
 
-      if (!cancelled && pkgRows) {
+      if (!cancelled) {
         const counts = new Map<string, number>()
-        ;(pkgRows as { tenant_id: string }[]).forEach((p) => {
+        pkgRows.forEach((p) => {
           counts.set(p.tenant_id, (counts.get(p.tenant_id) || 0) + 1)
         })
         rows.forEach((r) => {

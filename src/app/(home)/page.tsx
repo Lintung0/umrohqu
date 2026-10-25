@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import { Search, Calendar, Building2, ChevronDown } from "lucide-react"
 import CityAutocomplete from "@/components/shared/city-autocomplete"
 import { supabase } from "@/lib/supabase/client"
+import { fetchPublicPackages } from "@/lib/public-packages"
 
 const MONTHS = [
   { value: "januari", label: "Januari 2026" },
@@ -35,12 +36,12 @@ function HeroStats() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const [pkg, tnt] = await Promise.all([
-        supabase.from("packages").select("id", { count: "exact", head: true }).in("status", ["active", "ongoing"]),
+      const [pkgs, tnt] = await Promise.all([
+        fetchPublicPackages(),
         supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "active"),
       ])
       if (!cancelled) {
-        setPackages(pkg.count || 0)
+        setPackages(pkgs.length)
         setTravels(tnt.count || 0)
       }
     }

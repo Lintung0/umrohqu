@@ -6,6 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
+import { fetchPublicPackages } from "@/lib/public-packages"
 import { Loader2, CheckCircle, AlertCircle, ChevronRight, ChevronDown, ChevronUp, User, CalendarRange, Wallet, Landmark, Banknote, Upload, Copy, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatRupiah } from "@/lib/utils"
@@ -104,15 +105,12 @@ function CheckoutContent() {
 
     async function fetchData() {
       try {
-        const { data: pkgData, error: pkgError } = await supabase
-          .from("packages")
-          .select("*, travel:tenants(*)")
-          .eq("slug", packageSlug)
-          .single()
+        const rows = await fetchPublicPackages({ slug: packageSlug ?? undefined, withTravel: true })
+        const pkgData = rows[0]
 
         if (cancelled) return
 
-        if (pkgError || !pkgData) {
+        if (!pkgData) {
           setError("Paket tidak ditemukan.")
           setLoading(false)
           return
@@ -126,7 +124,8 @@ function CheckoutContent() {
 
         const enriched = await enrichPackagesWithDetail(supabase, [pkgData as any])
         setPkg((enriched?.[0] as any) || (pkgData as any))
-        setTravel((pkgData as any).travel as Tenant || null)
+        const travelData = Array.isArray(pkgData.travel) ? pkgData.travel[0] : pkgData.travel
+        setTravel((travelData as Tenant) || null)
 
         // Ambil opsi cicilan paket dari database
         const { data: optData } = await supabase

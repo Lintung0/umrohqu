@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
 
 import Link from "next/link";
-import { Loader2, Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields";
+import { fetchPublicPackages } from "@/lib/public-packages";
 import PackageCard from "@/components/shared/package-card";
 import type { Package, Tenant } from "@/lib/types";
 
@@ -27,24 +28,12 @@ interface ReviewRatingRow {
   booking_id: string;
 }
 
-function packagesEqual(a: Package[], b: Package[]): boolean {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i].id !== b[i].id || a[i].image_url !== b[i].image_url) return false;
-  }
-  return true;
-}
-
 export default function PackageSection() {
   const { t } = useTranslation();
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [tenants, setTenants] = useState<Map<string, Tenant>>(new Map());
-  const packagesRef = useRef<Package[]>([]);
-  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,27 +51,10 @@ export default function PackageSection() {
     return () => { cancelled = true };
   }, []);
 
-  const fetchPackages = useCallback(async (pageNum: number, showLoading = false) => {
-    const isInitial = pageNum === 1 && showLoading;
-    if (isInitial) setLoading(true);
-    else if (pageNum > 1) setLoadingMore(true);
-
+  const fetchPackages = useCallback(async () => {
     try {
-      const from = 0;
-      const to = pageNum * PAGE_SIZE - 1;
-
-      const { data, error } = await supabase
-        .from("packages")
-        .select("*")
-        .in("status", ["active", "ongoing"])
-        .neq("type", "haji")
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false })
-        .range(from, to);
-
-      if (error || !data) return;
-
-      const pkgs = (await enrichPackagesWithDetail(supabase, (data as Package[]) || [])) || [];
+      const data = (await fetchPublicPackages()).filter((pkg) => pkg.type !== "haji");
+      const pkgs = (await enrichPackagesWithDetail(supabase, data)) || [];
       if (pkgs.length > 0) {
         const ids = pkgs.map((p) => p.id);
         const { data: bookings } = await supabase
@@ -115,44 +87,24 @@ export default function PackageSection() {
         });
       }
 
-      if (!packagesEqual(packagesRef.current, pkgs)) {
-        packagesRef.current = pkgs;
-        setPackages(pkgs);
-        setHasMore(pkgs.length > pageNum * PAGE_SIZE);
-      }
+      setPackages(pkgs);
+      setPage(1);
     } catch {
-      // silently ignore network / enrich errors
+      setPackages([]);
     } finally {
-      if (isInitial) setLoading(false);
-      if (pageNum > 1) setLoadingMore(false);
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!initialLoadDone.current) {
-      initialLoadDone.current = true;
-      fetchPackages(1, true);
-    }
+    fetchPackages();
   }, [fetchPackages]);
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("packages-home")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "packages" },
-        () => fetchPackages(1)
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchPackages]);
+  const visiblePackages = packages.slice(0, page * PAGE_SIZE);
+  const hasMore = packages.length > visiblePackages.length;
 
   function loadMore() {
-    const next = page + 1;
-    setPage(next);
-    fetchPackages(next);
+    setPage((current) => current + 1);
   }
 
   useEffect(() => {
@@ -170,7 +122,7 @@ export default function PackageSection() {
 
     document.querySelectorAll(".card-animate").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [packages]);
+  }, [visiblePackages]);
 
   if (loading) {
     return (
@@ -216,7 +168,7 @@ export default function PackageSection() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-4">
-          {packages.map((pkg, index) => (
+          {visiblePackages.map((pkg, index) => (
             <div
               key={pkg.id}
               className="card-animate"
@@ -240,20 +192,10 @@ export default function PackageSection() {
             <div className="mt-12 text-center">
               <button
                 onClick={loadMore}
-                disabled={loadingMore}
-                className="group inline-flex w-full sm:w-auto justify-center items-center gap-2 px-6 sm:px-9 py-3.5 rounded-xl text-sm font-semibold bg-ivory-card text-emerald-dark border border-ivory-border hover:border-gold hover:bg-ivory transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group inline-flex w-full sm:w-auto justify-center items-center gap-2 px-6 sm:px-9 py-3.5 rounded-xl text-sm font-semibold bg-ivory-card text-emerald-dark border border-ivory-border hover:border-gold hover:bg-ivory transition-colors"
               >
-                {loadingMore ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Memuat...
-                  </>
-                ) : (
-                  <>
-                    Muat Lebih Banyak
-                    <span className="text-xs text-ivory-ink/70">({packages.length} paket)</span>
-                  </>
-                )}
+                Muat Lebih Banyak
+                <span className="text-xs text-ivory-ink/70">({packages.length} paket)</span>
               </button>
             </div>
           )}

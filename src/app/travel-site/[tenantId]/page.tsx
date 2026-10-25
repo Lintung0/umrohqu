@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { enrichPackagesWithDetail } from "@/lib/package-detail-fields"
 import { enrichTenantsWithDetail } from "@/lib/tenant-detail-fields"
+import { fetchPublicPackages } from "@/lib/public-packages"
 import { Loader2 } from "lucide-react"
 import { TEMPLATE_MAP } from "@/components/travel-site/templates"
 import { PackageDocumentationSection } from "@/components/shared/package-documentation"
@@ -24,16 +25,16 @@ export default function TravelSitePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [tenantRes, pkgRes, websiteRes] = await Promise.all([
+      const [tenantRes, publicPackages, websiteRes] = await Promise.all([
         supabase.from("tenants").select("*").eq("id", tenantId).single(),
-        supabase.from("packages").select("*").eq("tenant_id", tenantId).neq("type", "haji").in("status", ["active", "ongoing", "completed"]).order("created_at", { ascending: false }),
+        fetchPublicPackages({ tenantId, includeCompleted: true, includeUnshared: true }),
         supabase.from("websites").select("template_id, theme_config").eq("tenant_id", tenantId).single(),
       ])
 
       const baseTenant = tenantRes.data as Tenant | null
       const enrichedTenant = baseTenant ? (await enrichTenantsWithDetail(supabase, [baseTenant]))[0] ?? null : null
       setTenant(enrichedTenant as (Tenant & Record<string, unknown>) | null)
-      const allPackages = ((await enrichPackagesWithDetail(supabase, (pkgRes.data as Package[]) || [])) || []) as Package[]
+      const allPackages = ((await enrichPackagesWithDetail(supabase, publicPackages.filter((p) => p.type !== "haji"))) || []) as Package[]
       setPackages(allPackages.filter((p) => p.status === "active" || p.status === "ongoing"))
       setDocPackages(allPackages.filter((p) => p.images && p.images.length > 0))
 

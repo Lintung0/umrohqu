@@ -21,6 +21,7 @@ const PUBLIC_ROUTES = [
   "/reset-password",
   "/verify-email",
   "/booking-success",
+  "/api/public",
   "/api/auth",
   "/api/midtrans",
   "/api/tenant/setup-fee-callback",
@@ -69,7 +70,7 @@ export async function proxy(request: NextRequest) {
 
   const subdomain = getSubdomain(hostname)
 
-  if (subdomain) {
+  if (subdomain && !pathname.startsWith("/api/")) {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

@@ -1,6 +1,6 @@
 import { IslamicPattern } from "@/components/ui/islamic-pattern"
 import Logo from "@/components/logo"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient, createClient } from "@/lib/supabase/server"
 
 export async function AuthLayout({
   children,
@@ -8,8 +8,9 @@ export async function AuthLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
+  const admin = createAdminClient()
   const [pkgs, travellers] = await Promise.all([
-    supabase.from("packages").select("id", { count: "exact", head: true }).in("status", ["active", "ongoing"]),
+    admin.from("packages").select("id", { count: "exact", head: true }).in("status", ["active", "ongoing"]).eq("is_shared_to_marketplace", true).is("deleted_at", null),
     supabase.from("tenants").select("id", { count: "exact", head: true }).eq("status", "active"),
   ])
 
