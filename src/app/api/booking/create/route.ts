@@ -45,6 +45,11 @@ function toBookingChannel(feeChannel: string): string {
   return "marketplace"
 }
 
+function getMissingColumn(error: { code?: string; message?: string } | null): string | null {
+  if (error?.code !== "PGRST204") return null
+  return error.message?.match(/Could not find the '([^']+)' column/)?.[1] ?? null
+}
+
 export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -201,7 +206,7 @@ export async function POST(_request: NextRequest) {
       agentId = agent?.id || null
     }
 
-    const bookingPayload = {
+    const bookingPayload: Record<string, unknown> = {
       package_id: packageId,
       package_departure_id: packageDepartureId,
       tenant_id: pkg.tenant_id,
@@ -222,11 +227,27 @@ export async function POST(_request: NextRequest) {
       notes: notes || null,
     }
 
-    let { data: booking, error: insertErr } = await admin
+    let bookingInsert = await admin
       .from("bookings")
       .insert(bookingPayload)
       .select("id, booking_code")
       .single()
+    let booking = bookingInsert.data
+    let insertErr = bookingInsert.error
+
+    for (let attempt = 0; insertErr && attempt < 8; attempt++) {
+      const missingColumn = getMissingColumn(insertErr)
+      if (!missingColumn || !(missingColumn in bookingPayload)) break
+      console.warn(`[booking/create] Kolom bookings.${missingColumn} tidak ada di DB, retry tanpa kolom tersebut`)
+      delete bookingPayload[missingColumn]
+      bookingInsert = await admin
+        .from("bookings")
+        .insert(bookingPayload)
+        .select("id, booking_code")
+        .single()
+      booking = bookingInsert.data
+      insertErr = bookingInsert.error
+    }
 
     // Self-healing jika sequence booking_code bentrok dengan data lama
     if (insertErr && insertErr.code === "23505" && insertErr.message?.includes("bookings_booking_code_key")) {
@@ -319,7 +340,7 @@ export async function POST(_request: NextRequest) {
 
     // 3. Insert participants
     if (pilgrims && pilgrims.length > 0) {
-      const participantRecords = pilgrims.map((p) => ({
+      const participantRecords: Record<string, unknown>[] = pilgrims.map((p) => ({
         booking_id: booking.id,
         full_name: p.full_name,
         national_id: p.national_id || null,
@@ -333,7 +354,18 @@ export async function POST(_request: NextRequest) {
         down_payment_amount: isInstallment ? Math.round(dpAmount / pilgrimCount) : Number(pkg.price),
         tenor_months: isInstallment ? tenorMonths || 24 : 0,
       }))
-      await admin.from("participants").insert(participantRecords)
+
+      let participantErr: { code?: string; message?: string } | null = null
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const result = await admin.from("participants").insert(participantRecords)
+        participantErr = result.error
+        if (!participantErr) break
+        const missingColumn = getMissingColumn(participantErr)
+        if (!missingColumn || !(missingColumn in participantRecords[0])) break
+        console.warn(`[booking/create] Kolom participants.${missingColumn} tidak ada di DB, retry tanpa kolom tersebut`)
+        participantRecords.forEach((record) => delete record[missingColumn])
+      }
+      if (participantErr) console.error("Participant insert error:", participantErr)
     }
 
     // 4. Generate invoices & payment schedules
